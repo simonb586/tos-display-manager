@@ -1,0 +1,298 @@
+[
+  {
+    "name": "Infrastructures",
+    "file": "infrastructures.json",
+    "rows": 6621,
+    "columns": [
+      "Support ID",
+      "Type de support",
+      "Formats d'affichage",
+      "Médium recommandé",
+      "Emplacement/Visibilité",
+      "Site",
+      "Type de site",
+      "Ligne de distribution",
+      "TYPE DE LIGNE DE DISTRIBUTION",
+      "Enjeux",
+      "Type d'enjeux",
+      "Actif",
+      "CAMPAGNES SELON VISUEL",
+      "VISUEL EN EXPO",
+      "COMMENTAIRES",
+      "Nom de la campagne actuelle",
+      "Visuel de la campagne",
+      "Visuel actuel du cadre",
+      "Date de la dernière manipulation",
+      "EDT Associé",
+      "Campagne précédentes",
+      "EDT précédent associé",
+      "Coordonnées GPS",
+      "Latitude",
+      "Longitude",
+      "Prochain EDT ciblé",
+      "Lien carte interactive"
+    ]
+  },
+  {
+    "name": "Campagnes et visuels",
+    "file": "campagnes_et_visuels.json",
+    "rows": 162,
+    "columns": [
+      "Nom de la campagne",
+      "Visuel terrain de la campagne en exposition",
+      "Date de début",
+      "Date de fin",
+      "Statut de la campagne",
+      "Support ID",
+      "Emplacement",
+      "Date de mise à jour",
+      "Date Created",
+      "Date Modified",
+      "Record ID#",
+      "Record Owner",
+      "Last Modified By"
+    ]
+  },
+  {
+    "name": "Répertoire des affiches",
+    "file": "repertoire_des_affiches.json",
+    "rows": 182,
+    "columns": [
+      "Type de campagne",
+      "Nom de la campagne",
+      "Medium d'affichage",
+      "Format",
+      "Nom détaillé du visuel",
+      "Quantité en entrepot",
+      "Quantité en expo",
+      "Date de début",
+      "Date de fin",
+      "Statut de la campagne",
+      "Visuel",
+      "Statut après periode d'affichage",
+      "Date du dernier décompte",
+      "Date Created",
+      "Date Modified",
+      "Record ID#",
+      "Record Owner",
+      "Last Modified By"
+    ]
+  },
+  {
+    "name": "Communications opérationnelles",
+    "file": "communications_operationnelles.json",
+    "rows": 58,
+    "columns": [
+      "Emplacement",
+      "Message",
+      "Date de début",
+      "Date de fin",
+      "Statut",
+      "# d'Arrêt",
+      "Related voiture",
+      "#d'arrêt ou site",
+      "ID du support",
+      "Visuel du message",
+      "Visuel terrain",
+      "No d'EDT",
+      "Date Created",
+      "Date Modified",
+      "Record ID#",
+      "Record Owner",
+      "Last Modified By"
+    ]
+  },
+  {
+    "name": "Enjeux des cadres et supports",
+    "file": "enjeux_des_cadres_et_supports.json",
+    "rows": 104,
+    "columns": [
+      "Related Support",
+      "#Du cadre",
+      "Emplacement",
+      "Enjeux",
+      "Statut",
+      "Commentaire",
+      "Date d'inscription de l'enjeux",
+      "Date Created",
+      "Date Modified",
+      "Record ID#",
+      "Record Owner",
+      "Last Modified By"
+    ]
+  },
+  {
+    "name": "Centres d’information",
+    "file": "centres_dinformation.json",
+    "rows": 90,
+    "columns": [
+      "Nom du C.I.",
+      "Nombre de cadres",
+      "Photo",
+      "Enjeux",
+      "Date de la dernière intervention",
+      "Commentaires",
+      "Date Created",
+      "Date Modified",
+      "Record ID#",
+      "Record Owner",
+      "Last Modified By"
+    ]
+  },
+  {
+    "name": "C.I. avec enjeux",
+    "file": "c_i_avec_enjeux.json",
+    "rows": 16,
+    "columns": [
+      "Nom complet du C.I.",
+      "Enjeux",
+      "Commentaires",
+      "Photo",
+      "Date de la dernière mise à jour",
+      "Date Created",
+      "Date Modified",
+      "Record ID#",
+      "Record Owner",
+      "Last Modified By"
+    ]
+  },
+  {
+    "name": "Liste des arrêts",
+    "file": "liste_des_arrets.json",
+    "rows": 4323,
+    "columns": [
+      "# d'Arrêt",
+      "Emplacement/Visibilité",
+      "Type de support",
+      "Statut",
+      "Visuel affiché",
+      "Photo du visuel réel",
+      "Date Created",
+      "Date Modified",
+      "Record ID#",
+      "Record Owner",
+      "Last Modified By"
+    ]
+  },
+  {
+    "name": "Voitures / trains",
+    "file": "voitures_trains.json",
+    "rows": 225,
+    "columns": [
+      "#  Voiture",
+      "Statut de la voiture",
+      "Support ID",
+      "Date Created",
+      "Date Modified",
+      "Record ID#",
+      "Record Owner",
+      "Last Modified By"
+    ]
+  },
+  {
+    "name": "Photos",
+    "file": "photos.json",
+    "rows": 1,
+    "columns": [
+      "Photo ID",
+      "Support ID",
+      "Nom fichier",
+      "Action",
+      "Date",
+      "Utilisateur",
+      "Campagne",
+      "Visuel",
+      "GPS",
+      "Statut"
+    ]
+  },
+  {
+    "name": "Bons de travail",
+    "file": "bons_de_travail.json",
+    "rows": 1,
+    "columns": [
+      "BT",
+      "Type",
+      "Support ID",
+      "EDT",
+      "Priorité",
+      "Statut",
+      "Assigné à",
+      "Date cible",
+      "Client"
+    ]
+  },
+  {
+    "name": "Historique des campagnes",
+    "file": "historique_des_campagnes.json",
+    "rows": 1,
+    "columns": [
+      "Support ID",
+      "Campagne",
+      "Visuel",
+      "EDT",
+      "Date installation",
+      "Date retrait",
+      "Photo installation",
+      "Utilisateur"
+    ]
+  },
+  {
+    "name": "Suivi des EDT",
+    "file": "suivi_des_edt.json",
+    "rows": 1,
+    "columns": [
+      "No EDT",
+      "Campagne",
+      "Phase",
+      "Client",
+      "Date début prévue",
+      "Date fin prévue",
+      "Dates de travaux",
+      "Statut",
+      "Supports ciblés",
+      "Supports complétés",
+      "Photos reçues",
+      "Avancement",
+      "Coordonnateur",
+      "Commentaires"
+    ]
+  },
+  {
+    "name": "Utilisateurs",
+    "file": "utilisateurs.json",
+    "rows": 2,
+    "columns": [
+      "Nom",
+      "Courriel",
+      "Rôle",
+      "Organisation",
+      "Statut"
+    ]
+  },
+  {
+    "name": "Clients",
+    "file": "clients.json",
+    "rows": 1,
+    "columns": [
+      "Client",
+      "Type",
+      "Client-admin",
+      "Statut",
+      "Notes"
+    ]
+  },
+  {
+    "name": "Journal des événements",
+    "file": "journal_des_evenements.json",
+    "rows": 1,
+    "columns": [
+      "Date",
+      "Utilisateur",
+      "Action",
+      "Table",
+      "Ancienne valeur",
+      "Nouvelle valeur"
+    ]
+  }
+]

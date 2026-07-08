@@ -1,30 +1,40 @@
-# TOS Display Manager — MVP V0.5
+# TOS Display Manager — MVP V0.6 Préproduction
 
-Cette version est la première ébauche fonctionnelle avancée.
+Version destinée à être déposée dans GitHub puis déployée sur Vercel.
 
-## Inclus
+## Inclus dans cette V0.6
 
-- Table Infrastructures avec les colonnes QuickBase, moins les champs QuickBase retirés.
-- Accents corrigés dans les CSV.
-- Filtres sur chaque colonne.
-- Fiche Infrastructure 360° avec panneau droit réduit et masquable.
-- Champs GPS préparés et bouton carte interactive généré automatiquement.
-- Relations visibles avec campagnes, communications, enjeux, photos et historique.
-- Table centrale Photos.
-- Historique des campagnes par support.
-- Maquette fonctionnelle de l'application mobile terrain.
-- Workflow simulé : Support ID → visuel compatible → photo → synchronisation.
-- Journal des automatisations.
+- Toutes les tables visibles dans le menu.
+- Données QuickBase importées dans le projet pour consultation.
+- Correction des accents et des problèmes d'encodage courants.
+- Table Infrastructures enrichie : GPS, latitude, longitude, Prochain EDT ciblé, lien carte interactive.
+- Recherche générale stricte : aucun résultat approximatif inutile.
+- Filtres par colonne.
+- Exports simples : table complète et résultats filtrés en CSV compatible Excel.
+- Ébauche du rapport client illustré.
+- Nouvelle table Suivi des EDT.
+- Table Photos avec règle de nommage automatique.
+- Application terrain PWA : recherche par Infrastructures ou Arrêts.
+- Page de connexion et structure des rôles.
 
-## Démarrer
+## Lancer localement
 
 ```powershell
 npm install
 npm run dev
 ```
 
-Puis ouvrir : http://localhost:3000
+## Déployer
 
-## Notes
+Déposer le contenu de ce dossier dans GitHub. Vercel redéploiera automatiquement sur :
 
-La V0.5 est encore locale. Elle prépare la structure pour le déploiement futur sur portail.groupetos.com.
+https://portail.groupetos.com
+
+## Variables Supabase prévues dans Vercel
+
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+## Notes importantes
+
+Cette version est une préproduction front-end avec données intégrées. Le branchement complet à Supabase, la création des comptes utilisateurs réels, l'écriture en base de données et les rapports PDF complets seront consolidés dans les incréments V0.6.x.
