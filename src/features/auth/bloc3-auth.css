@@ -1,0 +1,77 @@
+.bloc3-card {
+  background: #ffffff;
+  border: 1px solid #d9e2ef;
+  border-radius: 22px;
+  padding: 24px;
+  margin: 24px 0;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.bloc3-title,
+.bloc3-status {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.bloc3-title h2,
+.bloc3-status h2 {
+  margin: 0 0 6px;
+  color: #0f172a;
+  font-size: 26px;
+}
+
+.bloc3-title p,
+.bloc3-status p {
+  margin: 3px 0;
+  color: #64748b;
+}
+
+.bloc3-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+  max-width: 520px;
+}
+
+.bloc3-form label {
+  display: grid;
+  gap: 6px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.bloc3-form input {
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 13px 14px;
+  font-size: 15px;
+}
+
+.bloc3-form button,
+.bloc3-secondary {
+  border: none;
+  border-radius: 14px;
+  padding: 13px 16px;
+  font-weight: 700;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+}
+
+.bloc3-secondary {
+  margin-top: 18px;
+  background: #0f172a;
+}
+
+.bloc3-error {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fee2e2;
+  color: #991b1b;
+}

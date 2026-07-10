@@ -89,76 +89,121 @@ const imports = [
 ];
 
 function dedupeRows(rows, key) {
-  if (!key) return rows;
+  if (!key) return { rows, ignored: 0 };
   const map = new Map();
   let ignored = 0;
   for (const row of rows) {
     const value = txt(row[key]);
-    if (!value) { ignored++; continue; }
+    if (!value) {
+      ignored++;
+      continue;
+    }
     map.set(value, row);
   }
   return { rows: Array.from(map.values()), ignored };
 }
 
+function fallbackRows(rows) {
+  return rows.map(row => ({
+    data: row.raw_data ?? row
+  }));
+}
+
+function isSchemaError(error) {
+  const message = String(error?.message || '').toLowerCase();
+  return (
+    message.includes('could not find') ||
+    message.includes('does not exist') ||
+    message.includes('schema cache') ||
+    message.includes('on conflict') ||
+    message.includes('unique or exclusion constraint') ||
+    message.includes('column')
+  );
+}
+
 async function withRetry(operation, label, attempts = 5) {
   let lastError;
   for (let i = 1; i <= attempts; i++) {
-    try { return await operation(); }
-    catch (error) {
+    try {
+      return await operation();
+    } catch (error) {
       lastError = error;
       console.warn(`⚠️ ${label} échoué (${i}/${attempts}) : ${error.message}`);
-      await wait(1500 * i);
+      await wait(1200 * i);
     }
   }
   throw lastError;
 }
 
-async function upsertChunks(table, rows, key, size = 250) {
+async function clearTable(table) {
+  await withRetry(async () => {
+    const { error } = await supabase.from(table).delete().neq('id', -999999);
+    if (error && !isSchemaError(error)) throw new Error(error.message);
+  }, `Nettoyage ${table}`, 3);
+}
+
+async function sendChunk(table, chunk, key, mode) {
+  const query = supabase.from(table);
+  if (mode === 'jsonb') return await query.insert(fallbackRows(chunk));
+  if (key) return await query.upsert(chunk, { onConflict: key });
+  return await query.insert(chunk);
+}
+
+async function importChunks(table, rows, key, size = 250) {
+  let mode = 'structured';
+
   for (let i = 0; i < rows.length; i += size) {
     const chunk = rows.slice(i, i + size);
+
     await withRetry(async () => {
-      const query = supabase.from(table);
-      const { error } = key
-      const { error } =
-  table === 'ci_avec_enjeux'
-    ? await query.insert(chunk)
-    : key
-    ? await query.upsert(chunk, { onConflict: key })
-    : await query.insert(chunk);
+      let { error } = await sendChunk(table, chunk, key, mode);
+
+      if (error && mode === 'structured' && isSchemaError(error)) {
+        console.warn(`↪️ ${table}: structure Supabase partielle, bascule en mode JSONB.`);
+        mode = 'jsonb';
+        const retry = await sendChunk(table, chunk, null, mode);
+        error = retry.error;
+      }
+
       if (error) throw new Error(error.message);
     }, `${table} ${Math.min(i + size, rows.length)}/${rows.length}`);
-    console.log(`  ${table}: ${Math.min(i + size, rows.length)}/${rows.length}`);
-    await wait(150);
+
+    console.log(`  ${table}: ${Math.min(i + size, rows.length)}/${rows.length} (${mode})`);
+    await wait(120);
   }
+
+  return mode;
 }
 
 async function main() {
-  console.log('🚀 Début import Bloc 1 V3...');
+  console.log('🚀 Import Engine TOS Bloc 1 V4');
+  console.log('Mode: nettoyage + import robuste + fallback JSONB\n');
   const report = [];
 
   for (const item of imports) {
     const filePath = path.join(dataDir, item.file);
     if (!fs.existsSync(filePath)) {
       console.warn(`⚠️ Fichier absent: ${item.file}`);
-      report.push({ table: item.table, status: 'fichier absent', rows: 0 });
+      report.push({ table: item.table, status: 'fichier absent', rows: 0, ignored: 0, mode: '-' });
       continue;
     }
 
     const json = readJson(item.file);
     const mapped = Array.isArray(json) ? json.map(item.map) : [];
-    const result = dedupeRows(mapped, item.key);
-    const rows = Array.isArray(result) ? result : result.rows;
-    const ignored = Array.isArray(result) ? 0 : result.ignored;
+    const { rows, ignored } = dedupeRows(mapped, item.key);
 
-    console.log(`\n📦 ${item.table}: ${rows.length} ligne(s) à synchroniser${ignored ? `, ${ignored} doublon(s) ou clé vide ignoré(s)` : ''}`);
-    await upsertChunks(item.table, rows, item.key);
-    report.push({ table: item.table, status: 'ok', rows: rows.length, ignored });
+    console.log(`\n📦 ${item.table}: ${rows.length} ligne(s)${ignored ? `, ${ignored} doublon(s)/clé vide ignoré(s)` : ''}`);
+
+    await clearTable(item.table);
+    const mode = await importChunks(item.table, rows, item.key);
+
+    report.push({ table: item.table, status: 'ok', rows: rows.length, ignored, mode });
     console.log(`✅ ${item.table}: terminé`);
   }
 
-  console.log('\n✅ Import Bloc 1 V3 terminé. Rapport:');
+  console.log('\n✅ Import Bloc 1 terminé. Rapport:');
   for (const r of report) {
-    console.log(`- ${r.table}: ${r.status}, ${r.rows} ligne(s)${r.ignored ? `, ${r.ignored} ignorée(s)` : ''}`);
+    console.log(`- ${r.table}: ${r.status}, ${r.rows} ligne(s), mode ${r.mode}${r.ignored ? `, ${r.ignored} ignorée(s)` : ''}`);
   }
 }
 

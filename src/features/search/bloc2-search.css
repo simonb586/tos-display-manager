@@ -1,0 +1,92 @@
+.bloc2-card {
+  background: #ffffff;
+  border: 1px solid #d9e2ef;
+  border-radius: 22px;
+  padding: 24px;
+  margin: 24px 0;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.bloc2-header h2 {
+  margin: 0 0 6px;
+  font-size: 28px;
+  color: #0f172a;
+}
+
+.bloc2-header p {
+  margin: 0 0 18px;
+  color: #64748b;
+}
+
+.bloc2-searchbar {
+  display: grid;
+  grid-template-columns: 220px 1fr 170px;
+  gap: 12px;
+}
+
+.bloc2-searchbar select,
+.bloc2-searchbar input {
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 13px 14px;
+  font-size: 15px;
+}
+
+.bloc2-searchbar button {
+  border: none;
+  border-radius: 14px;
+  padding: 13px 16px;
+  font-weight: 700;
+  background: #2563eb;
+  color: white;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.bloc2-error {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.bloc2-results-meta {
+  margin: 16px 0 10px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.bloc2-results {
+  display: grid;
+  gap: 10px;
+}
+
+.bloc2-result {
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: grid;
+  gap: 4px;
+}
+
+.bloc2-result strong {
+  color: #0f172a;
+}
+
+.bloc2-result span {
+  color: #334155;
+}
+
+.bloc2-result small {
+  color: #64748b;
+}
+
+@media (max-width: 850px) {
+  .bloc2-searchbar {
+    grid-template-columns: 1fr;
+  }
+}
