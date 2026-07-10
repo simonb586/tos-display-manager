@@ -22,6 +22,8 @@ import journalJson from './data/journal_des_evenements.json';
 import { strictMatches, downloadCSV, photoName, normalize } from './lib/utils';
 import { supabase, supabaseConfigured } from './lib/supabaseClient';
 import { loadManyTables } from './services/dataService';
+import WorkOrdersPanel from './components/WorkOrdersPanel';
+import './features/workorders/bloc6-workorders.css';
 
 const tableConfig = {
   'Infrastructures': { table: 'infrastructures', fallback: infrastructuresJson, idField: 'support_id', labelField: 'emplacement_visibilite' },
@@ -117,7 +119,7 @@ function App(){
   useEffect(()=>{ if (!supabase) return; supabase.auth.getSession().then(({data})=>setSession(data.session)); const { data: listener } = supabase.auth.onAuthStateChange((_event, currentSession)=>setSession(currentSession)); return ()=>listener?.subscription?.unsubscribe(); },[]);
   const items=['Tableau de bord','Connexion','Application terrain','Recherche terrain',...manifest.map(m=>m.name)];
   if (loading) return <div className="login"><div className="loginCard"><h1>Chargement TDM...</h1><p>Lecture Supabase avec fallback JSON.</p></div></div>;
-  return <div className="app"><aside><div className="brand">TOS<span>Display Manager</span></div><select value={role} onChange={e=>setRole(e.target.value)}>{roles.map(r=><option key={r}>{r}</option>)}</select>{items.map(it=><button key={it} className={active===it?'active':''} onClick={()=>setActive(it)}>{it==='Tableau de bord'?'📊':it==='Connexion'?'🔐':it==='Application terrain'?'📱':it==='Recherche terrain'?'🔎':(icons[it]||'📋')} {it}</button>)}</aside><main>{active==='Tableau de bord'?<Dashboard setActive={setActive} dataStore={dataStore}/>:active==='Connexion'?<LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>:active==='Application terrain'?<MobileApp dataStore={dataStore} role={role}/>:active==='Recherche terrain'?<div className="dashboard"><FieldSearch dataStore={dataStore}/></div>:<TableView name={active} dataStore={dataStore}/>}</main></div>;
+  return <div className="app"><aside><div className="brand">TOS<span>Display Manager</span></div><select value={role} onChange={e=>setRole(e.target.value)}>{roles.map(r=><option key={r}>{r}</option>)}</select>{items.map(it=><button key={it} className={active===it?'active':''} onClick={()=>setActive(it)}>{it==='Tableau de bord'?'📊':it==='Connexion'?'🔐':it==='Application terrain'?'📱':it==='Recherche terrain'?'🔎':(icons[it]||'📋')} {it}</button>)}</aside><main>{active==='Tableau de bord'?<Dashboard setActive={setActive} dataStore={dataStore}/>:active==='Connexion'?<LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>:active==='Application terrain'?<MobileApp dataStore={dataStore} role={role}/>:active==='Recherche terrain'?<div className="dashboard"><FieldSearch dataStore={dataStore}/></div>:active==='Bons de travail'?<WorkOrdersPanel dataStore={dataStore} role={role} session={session}/>:<TableView name={active} dataStore={dataStore}/>}</main></div>;
 }
 
 createRoot(document.getElementById('root')).render(<App/>);
