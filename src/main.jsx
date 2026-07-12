@@ -150,6 +150,26 @@ function LoginView({ session, setSession, role, setRole }) {
   return <div className="login"><div className="loginCard"><h1><Lock/> TOS Display Manager</h1><p>Connexion sécurisée.</p>{session ? <><p>Connecté : <b>{session.user?.email}</b></p><label>Rôle de validation</label><select value={role} onChange={e => setRole(e.target.value)}>{roles.map(r => <option key={r}>{r}</option>)}</select><button onClick={logout}><LogOut/> Déconnexion</button></> : <><input placeholder="Courriel" value={email} onChange={e => setEmail(e.target.value)}/><input placeholder="Mot de passe" type="password" value={password} onChange={e => setPassword(e.target.value)}/><button onClick={login}>Se connecter</button></>}{message && <small>{message}</small>}</div></div>;
 }
 
+
+function SupabaseConfigurationError() {
+  return (
+    <div className="production-login-page">
+      <div className="production-login-card">
+        <div className="production-login-logo">TOS<span>Display Manager</span></div>
+        <div className="production-login-icon"><ShieldCheck size={30}/></div>
+        <h1>Configuration Vercel incomplète</h1>
+        <p>
+          Les variables VITE_SUPABASE_URL et VITE_SUPABASE_PUBLISHABLE_KEY
+          ne sont pas disponibles dans cet environnement.
+        </p>
+        <p>
+          Active-les pour Preview et Production dans Vercel, puis redéploie.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [active, setActive] = useState('Tableau de bord');
   const [role, setRole] = useState('Administrateur');
@@ -213,9 +233,10 @@ function App() {
       : [];
   const items = ['Tableau de bord', ...adminItems, 'Application terrain', 'Recherche terrain', ...manifest.map(m => m.name)];
 
+  if (!supabaseConfigured) return <SupabaseConfigurationError/>;
   if (loading || profileLoading) return <div className="login"><div className="loginCard"><h1>Chargement TDM...</h1><p>Validation de la session et du profil.</p></div></div>;
-  if (supabaseConfigured && !session) return <ProductionLogin/>;
-  if (supabaseConfigured && session && (!profile || String(profile.statut || '').toLowerCase() !== 'actif')) {
+  if (!session) return <ProductionLogin/>;
+  if (session && (!profile || String(profile.statut || '').toLowerCase() !== 'actif')) {
     return <div className="production-login-page"><div className="production-login-card"><h1>Accès non autorisé</h1><p>Aucun profil applicatif actif n’est associé à ce compte.</p><button onClick={() => supabase.auth.signOut()}>Déconnexion</button></div></div>;
   }
 
