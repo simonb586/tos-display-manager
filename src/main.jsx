@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   Search, Download, FileSpreadsheet, FileText, ShieldCheck, BarChart3,
-  ClipboardList, Bell, Lock, LogOut
+  ClipboardList, Bell, Lock, LogOut, MapPin
 } from 'lucide-react';
 import './styles.css';
 import './features/admin/bloc4-admin.css';
@@ -10,6 +10,9 @@ import './features/terrain/bloc5-terrain.css';
 import './features/workorders/bloc6-workorders.css';
 import './features/v07/bloc-7-3.css';
 import './features/v07/bloc-7-4.css';
+import 'leaflet/dist/leaflet.css';
+import './features/v08/bloc-8-map.css';
+import './features/v08/bloc-8-role-visibility.css';
 
 import manifest from './data/manifest.json';
 import infrastructuresJson from './data/infrastructures.json';
@@ -44,7 +47,11 @@ import LegacyPhotoImporter from './components/LegacyPhotoImporter';
 import SupportPhotoGallery from './components/SupportPhotoGallery';
 import ProductionLogin from './components/ProductionLogin';
 import UserProvisioningPanel from './components/UserProvisioningPanel';
+import InteractiveMap from './components/InteractiveMap';
+import RoleVisibilityAdmin from './components/RoleVisibilityAdmin';
+import { infrastructureMapUrl } from './services/mapService';
 import { getCurrentProfile } from './services/authProfileService';
+import { getRoleVisibility, canSeeTable, columnsForTable } from './services/roleVisibilityService';
 
 const tableConfig = {
   Infrastructures: { table: 'infrastructures', fallback: infrastructuresJson, idField: 'support_id', labelField: 'emplacement_visibilite' },
@@ -73,9 +80,79 @@ const icons = {
   'Journal des événements': '🧾'
 };
 const roles = ['Administrateur', 'Coordonnateur', 'Installateur', 'Client-Admin', 'Client'];
-const getCols = rows => rows?.length ? Object.keys(rows[0]).filter(c => !['raw_data', 'created_at', 'updated_at'].includes(c)) : [];
-const getRows = (dataStore, name) => dataStore?.[name]?.rows || tableConfig[name]?.fallback || [];
+
+const INFRASTRUCTURE_LABELS = {
+  support_id: 'Support ID',
+  type_support: 'Type de support',
+  format_affichage: 'Formats d’affichage',
+  medium_recommande: 'Médium recommandé',
+  emplacement_visibilite: 'Emplacement / visibilité',
+  site: 'Site',
+  type_site: 'Type de site',
+  ligne_distribution: 'Ligne de distribution',
+  type_ligne_distribution: 'Type de ligne de distribution',
+  enjeux: 'Enjeux',
+  type_enjeux: 'Type d’enjeux',
+  actif: 'Actif',
+  campagne_selon_visuel: 'Campagne selon le visuel',
+  visuel_en_expo: 'Visuel en exposition',
+  commentaires: 'Commentaires',
+  campagne_actuelle: 'Nom de la campagne actuelle',
+  visuel_campagne: 'Visuel de la campagne',
+  visuel_actuel_cadre: 'Visuel actuel du cadre',
+  date_derniere_manipulation: 'Date de la dernière manipulation',
+  edt_associe: 'EDT associé',
+  campagne_precedente: 'Campagne précédente',
+  edt_precedent_associe: 'EDT précédent associé',
+  coordonnees_gps: 'Coordonnées GPS',
+  latitude: 'Latitude',
+  longitude: 'Longitude',
+  prochain_edt_cible: 'Prochain EDT ciblé',
+  lien_carte_interactive: 'Lien vers la carte interactive'
+};
+
+const ALWAYS_HIDDEN_COLUMNS = {
+  Infrastructures: ['format_visuel', 'photo_miniature_url', 'photo_principale_url']
+};
+
+const getRows = (dataStore, name) =>
+  dataStore?.[name]?.rows || tableConfig[name]?.fallback || [];
+
+const getCols = (rows, name) => {
+  if (!rows?.length) return [];
+  const hidden = new Set([
+    'raw_data',
+    'created_at',
+    'updated_at',
+    ...(ALWAYS_HIDDEN_COLUMNS[name] || [])
+  ]);
+  return Object.keys(rows[0]).filter(column => !hidden.has(column));
+};
+
+const columnLabel = (tableName, column) =>
+  tableName === 'Infrastructures'
+    ? (INFRASTRUCTURE_LABELS[column] || column)
+    : column;
+
 const sourceLabel = (dataStore, name) => dataStore?.[name]?.source || 'json';
+
+const thumbnailForInfrastructure = row =>
+  row.photo_miniature_url ||
+  row.photo_principale_url ||
+  (String(row.visuel_actuel_cadre || '').match(/^https?:\/\//i)
+    ? row.visuel_actuel_cadre
+    : '');
+
+function renderTableCell(tableName, row, column) {
+  if (tableName === 'Infrastructures' && column === 'visuel_actuel_cadre') {
+    const url = thumbnailForInfrastructure(row);
+    return url
+      ? <img className="infrastructure-thumbnail" src={url} alt={`Photo du support ${row.support_id || ''}`}/>
+      : <span className="infrastructure-thumbnail-missing">Aucune photo</span>;
+  }
+
+  return String(row[column] ?? '').slice(0, 160);
+}
 
 function Dashboard({ setActive, dataStore }) {
   const infrastructures = getRows(dataStore, 'Infrastructures');
@@ -101,9 +178,10 @@ function Dashboard({ setActive, dataStore }) {
 
 function Card({ title, value }) { return <div className="card"><ClipboardList/><span>{title}</span><strong>{Number(value || 0).toLocaleString('fr-CA')}</strong></div>; }
 
-function TableView({ name, dataStore }) {
+function TableView({ name, dataStore, onOpenMap, rolePermission }) {
   const rows = getRows(dataStore, name);
-  const cols = getCols(rows);
+  const allCols = getCols(rows, name);
+  const cols = columnsForTable(rolePermission, name, allCols);
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState({});
   const [selected, setSelected] = useState(null);
@@ -111,19 +189,48 @@ function TableView({ name, dataStore }) {
     .filter(r => strictMatches(r, query, cols))
     .filter(r => Object.entries(filters).every(([c, v]) => !v || normalize(r[c]).includes(normalize(v)))), [rows, query, filters, cols]);
   const shown = filtered.slice(0, 200);
+  const hasMapColumn = name === 'Infrastructures';
 
   return <div className="tablePage">
     <header className="pageHead"><div><h1>{icons[name] || '📋'} {name}</h1><p>{filtered.length.toLocaleString('fr-CA')} résultat(s) sur {rows.length.toLocaleString('fr-CA')} ligne(s). Source : {sourceLabel(dataStore, name)}.</p></div><div className="actions"><button onClick={() => downloadCSV(`${name}_table_complete.csv`, rows, cols)}><Download/> Table complète</button><button onClick={() => downloadCSV(`${name}_resultats_filtres.csv`, filtered, cols)}><FileSpreadsheet/> Résultats filtrés</button><button onClick={() => alert('Rapport client illustré : module Rapports à venir.')}><FileText/> Rapport client avec photo</button></div></header>
     <div className="searchbar"><Search/><input placeholder="Recherche exacte dans toutes les colonnes..." value={query} onChange={e => setQuery(e.target.value)}/></div>
-    <div className="tableWrap"><table><thead><tr>{cols.map(c => <th key={c}>{c}<input placeholder="Filtrer" value={filters[c] || ''} onChange={e => setFilters({ ...filters, [c]: e.target.value })}/></th>)}</tr></thead><tbody>{shown.map((r, i) => <tr key={r.id || i} onClick={() => setSelected(r)}>{cols.map(c => <td key={c}>{String(r[c] ?? '').slice(0, 160)}</td>)}</tr>)}</tbody></table></div>
-    {selected && <Detail name={name} row={selected} onClose={() => setSelected(null)}/>} 
+    <div className="tableWrap"><table><thead><tr>{hasMapColumn && <th>Carte</th>}{cols.map(c => <th key={c}>{columnLabel(name, c)}<input placeholder="Filtrer" value={filters[c] || ''} onChange={e => setFilters({ ...filters, [c]: e.target.value })}/></th>)}</tr></thead><tbody>{shown.map((r, i) => {
+      const supportId = r.support_id || r['Support ID'] || '';
+      const mapUrl = infrastructureMapUrl(r);
+      return <tr key={r.id || i} onClick={() => setSelected(r)}>
+        {hasMapColumn && <td>
+          {mapUrl
+            ? <button className="table-map-button" title={`Ouvrir ${supportId} sur la carte`} onClick={event => {
+                event.stopPropagation();
+                onOpenMap?.(supportId);
+              }}><MapPin size={16}/> Carte</button>
+            : <span className="table-map-missing">GPS absent</span>}
+        </td>}
+        {cols.map(c => <td key={c}>{renderTableCell(name, r, c)}</td>)}
+      </tr>;
+    })}</tbody></table></div>
+    {selected && <Detail name={name} row={selected} onClose={() => setSelected(null)} onOpenMap={onOpenMap}/>}
   </div>;
 }
 
-function Detail({ name, row, onClose }) {
-  const cols = Object.keys(row).filter(c => c !== 'raw_data');
+function Detail({ name, row, onClose, onOpenMap }) {
+  const cols = getCols([row], name);
   const support = row.support_id || row.no_arret || row.related_support || row['Support ID'] || '';
-  return <div className="drawer"><div className="drawerPanel"><button className="close" onClick={onClose}>×</button><h2>Fiche 360° — {name}</h2>{support && <div className="support">Identifiant : <b>{support}</b></div>}<div className="detailGrid">{cols.map(c => <div key={c}><label>{c}</label><p>{String(row[c] ?? '—')}</p></div>)}</div>{name === 'Infrastructures' && support && <SupportPhotoGallery supportId={support}/>}</div></div>;
+  const mapUrl = name === 'Infrastructures' ? infrastructureMapUrl(row) : '';
+
+  return <div className="drawer"><div className="drawerPanel"><button className="close" onClick={onClose}>×</button><h2>Fiche 360° — {name}</h2>{support && <div className="support">Identifiant : <b>{support}</b></div>}
+    {mapUrl && <button className="detail-map-button" onClick={() => onOpenMap?.(support)}><MapPin size={17}/> Voir ce support sur la carte interactive</button>}
+    <div className="detailGrid">{cols.map(c => {
+      if (name === 'Infrastructures' && c === 'visuel_actuel_cadre') {
+        const url = thumbnailForInfrastructure(row);
+        return <div key={c} className="detail-photo-card"><label>{columnLabel(name, c)}</label>{url
+          ? <img src={url} alt={`Photo du support ${support}`}/>
+          : <p>Aucune photo associée.</p>}</div>;
+      }
+      return <div key={c}><label>{columnLabel(name, c)}</label><p>{String(row[c] ?? '—')}</p></div>;
+    })}</div>
+    {name === 'Infrastructures' && support && <SupportPhotoGallery supportId={support}/>}
+  </div></div>;
 }
 
 function FieldSearch({ dataStore }) {
@@ -178,6 +285,8 @@ function App() {
   const [profileLoading, setProfileLoading] = useState(true);
   const [dataStore, setDataStore] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [mapFocusSupportId, setMapFocusSupportId] = useState('');
+  const [rolePermission, setRolePermission] = useState({ visible_tables: ['*'], visible_columns: {} });
 
   useEffect(() => {
     loadManyTables(tableConfig)
@@ -226,12 +335,37 @@ function App() {
     if (profile?.role) setRole(profile.role);
   }, [profile]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    getRoleVisibility(role)
+      .then(permission => {
+        if (!cancelled) setRolePermission(permission);
+      })
+      .catch(error => {
+        console.error('Permissions d’interface introuvables', error);
+      });
+
+    return () => { cancelled = true; };
+  }, [role]);
+
   const adminItems = role === 'Administrateur'
-    ? ['Administration', 'Utilisateurs réels', 'Studio des relations', 'Validation système', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats']
+    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Studio des relations', 'Validation système', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats']
     : role === 'Coordonnateur'
       ? ['Validation système', 'Campagnes maîtres', 'Campagne — Visuels et formats']
       : [];
-  const items = ['Tableau de bord', ...adminItems, 'Application terrain', 'Recherche terrain', ...manifest.map(m => m.name)];
+  const visibleManifestTables = manifest
+    .map(module => module.name)
+    .filter(tableName => canSeeTable(rolePermission, tableName));
+
+  const items = [
+    'Tableau de bord',
+    ...adminItems,
+    'Carte interactive',
+    'Application terrain',
+    'Recherche terrain',
+    ...visibleManifestTables
+  ];
 
   if (!supabaseConfigured) return <SupabaseConfigurationError/>;
   if (loading || profileLoading) return <div className="login"><div className="loginCard"><h1>Chargement TDM...</h1><p>Validation de la session et du profil.</p></div></div>;
@@ -245,17 +379,19 @@ function App() {
   else if (active === 'Connexion') content = <LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>;
   else if (active === 'Administration') content = <AdminPanel role={role} currentRole={role} session={session}/>;
   else if (active === 'Utilisateurs réels') content = <UserProvisioningPanel role={role}/>;
+  else if (active === 'Visibilité par rôle') content = <RoleVisibilityAdmin dataStore={dataStore} tableNames={manifest.map(module => module.name)} role={role}/>;
   else if (active === 'Studio des relations') content = <RelationsStudio role={role}/>;
   else if (active === 'Validation système') content = <ValidationCenter role={role}/>;
   else if (active === 'Import anciennes photos') content = <LegacyPhotoImporter dataStore={dataStore} session={session}/>;
   else if (active === 'Campagnes maîtres') content = <CampaignsPanel role={role} session={session}/>;
   else if (active === 'Campagne — Visuels et formats') content = <CampaignVisualManager role={role}/>;
+  else if (active === 'Carte interactive') content = <InteractiveMap dataStore={dataStore} focusSupportId={mapFocusSupportId} onClearFocus={() => setMapFocusSupportId('')}/>;
   else if (active === 'Application terrain') content = <TerrainApp dataStore={dataStore} role={role} session={session}/>;
   else if (active === 'Recherche terrain') content = <div className="dashboard"><FieldSearch dataStore={dataStore}/></div>;
   else if (active === 'Bons de travail') content = <WorkOrdersPanel dataStore={dataStore} role={role} session={session}/>;
-  else content = <TableView name={active} dataStore={dataStore}/>;
+  else content = <TableView name={active} dataStore={dataStore} rolePermission={rolePermission} onOpenMap={supportId => { setMapFocusSupportId(String(supportId || '')); setActive('Carte interactive'); }}/>;
 
-  return <div className="app"><aside><div className="brand">TOS<span>Display Manager</span></div><span className="role-badge">{profile?.nom || session?.user?.email}<br/>{role}</span>{items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Studio des relations' ? '🔗' : it === 'Validation système' ? '✅' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}</aside><main>{content}</main></div>;
+  return <div className="app"><aside><div className="brand">TOS<span>Display Manager</span></div><span className="role-badge">{profile?.nom || session?.user?.email}<br/>{role}</span>{items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Visibilité par rôle' ? '👁️' : it === 'Studio des relations' ? '🔗' : it === 'Validation système' ? '✅' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}</aside><main>{content}</main></div>;
 }
 
 createRoot(document.getElementById('root')).render(<App/>);
