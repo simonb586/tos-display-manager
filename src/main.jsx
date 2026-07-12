@@ -22,16 +22,8 @@ import journalJson from './data/journal_des_evenements.json';
 import { strictMatches, downloadCSV, photoName, normalize } from './lib/utils';
 import { supabase, supabaseConfigured } from './lib/supabaseClient';
 import { loadManyTables } from './services/dataService';
-import WorkOrdersPanel from './components/WorkOrdersPanel';
-import './features/v07/bloc-7-3.css';
-import RelationsStudio from './components/RelationsStudio';
-import './features/v07/bloc-7-4.css';
-import LegacyPhotoImporter from './components/LegacyPhotoImporter';
-import ValidationCenter from './components/ValidationCenter';
-import CampaignVisualManager from './components/CampaignVisualManager';
-import CampaignsPanel from './components/CampaignsPanel';
-import './features/campaigns/sprint-7-2-campaigns.css';
-import './features/workorders/bloc6-workorders.css';
+import Bloc3LoginPanel from './components/Bloc3LoginPanel';
+import './features/auth/bloc3-auth.css';
 
 const tableConfig = {
   'Infrastructures': { table: 'infrastructures', fallback: infrastructuresJson, idField: 'support_id', labelField: 'emplacement_visibilite' },
@@ -67,7 +59,7 @@ function Dashboard({ setActive, dataStore }) {
   return <div className="dashboard">
     <div className="hero"><div><h1>TOS Display Manager <span>Blocs 1-2-3</span></h1><p>Base Supabase, recherche Infrastructure/Arrêt, première authentification et rôles.</p></div><div className="badge"><ShieldCheck/> {supabaseConfigured ? 'Supabase configuré' : 'Mode JSON local'}</div></div>
     <div className="cards"><Card title="Infrastructures" value={infrastructures.length}/><Card title="Arrêts" value={arrets.length}/><Card title="EDT" value={edt.length}/><Card title="Bons de travail" value={bt.length}/></div>
-    <div className="grid2"><section className="panel"><h2><BarChart3/> Avancement des EDT</h2>{edtData.map(e=><div className="progress" key={e.name}><span>{e.name}</span><div><i style={{width: Math.min(100,e.progress)+'%'}}></i></div><b>{e.progress}%</b></div>)}<button onClick={()=>setActive('Suivi des EDT')}>Ouvrir le suivi des EDT</button></section><section className="panel"><h2><Bell/> Blocs installés</h2><ul className="checks"><li>Bloc 1 : données Supabase avec fallback JSON.</li><li>Bloc 2 : recherche Infrastructure / Arrêt.</li><li>Bloc 3 : connexion et rôles en première version.</li></ul></section></div>
+    <div className="grid2"><section className="panel"><h2><BarChart3/> Avancement des EDT</h2>{edtData.map(e=><div className="progress" key={e.name}><span>{e.name}</span><div><i style={{width: Math.min(100,e.progress)+'%'}}></i></div><b>{e.progress}%</b></div>)}<button onClick={()=>setActive('Suivi des EDT')}>Ouvrir le suivi des EDT</button></section><section className="panel"><h2><Bell/> Blocs installés</h2><ul className="checks"><li>Bloc 1 : données Supabase avec fallback JSON.</li><li>Bloc 2 : recherche Infrastructure / Arrêt.</li><li>Bloc 3 :   et rôles en première version.</li></ul></section></div>
   </div>;
 }
 function Card({title,value}){return <div className="card"><ClipboardList/><span>{title}</span><strong>{Number(value||0).toLocaleString('fr-CA')}</strong></div>}
@@ -125,9 +117,9 @@ function App(){
   const [loading,setLoading] = useState(true);
   useEffect(()=>{ loadManyTables(tableConfig).then(ds=>{ setDataStore(ds); setLoading(false); console.log('Données TDM chargées', Object.fromEntries(Object.entries(ds).map(([k,v])=>[k,{source:v.source,count:v.rows.length}]))); }); },[]);
   useEffect(()=>{ if (!supabase) return; supabase.auth.getSession().then(({data})=>setSession(data.session)); const { data: listener } = supabase.auth.onAuthStateChange((_event, currentSession)=>setSession(currentSession)); return ()=>listener?.subscription?.unsubscribe(); },[]);
-  const items=['Tableau de bord','Connexion','Studio des relations','Application terrain','Recherche terrain',...manifest.map(m=>m.name)];
+  const items=['Tableau de bord','Connexion','Application terrain','Recherche terrain',...manifest.map(m=>m.name)];
   if (loading) return <div className="login"><div className="loginCard"><h1>Chargement TDM...</h1><p>Lecture Supabase avec fallback JSON.</p></div></div>;
-  return <div className="app"><aside><div className="brand">TOS<span>Display Manager</span></div><select value={role} onChange={e=>setRole(e.target.value)}>{roles.map(r=><option key={r}>{r}</option>)}</select>{items.map(it=><button key={it} className={active===it?'active':''} onClick={()=>setActive(it)}>{it==='Tableau de bord'?'📊':it==='Connexion'?'🔐':it==='Application terrain'?'📱':it==='Recherche terrain'?'🔎':(icons[it]||'📋')} {it}</button>)}</aside><main>{active==='Tableau de bord'?<Dashboard setActive={setActive} dataStore={dataStore}/>:active==='Connexion'?<LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>:active==='Application terrain'?<MobileApp dataStore={dataStore} role={role}/>:active==='Recherche terrain'?<div className="dashboard"><FieldSearch dataStore={dataStore}/></div>:active==='Bons de travail'?<WorkOrdersPanel dataStore={dataStore} role={role} session={session}/>:active==='Campagnes et visuels'?<CampaignsPanel role={role} session={session}/>:active==='Campagnes et visuels'?<CampaignsPanel role={role} session={session}/>:active==='Studio des relations'?<RelationsStudio role={role}/>:active==='Validation système'?<ValidationCenter role={role}/>:active==='Import anciennes photos'?<LegacyPhotoImporter dataStore={dataStore} session={session}/>:active==='Campagne - Visuels et formats'?<CampaignVisualManager role={role}/>:<TableView name={active} dataStore={dataStore}/>}</main></div>;
+  return <div className="app"><aside><div className="brand">TOS<span>Display Manager</span></div><select value={role} onChange={e=>setRole(e.target.value)}>{roles.map(r=><option key={r}>{r}</option>)}</select>{items.map(it=><button key={it} className={active===it?'active':''} onClick={()=>setActive(it)}>{it==='Tableau de bord'?'📊':it==='Connexion'?'🔐':it==='Application terrain'?'📱':it==='Recherche terrain'?'🔎':(icons[it]||'📋')} {it}</button>)}</aside><main>{active==='Tableau de bord'?<Dashboard setActive={setActive} dataStore={dataStore}/>:active==='Connexion'?<LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>:active==='Application terrain'?<MobileApp dataStore={dataStore} role={role}/>:active==='Recherche terrain'?<div className="dashboard"><FieldSearch dataStore={dataStore}/></div>:<TableView name={active} dataStore={dataStore}/>}</main></div>;
 }
 
 createRoot(document.getElementById('root')).render(<App/>);
