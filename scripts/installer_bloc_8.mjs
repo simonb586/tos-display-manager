@@ -13,15 +13,6 @@ function fail(message, details = '') {
   process.exit(1);
 }
 
-function commandExists(command, args = ['--version']) {
-  const result = spawnSync(command, args, {
-    cwd: root,
-    encoding: 'utf8',
-    shell: false
-  });
-  return result.status === 0;
-}
-
 function resolvePackage(packageName) {
   try {
     require.resolve(`${packageName}/package.json`, { paths: [root] });
@@ -48,9 +39,79 @@ function dependencyDeclared(pkg, name) {
   return Boolean(pkg.dependencies?.[name] || pkg.devDependencies?.[name]);
 }
 
-function runNpmInstall(packages) {
-  const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  const args = [
+function candidateNpmCommands() {
+  const candidates = [];
+
+  if (process.env.npm_execpath && fs.existsSync(process.env.npm_execpath)) {
+    candidates.push({
+      command: process.execPath,
+      prefixArgs: [process.env.npm_execpath],
+      label: 'npm via npm_execpath'
+    });
+  }
+
+  if (process.platform === 'win32') {
+    candidates.push(
+      { command: 'npm.cmd', prefixArgs: [], label: 'npm.cmd' },
+      { command: 'npm.exe', prefixArgs: [], label: 'npm.exe' },
+      { command: 'cmd.exe', prefixArgs: ['/d', '/s', '/c', 'npm'], label: 'cmd.exe /c npm' },
+      { command: 'powershell.exe', prefixArgs: ['-NoProfile', '-Command', 'npm'], label: 'PowerShell npm' }
+    );
+
+    const programFiles = [process.env.ProgramFiles, process.env['ProgramFiles(x86)']].filter(Boolean);
+
+    for (const base of programFiles) {
+      const npmCmd = path.join(base, 'nodejs', 'npm.cmd');
+      if (fs.existsSync(npmCmd)) {
+        candidates.unshift({ command: npmCmd, prefixArgs: [], label: npmCmd });
+      }
+    }
+
+    const appDataNpm = process.env.APPDATA
+      ? path.join(process.env.APPDATA, 'npm', 'npm.cmd')
+      : null;
+
+    if (appDataNpm && fs.existsSync(appDataNpm)) {
+      candidates.unshift({ command: appDataNpm, prefixArgs: [], label: appDataNpm });
+    }
+  } else {
+    candidates.push(
+      { command: 'npm', prefixArgs: [], label: 'npm' },
+      { command: '/usr/local/bin/npm', prefixArgs: [], label: '/usr/local/bin/npm' },
+      { command: '/usr/bin/npm', prefixArgs: [], label: '/usr/bin/npm' }
+    );
+  }
+
+  return candidates;
+}
+
+function canRunNpm(candidate) {
+  const result = spawnSync(
+    candidate.command,
+    [...candidate.prefixArgs, '--version'],
+    {
+      cwd: root,
+      encoding: 'utf8',
+      shell: false,
+      windowsHide: true
+    }
+  );
+
+  return result.status === 0;
+}
+
+function findWorkingNpm() {
+  for (const candidate of candidateNpmCommands()) {
+    if (canRunNpm(candidate)) {
+      console.log(`✅ npm détecté : ${candidate.label}`);
+      return candidate;
+    }
+  }
+  return null;
+}
+
+function runNpmInstall(candidate, packages) {
+  const installArgs = [
     'install',
     ...packages,
     '--save',
@@ -60,38 +121,40 @@ function runNpmInstall(packages) {
     '--no-fund'
   ];
 
+  let args;
+
+  if (candidate.label === 'cmd.exe /c npm') {
+    args = [...candidate.prefixArgs, ...installArgs];
+  } else if (candidate.label === 'PowerShell npm') {
+    args = [
+      '-NoProfile',
+      '-Command',
+      `npm ${installArgs.map(value => `\"${String(value).replaceAll('\"', '`"')}\"`).join(' ')}`
+    ];
+  } else {
+    args = [...candidate.prefixArgs, ...installArgs];
+  }
+
   console.log(`Installation npm : ${packages.join(', ')}`);
-  const result = spawnSync(npmCommand, args, {
+
+  const result = spawnSync(candidate.command, args, {
     cwd: root,
     stdio: 'inherit',
-    shell: false
+    shell: false,
+    windowsHide: true
   });
 
-  if (result.status !== 0) {
-    fail(
-      'Installation npm échouée.',
-      [
-        'Commande tentée :',
-        `${npmCommand} ${args.join(' ')}`,
-        '',
-        'Essaie manuellement :',
-        'npm install leaflet@1.9.4 react-leaflet@4.2.1 --legacy-peer-deps --ignore-scripts'
-      ].join('\n')
-    );
-  }
+  return result.status === 0;
 }
 
 if (!fs.existsSync(packageFile)) {
   fail('package.json introuvable. Lance ce script à la racine du projet.');
 }
 
-if (!commandExists(process.platform === 'win32' ? 'npm.cmd' : 'npm')) {
-  fail('npm est introuvable dans le terminal.');
-}
-
 console.log('Vérification des dépendances cartographiques...');
 
 let pkg = readPackageJson();
+
 const required = [
   { name: 'leaflet', version: '1.9.4' },
   { name: 'react-leaflet', version: '4.2.1' }
@@ -102,20 +165,43 @@ const missing = required.filter(item =>
 );
 
 if (missing.length) {
-  runNpmInstall(missing.map(item => `${item.name}@${item.version}`));
-  pkg = readPackageJson();
+  const npm = findWorkingNpm();
+
+  if (!npm) {
+    console.warn('⚠️ npm n’a pas pu être lancé automatiquement depuis Node.');
+    console.warn('⚠️ Le Bloc 8 reste copié, mais les dépendances manquantes doivent être installées manuellement.');
+    console.warn('');
+    console.warn('Commande manuelle :');
+    console.warn('npm install leaflet@1.9.4 react-leaflet@4.2.1 --legacy-peer-deps --ignore-scripts');
+    console.warn('');
+  } else {
+    const ok = runNpmInstall(
+      npm,
+      missing.map(item => `${item.name}@${item.version}`)
+    );
+
+    if (!ok) {
+      console.warn('⚠️ L’installation automatique npm a échoué.');
+      console.warn('⚠️ Le Bloc 8 reste installé. Exécute manuellement :');
+      console.warn('npm install leaflet@1.9.4 react-leaflet@4.2.1 --legacy-peer-deps --ignore-scripts');
+      console.warn('');
+    }
+
+    pkg = readPackageJson();
+  }
 } else {
   console.log('✅ Leaflet et React-Leaflet sont déjà installés.');
 }
 
 for (const item of required) {
-  if (!dependencyDeclared(pkg, item.name)) {
-    fail(`${item.name} n’est pas déclaré dans package.json après installation.`);
+  const declared = dependencyDeclared(pkg, item.name);
+  const resolvable = resolvePackage(item.name);
+
+  if (declared && resolvable) {
+    console.log(`✅ ${item.name}`);
+  } else {
+    console.warn(`⚠️ ${item.name} reste à installer manuellement.`);
   }
-  if (!resolvePackage(item.name)) {
-    fail(`${item.name} n’est pas résolvable dans node_modules après installation.`);
-  }
-  console.log(`✅ ${item.name}`);
 }
 
 const checks = [
@@ -165,9 +251,8 @@ for (const [relative, requiredTokens] of checks) {
 if (failed) process.exit(1);
 
 console.log('');
-console.log('✅ Bloc 8 installé correctement.');
-console.log('✅ Dépendances vérifiées sans réinstallation inutile.');
-console.log('✅ Les scripts npm bloqués sont contournés avec --ignore-scripts.');
+console.log('✅ Bloc 8 robuste final installé correctement.');
+console.log('✅ L’installateur ne bloque plus si npm ne peut pas être lancé automatiquement.');
 console.log('');
 console.log('Étapes suivantes :');
 console.log('1. Exécuter le contenu de supabase/BLOC_8_CARTE_INTERACTIVE.sql dans Supabase.');

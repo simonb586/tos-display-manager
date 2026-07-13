@@ -176,6 +176,19 @@ grant insert, update, delete on public.role_ui_permissions to authenticated;
 -- La colonne format_visuel n'est pas supprimée physiquement afin de ne perdre aucune donnée.
 -- Elle est masquée dans la table et les exports Infrastructure.
 
+-- Bloc 8.1 : compatibilité avec la structure réelle de public.support_photos.
+-- Colonnes disponibles :
+-- support_id, photo_url, thumbnail_url, prise_le, statut_validation.
+
+alter table public.infrastructures
+add column if not exists photo_miniature_url text;
+
+alter table public.infrastructures
+add column if not exists photo_principale_url text;
+
+alter table public.infrastructures
+add column if not exists visuel_actuel_cadre text;
+
 create or replace function public.sync_infrastructure_photo_thumbnail()
 returns trigger
 language plpgsql
@@ -183,7 +196,10 @@ security definer
 set search_path = public
 as $$
 begin
-  if new.support_id is not null and coalesce(new.thumbnail_url, new.photo_url) is not null then
+  if new.support_id is not null
+     and coalesce(new.thumbnail_url, new.photo_url) is not null
+     and new.statut_validation = 'Validée'
+  then
     update public.infrastructures
     set
       photo_miniature_url = coalesce(new.thumbnail_url, new.photo_url),
@@ -201,16 +217,15 @@ drop trigger if exists support_photos_sync_infrastructure_thumbnail
 on public.support_photos;
 
 create trigger support_photos_sync_infrastructure_thumbnail
-after insert or update of thumbnail_url, photo_url, photo_principale
+after insert or update of thumbnail_url, photo_url, statut_validation
 on public.support_photos
 for each row
 when (
   new.statut_validation = 'Validée'
-  or new.photo_principale = true
+  and coalesce(new.thumbnail_url, new.photo_url) is not null
 )
 execute function public.sync_infrastructure_photo_thumbnail();
 
--- Synchronisation initiale avec la photo la plus récente de chaque support.
 with latest_photo as (
   select distinct on (support_id)
     support_id,
@@ -218,7 +233,11 @@ with latest_photo as (
     coalesce(photo_url, thumbnail_url) as principale
   from public.support_photos
   where coalesce(thumbnail_url, photo_url) is not null
-  order by support_id, photo_principale desc, prise_le desc
+  order by
+    support_id,
+    (statut_validation = 'Validée') desc,
+    prise_le desc nulls last,
+    id desc
 )
 update public.infrastructures i
 set

@@ -13,6 +13,7 @@ import './features/v07/bloc-7-4.css';
 import 'leaflet/dist/leaflet.css';
 import './features/v08/bloc-8-map.css';
 import './features/v08/bloc-8-role-visibility.css';
+import './features/v09/bloc-9-reports.css';
 
 import manifest from './data/manifest.json';
 import infrastructuresJson from './data/infrastructures.json';
@@ -49,6 +50,7 @@ import ProductionLogin from './components/ProductionLogin';
 import UserProvisioningPanel from './components/UserProvisioningPanel';
 import InteractiveMap from './components/InteractiveMap';
 import RoleVisibilityAdmin from './components/RoleVisibilityAdmin';
+import FinalReportsCenter from './components/FinalReportsCenter';
 import { infrastructureMapUrl } from './services/mapService';
 import { getCurrentProfile } from './services/authProfileService';
 import { getRoleVisibility, canSeeTable, columnsForTable } from './services/roleVisibilityService';
@@ -350,7 +352,7 @@ function App() {
   }, [role]);
 
   const adminItems = role === 'Administrateur'
-    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Studio des relations', 'Validation système', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats']
+    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Rapports finaux', 'Studio des relations', 'Validation système', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats']
     : role === 'Coordonnateur'
       ? ['Validation système', 'Campagnes maîtres', 'Campagne — Visuels et formats']
       : [];
@@ -379,6 +381,7 @@ function App() {
   else if (active === 'Connexion') content = <LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>;
   else if (active === 'Administration') content = <AdminPanel role={role} currentRole={role} session={session}/>;
   else if (active === 'Utilisateurs réels') content = <UserProvisioningPanel role={role}/>;
+  else if (active === 'Rapports finaux') content = <FinalReportsCenter dataStore={dataStore} role={role}/>;
   else if (active === 'Visibilité par rôle') content = <RoleVisibilityAdmin dataStore={dataStore} tableNames={manifest.map(module => module.name)} role={role}/>;
   else if (active === 'Studio des relations') content = <RelationsStudio role={role}/>;
   else if (active === 'Validation système') content = <ValidationCenter role={role}/>;
@@ -391,7 +394,7 @@ function App() {
   else if (active === 'Bons de travail') content = <WorkOrdersPanel dataStore={dataStore} role={role} session={session}/>;
   else content = <TableView name={active} dataStore={dataStore} rolePermission={rolePermission} onOpenMap={supportId => { setMapFocusSupportId(String(supportId || '')); setActive('Carte interactive'); }}/>;
 
-  return <div className="app"><aside><div className="brand">TOS<span>Display Manager</span></div><span className="role-badge">{profile?.nom || session?.user?.email}<br/>{role}</span>{items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Visibilité par rôle' ? '👁️' : it === 'Studio des relations' ? '🔗' : it === 'Validation système' ? '✅' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}</aside><main>{content}</main></div>;
+  return <div className="app"><aside><div className="brand">TOS<span>Display Manager</span></div><span className="role-badge">{profile?.nom || session?.user?.email}<br/>{role}</span>{items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Studio des relations' ? '🔗' : it === 'Validation système' ? '✅' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}</aside><main>{content}</main></div>;
 }
 
 createRoot(document.getElementById('root')).render(<App/>);
