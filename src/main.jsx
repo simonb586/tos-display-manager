@@ -18,6 +18,7 @@ import './features/v10/bloc-10-editor.css';
 import './features/v11/bloc-11-operations.css';
 import './features/v11/correctifs-urgence.css';
 import './features/v12/bloc-12.css';
+import './features/v12/account-activation.css';
 
 import manifest from './data/manifest.json';
 import infrastructuresJson from './data/infrastructures.json';
@@ -61,10 +62,12 @@ import PhotoInventoryCenter from './components/PhotoInventoryCenter';
 import OperationsCenter from './components/OperationsCenter';
 import GlobalButtonFeedback from './components/GlobalButtonFeedback';
 import ColumnRelationMenu from './components/ColumnRelationMenu';
+import AccountActivation from './components/AccountActivation';
 import { infrastructureMapUrl } from './services/mapService';
 import { getCurrentProfile } from './services/authProfileService';
 import { getRoleVisibility, canSeeTable, columnsForTable } from './services/roleVisibilityService';
 import { updateUniversalRow, updateUniversalRows, loadAutomaticFieldRules, primaryKeyFor } from './services/universalEditorService';
+import { requiresAccountActivation } from './services/accountActivationService';
 
 const tableConfig = {
   Infrastructures: { table: 'infrastructures', fallback: infrastructuresJson, idField: 'support_id', labelField: 'emplacement_visibilite' },
@@ -178,7 +181,7 @@ function Dashboard({ setActive, dataStore }) {
 
   return <div className="dashboard">
     <div className="hero">
-      <div><h1>TOS Display Manager <span>v0.12.2</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
+      <div><h1>TOS Display Manager <span>v0.12.3</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
       <div className="badge"><ShieldCheck/> {supabaseConfigured ? 'Supabase configuré' : 'Mode JSON local'}</div>
     </div>
     <div className="cards"><Card title="Infrastructures" value={infrastructures.length}/><Card title="Arrêts" value={arrets.length}/><Card title="EDT" value={edt.length}/><Card title="Bons de travail" value={bt.length}/></div>
@@ -559,6 +562,14 @@ function App() {
   if (!supabaseConfigured) return <SupabaseConfigurationError/>;
   if (loading || profileLoading) return <div className="login"><div className="loginCard"><h1>Chargement TDM...</h1><p>Validation de la session et du profil.</p></div></div>;
   if (!session) return <ProductionLogin/>;
+
+  if (session && profile && requiresAccountActivation(session, profile)) {
+    return <AccountActivation session={session} profile={profile} onActivated={async () => {
+      const { data } = await supabase.from('utilisateurs').select('*').or(`auth_user_id.eq.${session.user.id},courriel.eq.${session.user.email}`).maybeSingle();
+      if (data) setProfile(data);
+      setActive('Application terrain');
+    }}/>;
+  }
   if (session && (!profile || String(profile.statut || '').toLowerCase() !== 'actif')) {
     return <div className="production-login-page"><div className="production-login-card"><h1>Accès non autorisé</h1><p>Aucun profil applicatif actif n’est associé à ce compte.</p><button onClick={() => supabase.auth.signOut()}>Déconnexion</button></div></div>;
   }

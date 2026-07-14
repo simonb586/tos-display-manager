@@ -147,7 +147,7 @@ Deno.serve(async request => {
         email,
         {
           redirectTo,
-          data: { nom, role, organisation }
+          data: { nom, role, organisation, account_activated: false }
         }
       );
 

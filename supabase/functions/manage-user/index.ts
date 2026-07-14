@@ -194,7 +194,8 @@ Deno.serve(async request => {
             data: {
               nom: body.nom || '',
               role: body.role || 'Installateur',
-              organisation: body.organisation || ''
+              organisation: body.organisation || '',
+              account_activated: false
             }
           }
         );
