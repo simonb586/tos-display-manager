@@ -178,7 +178,7 @@ function Dashboard({ setActive, dataStore }) {
 
   return <div className="dashboard">
     <div className="hero">
-      <div><h1>TOS Display Manager <span>v0.12</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
+      <div><h1>TOS Display Manager <span>v0.12.2</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
       <div className="badge"><ShieldCheck/> {supabaseConfigured ? 'Supabase configuré' : 'Mode JSON local'}</div>
     </div>
     <div className="cards"><Card title="Infrastructures" value={infrastructures.length}/><Card title="Arrêts" value={arrets.length}/><Card title="EDT" value={edt.length}/><Card title="Bons de travail" value={bt.length}/></div>

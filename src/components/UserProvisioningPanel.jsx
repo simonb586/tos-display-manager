@@ -230,21 +230,19 @@ export default function UserProvisioningPanel({ role }) {
                     </small>
                   </div>
 
-                  <div className="user-v2-actions">
+                  <div className="user-v2-actions user-v2-actions-visible">
                     <button disabled={pending} onClick={() => setEditing(user)}>
                       <Pencil size={15}/> Modifier
                     </button>
 
-                    {user.lifecycle_status !== 'Actif' && (
-                      <button
-                        disabled={pending}
-                        onClick={() => runAction('resend_invite', user)}
-                      >
-                        <MailPlus size={15}/> Renvoyer
-                      </button>
-                    )}
+                    <button
+                      disabled={pending}
+                      onClick={() => runAction('resend_invite', user)}
+                    >
+                      <MailPlus size={15}/> Renvoyer
+                    </button>
 
-                    {user.statut === 'Actif' ? (
+                    {String(user.statut || 'Actif') === 'Actif' ? (
                       <button
                         disabled={pending}
                         onClick={() => runAction(
@@ -272,15 +270,16 @@ export default function UserProvisioningPanel({ role }) {
                     </button>
 
                     <button
-                      className="danger"
+                      className="danger user-delete-button"
                       disabled={pending}
+                      title="Supprimer complètement cet utilisateur"
                       onClick={() => runAction(
                         'delete',
                         user,
-                        `Supprimer le compte Auth de ${user.courriel}? Les historiques opérationnels seront conservés.`
+                        `Supprimer complètement le compte Auth et le profil de ${user.courriel}? Les historiques opérationnels seront conservés.`
                       )}
                     >
-                      <Trash2 size={15}/> Supprimer
+                      <Trash2 size={15}/> Supprimer l’utilisateur
                     </button>
                   </div>
                 </article>

@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ChevronDown,
   Eye,
@@ -29,6 +30,8 @@ export default function ColumnRelationMenu({
   const [destinationField, setDestinationField] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [popoverStyle, setPopoverStyle] = useState({});
+  const triggerRef = useRef(null);
 
   const isAdmin = role === 'Administrateur';
 
@@ -39,6 +42,24 @@ export default function ColumnRelationMenu({
     ),
     [rules, sourceTable, sourceField]
   );
+
+  function positionPopover() {
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+
+    const rect = trigger.getBoundingClientRect();
+    const width = Math.min(420, window.innerWidth - 24);
+    const left = Math.max(12, Math.min(rect.left, window.innerWidth - width - 12));
+    const top = Math.min(rect.bottom + 8, window.innerHeight - 120);
+
+    setPopoverStyle({
+      position: 'fixed',
+      width: `${width}px`,
+      left: `${left}px`,
+      top: `${top}px`,
+      maxHeight: `${Math.max(300, window.innerHeight - top - 16)}px`
+    });
+  }
 
   async function load() {
     setBusy(true);
@@ -63,7 +84,19 @@ export default function ColumnRelationMenu({
   }
 
   useEffect(() => {
-    if (open) load();
+    if (!open) return;
+
+    positionPopover();
+    load();
+
+    const reposition = () => positionPopover();
+    window.addEventListener('resize', reposition);
+    window.addEventListener('scroll', reposition, true);
+
+    return () => {
+      window.removeEventListener('resize', reposition);
+      window.removeEventListener('scroll', reposition, true);
+    };
   }, [open, sourceTable, sourceField]);
 
   if (!isAdmin) return null;
@@ -126,6 +159,7 @@ export default function ColumnRelationMenu({
   return (
     <div className="column-relation-menu" onClick={event => event.stopPropagation()}>
       <button
+        ref={triggerRef}
         type="button"
         className="column-relation-trigger"
         title="Relations de cette colonne"
@@ -138,8 +172,12 @@ export default function ColumnRelationMenu({
         )}
       </button>
 
-      {open && (
-        <div className="column-relation-popover">
+      {open && createPortal(
+        <div
+          className="column-relation-popover column-relation-popover-portal"
+          style={popoverStyle}
+          onClick={event => event.stopPropagation()}
+        >
           <div className="column-relation-head">
             <div>
               <strong>Relations de la colonne</strong>
@@ -239,7 +277,8 @@ export default function ColumnRelationMenu({
               <small>Aucune relation pour cette colonne.</small>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
