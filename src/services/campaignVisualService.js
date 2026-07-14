@@ -4,3 +4,10 @@ export async function listCompatibleVisualsForSupport(support){ready();const for
 export async function listCampaignVisuals(){ready();const{data,error}=await supabase.from('campagne_visuels_formats').select('*, campagne:campagne_id(*)').order('nom_visuel');if(error)throw error;return data||[];}
 export async function saveCampaignVisual(v){ready();const payload={campagne_id:Number(v.campagne_id),phase:v.phase?.trim()||null,nom_visuel:v.nom_visuel?.trim()||'',code_visuel:v.code_visuel?.trim()||null,format_support:v.format_support?.trim()||'',quantite_prevue:Number(v.quantite_prevue||0),actif:v.actif!==false,instructions_terrain:v.instructions_terrain?.trim()||null,updated_at:new Date().toISOString()};if(!payload.campagne_id||!payload.nom_visuel||!payload.format_support)throw new Error('Campagne, visuel et format sont obligatoires.');const q=v.id?supabase.from('campagne_visuels_formats').update(payload).eq('id',v.id):supabase.from('campagne_visuels_formats').insert(payload);const{data,error}=await q.select().single();if(error)throw error;return data;}
 export async function applyVisualToSupport({supportId,visualId,userEmail,photoUrl=null,photoPath=null}){ready();const{data,error}=await supabase.rpc('appliquer_visuel_support',{p_support_id:supportId,p_visuel_id:Number(visualId),p_utilisateur:userEmail||null,p_photo_url:photoUrl,p_photo_path:photoPath});if(error)throw error;return data;}
+
+export async function deleteOrArchiveCampaignVisual(id){
+  ready();
+  const {data,error}=await supabase.rpc('delete_or_archive_campaign_visual',{p_visual_id:Number(id)});
+  if(error)throw error;
+  return data;
+}

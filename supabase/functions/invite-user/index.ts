@@ -15,20 +15,60 @@ const json = (body: unknown, status = 200) => new Response(
   }
 );
 
-async function findExistingUser(adminClient: any, email: string) {
+function publicSiteUrl() {
+  const raw =
+    Deno.env.get('PUBLIC_SITE_URL') ||
+    Deno.env.get('APP_PUBLIC_URL') ||
+    '';
+
+  const value = raw.trim().replace(/\/+$/, '');
+
+  if (!value) {
+    throw new Error('Le secret PUBLIC_SITE_URL est obligatoire.');
+  }
+
+  const url = new URL(value);
+
+  if (url.protocol !== 'https:') {
+    throw new Error('PUBLIC_SITE_URL doit commencer par https://');
+  }
+
+  if (
+    ['localhost', '127.0.0.1', '0.0.0.0'].includes(url.hostname) ||
+    url.hostname.endsWith('.local')
+  ) {
+    throw new Error('PUBLIC_SITE_URL ne peut jamais pointer vers localhost.');
+  }
+
+  return value;
+}
+
+async function callerIsAdmin(userClient: any, adminClient: any, user: any) {
+  const { data, error } = await adminClient
+    .from('utilisateurs')
+    .select('role,statut')
+    .or(`auth_user_id.eq.${user.id},courriel.eq.${user.email}`)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  return data?.role === 'Administrateur' &&
+    String(data?.statut || '').toLowerCase() === 'actif';
+}
+
+async function findUser(adminClient: any, email: string) {
   for (let page = 1; page <= 10; page += 1) {
     const { data, error } = await adminClient.auth.admin.listUsers({
       page,
       perPage: 1000
     });
-
     if (error) throw error;
 
-    const found = data.users.find(
-      (user: any) => String(user.email || '').toLowerCase() === email
+    const user = data.users.find(
+      (item: any) => String(item.email || '').toLowerCase() === email
     );
 
-    if (found) return found;
+    if (user) return user;
     if (data.users.length < 1000) break;
   }
 
@@ -48,65 +88,40 @@ Deno.serve(async request => {
     const authorization = request.headers.get('Authorization');
     if (!authorization) return json({ error: 'Session absente.' }, 401);
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const publishableKey =
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const publicKey =
       Deno.env.get('SUPABASE_ANON_KEY') ||
-      Deno.env.get('SUPABASE_PUBLISHABLE_KEY');
-    const serverSecret =
+      Deno.env.get('SUPABASE_PUBLISHABLE_KEY')!;
+    const serverKey =
       Deno.env.get('SUPABASE_SECRET_KEY') ||
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-    if (!supabaseUrl || !publishableKey || !serverSecret) {
-      return json({
-        error: 'Configuration serveur incomplète.',
-        missing: {
-          SUPABASE_URL: !supabaseUrl,
-          SUPABASE_PUBLISHABLE_OR_ANON_KEY: !publishableKey,
-          SUPABASE_SECRET_OR_SERVICE_ROLE_KEY: !serverSecret
-        }
-      }, 500);
+    if (!supabaseUrl || !publicKey || !serverKey) {
+      return json({ error: 'Configuration Supabase Edge incomplète.' }, 500);
     }
 
-    const callerClient = createClient(supabaseUrl, publishableKey, {
+    const userClient = createClient(supabaseUrl, publicKey, {
       global: { headers: { Authorization: authorization } }
     });
+    const adminClient = createClient(supabaseUrl, serverKey, {
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
 
-    const { data: userData, error: userError } =
-      await callerClient.auth.getUser();
-
-    if (userError || !userData.user) {
+    const { data: authData, error: authError } = await userClient.auth.getUser();
+    if (authError || !authData.user) {
       return json({ error: 'Session invalide.' }, 401);
     }
 
-    const adminClient = createClient(supabaseUrl, serverSecret, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    });
-
-    const { data: profile, error: profileError } = await adminClient
-      .from('utilisateurs')
-      .select('role,statut,courriel')
-      .or(
-        `auth_user_id.eq.${userData.user.id},courriel.eq.${userData.user.email}`
-      )
-      .maybeSingle();
-
-    if (profileError) {
-      return json({ error: `Profil administrateur illisible : ${profileError.message}` }, 500);
-    }
-
-    if (
-      profile?.role !== 'Administrateur' ||
-      String(profile?.statut || '').toLowerCase() !== 'actif'
-    ) {
+    if (!(await callerIsAdmin(userClient, adminClient, authData.user))) {
       return json({ error: 'Accès administrateur actif requis.' }, 403);
     }
 
     const body = await request.json();
     const email = String(body.email || '').trim().toLowerCase();
     const nom = String(body.nom || '').trim();
-    const role = String(body.role || 'Client').trim();
+    const role = String(body.role || 'Installateur').trim();
     const organisation = String(body.organisation || '').trim();
-    const redirectTo = String(body.redirectTo || '').trim();
+    const redirectTo = `${publicSiteUrl()}/`;
 
     if (!email || !email.includes('@')) {
       return json({ error: 'Courriel valide obligatoire.' }, 400);
@@ -124,65 +139,79 @@ Deno.serve(async request => {
       return json({ error: 'Rôle invalide.' }, 400);
     }
 
-    let authUser = await findExistingUser(adminClient, email);
+    let authUser = await findUser(adminClient, email);
     let invitationSent = false;
 
     if (!authUser) {
-      const { data: invited, error: inviteError } =
-        await adminClient.auth.admin.inviteUserByEmail(email, {
-          redirectTo: redirectTo || undefined,
+      const { data, error } = await adminClient.auth.admin.inviteUserByEmail(
+        email,
+        {
+          redirectTo,
           data: { nom, role, organisation }
-        });
+        }
+      );
 
-      if (inviteError) {
+      if (error) {
         return json({
-          error: `Supabase Auth n’a pas pu envoyer l’invitation : ${inviteError.message}`,
-          hint:
-            'Vérifie Authentication > SMTP Settings, les URL de redirection autorisées et les journaux Auth.'
+          error: `Invitation impossible : ${error.message}`,
+          redirect_to: redirectTo
         }, 400);
       }
 
-      authUser = invited.user;
+      authUser = data.user;
+      invitationSent = true;
+    } else if (!authUser.email_confirmed_at) {
+      const { error } = await adminClient.auth.resend({
+        type: 'invite',
+        email,
+        options: { emailRedirectTo: redirectTo }
+      });
+
+      if (error) {
+        return json({
+          error: `Le compte existe, mais l’invitation n’a pas pu être renvoyée : ${error.message}`
+        }, 400);
+      }
+
       invitationSent = true;
     }
 
-    const profilePayload = {
-      auth_user_id: authUser?.id || null,
-      nom,
-      courriel: email,
-      role,
-      organisation,
-      statut: 'Actif',
-      client_id: body.client_id ? Number(body.client_id) : null,
-      updated_at: new Date().toISOString()
-    };
+    const lifecycle = authUser?.email_confirmed_at
+      ? 'Actif'
+      : 'Invitation envoyée';
 
-    const { data: savedProfile, error: upsertError } = await adminClient
+    const { data: profile, error: profileError } = await adminClient
       .from('utilisateurs')
-      .upsert(profilePayload, { onConflict: 'courriel' })
+      .upsert({
+        auth_user_id: authUser?.id || null,
+        nom,
+        courriel: email,
+        role,
+        organisation,
+        statut: authUser?.banned_until ? 'Désactivé' : 'Actif',
+        invitation_statut: lifecycle,
+        invitation_envoyee_le: invitationSent ? new Date().toISOString() : null,
+        client_id: body.client_id ? Number(body.client_id) : null,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'courriel' })
       .select()
       .single();
 
-    if (upsertError) {
-      return json({
-        error: `Le compte Auth existe, mais le profil n’a pas pu être enregistré : ${upsertError.message}`
-      }, 500);
+    if (profileError) {
+      return json({ error: `Profil non enregistré : ${profileError.message}` }, 500);
     }
 
     return json({
       ok: true,
       invitation_sent: invitationSent,
-      already_existed: !invitationSent,
-      user_id: authUser?.id,
-      profile: savedProfile,
+      redirect_to: redirectTo,
+      profile,
       message: invitationSent
-        ? 'Invitation envoyée.'
-        : 'Le compte existait déjà; son profil a été mis à jour.'
+        ? `Invitation envoyée vers ${redirectTo}`
+        : 'Le compte était déjà actif; son profil a été mis à jour.'
     });
   } catch (error) {
     console.error(error);
-    return json({
-      error: error?.message || 'Erreur inconnue dans invite-user.'
-    }, 500);
+    return json({ error: error.message || String(error) }, 500);
   }
 });

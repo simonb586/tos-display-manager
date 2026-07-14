@@ -17,6 +17,7 @@ import './features/v09/bloc-9-reports.css';
 import './features/v10/bloc-10-editor.css';
 import './features/v11/bloc-11-operations.css';
 import './features/v11/correctifs-urgence.css';
+import './features/v12/bloc-12.css';
 
 import manifest from './data/manifest.json';
 import infrastructuresJson from './data/infrastructures.json';
@@ -59,6 +60,7 @@ import ChangeHistoryPanel from './components/ChangeHistoryPanel';
 import PhotoInventoryCenter from './components/PhotoInventoryCenter';
 import OperationsCenter from './components/OperationsCenter';
 import GlobalButtonFeedback from './components/GlobalButtonFeedback';
+import ColumnRelationMenu from './components/ColumnRelationMenu';
 import { infrastructureMapUrl } from './services/mapService';
 import { getCurrentProfile } from './services/authProfileService';
 import { getRoleVisibility, canSeeTable, columnsForTable } from './services/roleVisibilityService';
@@ -176,10 +178,15 @@ function Dashboard({ setActive, dataStore }) {
 
   return <div className="dashboard">
     <div className="hero">
-      <div><h1>TOS Display Manager <span>v0.11.1</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
+      <div><h1>TOS Display Manager <span>v0.12</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
       <div className="badge"><ShieldCheck/> {supabaseConfigured ? 'Supabase configuré' : 'Mode JSON local'}</div>
     </div>
     <div className="cards"><Card title="Infrastructures" value={infrastructures.length}/><Card title="Arrêts" value={arrets.length}/><Card title="EDT" value={edt.length}/><Card title="Bons de travail" value={bt.length}/></div>
+    <div className="dashboard-v12-grid">
+      <div className="dashboard-v12-card"><h3>Enjeux ouverts</h3><strong>{getRows(dataStore, 'Enjeux des cadres et supports').length.toLocaleString('fr-CA')}</strong><p>Éléments nécessitant un suivi.</p></div>
+      <div className="dashboard-v12-card"><h3>Photos</h3><strong>{getRows(dataStore, 'Photos').length.toLocaleString('fr-CA')}</strong><p>Preuves et miniatures disponibles.</p></div>
+      <div className="dashboard-v12-card"><h3>Campagnes</h3><strong>{getRows(dataStore, 'Campagnes et visuels').length.toLocaleString('fr-CA')}</strong><p>Campagnes et visuels suivis.</p></div>
+    </div>
     <div className="grid2">
       <section className="panel"><h2><BarChart3/> Avancement des EDT</h2>{edtData.map(e => <div className="progress" key={e.name}><span>{e.name}</span><div><i style={{ width: `${Math.min(100, e.progress)}%` }}/></div><b>{e.progress}%</b></div>)}<button onClick={() => setActive('Suivi des EDT')}>Ouvrir le suivi des EDT</button></section>
       <section className="panel"><h2><Bell/> Modules v0.7</h2><ul className="checks"><li>Données complètes paginées.</li><li>Campagnes, phases, visuels et formats.</li><li>Studio des relations et Centre de validation.</li><li>Application terrain filtrée selon le format du support.</li></ul></section>
@@ -273,7 +280,7 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
     {message && <div className="v07-message">{message}</div>}
 
     <div className="searchbar"><Search/><input placeholder="Recherche exacte dans toutes les colonnes..." value={query} onChange={e => setQuery(e.target.value)}/></div>
-    <div className="tableWrap"><table><thead><tr>{hasMapColumn && <th>Carte</th>}{cols.map(c => <th key={c}>{columnLabel(name, c)}<input placeholder="Filtrer" value={filters[c] || ''} onChange={e => setFilters({ ...filters, [c]: e.target.value })}/></th>)}</tr></thead><tbody>{shown.map((r, i) => {
+    <div className="tableWrap"><table><thead><tr>{hasMapColumn && <th>Carte</th>}{cols.map(c => <th key={c}><div className="grid-column-header"><div className="grid-column-header-main"><span>{columnLabel(name, c)}</span><input placeholder="Filtrer" value={filters[c] || ''} onChange={e => setFilters({ ...filters, [c]: e.target.value })}/></div><ColumnRelationMenu sourceTable={config.table} sourceField={c} role={role}/></div></th>)}</tr></thead><tbody>{shown.map((r, i) => {
       const token = rowToken(r, i);
       const supportId = r.support_id || r['Support ID'] || '';
       const mapUrl = infrastructureMapUrl(r);
