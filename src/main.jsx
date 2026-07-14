@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   Search, Download, FileSpreadsheet, FileText, ShieldCheck, BarChart3,
-  ClipboardList, Bell, Lock, LogOut, MapPin
+  ClipboardList, Bell, Lock, LogOut, MapPin, Edit3, Save, X, History
 } from 'lucide-react';
 import './styles.css';
 import './features/admin/bloc4-admin.css';
@@ -14,6 +14,8 @@ import 'leaflet/dist/leaflet.css';
 import './features/v08/bloc-8-map.css';
 import './features/v08/bloc-8-role-visibility.css';
 import './features/v09/bloc-9-reports.css';
+import './features/v10/bloc-10-editor.css';
+import './features/v11/bloc-11-operations.css';
 
 import manifest from './data/manifest.json';
 import infrastructuresJson from './data/infrastructures.json';
@@ -51,9 +53,14 @@ import UserProvisioningPanel from './components/UserProvisioningPanel';
 import InteractiveMap from './components/InteractiveMap';
 import RoleVisibilityAdmin from './components/RoleVisibilityAdmin';
 import FinalReportsCenter from './components/FinalReportsCenter';
+import EditableField from './components/EditableField';
+import ChangeHistoryPanel from './components/ChangeHistoryPanel';
+import PhotoInventoryCenter from './components/PhotoInventoryCenter';
+import OperationsCenter from './components/OperationsCenter';
 import { infrastructureMapUrl } from './services/mapService';
 import { getCurrentProfile } from './services/authProfileService';
 import { getRoleVisibility, canSeeTable, columnsForTable } from './services/roleVisibilityService';
+import { updateUniversalRow, updateUniversalRows, loadAutomaticFieldRules, primaryKeyFor } from './services/universalEditorService';
 
 const tableConfig = {
   Infrastructures: { table: 'infrastructures', fallback: infrastructuresJson, idField: 'support_id', labelField: 'emplacement_visibilite' },
@@ -167,7 +174,7 @@ function Dashboard({ setActive, dataStore }) {
 
   return <div className="dashboard">
     <div className="hero">
-      <div><h1>TOS Display Manager <span>v0.7 consolidée</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
+      <div><h1>TOS Display Manager <span>v0.11</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
       <div className="badge"><ShieldCheck/> {supabaseConfigured ? 'Supabase configuré' : 'Mode JSON local'}</div>
     </div>
     <div className="cards"><Card title="Infrastructures" value={infrastructures.length}/><Card title="Arrêts" value={arrets.length}/><Card title="EDT" value={edt.length}/><Card title="Bons de travail" value={bt.length}/></div>
@@ -180,26 +187,95 @@ function Dashboard({ setActive, dataStore }) {
 
 function Card({ title, value }) { return <div className="card"><ClipboardList/><span>{title}</span><strong>{Number(value || 0).toLocaleString('fr-CA')}</strong></div>; }
 
-function TableView({ name, dataStore, onOpenMap, rolePermission }) {
+function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpdated }) {
   const rows = getRows(dataStore, name);
+  const config = tableConfig[name];
   const allCols = getCols(rows, name);
   const cols = columnsForTable(rolePermission, name, allCols);
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState({});
   const [selected, setSelected] = useState(null);
+  const [gridEditing, setGridEditing] = useState(false);
+  const [drafts, setDrafts] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+
   const filtered = useMemo(() => rows
     .filter(r => strictMatches(r, query, cols))
     .filter(r => Object.entries(filters).every(([c, v]) => !v || normalize(r[c]).includes(normalize(v)))), [rows, query, filters, cols]);
   const shown = filtered.slice(0, 200);
   const hasMapColumn = name === 'Infrastructures';
+  const canEdit = role === 'Administrateur';
+
+  function rowToken(row, index) {
+    try {
+      const key = primaryKeyFor(config, row);
+      return `${key.field}:${key.value}`;
+    } catch {
+      return `row:${index}`;
+    }
+  }
+
+  function changeCell(row, index, column, value) {
+    const token = rowToken(row, index);
+    setDrafts(current => ({
+      ...current,
+      [token]: {
+        originalRow: row,
+        changes: {
+          ...(current[token]?.changes || {}),
+          [column]: value
+        }
+      }
+    }));
+  }
+
+  async function saveGrid() {
+    const entries = Object.values(drafts);
+    if (!entries.length) {
+      setGridEditing(false);
+      return;
+    }
+
+    if (!window.confirm(`Enregistrer ${entries.length} ligne(s) modifiée(s) dans ${name}?`)) return;
+
+    setSaving(true);
+    setMessage('');
+
+    try {
+      const updated = await updateUniversalRows({ config, entries });
+      onRowsUpdated(name, updated);
+      setDrafts({});
+      setGridEditing(false);
+      setMessage(`${updated.length} ligne(s) enregistrée(s).`);
+    } catch (error) {
+      setMessage(`Erreur : ${error.message || error}`);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return <div className="tablePage">
-    <header className="pageHead"><div><h1>{icons[name] || '📋'} {name}</h1><p>{filtered.length.toLocaleString('fr-CA')} résultat(s) sur {rows.length.toLocaleString('fr-CA')} ligne(s). Source : {sourceLabel(dataStore, name)}.</p></div><div className="actions"><button onClick={() => downloadCSV(`${name}_table_complete.csv`, rows, cols)}><Download/> Table complète</button><button onClick={() => downloadCSV(`${name}_resultats_filtres.csv`, filtered, cols)}><FileSpreadsheet/> Résultats filtrés</button><button onClick={() => alert('Rapport client illustré : module Rapports à venir.')}><FileText/> Rapport client avec photo</button></div></header>
+    <header className="pageHead"><div><h1>{icons[name] || '📋'} {name}</h1><p>{filtered.length.toLocaleString('fr-CA')} résultat(s) sur {rows.length.toLocaleString('fr-CA')} ligne(s). Source : {sourceLabel(dataStore, name)}.</p></div><div className="actions">
+      {canEdit && !gridEditing && <button onClick={() => { setGridEditing(true); setMessage(''); }}><Edit3/> Modifier la grille</button>}
+      <button onClick={() => downloadCSV(`${name}_table_complete.csv`, rows, cols)}><Download/> Table complète</button>
+      <button onClick={() => downloadCSV(`${name}_resultats_filtres.csv`, filtered, cols)}><FileSpreadsheet/> Résultats filtrés</button>
+    </div></header>
+
+    {gridEditing && <div className="grid-edit-toolbar">
+      <button className="grid-edit-primary" disabled={saving} onClick={saveGrid}><Save size={17}/> {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}</button>
+      <button className="grid-edit-secondary" onClick={() => { setDrafts({}); setGridEditing(false); }}><X size={17}/> Annuler</button>
+      <span className="grid-edit-note">{Object.keys(drafts).length} ligne(s) modifiée(s). Clique directement dans les cellules.</span>
+    </div>}
+
+    {message && <div className="v07-message">{message}</div>}
+
     <div className="searchbar"><Search/><input placeholder="Recherche exacte dans toutes les colonnes..." value={query} onChange={e => setQuery(e.target.value)}/></div>
     <div className="tableWrap"><table><thead><tr>{hasMapColumn && <th>Carte</th>}{cols.map(c => <th key={c}>{columnLabel(name, c)}<input placeholder="Filtrer" value={filters[c] || ''} onChange={e => setFilters({ ...filters, [c]: e.target.value })}/></th>)}</tr></thead><tbody>{shown.map((r, i) => {
+      const token = rowToken(r, i);
       const supportId = r.support_id || r['Support ID'] || '';
       const mapUrl = infrastructureMapUrl(r);
-      return <tr key={r.id || i} onClick={() => setSelected(r)}>
+      return <tr key={token} className={drafts[token] ? 'editing-row' : ''} onClick={() => !gridEditing && setSelected(r)}>
         {hasMapColumn && <td>
           {mapUrl
             ? <button className="table-map-button" title={`Ouvrir ${supportId} sur la carte`} onClick={event => {
@@ -208,28 +284,96 @@ function TableView({ name, dataStore, onOpenMap, rolePermission }) {
               }}><MapPin size={16}/> Carte</button>
             : <span className="table-map-missing">GPS absent</span>}
         </td>}
-        {cols.map(c => <td key={c}>{renderTableCell(name, r, c)}</td>)}
+        {cols.map(c => {
+          const changed = Object.prototype.hasOwnProperty.call(drafts[token]?.changes || {}, c);
+          const value = changed ? drafts[token].changes[c] : r[c];
+          return <td key={c} className={gridEditing ? `grid-edit-cell ${changed ? 'changed' : ''}` : ''}>
+            {gridEditing
+              ? <EditableField column={c} value={value} compact onChange={next => changeCell(r, i, c, next)}/>
+              : renderTableCell(name, r, c)}
+          </td>;
+        })}
       </tr>;
     })}</tbody></table></div>
-    {selected && <Detail name={name} row={selected} onClose={() => setSelected(null)} onOpenMap={onOpenMap}/>}
+    {selected && <Detail name={name} row={selected} role={role} config={config} onSaved={updated => { onRowsUpdated(name, [updated]); setSelected(updated); }} onClose={() => setSelected(null)} onOpenMap={onOpenMap}/>}
   </div>;
 }
 
-function Detail({ name, row, onClose, onOpenMap }) {
+function Detail({ name, row, role, config, onSaved, onClose, onOpenMap }) {
   const cols = getCols([row], name);
   const support = row.support_id || row.no_arret || row.related_support || row['Support ID'] || '';
   const mapUrl = name === 'Infrastructures' ? infrastructureMapUrl(row) : '';
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(row);
+  const [rules, setRules] = useState({});
+  const [message, setMessage] = useState('');
+  const [saving, setSaving] = useState(false);
+  const canEdit = role === 'Administrateur';
+
+  useEffect(() => {
+    loadAutomaticFieldRules(config.table).then(setRules);
+  }, [config.table]);
+
+  async function save() {
+    const changes = Object.fromEntries(
+      cols
+        .filter(column => draft[column] !== row[column])
+        .map(column => [column, draft[column]])
+    );
+
+    if (!Object.keys(changes).length) {
+      setEditing(false);
+      return;
+    }
+
+    if (!window.confirm(`Enregistrer les modifications de cette fiche ${name}?`)) return;
+
+    setSaving(true);
+    try {
+      const updated = await updateUniversalRow({ config, originalRow: row, changes });
+      setDraft(updated);
+      onSaved(updated);
+      setEditing(false);
+      setMessage('Fiche enregistrée.');
+    } catch (error) {
+      setMessage(`Erreur : ${error.message || error}`);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return <div className="drawer"><div className="drawerPanel"><button className="close" onClick={onClose}>×</button><h2>Fiche 360° — {name}</h2>{support && <div className="support">Identifiant : <b>{support}</b></div>}
+
+    {canEdit && <div className="detail-edit-actions">
+      {!editing
+        ? <button className="grid-edit-primary" onClick={() => { setDraft(row); setEditing(true); setMessage(''); }}><Edit3 size={17}/> Modifier la fiche</button>
+        : <>
+            <button className="grid-edit-primary" disabled={saving} onClick={save}><Save size={17}/> Enregistrer</button>
+            <button className="grid-edit-secondary" onClick={() => { setDraft(row); setEditing(false); }}><X size={17}/> Annuler</button>
+          </>}
+    </div>}
+
+    {message && <div className="v07-message">{message}</div>}
     {mapUrl && <button className="detail-map-button" onClick={() => onOpenMap?.(support)}><MapPin size={17}/> Voir ce support sur la carte interactive</button>}
+
     <div className="detailGrid">{cols.map(c => {
-      if (name === 'Infrastructures' && c === 'visuel_actuel_cadre') {
+      if (!editing && name === 'Infrastructures' && c === 'visuel_actuel_cadre') {
         const url = thumbnailForInfrastructure(row);
         return <div key={c} className="detail-photo-card"><label>{columnLabel(name, c)}</label>{url
           ? <img src={url} alt={`Photo du support ${support}`}/>
           : <p>Aucune photo associée.</p>}</div>;
       }
-      return <div key={c}><label>{columnLabel(name, c)}</label><p>{String(row[c] ?? '—')}</p></div>;
+
+      const rule = rules[c];
+      return <div key={c}>
+        <label>{columnLabel(name, c)}</label>
+        {editing
+          ? <>
+              <EditableField column={c} value={draft[c]} onChange={value => setDraft(current => ({ ...current, [c]: value }))}/>
+              {rule && !rule.is_primary_source && <small className="automatic-field-warning">Champ alimenté automatiquement depuis {rule.source_table || 'une relation'}.{rule.source_field || ''}. Une propagation future pourrait remplacer la valeur.</small>}
+            </>
+          : <p>{String(row[c] ?? '—')}</p>}
+      </div>;
     })}</div>
     {name === 'Infrastructures' && support && <SupportPhotoGallery supportId={support}/>}
   </div></div>;
@@ -352,7 +496,7 @@ function App() {
   }, [role]);
 
   const adminItems = role === 'Administrateur'
-    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Rapports finaux', 'Studio des relations', 'Validation système', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats']
+    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Rapports finaux', 'Studio des relations', 'Validation système', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats']
     : role === 'Coordonnateur'
       ? ['Validation système', 'Campagnes maîtres', 'Campagne — Visuels et formats']
       : [];
@@ -369,6 +513,40 @@ function App() {
     ...visibleManifestTables
   ];
 
+  function applyUpdatedRows(tableLabel, updatedRows) {
+    setDataStore(current => {
+      const module = current?.[tableLabel];
+      if (!module) return current;
+      const config = tableConfig[tableLabel];
+
+      const nextRows = module.rows.map(existing => {
+        try {
+          const existingKey = primaryKeyFor(config, existing);
+          const replacement = updatedRows.find(candidate => {
+            try {
+              const candidateKey = primaryKeyFor(config, candidate);
+              return candidateKey.field === existingKey.field &&
+                String(candidateKey.value) === String(existingKey.value);
+            } catch {
+              return false;
+            }
+          });
+          return replacement || existing;
+        } catch {
+          return existing;
+        }
+      });
+
+      return {
+        ...current,
+        [tableLabel]: {
+          ...module,
+          rows: nextRows
+        }
+      };
+    });
+  }
+
   if (!supabaseConfigured) return <SupabaseConfigurationError/>;
   if (loading || profileLoading) return <div className="login"><div className="loginCard"><h1>Chargement TDM...</h1><p>Validation de la session et du profil.</p></div></div>;
   if (!session) return <ProductionLogin/>;
@@ -381,6 +559,9 @@ function App() {
   else if (active === 'Connexion') content = <LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>;
   else if (active === 'Administration') content = <AdminPanel role={role} currentRole={role} session={session}/>;
   else if (active === 'Utilisateurs réels') content = <UserProvisioningPanel role={role}/>;
+  else if (active === 'Édition — Historique') content = <ChangeHistoryPanel role={role}/>;
+  else if (active === 'Photos et inventaire') content = <PhotoInventoryCenter role={role}/>;
+  else if (active === 'Centre EDT et BT') content = <OperationsCenter role={role}/>;
   else if (active === 'Rapports finaux') content = <FinalReportsCenter dataStore={dataStore} role={role}/>;
   else if (active === 'Visibilité par rôle') content = <RoleVisibilityAdmin dataStore={dataStore} tableNames={manifest.map(module => module.name)} role={role}/>;
   else if (active === 'Studio des relations') content = <RelationsStudio role={role}/>;
@@ -392,9 +573,9 @@ function App() {
   else if (active === 'Application terrain') content = <TerrainApp dataStore={dataStore} role={role} session={session}/>;
   else if (active === 'Recherche terrain') content = <div className="dashboard"><FieldSearch dataStore={dataStore}/></div>;
   else if (active === 'Bons de travail') content = <WorkOrdersPanel dataStore={dataStore} role={role} session={session}/>;
-  else content = <TableView name={active} dataStore={dataStore} rolePermission={rolePermission} onOpenMap={supportId => { setMapFocusSupportId(String(supportId || '')); setActive('Carte interactive'); }}/>;
+  else content = <TableView name={active} dataStore={dataStore} rolePermission={rolePermission} role={role} onRowsUpdated={applyUpdatedRows} onOpenMap={supportId => { setMapFocusSupportId(String(supportId || '')); setActive('Carte interactive'); }}/>;
 
-  return <div className="app"><aside><div className="brand">TOS<span>Display Manager</span></div><span className="role-badge">{profile?.nom || session?.user?.email}<br/>{role}</span>{items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Studio des relations' ? '🔗' : it === 'Validation système' ? '✅' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}</aside><main>{content}</main></div>;
+  return <div className="app"><aside><div className="brand">TOS<span>Display Manager</span></div><span className="role-badge">{profile?.nom || session?.user?.email}<br/>{role}</span>{items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Édition — Historique' ? '🕘' : it === 'Photos et inventaire' ? '🖼️' : it === 'Centre EDT et BT' ? '🛠️' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Studio des relations' ? '🔗' : it === 'Validation système' ? '✅' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}</aside><main>{content}</main></div>;
 }
 
 createRoot(document.getElementById('root')).render(<App/>);
