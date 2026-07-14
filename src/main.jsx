@@ -16,6 +16,7 @@ import './features/v08/bloc-8-role-visibility.css';
 import './features/v09/bloc-9-reports.css';
 import './features/v10/bloc-10-editor.css';
 import './features/v11/bloc-11-operations.css';
+import './features/v11/correctifs-urgence.css';
 
 import manifest from './data/manifest.json';
 import infrastructuresJson from './data/infrastructures.json';
@@ -57,6 +58,7 @@ import EditableField from './components/EditableField';
 import ChangeHistoryPanel from './components/ChangeHistoryPanel';
 import PhotoInventoryCenter from './components/PhotoInventoryCenter';
 import OperationsCenter from './components/OperationsCenter';
+import GlobalButtonFeedback from './components/GlobalButtonFeedback';
 import { infrastructureMapUrl } from './services/mapService';
 import { getCurrentProfile } from './services/authProfileService';
 import { getRoleVisibility, canSeeTable, columnsForTable } from './services/roleVisibilityService';
@@ -174,7 +176,7 @@ function Dashboard({ setActive, dataStore }) {
 
   return <div className="dashboard">
     <div className="hero">
-      <div><h1>TOS Display Manager <span>v0.11</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
+      <div><h1>TOS Display Manager <span>v0.11.1</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
       <div className="badge"><ShieldCheck/> {supabaseConfigured ? 'Supabase configuré' : 'Mode JSON local'}</div>
     </div>
     <div className="cards"><Card title="Infrastructures" value={infrastructures.length}/><Card title="Arrêts" value={arrets.length}/><Card title="EDT" value={edt.length}/><Card title="Bons de travail" value={bt.length}/></div>
@@ -554,6 +556,15 @@ function App() {
     return <div className="production-login-page"><div className="production-login-card"><h1>Accès non autorisé</h1><p>Aucun profil applicatif actif n’est associé à ce compte.</p><button onClick={() => supabase.auth.signOut()}>Déconnexion</button></div></div>;
   }
 
+  async function logoutFromPortal() {
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      setSession(null);
+      setProfile(null);
+    }
+  }
+
   let content;
   if (active === 'Tableau de bord') content = <Dashboard setActive={setActive} dataStore={dataStore}/>;
   else if (active === 'Connexion') content = <LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>;
@@ -575,7 +586,16 @@ function App() {
   else if (active === 'Bons de travail') content = <WorkOrdersPanel dataStore={dataStore} role={role} session={session}/>;
   else content = <TableView name={active} dataStore={dataStore} rolePermission={rolePermission} role={role} onRowsUpdated={applyUpdatedRows} onOpenMap={supportId => { setMapFocusSupportId(String(supportId || '')); setActive('Carte interactive'); }}/>;
 
-  return <div className="app"><aside><div className="brand">TOS<span>Display Manager</span></div><span className="role-badge">{profile?.nom || session?.user?.email}<br/>{role}</span>{items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Édition — Historique' ? '🕘' : it === 'Photos et inventaire' ? '🖼️' : it === 'Centre EDT et BT' ? '🛠️' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Studio des relations' ? '🔗' : it === 'Validation système' ? '✅' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}</aside><main>{content}</main></div>;
+  return <div className="app">
+    <GlobalButtonFeedback/>
+    <aside>
+      <div className="brand">TOS<span>Display Manager</span></div>
+      <span className="role-badge">{profile?.nom || session?.user?.email}<br/>{role}</span>
+      {items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Édition — Historique' ? '🕘' : it === 'Photos et inventaire' ? '🖼️' : it === 'Centre EDT et BT' ? '🛠️' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Studio des relations' ? '🔗' : it === 'Validation système' ? '✅' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}
+      <button className="sidebar-logout" onClick={logoutFromPortal}><LogOut size={17}/> Déconnexion</button>
+    </aside>
+    <main>{content}</main>
+  </div>;
 }
 
 createRoot(document.getElementById('root')).render(<App/>);

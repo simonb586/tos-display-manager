@@ -27,7 +27,8 @@ import {
   normalizeInfrastructureForMap
 } from '../services/mapService';
 
-const DEFAULT_CENTER = [45.5019, -73.5674];
+const DEFAULT_CENTER = [52.0, -71.5];
+const DEFAULT_ZOOM = 5;
 
 function MapStateBridge({ onZoom }) {
   useMapEvents({
@@ -35,6 +36,36 @@ function MapStateBridge({ onZoom }) {
       onZoom(event.target.getZoom());
     }
   });
+  return null;
+}
+
+function MapResizeGuard() {
+  const map = useMap();
+
+  useEffect(() => {
+    const invalidate = () => map.invalidateSize({ pan: false });
+    const timers = [
+      window.setTimeout(invalidate, 0),
+      window.setTimeout(invalidate, 150),
+      window.setTimeout(invalidate, 500)
+    ];
+
+    window.addEventListener('resize', invalidate);
+
+    const container = map.getContainer();
+    const observer = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(invalidate)
+      : null;
+
+    observer?.observe(container);
+
+    return () => {
+      timers.forEach(timer => window.clearTimeout(timer));
+      window.removeEventListener('resize', invalidate);
+      observer?.disconnect();
+    };
+  }, [map]);
+
   return null;
 }
 
@@ -76,7 +107,7 @@ const clusterIcon = count => L.divIcon({
 
 export default function InteractiveMap({ dataStore, focusSupportId = '', onClearFocus }) {
   const infrastructures = dataStore?.Infrastructures?.rows || [];
-  const [zoom, setZoom] = useState(8);
+  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [selected, setSelected] = useState(null);
   const [autoFit, setAutoFit] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(true);
@@ -234,12 +265,13 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
         </aside>
 
         <section className="map-canvas">
-          <MapContainer center={DEFAULT_CENTER} zoom={8} preferCanvas className="tos-map">
+          <MapContainer center={DEFAULT_CENTER} zoom={DEFAULT_ZOOM} preferCanvas className="tos-map">
             <TileLayer
               attribution='&copy; OpenStreetMap contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <MapStateBridge onZoom={setZoom}/>
+            <MapResizeGuard/>
             <FocusSupport point={focusedPoint}/>
             <FitVisiblePoints points={visiblePoints} enabled={autoFit}/>
 
@@ -299,10 +331,12 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
           </MapContainer>
 
           {!points.length && (
-            <div className="map-empty">
+            <div className="map-empty-card">
               <AlertTriangle/>
-              <h2>Aucune coordonnée GPS exploitable</h2>
-              <p>Ajoute Latitude et Longitude dans la table Infrastructure pour afficher les supports.</p>
+              <div>
+                <h2>Aucun support géolocalisé pour le moment</h2>
+                <p>La carte demeure centrée sur le Québec. Les marqueurs apparaîtront automatiquement dès que des coordonnées GPS seront enregistrées.</p>
+              </div>
             </div>
           )}
         </section>
