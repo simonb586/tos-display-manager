@@ -19,6 +19,7 @@ import './features/v11/bloc-11-operations.css';
 import './features/v11/correctifs-urgence.css';
 import './features/v12/bloc-12.css';
 import './features/v12/account-activation.css';
+import './features/v12/installer-terrain-shell.css';
 
 import manifest from './data/manifest.json';
 import infrastructuresJson from './data/infrastructures.json';
@@ -63,6 +64,7 @@ import OperationsCenter from './components/OperationsCenter';
 import GlobalButtonFeedback from './components/GlobalButtonFeedback';
 import ColumnRelationMenu from './components/ColumnRelationMenu';
 import AccountActivation from './components/AccountActivation';
+import InstallerTerrainShell from './components/InstallerTerrainShell';
 import { infrastructureMapUrl } from './services/mapService';
 import { getCurrentProfile } from './services/authProfileService';
 import { getRoleVisibility, canSeeTable, columnsForTable } from './services/roleVisibilityService';
@@ -181,7 +183,7 @@ function Dashboard({ setActive, dataStore }) {
 
   return <div className="dashboard">
     <div className="hero">
-      <div><h1>TOS Display Manager <span>v0.12.3</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
+      <div><h1>TOS Display Manager <span>v0.12.4</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
       <div className="badge"><ShieldCheck/> {supabaseConfigured ? 'Supabase configuré' : 'Mode JSON local'}</div>
     </div>
     <div className="cards"><Card title="Infrastructures" value={infrastructures.length}/><Card title="Arrêts" value={arrets.length}/><Card title="EDT" value={edt.length}/><Card title="Bons de travail" value={bt.length}/></div>
@@ -581,6 +583,19 @@ function App() {
       setSession(null);
       setProfile(null);
     }
+  }
+
+  if (role === 'Installateur') {
+    return <InstallerTerrainShell
+      dataStore={dataStore}
+      role={role}
+      session={session}
+      profile={profile}
+      onLogout={() => {
+        setSession(null);
+        setProfile(null);
+      }}
+    />;
   }
 
   let content;
