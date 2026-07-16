@@ -41,6 +41,60 @@ export async function uploadTerrainPhoto(file, supportId, action = 'inspection')
   return { path, publicUrl: data?.publicUrl || '' };
 }
 
+
+export async function registerTerrainSupportPhoto({
+  supportId,
+  campagneId = null,
+  visuelId = null,
+  action = 'inspection',
+  fileName,
+  storagePath,
+  photoUrl,
+  userEmail = ''
+}) {
+  if (!supabaseConfigured || !supabase) {
+    throw new Error('Supabase n’est pas configuré.');
+  }
+
+  if (!supportId || !storagePath || !fileName) {
+    throw new Error('Support ID, fichier et chemin de stockage sont obligatoires.');
+  }
+
+  const normalizedAction = String(action || '').toLowerCase();
+  const isInstallation = normalizedAction === 'installation';
+  const isInspection = normalizedAction === 'inspection';
+
+  const row = {
+    support_id: String(supportId),
+    campagne_id: campagneId ? Number(campagneId) : null,
+    visuel_id: visuelId ? Number(visuelId) : null,
+    type_photo: isInstallation
+      ? 'Installation'
+      : isInspection
+        ? 'Inspection'
+        : normalizedAction === 'enjeu'
+          ? 'Enjeu'
+          : 'Photo',
+    nom_fichier: fileName,
+    storage_path: storagePath,
+    photo_url: photoUrl || null,
+    thumbnail_url: photoUrl || null,
+    prise_le: new Date().toISOString(),
+    utilisateur: userEmail || null,
+    statut_validation: (isInstallation || isInspection) ? 'Validée' : 'À valider',
+    est_principale: isInstallation
+  };
+
+  const { data, error } = await supabase
+    .from('support_photos')
+    .insert(row)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function saveInspection(payload, file = null) {
   if (!supabaseConfigured || !supabase || !navigator.onLine) {
     queueInspection({ ...payload, photo_pending: Boolean(file), photo_name: file?.name || null });
@@ -97,4 +151,38 @@ export async function syncOfflineQueue() {
 
   setOfflineQueue(remaining);
   return { synced, remaining: remaining.length };
+}
+
+
+export async function finalizeTerrainInstallation({
+  supportId,
+  visualId,
+  fileName,
+  storagePath,
+  photoUrl,
+  userEmail = '',
+  comments = ''
+}) {
+  if (!supabaseConfigured || !supabase) {
+    throw new Error('Supabase n’est pas configuré.');
+  }
+
+  const { data, error } = await supabase.rpc('finaliser_installation_terrain', {
+    p_support_id: String(supportId),
+    p_visuel_id: Number(visualId),
+    p_nom_fichier: fileName,
+    p_storage_path: storagePath,
+    p_photo_url: photoUrl || null,
+    p_utilisateur: userEmail || null,
+    p_commentaires: comments || null
+  });
+
+  if (error) throw error;
+  if (!data?.ok) throw new Error(data?.message || 'La mise à jour terrain a échoué.');
+
+  window.dispatchEvent(new CustomEvent('tos-terrain-data-updated', {
+    detail: data
+  }));
+
+  return data;
 }

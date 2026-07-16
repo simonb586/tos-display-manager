@@ -183,7 +183,7 @@ function Dashboard({ setActive, dataStore }) {
 
   return <div className="dashboard">
     <div className="hero">
-      <div><h1>TOS Display Manager <span>v0.12.4</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
+      <div><h1>TOS Display Manager <span>v0.12.6</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
       <div className="badge"><ShieldCheck/> {supabaseConfigured ? 'Supabase configuré' : 'Mode JSON local'}</div>
     </div>
     <div className="cards"><Card title="Infrastructures" value={infrastructures.length}/><Card title="Arrêts" value={arrets.length}/><Card title="EDT" value={edt.length}/><Card title="Bons de travail" value={bt.length}/></div>
@@ -448,10 +448,46 @@ function App() {
   const [mapFocusSupportId, setMapFocusSupportId] = useState('');
   const [rolePermission, setRolePermission] = useState({ visible_tables: ['*'], visible_columns: {} });
 
+  async function refreshDataStore() {
+    try {
+      const ds = await loadManyTables(tableConfig);
+      setDataStore(ds);
+      return ds;
+    } catch (error) {
+      console.error('Rafraîchissement des tables impossible', error);
+      return null;
+    }
+  }
+
   useEffect(() => {
-    loadManyTables(tableConfig)
-      .then(ds => { setDataStore(ds); setLoading(false); })
-      .catch(error => { console.error(error); setLoading(false); });
+    refreshDataStore().finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (!supabase) return undefined;
+
+    const refresh = () => refreshDataStore();
+
+    window.addEventListener('tos-terrain-data-updated', refresh);
+
+    const channel = supabase
+      .channel('tos-terrain-live-sync')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'infrastructures' },
+        refresh
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'support_photos' },
+        refresh
+      )
+      .subscribe();
+
+    return () => {
+      window.removeEventListener('tos-terrain-data-updated', refresh);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {

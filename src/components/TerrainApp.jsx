@@ -1,3 +1,293 @@
-import React,{useMemo,useState}from'react';import{Camera,CheckCircle2,Save,Search}from'lucide-react';import{saveInspection,uploadTerrainPhoto}from'../services/terrainService';import{listCompatibleVisualsForSupport,applyVisualToSupport}from'../services/campaignVisualService';
-const norm=v=>String(v??'').toLowerCase();
-export default function TerrainApp({dataStore,role,session}){const allowed=['Administrateur','Coordonnateur','Installateur'].includes(role);const infra=dataStore?.['Infrastructures']?.rows||[],arrets=dataStore?.['Liste des arrêts']?.rows||[];const[source,setSource]=useState('Infrastructure'),[q,setQ]=useState(''),[sel,setSel]=useState(null),[visuals,setVisuals]=useState([]),[visualId,setVisualId]=useState(''),[action,setAction]=useState('installation'),[comments,setComments]=useState(''),[file,setFile]=useState(null),[preview,setPreview]=useState(''),[msg,setMsg]=useState(''),[busy,setBusy]=useState(false);const rows=source==='Infrastructure'?infra:arrets,idField=source==='Infrastructure'?'support_id':'no_arret';const suggestions=useMemo(()=>q?rows.filter(r=>norm(r[idField]).includes(norm(q))||norm(r.emplacement_visibilite||r.site).includes(norm(q))).slice(0,12):[],[q,rows,idField]);const visual=visuals.find(v=>String(v.id)===String(visualId));async function choose(r){setSel(r);setQ(String(r[idField]||''));setVisualId('');try{setVisuals(source==='Infrastructure'?await listCompatibleVisualsForSupport(r):[])}catch(e){setMsg(e.message)}}async function submit(e){e.preventDefault();if(!sel)return setMsg('Sélectionne une fiche.');if(source==='Infrastructure'&&!visualId)return setMsg('Sélectionne un visuel compatible.');setBusy(true);try{let p=null;if(file)p=await uploadTerrainPhoto(file,sel.support_id||sel.no_arret,action);await saveInspection({support_id:source==='Infrastructure'?sel.support_id:null,no_arret:source==='Arrêt'?sel.no_arret:null,source_type:source,emplacement:sel.emplacement_visibilite||sel.site||'',campagne_id:visual?.campagne_id||null,campagne:visual?.campagne?.nom_campagne||null,visuel:visual?.nom_visuel||null,no_edt:visual?.campagne?.no_edt||null,action,commentaires:comments,utilisateur_courriel:session?.user?.email||'',statut:'Terminée',photo_path:p?.path||null,photo_url:p?.publicUrl||null},null);if(source==='Infrastructure')await applyVisualToSupport({supportId:sel.support_id,visualId,userEmail:session?.user?.email||'',photoUrl:p?.publicUrl,photoPath:p?.path});setMsg(`Intervention terminée. ${visual?.nom_visuel||''} propagé automatiquement.`)}catch(e){setMsg(e.message)}finally{setBusy(false)}}if(!allowed)return <div className="terrain-page">Accès refusé.</div>;return <div className="terrain-page"><header className="terrain-hero"><h1>Application terrain</h1><p>Le format du support filtre automatiquement les visuels.</p></header><div className="terrain-layout"><section className="terrain-card"><h2><Search/> Sélectionner une fiche</h2><div className="terrain-inline"><select value={source} onChange={e=>{setSource(e.target.value);setSel(null);setQ('');setVisuals([])}}><option>Infrastructure</option><option>Arrêt</option></select><input value={q} onChange={e=>setQ(e.target.value)}/></div><div className="terrain-suggestions">{suggestions.map((r,i)=><button key={i} onClick={()=>choose(r)}><b>{r[idField]}</b><span>{r.emplacement_visibilite||r.site}</span></button>)}</div>{sel&&<article className="terrain-selected"><CheckCircle2/><div><b>{sel[idField]}</b><span>{sel.emplacement_visibilite||sel.site}</span><small>Format : {sel.format_affichage||sel.format||sel.type_support||'Non défini'}</small></div></article>}</section><form className="terrain-card" onSubmit={submit}><h2><Camera/> Intervention</h2>{source==='Infrastructure'&&sel&&<><label>Visuel compatible<select required value={visualId} onChange={e=>setVisualId(e.target.value)}><option value="">Sélectionner</option>{visuals.map(v=><option key={v.id} value={v.id}>{v.nom_visuel}{v.phase?` — ${v.phase}`:''} — {v.format_support}</option>)}</select></label>{visuals.length===0&&<div className="terrain-message error">Aucun visuel compatible.</div>}{visual&&<div className="terrain-campaign-summary"><b>{visual.nom_visuel}</b><span>Campagne : {visual.campagne?.nom_campagne}</span><span>Phase : {visual.phase||'—'}</span><span>EDT : {visual.campagne?.no_edt||'—'}</span></div>}</>}<label>Action photo<select value={action} onChange={e=>setAction(e.target.value)}><option>installation</option><option>inspection</option><option>enjeu</option><option>photo</option></select></label><label>Commentaires<textarea value={comments} onChange={e=>setComments(e.target.value)}/></label><label className="terrain-photo"><Camera/> Prendre / joindre une photo<input type="file" accept="image/*" capture="environment" onChange={e=>{const f=e.target.files?.[0];setFile(f);setPreview(f?URL.createObjectURL(f):'')}}/></label>{preview&&<img className="terrain-preview" src={preview}/>}<button className="terrain-save" disabled={busy}><Save/> {busy?'Enregistrement...':'Terminer'}</button>{msg&&<div className="terrain-message">{msg}</div>}</form></div></div>}
+import React, { useMemo, useState } from 'react';
+import { Camera, CheckCircle2, Save, Search } from 'lucide-react';
+import {
+  finalizeTerrainInstallation,
+  registerTerrainSupportPhoto,
+  saveInspection,
+  uploadTerrainPhoto
+} from '../services/terrainService';
+import {
+  listCompatibleVisualsForSupport
+} from '../services/campaignVisualService';
+
+const norm = value => String(value ?? '').toLowerCase();
+
+export default function TerrainApp({ dataStore, role, session }) {
+  const allowed = ['Administrateur', 'Coordonnateur', 'Installateur'].includes(role);
+  const infrastructures = dataStore?.Infrastructures?.rows || [];
+  const stops = dataStore?.['Liste des arrêts']?.rows || [];
+
+  const [source, setSource] = useState('Infrastructure');
+  const [query, setQuery] = useState('');
+  const [selected, setSelected] = useState(null);
+  const [visuals, setVisuals] = useState([]);
+  const [visualId, setVisualId] = useState('');
+  const [action, setAction] = useState('installation');
+  const [comments, setComments] = useState('');
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState('');
+  const [message, setMessage] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const rows = source === 'Infrastructure' ? infrastructures : stops;
+  const idField = source === 'Infrastructure' ? 'support_id' : 'no_arret';
+  const visual = visuals.find(item => String(item.id) === String(visualId));
+  const requiresVisual = source === 'Infrastructure' && action === 'installation';
+
+  const suggestions = useMemo(() => (
+    query
+      ? rows
+          .filter(row =>
+            norm(row[idField]).includes(norm(query)) ||
+            norm(row.emplacement_visibilite || row.site).includes(norm(query))
+          )
+          .slice(0, 12)
+      : []
+  ), [query, rows, idField]);
+
+  async function choose(row) {
+    setSelected(row);
+    setQuery(String(row[idField] || ''));
+    setVisualId('');
+    setMessage('');
+
+    try {
+      setVisuals(
+        source === 'Infrastructure'
+          ? await listCompatibleVisualsForSupport(row)
+          : []
+      );
+    } catch (error) {
+      setMessage(error.message);
+    }
+  }
+
+  async function submit(event) {
+    event.preventDefault();
+
+    if (!selected) {
+      setMessage('Sélectionne une fiche.');
+      return;
+    }
+
+    if (requiresVisual && !visualId) {
+      setMessage('Sélectionne un visuel compatible pour une installation.');
+      return;
+    }
+
+    if (!file) {
+      setMessage('Prends ou joins une photo avant de terminer.');
+      return;
+    }
+
+    setBusy(true);
+    setMessage('');
+
+    try {
+      const supportId = selected.support_id || selected.no_arret;
+      const uploaded = await uploadTerrainPhoto(file, supportId, action);
+
+      if (source === 'Infrastructure' && action === 'installation') {
+        await finalizeTerrainInstallation({
+          supportId: selected.support_id,
+          visualId,
+          fileName: file.name || `${selected.support_id}-${action}.jpg`,
+          storagePath: uploaded.path,
+          photoUrl: uploaded.publicUrl,
+          userEmail: session?.user?.email || '',
+          comments
+        });
+      } else {
+        await saveInspection({
+          support_id: source === 'Infrastructure' ? selected.support_id : null,
+          no_arret: source === 'Arrêt' ? selected.no_arret : null,
+          source_type: source,
+          emplacement: selected.emplacement_visibilite || selected.site || '',
+          campagne_id: visual?.campagne_id || null,
+          campagne: visual?.campagne?.nom_campagne || null,
+          visuel: visual?.nom_visuel || null,
+          no_edt: visual?.campagne?.no_edt || null,
+          action,
+          commentaires: comments,
+          utilisateur_courriel: session?.user?.email || '',
+          statut: 'Terminée',
+          photo_path: uploaded.path,
+          photo_url: uploaded.publicUrl
+        }, null);
+
+        if (source === 'Infrastructure') {
+          await registerTerrainSupportPhoto({
+            supportId: selected.support_id,
+            campagneId: visual?.campagne_id || null,
+            visuelId: visual?.id || null,
+            action,
+            fileName: file.name || `${selected.support_id}-${action}.jpg`,
+            storagePath: uploaded.path,
+            photoUrl: uploaded.publicUrl,
+            userEmail: session?.user?.email || ''
+          });
+        }
+      }
+
+      const explanation =
+        action === 'installation'
+          ? 'Photo validée, définie comme principale et affichée dans Infrastructure.'
+          : action === 'inspection'
+            ? 'Photo validée et ajoutée à la galerie, sans remplacer la photo principale.'
+            : 'Photo ajoutée à la galerie en attente de validation, sans remplacer le visuel actuel.';
+
+      setMessage(`Intervention terminée. ${explanation}`);
+      setComments('');
+      setFile(null);
+      setPreview('');
+    } catch (error) {
+      setMessage(error.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (!allowed) return <div className="terrain-page">Accès refusé.</div>;
+
+  return (
+    <div className="terrain-page">
+      <header className="terrain-hero">
+        <h1>Application terrain</h1>
+        <p>Les photos d’installation s’affichent automatiquement dans Infrastructure.</p>
+      </header>
+
+      <div className="terrain-layout">
+        <section className="terrain-card">
+          <h2><Search/> Sélectionner une fiche</h2>
+
+          <div className="terrain-inline">
+            <select
+              value={source}
+              onChange={event => {
+                setSource(event.target.value);
+                setSelected(null);
+                setQuery('');
+                setVisuals([]);
+                setVisualId('');
+              }}
+            >
+              <option>Infrastructure</option>
+              <option>Arrêt</option>
+            </select>
+            <input value={query} onChange={event => setQuery(event.target.value)}/>
+          </div>
+
+          <div className="terrain-suggestions">
+            {suggestions.map((row, index) => (
+              <button key={index} onClick={() => choose(row)}>
+                <b>{row[idField]}</b>
+                <span>{row.emplacement_visibilite || row.site}</span>
+              </button>
+            ))}
+          </div>
+
+          {selected && (
+            <article className="terrain-selected">
+              <CheckCircle2/>
+              <div>
+                <b>{selected[idField]}</b>
+                <span>{selected.emplacement_visibilite || selected.site}</span>
+                <small>
+                  Format : {selected.format_affichage || selected.format || selected.type_support || 'Non défini'}
+                </small>
+              </div>
+            </article>
+          )}
+        </section>
+
+        <form className="terrain-card" onSubmit={submit}>
+          <h2><Camera/> Intervention</h2>
+
+          <label>
+            Action photo
+            <select
+              value={action}
+              onChange={event => {
+                setAction(event.target.value);
+                if (event.target.value !== 'installation') setVisualId('');
+              }}
+            >
+              <option value="installation">Installation</option>
+              <option value="inspection">Inspection</option>
+              <option value="enjeu">Enjeu</option>
+              <option value="photo">Autre photo</option>
+            </select>
+          </label>
+
+          {requiresVisual && selected && (
+            <>
+              <label>
+                Visuel compatible
+                <select
+                  required
+                  value={visualId}
+                  onChange={event => setVisualId(event.target.value)}
+                >
+                  <option value="">Sélectionner</option>
+                  {visuals.map(item => (
+                    <option key={item.id} value={item.id}>
+                      {item.nom_visuel}
+                      {item.phase ? ` — ${item.phase}` : ''}
+                      {` — ${item.format_support}`}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              {!visuals.length && (
+                <div className="terrain-message error">
+                  Aucun visuel compatible.
+                </div>
+              )}
+            </>
+          )}
+
+          {visual && (
+            <div className="terrain-campaign-summary">
+              <b>{visual.nom_visuel}</b>
+              <span>Campagne : {visual.campagne?.nom_campagne}</span>
+              <span>Phase : {visual.phase || '—'}</span>
+              <span>EDT : {visual.campagne?.no_edt || '—'}</span>
+            </div>
+          )}
+
+          <label>
+            Commentaires
+            <textarea
+              value={comments}
+              onChange={event => setComments(event.target.value)}
+            />
+          </label>
+
+          <label className="terrain-photo">
+            <Camera/> Prendre ou joindre une photo
+            <input
+              required
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={event => {
+                const nextFile = event.target.files?.[0] || null;
+                setFile(nextFile);
+                setPreview(nextFile ? URL.createObjectURL(nextFile) : '');
+              }}
+            />
+          </label>
+
+          {preview && <img className="terrain-preview" src={preview} alt="Aperçu"/>}
+
+          <button className="terrain-save" disabled={busy}>
+            <Save/> {busy ? 'Enregistrement...' : 'Terminer'}
+          </button>
+
+          {message && <div className="terrain-message">{message}</div>}
+        </form>
+      </div>
+    </div>
+  );
+}
