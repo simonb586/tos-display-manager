@@ -167,14 +167,15 @@ export async function finalizeTerrainInstallation({
     throw new Error('Supabase n’est pas configuré.');
   }
 
-  const { data, error } = await supabase.rpc('finaliser_installation_terrain', {
+  const { data, error } = await supabase.rpc('finaliser_installation_terrain_v0127', {
     p_support_id: String(supportId),
     p_visuel_id: Number(visualId),
     p_nom_fichier: fileName,
     p_storage_path: storagePath,
     p_photo_url: photoUrl || null,
     p_utilisateur: userEmail || null,
-    p_commentaires: comments || null
+    p_commentaires: comments || null,
+    p_idempotency_key: `TERRAIN-${String(supportId)}-${String(storagePath)}`
   });
 
   if (error) throw error;

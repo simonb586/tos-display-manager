@@ -88,7 +88,7 @@ export default function TerrainApp({ dataStore, role, session }) {
       const uploaded = await uploadTerrainPhoto(file, supportId, action);
 
       if (source === 'Infrastructure' && action === 'installation') {
-        await finalizeTerrainInstallation({
+        const result = await finalizeTerrainInstallation({
           supportId: selected.support_id,
           visualId,
           fileName: file.name || `${selected.support_id}-${action}.jpg`,
@@ -97,6 +97,8 @@ export default function TerrainApp({ dataStore, role, session }) {
           userEmail: session?.user?.email || '',
           comments
         });
+        if (!result?.ok || !result?.reference) throw new Error('Le serveur n’a pas confirmé la mise à jour complète.');
+        setMessage(`Installation confirmée. Infrastructure, historique et photo mis à jour. Référence : ${result.reference}`);
       } else {
         await saveInspection({
           support_id: source === 'Infrastructure' ? selected.support_id : null,
@@ -129,14 +131,12 @@ export default function TerrainApp({ dataStore, role, session }) {
         }
       }
 
-      const explanation =
-        action === 'installation'
-          ? 'Photo validée, définie comme principale et affichée dans Infrastructure.'
-          : action === 'inspection'
-            ? 'Photo validée et ajoutée à la galerie, sans remplacer la photo principale.'
-            : 'Photo ajoutée à la galerie en attente de validation, sans remplacer le visuel actuel.';
-
-      setMessage(`Intervention terminée. ${explanation}`);
+      if (!(source === 'Infrastructure' && action === 'installation')) {
+        const explanation = action === 'inspection'
+          ? 'Photo validée et ajoutée à la galerie, sans remplacer la photo principale.'
+          : 'Photo ajoutée à la galerie en attente de validation, sans remplacer le visuel actuel.';
+        setMessage(`Intervention terminée. ${explanation}`);
+      }
       setComments('');
       setFile(null);
       setPreview('');

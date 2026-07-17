@@ -29,8 +29,23 @@ export async function loadTable(tableName, fallbackData = []) {
     const rows = await loadAllRows(tableName);
     return { rows, source: 'supabase', error: null, complete: true };
   } catch (error) {
-    console.warn(`[TDM] Fallback JSON pour ${tableName}:`, error.message);
-    return { rows: fallbackData, source: 'json', error, complete: false };
+    const allowFallback =
+      import.meta.env.DEV &&
+      String(import.meta.env.VITE_ALLOW_JSON_FALLBACK || '').toLowerCase() === 'true';
+
+    if (allowFallback) {
+      console.warn(`[TDM] Fallback JSON de développement pour ${tableName}:`, error.message);
+      return {
+        rows: fallbackData,
+        source: 'json-dev-fallback',
+        error,
+        complete: false
+      };
+    }
+
+    throw new Error(
+      `Lecture Supabase impossible pour ${tableName}: ${error.message || error}`
+    );
   }
 }
 

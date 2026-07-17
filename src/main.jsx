@@ -65,6 +65,7 @@ import GlobalButtonFeedback from './components/GlobalButtonFeedback';
 import ColumnRelationMenu from './components/ColumnRelationMenu';
 import AccountActivation from './components/AccountActivation';
 import InstallerTerrainShell from './components/InstallerTerrainShell';
+import TerrainSyncDiagnostics from './components/TerrainSyncDiagnostics';
 import { infrastructureMapUrl } from './services/mapService';
 import { getCurrentProfile } from './services/authProfileService';
 import { getRoleVisibility, canSeeTable, columnsForTable } from './services/roleVisibilityService';
@@ -183,7 +184,7 @@ function Dashboard({ setActive, dataStore }) {
 
   return <div className="dashboard">
     <div className="hero">
-      <div><h1>TOS Display Manager <span>v0.12.6</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
+      <div><h1>TOS Display Manager <span>v0.12.7.1</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
       <div className="badge"><ShieldCheck/> {supabaseConfigured ? 'Supabase configuré' : 'Mode JSON local'}</div>
     </div>
     <div className="cards"><Card title="Infrastructures" value={infrastructures.length}/><Card title="Arrêts" value={arrets.length}/><Card title="EDT" value={edt.length}/><Card title="Bons de travail" value={bt.length}/></div>
@@ -444,51 +445,40 @@ function App() {
   const [profile, setProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [dataStore, setDataStore] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [mapFocusSupportId, setMapFocusSupportId] = useState('');
   const [rolePermission, setRolePermission] = useState({ visible_tables: ['*'], visible_columns: {} });
 
   async function refreshDataStore() {
+    if (!session) return null;
     try {
       const ds = await loadManyTables(tableConfig);
       setDataStore(ds);
       return ds;
     } catch (error) {
-      console.error('Rafraîchissement des tables impossible', error);
+      console.error('Rafraîchissement Supabase impossible', error);
+      setDataStore(current => ({...current,__sync_error__:{rows:[],source:'error',error,complete:false}}));
       return null;
     }
   }
 
   useEffect(() => {
+    if (!session) return;
+    setLoading(true);
     refreshDataStore().finally(() => setLoading(false));
-  }, []);
+  }, [session?.user?.id]);
 
   useEffect(() => {
-    if (!supabase) return undefined;
-
+    if (!supabase || !session) return undefined;
     const refresh = () => refreshDataStore();
-
     window.addEventListener('tos-terrain-data-updated', refresh);
-
     const channel = supabase
-      .channel('tos-terrain-live-sync')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'infrastructures' },
-        refresh
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'support_photos' },
-        refresh
-      )
+      .channel(`tos-terrain-live-sync-${session.user.id}`)
+      .on('postgres_changes',{event:'*',schema:'public',table:'infrastructures'},refresh)
+      .on('postgres_changes',{event:'*',schema:'public',table:'support_photos'},refresh)
       .subscribe();
-
-    return () => {
-      window.removeEventListener('tos-terrain-data-updated', refresh);
-      supabase.removeChannel(channel);
-    };
-  }, []);
+    return () => {window.removeEventListener('tos-terrain-data-updated',refresh);supabase.removeChannel(channel);};
+  }, [session?.user?.id]);
 
   useEffect(() => {
     if (!supabase) {
@@ -546,7 +536,7 @@ function App() {
   }, [role]);
 
   const adminItems = role === 'Administrateur'
-    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Rapports finaux', 'Studio des relations', 'Validation système', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats']
+    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Diagnostic terrain', 'Rapports finaux', 'Studio des relations', 'Validation système', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats']
     : role === 'Coordonnateur'
       ? ['Validation système', 'Campagnes maîtres', 'Campagne — Visuels et formats']
       : [];
@@ -598,7 +588,7 @@ function App() {
   }
 
   if (!supabaseConfigured) return <SupabaseConfigurationError/>;
-  if (loading || profileLoading) return <div className="login"><div className="loginCard"><h1>Chargement TDM...</h1><p>Validation de la session et du profil.</p></div></div>;
+  if (profileLoading || (session && loading)) return <div className="login"><div className="loginCard"><h1>Chargement TDM...</h1><p>Validation de la session, du profil et des données Supabase.</p></div></div>;
   if (!session) return <ProductionLogin/>;
 
   if (session && profile && requiresAccountActivation(session, profile)) {
@@ -642,6 +632,7 @@ function App() {
   else if (active === 'Édition — Historique') content = <ChangeHistoryPanel role={role}/>;
   else if (active === 'Photos et inventaire') content = <PhotoInventoryCenter role={role}/>;
   else if (active === 'Centre EDT et BT') content = <OperationsCenter role={role}/>;
+  else if (active === 'Diagnostic terrain') content = <TerrainSyncDiagnostics role={role}/>;
   else if (active === 'Rapports finaux') content = <FinalReportsCenter dataStore={dataStore} role={role}/>;
   else if (active === 'Visibilité par rôle') content = <RoleVisibilityAdmin dataStore={dataStore} tableNames={manifest.map(module => module.name)} role={role}/>;
   else if (active === 'Studio des relations') content = <RelationsStudio role={role}/>;
@@ -660,10 +651,10 @@ function App() {
     <aside>
       <div className="brand">TOS<span>Display Manager</span></div>
       <span className="role-badge">{profile?.nom || session?.user?.email}<br/>{role}</span>
-      {items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Édition — Historique' ? '🕘' : it === 'Photos et inventaire' ? '🖼️' : it === 'Centre EDT et BT' ? '🛠️' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Studio des relations' ? '🔗' : it === 'Validation système' ? '✅' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}
+      {items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Édition — Historique' ? '🕘' : it === 'Photos et inventaire' ? '🖼️' : it === 'Centre EDT et BT' ? '🛠️' : it === 'Diagnostic terrain' ? '🧪' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Studio des relations' ? '🔗' : it === 'Validation système' ? '✅' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}
       <button className="sidebar-logout" onClick={logoutFromPortal}><LogOut size={17}/> Déconnexion</button>
     </aside>
-    <main>{content}</main>
+    <main>{dataStore?.__sync_error__&&<div className="sync-error-banner"><strong>Erreur de lecture Supabase</strong><span>Les données locales ne sont pas utilisées en production.</span><button onClick={refreshDataStore}>Recharger depuis Supabase</button></div>}{content}</main>
   </div>;
 }
 

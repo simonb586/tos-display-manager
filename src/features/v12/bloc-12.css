@@ -24,3 +24,5 @@
 @media(max-width:800px){
   .user-v2-actions-visible{min-width:0;width:100%}
 }
+
+.sync-error-banner{margin:12px;padding:12px 14px;display:flex;gap:12px;flex-wrap:wrap;border:1px solid #fecaca;border-radius:12px;background:#fef2f2;color:#991b1b}.sync-error-banner button{margin-left:auto;border:0;border-radius:9px;padding:8px 10px;background:#991b1b;color:white;font-weight:800}
