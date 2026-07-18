@@ -1,0 +1,16 @@
+import { supabase, supabaseConfigured } from '../lib/supabaseClient';
+const ready=()=>{if(!supabaseConfigured||!supabase)throw new Error('Supabase n’est pas configuré.');};
+const pad=n=>String(n).padStart(2,'0');
+export function detectLegacyPhotoMetadata(name,ids=[]){const base=String(name||'').replace(/\.[^.]+$/,'');const low=base.toLowerCase();const id=[...ids].sort((a,b)=>String(b).length-String(a).length).find(x=>low.includes(String(x).toLowerCase()))||'';const m=base.match(/(20\d{2})[-_ ]?(0[1-9]|1[0-2])?[-_ ]?(0[1-9]|[12]\d|3[01])?/);return{supportId:id,date:m?`${m[1]}-${m[2]||'01'}-${m[3]||'01'}`:'',confidence:id?(m?'Élevée':'Moyenne'):'Faible'};}
+export async function importLegacyPhoto({file,supportId,date,userEmail,sequence=1}){ready();const d=date?new Date(`${date}T12:00:00`):new Date(file.lastModified||Date.now());const ext=file.name.split('.').pop()||'jpg';const filename=`${supportId}_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_HISTORIQUE_${String(sequence).padStart(3,'0')}.${ext}`;const path=`${supportId}/${filename}`;const{error:up}=await supabase.storage.from('support-photos').upload(path,file,{upsert:false});if(up)throw up;const{data:u}=supabase.storage.from('support-photos').getPublicUrl(path);const{error}=await supabase.from('support_photos').insert({support_id:supportId,type_photo:'HISTORIQUE',nom_fichier:filename,storage_path:path,photo_url:u?.publicUrl||'',prise_le:d.toISOString(),utilisateur:userEmail,statut_validation:'Validée'});if(error)throw error;}
+
+export async function listSupportPhotos(supportId){
+  ready();
+  const { data, error } = await supabase
+    .from('support_photos')
+    .select('*')
+    .eq('support_id', supportId)
+    .order('prise_le', { ascending: false });
+  if(error) throw error;
+  return data || [];
+}
