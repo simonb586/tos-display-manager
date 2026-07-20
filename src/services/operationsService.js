@@ -16,7 +16,9 @@ export async function loadOperationsData() {
     phasesResult,
     assignmentsResult,
     historyResult,
-    usersResult
+    usersResult,
+    edtSupportsResult,
+    dashboardResult
   ] = await Promise.all([
     supabase.from('suivi_des_edt').select('*').order('date_debut', { ascending: false, nullsFirst: false }),
     supabase.from('bons_de_travail').select('*').order('date_cible', { ascending: true, nullsFirst: false }),
@@ -24,7 +26,9 @@ export async function loadOperationsData() {
     supabase.from('edt_phases').select('*').order('ordre', { ascending: true }),
     supabase.from('edt_assignments').select('*').order('created_at', { ascending: false }),
     supabase.from('operations_history').select('*').order('created_at', { ascending: false }).limit(500),
-    supabase.from('utilisateurs').select('id,nom,courriel,role,statut').order('nom')
+    supabase.from('utilisateurs').select('id,nom,courriel,role,statut').order('nom'),
+    supabase.from('edt_supports').select('*').order('updated_at', { ascending: false }),
+    supabase.rpc('tableau_bord_edt_v0129', { p_edt_id: null })
   ]);
 
   for (const result of [
@@ -34,7 +38,9 @@ export async function loadOperationsData() {
     phasesResult,
     assignmentsResult,
     historyResult,
-    usersResult
+    usersResult,
+    edtSupportsResult,
+    dashboardResult
   ]) {
     if (result.error) throw result.error;
   }
@@ -46,7 +52,9 @@ export async function loadOperationsData() {
     phases: phasesResult.data || [],
     assignments: assignmentsResult.data || [],
     history: historyResult.data || [],
-    users: usersResult.data || []
+    users: usersResult.data || [],
+    edtSupports: edtSupportsResult.data || [],
+    dashboard: dashboardResult.data || []
   };
 }
 
@@ -293,4 +301,76 @@ export function computeEdtProgress(edt, workOrders, phases) {
   }
 
   return Number(edt.progression || 0);
+}
+
+
+export function parseSupportIds(value) {
+  return [...new Set(String(value || '')
+    .split(/[\n,;\t ]+/)
+    .map(item => item.trim())
+    .filter(Boolean))];
+}
+
+export async function assignSupportsToEdt({
+  edtId,
+  supportIds,
+  phaseId = null,
+  priority = 'Normale',
+  assignedTo = null,
+  targetDate = null,
+  generateWorkOrders = true
+}) {
+  ensureSupabase();
+  const ids = Array.isArray(supportIds) ? supportIds : parseSupportIds(supportIds);
+  if (!edtId) throw new Error('Sélectionne un EDT.');
+  if (!ids.length) throw new Error('Ajoute au moins un Support ID.');
+
+  const { data, error } = await supabase.rpc('assigner_supports_edt_v0129', {
+    p_edt_id: Number(edtId),
+    p_support_ids: ids,
+    p_phase_id: phaseId ? Number(phaseId) : null,
+    p_priorite: priority || 'Normale',
+    p_assigne_a: assignedTo || null,
+    p_date_cible: targetDate || null,
+    p_generer_bt: Boolean(generateWorkOrders)
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function removeSupportFromEdt(edtId, supportId) {
+  ensureSupabase();
+  const { data, error } = await supabase.rpc('retirer_support_edt_v0129', {
+    p_edt_id: Number(edtId),
+    p_support_id: supportId
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function refreshEdtEnterprise(edtId) {
+  ensureSupabase();
+  const { data, error } = await supabase.rpc('refresh_edt_enterprise', {
+    p_edt_id: Number(edtId)
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function updateEdtSupport(id, patch) {
+  ensureSupabase();
+  const normalized = { ...patch, updated_at: new Date().toISOString() };
+  if (normalized.progression !== undefined) {
+    normalized.progression = Math.max(0, Math.min(100, Number(normalized.progression || 0)));
+  }
+  if (normalized.statut === 'Terminé') normalized.progression = 100;
+
+  const { data, error } = await supabase
+    .from('edt_supports')
+    .update(normalized)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 }

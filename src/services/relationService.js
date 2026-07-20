@@ -170,6 +170,7 @@ export async function saveRelationRule(rule) {
     condition_json: rule.condition_json || {},
     confidence: rule.confidence || 'Manuelle',
     validation_status: rule.validation_status || 'À confirmer',
+    propagation_mode: rule.propagation_mode || 'automatique',
     updated_at: new Date().toISOString()
   };
 
@@ -208,6 +209,22 @@ export async function testRelationRule(rule) {
     p_rule_id: rule.id
   });
 
+  if (error) throw error;
+  return data;
+}
+
+export async function executeRelationRule(ruleId, sourceRecord, dryRun = false) {
+  ensureSupabase();
+  const { data, error } = await supabase.rpc('executer_relation_rule_v0129', {
+    p_rule_id: ruleId, p_source_record: sourceRecord, p_dry_run: dryRun
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function installRelationTriggers() {
+  ensureSupabase();
+  const { data, error } = await supabase.rpc('installer_declencheurs_relations_v0129');
   if (error) throw error;
   return data;
 }

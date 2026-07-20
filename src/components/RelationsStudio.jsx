@@ -19,6 +19,7 @@ import {
   saveRelationField,
   saveRelationRule,
   synchronizeRelationCatalog,
+  installRelationTriggers,
   testRelationRule
 } from '../services/relationService';
 
@@ -33,7 +34,9 @@ const emptyRule = {
   create_history: true,
   requires_confirmation: false,
   confidence: 'Manuelle',
-  validation_status: 'À confirmer'
+  validation_status: 'À confirmer',
+  propagation_mode: 'automatique',
+  condition_json: { source_key: '', destination_key: '' }
 };
 
 export default function RelationsStudio({ role }) {
@@ -181,6 +184,13 @@ export default function RelationsStudio({ role }) {
     );
   }
 
+  async function installTriggers() {
+    await runAction(
+      installRelationTriggers,
+      'Les déclencheurs automatiques ont été installés sur toutes les tables sources actives.'
+    );
+  }
+
   async function createRule(event) {
     event.preventDefault();
 
@@ -272,6 +282,9 @@ export default function RelationsStudio({ role }) {
           <button disabled={busy} onClick={synchronizeAll}>
             {busy ? <LoaderCircle className="spin" size={18}/> : <Workflow size={18}/>}
             Synchroniser toutes les tables
+          </button>
+          <button disabled={busy} onClick={installTriggers}>
+            <Workflow size={18}/> Installer les propagations
           </button>
           <button disabled={busy} onClick={() => reload()}>
             <RefreshCw className={status === 'loading' ? 'spin' : ''} size={18}/>
@@ -571,6 +584,30 @@ export default function RelationsStudio({ role }) {
                   </select>
                 </label>
               </fieldset>
+
+              <div className="relations-grid">
+                <label>
+                  Clé de correspondance source
+                  <select value={newRule.condition_json?.source_key || ''} onChange={event => setNewRule(current => ({...current, condition_json:{...(current.condition_json||{}), source_key:event.target.value}}))}>
+                    <option value="">Automatique (support_id ou id)</option>
+                    {(schema[newRule.source_table] || []).map(field => <option key={field}>{field}</option>)}
+                  </select>
+                </label>
+                <label>
+                  Clé de correspondance destination
+                  <select value={newRule.condition_json?.destination_key || ''} onChange={event => setNewRule(current => ({...current, condition_json:{...(current.condition_json||{}), destination_key:event.target.value}}))}>
+                    <option value="">Automatique (support_id ou id)</option>
+                    {(schema[newRule.destination_table] || []).map(field => <option key={field}>{field}</option>)}
+                  </select>
+                </label>
+                <label>
+                  Mode de propagation
+                  <select value={newRule.propagation_mode || 'automatique'} onChange={event => setNewRule(current => ({...current, propagation_mode:event.target.value}))}>
+                    <option value="automatique">Automatique</option>
+                    <option value="manuel">Manuel</option>
+                  </select>
+                </label>
+              </div>
 
               <div className="relations-builder-options">
                 <label>

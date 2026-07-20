@@ -1,5 +1,5 @@
 
--- TOS Display Manager — v0.12.7.3
+-- TOS Display Manager — v0.12.8
 -- Stabilisation complète des opérations terrain.
 -- Installation : exécuter ce fichier une seule fois dans Supabase SQL Editor.
 
@@ -192,7 +192,7 @@ begin
   values(
     p_support_id,v_campaign.nom_campagne,v_visual.nom_visuel,v_campaign.no_edt,
     now()::text,p_photo_url,p_utilisateur,
-    jsonb_build_object('reference',v_ref,'photo_id',v_photo.id,'source','v0.12.7.3')
+    jsonb_build_object('reference',v_ref,'photo_id',v_photo.id,'source','v0.12.8')
   );
 
   if not exists(

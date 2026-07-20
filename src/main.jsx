@@ -185,7 +185,7 @@ function Dashboard({ setActive, dataStore }) {
 
   return <div className="dashboard">
     <div className="hero">
-      <div><h1>TOS Display Manager <span>v0.12.7.3</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
+      <div><h1>TOS Display Manager <span>v0.12.9 Lots 1 + 2</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
       <div className="badge"><ShieldCheck/> {supabaseConfigured ? 'Supabase configuré' : 'Mode JSON local'}</div>
     </div>
     <div className="cards"><Card title="Infrastructures" value={infrastructures.length}/><Card title="Arrêts" value={arrets.length}/><Card title="EDT" value={edt.length}/><Card title="Bons de travail" value={bt.length}/></div>
@@ -391,7 +391,7 @@ function Detail({ name, row, role, config, onSaved, onClose, onOpenMap }) {
           : <p>{String(row[c] ?? '—')}</p>}
       </div>;
     })}</div>
-    {name === 'Infrastructures' && support && <SupportPhotoGallery supportId={support}/>}
+    {name === 'Infrastructures' && support && <SupportPhotoGallery supportId={support} canDelete={role === 'Administrateur'}/>}
   </div></div>;
 }
 
@@ -589,7 +589,16 @@ function App() {
   }
 
   if (!supabaseConfigured) return <SupabaseConfigurationError/>;
-  if (profileLoading || (session && loading)) return <div className="login"><div className="loginCard"><h1>Chargement TDM...</h1><p>Validation de la session, du profil et des données Supabase.</p></div></div>;
+  if (profileLoading || (session && loading)) return (
+    <div className="app-startup" role="status" aria-live="polite">
+      <div className="app-startup-card">
+        <div className="app-startup-spinner" aria-hidden="true"/>
+        <h1>TOS Display Manager</h1>
+        <p>Ouverture sécurisée de votre espace…</p>
+        <small>Version v0.12.9 Lots 1 + 2</small>
+      </div>
+    </div>
+  );
   if (!session) return <ProductionLogin/>;
 
   if (session && profile && requiresAccountActivation(session, profile)) {

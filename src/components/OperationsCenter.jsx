@@ -11,6 +11,7 @@ import {
   UserPlus,
   Users
 } from 'lucide-react';
+import EdtEnterprisePanel from './EdtEnterprisePanel';
 import {
   assignUser,
   closeEdt,
@@ -75,7 +76,9 @@ export default function OperationsCenter({ role }) {
     phases: [],
     assignments: [],
     history: [],
-    users: []
+    users: [],
+    edtSupports: [],
+    dashboard: []
   });
   const [selectedEdtId, setSelectedEdtId] = useState('');
   const [edtForm, setEdtForm] = useState(emptyEdt);
@@ -306,6 +309,16 @@ export default function OperationsCenter({ role }) {
                 </div>
               </div>
             </section>
+          )}
+
+          {selectedEdt && (
+            <EdtEnterprisePanel
+              edt={selectedEdt}
+              data={data}
+              canManage={canManage}
+              busy={busy}
+              run={run}
+            />
           )}
         </div>
       )}

@@ -126,7 +126,9 @@ export default function ColumnRelationMenu({
         condition_json: {
           grid_shortcut: true,
           destination_editable: mode === 'edit',
-          relation_direction: mode === 'edit' ? 'bidirectional' : 'source_to_destination'
+          relation_direction: mode === 'edit' ? 'bidirectional' : 'source_to_destination',
+          source_key: (schema[sourceTable] || []).includes('support_id') ? 'support_id' : ((schema[sourceTable] || []).includes('id') ? 'id' : ''),
+          destination_key: (schema[destinationTable] || []).includes('support_id') ? 'support_id' : ((schema[destinationTable] || []).includes('id') ? 'id' : '')
         }
       });
 

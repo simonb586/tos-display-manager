@@ -1,5 +1,5 @@
 
--- Vérification v0.12.7.3
+-- Vérification v0.12.8
 select column_name
 from information_schema.columns
 where table_schema='public' and table_name='infrastructures'

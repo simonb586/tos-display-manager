@@ -105,7 +105,7 @@ export default function TerrainApp({ dataStore, role, session }) {
         setMessage(`Installation confirmée. Infrastructure, historique et photo mis à jour. Référence : ${result.reference}`);
       } else {
         if (source !== 'Infrastructure') {
-          throw new Error('La stabilisation v0.12.7.3 exige une Infrastructure pour cette opération.');
+          throw new Error('La stabilisation v0.12.8 exige une Infrastructure pour cette opération.');
         }
 
         const result = await finalizeTerrainIntervention({
