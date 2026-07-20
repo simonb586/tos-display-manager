@@ -5,6 +5,7 @@ import {
   Package,
   RefreshCw,
   Star,
+  Trash2,
   XCircle
 } from 'lucide-react';
 import {
@@ -14,6 +15,7 @@ import {
   makePrimaryPhoto,
   validateSupportPhoto
 } from '../services/photoInventoryService';
+import { deleteSupportPhoto } from '../services/photoLibraryService';
 
 export default function PhotoInventoryCenter({ role }) {
   const [tab, setTab] = useState('photos');
@@ -58,6 +60,22 @@ export default function PhotoInventoryCenter({ role }) {
       await reload();
     } catch (error) {
       setMessage(error.message || 'Erreur de validation.');
+    }
+  }
+
+  async function removePhoto(photo) {
+    if (!canManage) return;
+    const confirmed = window.confirm(
+      `Supprimer définitivement la photo « ${photo.nom_fichier || photo.id} » ? Cette action est irréversible.`
+    );
+    if (!confirmed) return;
+
+    try {
+      await deleteSupportPhoto(photo);
+      setMessage('Photo supprimée définitivement.');
+      await reload();
+    } catch (error) {
+      setMessage(error.message || 'Erreur lors de la suppression de la photo.');
     }
   }
 
@@ -130,6 +148,7 @@ export default function PhotoInventoryCenter({ role }) {
                     <button onClick={() => setStatus(photo, 'Validée')}><CheckCircle2/> Valider</button>
                     <button onClick={() => setStatus(photo, 'Rejetée')}><XCircle/> Rejeter</button>
                     <button onClick={() => setPrimary(photo)}><Star/> Principale</button>
+                    <button className="danger" onClick={() => removePhoto(photo)}><Trash2/> Supprimer</button>
                   </div>
                 )}
               </div>
