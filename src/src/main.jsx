@@ -52,6 +52,7 @@ import RelationsStudio from './components/RelationsStudio';
 import ValidationCenter from './components/ValidationCenter';
 import LegacyPhotoImporter from './components/LegacyPhotoImporter';
 import SupportPhotoGallery from './components/SupportPhotoGallery';
+import Support360Panel from './components/Support360Panel';
 import ProductionLogin from './components/ProductionLogin';
 import UserProvisioningPanel from './components/UserProvisioningPanel';
 import InteractiveMap from './components/InteractiveMap';
@@ -184,7 +185,7 @@ function Dashboard({ setActive, dataStore }) {
 
   return <div className="dashboard">
     <div className="hero">
-      <div><h1>TOS Display Manager <span>v0.12.7.2</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
+      <div><h1>TOS Display Manager</h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
       <div className="badge"><ShieldCheck/> {supabaseConfigured ? 'Supabase configuré' : 'Mode JSON local'}</div>
     </div>
     <div className="cards"><Card title="Infrastructures" value={infrastructures.length}/><Card title="Arrêts" value={arrets.length}/><Card title="EDT" value={edt.length}/><Card title="Bons de travail" value={bt.length}/></div>
@@ -195,7 +196,7 @@ function Dashboard({ setActive, dataStore }) {
     </div>
     <div className="grid2">
       <section className="panel"><h2><BarChart3/> Avancement des EDT</h2>{edtData.map(e => <div className="progress" key={e.name}><span>{e.name}</span><div><i style={{ width: `${Math.min(100, e.progress)}%` }}/></div><b>{e.progress}%</b></div>)}<button onClick={() => setActive('Suivi des EDT')}>Ouvrir le suivi des EDT</button></section>
-      <section className="panel"><h2><Bell/> Modules v0.7</h2><ul className="checks"><li>Données complètes paginées.</li><li>Campagnes, phases, visuels et formats.</li><li>Studio des relations et Centre de validation.</li><li>Application terrain filtrée selon le format du support.</li></ul></section>
+      <section className="panel"><h2><Bell/> Modules opérationnels</h2><ul className="checks"><li>Données complètes paginées.</li><li>Campagnes, phases, visuels et formats.</li><li>Studio des relations et Centre de validation.</li><li>Application terrain filtrée selon le format du support.</li></ul></section>
     </div>
   </div>;
 }
@@ -390,7 +391,7 @@ function Detail({ name, row, role, config, onSaved, onClose, onOpenMap }) {
           : <p>{String(row[c] ?? '—')}</p>}
       </div>;
     })}</div>
-    {name === 'Infrastructures' && support && <SupportPhotoGallery supportId={support}/>}
+    {name === 'Infrastructures' && support && <Support360Panel supportId={support} role={role}/>} 
   </div></div>;
 }
 
@@ -588,7 +589,7 @@ function App() {
   }
 
   if (!supabaseConfigured) return <SupabaseConfigurationError/>;
-  if (profileLoading || (session && loading)) return <div className="login"><div className="loginCard"><h1>Chargement TDM...</h1><p>Validation de la session, du profil et des données Supabase.</p></div></div>;
+  if (profileLoading || (session && loading)) return <div className="login"><div className="loginCard"><h1>TOS Display Manager</h1><p>Ouverture sécurisée de votre espace…</p></div></div>;
   if (!session) return <ProductionLogin/>;
 
   if (session && profile && requiresAccountActivation(session, profile)) {
