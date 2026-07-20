@@ -122,6 +122,7 @@ const INFRASTRUCTURE_LABELS = {
   date_derniere_manipulation: 'Date de la dernière manipulation',
   edt_associe: 'EDT associé',
   campagne_precedente: 'Campagne précédente',
+  visuel_precedent: 'Visuel précédent',
   edt_precedent_associe: 'EDT précédent associé',
   coordonnees_gps: 'Coordonnées GPS',
   latitude: 'Latitude',
@@ -184,7 +185,7 @@ function Dashboard({ setActive, dataStore }) {
 
   return <div className="dashboard">
     <div className="hero">
-      <div><h1>TOS Display Manager <span>v0.12.7.2</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
+      <div><h1>TOS Display Manager <span>v0.12.7.3</span></h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
       <div className="badge"><ShieldCheck/> {supabaseConfigured ? 'Supabase configuré' : 'Mode JSON local'}</div>
     </div>
     <div className="cards"><Card title="Infrastructures" value={infrastructures.length}/><Card title="Arrêts" value={arrets.length}/><Card title="EDT" value={edt.length}/><Card title="Bons de travail" value={bt.length}/></div>

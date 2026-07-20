@@ -2,8 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Camera, CheckCircle2, Save, Search } from 'lucide-react';
 import {
   finalizeTerrainInstallation,
-  registerTerrainSupportPhoto,
-  saveInspection,
+  finalizeTerrainIntervention,
   uploadTerrainPhoto
 } from '../services/terrainService';
 import {
@@ -24,6 +23,7 @@ export default function TerrainApp({ dataStore, role, session }) {
   const [visualId, setVisualId] = useState('');
   const [action, setAction] = useState('installation');
   const [comments, setComments] = useState('');
+  const [issueType, setIssueType] = useState('');
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState('');
   const [message, setMessage] = useState('');
@@ -104,34 +104,23 @@ export default function TerrainApp({ dataStore, role, session }) {
         setMessageType('success');
         setMessage(`Installation confirmée. Infrastructure, historique et photo mis à jour. Référence : ${result.reference}`);
       } else {
-        await saveInspection({
-          support_id: source === 'Infrastructure' ? selected.support_id : null,
-          no_arret: source === 'Arrêt' ? selected.no_arret : null,
-          source_type: source,
-          emplacement: selected.emplacement_visibilite || selected.site || '',
-          campagne_id: visual?.campagne_id || null,
-          campagne: visual?.campagne?.nom_campagne || null,
-          visuel: visual?.nom_visuel || null,
-          no_edt: visual?.campagne?.no_edt || null,
-          action,
-          commentaires: comments,
-          utilisateur_courriel: session?.user?.email || '',
-          statut: 'Terminée',
-          photo_path: uploaded.path,
-          photo_url: uploaded.publicUrl
-        }, null);
+        if (source !== 'Infrastructure') {
+          throw new Error('La stabilisation v0.12.7.3 exige une Infrastructure pour cette opération.');
+        }
 
-        if (source === 'Infrastructure') {
-          await registerTerrainSupportPhoto({
-            supportId: selected.support_id,
-            campagneId: visual?.campagne_id || null,
-            visuelId: visual?.id || null,
-            action,
-            fileName: file.name || `${selected.support_id}-${action}.jpg`,
-            storagePath: uploaded.path,
-            photoUrl: uploaded.publicUrl,
-            userEmail: session?.user?.email || ''
-          });
+        const result = await finalizeTerrainIntervention({
+          supportId: selected.support_id,
+          action,
+          issueType,
+          comments,
+          fileName: file.name || `${selected.support_id}-${action}.jpg`,
+          storagePath: uploaded.path,
+          photoUrl: uploaded.publicUrl,
+          userEmail: session?.user?.email || ''
+        });
+
+        if (!result?.ok || !result?.reference) {
+          throw new Error('Le serveur n’a pas confirmé toutes les écritures.');
         }
       }
 
@@ -143,6 +132,7 @@ export default function TerrainApp({ dataStore, role, session }) {
         setMessage(`Intervention terminée. ${explanation}`);
       }
       setComments('');
+      setIssueType('');
       setFile(null);
       setPreview('');
     } catch (error) {
@@ -260,6 +250,19 @@ export default function TerrainApp({ dataStore, role, session }) {
               <span>Phase : {visual.phase || '—'}</span>
               <span>EDT : {visual.campagne?.no_edt || '—'}</span>
             </div>
+          )}
+
+
+          {action === 'enjeu' && (
+            <label>
+              Type d’enjeu
+              <input
+                required
+                value={issueType}
+                onChange={event => setIssueType(event.target.value)}
+                placeholder="Ex. vitre brisée, affiche endommagée, structure..."
+              />
+            </label>
           )}
 
           <label>

@@ -167,7 +167,7 @@ export async function finalizeTerrainInstallation({
     throw new Error('Supabase n’est pas configuré.');
   }
 
-  const { data, error } = await supabase.rpc('finaliser_installation_terrain_v0127', {
+  const { data, error } = await supabase.rpc('finaliser_installation_terrain_v01273', {
     p_support_id: String(supportId),
     p_visuel_id: Number(visualId),
     p_nom_fichier: fileName,
@@ -185,5 +185,40 @@ export async function finalizeTerrainInstallation({
     detail: data
   }));
 
+  return data;
+}
+
+
+export async function finalizeTerrainIntervention({
+  supportId,
+  action,
+  issueType = '',
+  comments = '',
+  fileName,
+  storagePath,
+  photoUrl,
+  userEmail = ''
+}) {
+  if (!supabaseConfigured || !supabase) {
+    throw new Error('Supabase n’est pas configuré.');
+  }
+
+  const reference = `TERRAIN-${String(action).toUpperCase()}-${String(supportId)}-${String(storagePath)}`;
+  const { data, error } = await supabase.rpc('finaliser_intervention_terrain_v01273', {
+    p_support_id: String(supportId),
+    p_action: String(action),
+    p_type_enjeu: issueType || null,
+    p_commentaires: comments || null,
+    p_nom_fichier: fileName,
+    p_storage_path: storagePath,
+    p_photo_url: photoUrl || null,
+    p_utilisateur: userEmail || null,
+    p_idempotency_key: reference
+  });
+
+  if (error) throw error;
+  if (!data?.ok) throw new Error(data?.message || 'L’intervention terrain a échoué.');
+
+  window.dispatchEvent(new CustomEvent('tos-terrain-data-updated', { detail: data }));
   return data;
 }
