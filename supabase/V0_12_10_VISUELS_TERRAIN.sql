@@ -64,7 +64,7 @@ begin
     raise exception 'Permission terrain requise.';
   end if;
 
-  select coalesce(format_affichage, format, type_support)
+  select coalesce(format_affichage, type_support)
     into v_format
     from public.infrastructures
    where support_id = p_support_id;
@@ -144,7 +144,7 @@ begin
     raise exception 'Permission terrain requise.';
   end if;
 
-  select coalesce(format_affichage, format, type_support)
+  select coalesce(format_affichage, type_support)
     into v_support_format
     from public.infrastructures
    where support_id = p_support_id;
