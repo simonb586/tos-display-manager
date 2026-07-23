@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { History, RefreshCw } from 'lucide-react';
 import { loadAdminChangeLog } from '../services/universalEditorService';
+import SortableHeader from './SortableHeader';
+import useSortableRows from '../hooks/useSortableRows';
 
 export default function ChangeHistoryPanel({ role }) {
   const [rows, setRows] = useState([]);
   const [message, setMessage] = useState('');
+  const { sortedRows, sortState, setSortState } = useSortableRows(rows, null, 'change-history');
 
   async function reload() {
     try {
@@ -39,17 +42,17 @@ export default function ChangeHistoryPanel({ role }) {
         <table>
           <thead>
             <tr>
-              <th>Date</th>
-              <th>Utilisateur</th>
-              <th>Table</th>
-              <th>Ligne</th>
-              <th>Champ</th>
-              <th>Ancienne valeur</th>
-              <th>Nouvelle valeur</th>
+              <SortableHeader label="Date" column="changed_at" rows={rows} sortState={sortState} onSort={setSortState} onReset={() => setSortState(null)}/>
+              <SortableHeader label="Utilisateur" column="changed_by_email" rows={rows} sortState={sortState} onSort={setSortState} onReset={() => setSortState(null)}/>
+              <SortableHeader label="Table" column="table_name" rows={rows} sortState={sortState} onSort={setSortState} onReset={() => setSortState(null)}/>
+              <SortableHeader label="Ligne" column="record_key" rows={rows} sortState={sortState} onSort={setSortState} onReset={() => setSortState(null)}/>
+              <SortableHeader label="Champ" column="field_name" rows={rows} sortState={sortState} onSort={setSortState} onReset={() => setSortState(null)}/>
+              <SortableHeader label="Ancienne valeur" column="old_value" rows={rows} sortState={sortState} onSort={setSortState} onReset={() => setSortState(null)}/>
+              <SortableHeader label="Nouvelle valeur" column="new_value" rows={rows} sortState={sortState} onSort={setSortState} onReset={() => setSortState(null)}/>
             </tr>
           </thead>
           <tbody>
-            {rows.map(row => (
+            {sortedRows.map(row => (
               <tr key={row.id}>
                 <td>{new Date(row.changed_at).toLocaleString('fr-CA')}</td>
                 <td>{row.changed_by_email || row.changed_by || '—'}</td>

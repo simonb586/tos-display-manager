@@ -1,0 +1,19 @@
+.sortable-header{position:relative;display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:110px}
+.sortable-header.sorted{color:#5b21b6}
+.sortable-header-label{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.sortable-header-trigger{flex:0 0 auto;border:0;border-radius:7px;padding:5px;background:#ede9fe;color:#5b21b6;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.sortable-header-trigger:hover,.sortable-header-trigger:focus-visible{background:#ddd6fe;outline:2px solid #8b5cf6;outline-offset:1px}
+.sortable-header-popover{position:absolute;z-index:1900;top:calc(100% + 7px);left:0;width:290px;padding:12px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;box-shadow:0 18px 45px rgba(15,23,42,.25);color:#0f172a;text-align:left}
+.sortable-header-popover-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.sortable-header-popover-head button{border:0;border-radius:6px;padding:4px;background:#f1f5f9}
+.column-sort-section{display:grid;gap:8px;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid #e2e8f0}
+.column-sort-section>small{color:#64748b;font-weight:500}
+.column-sort-actions,.column-empty-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.column-sort-actions button,.column-empty-actions button,.column-sort-reset{border:1px solid #d8dee9;border-radius:8px;padding:7px;background:#fff;color:#334155;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.column-sort-actions button{display:flex;align-items:center;gap:5px}
+.column-sort-actions button.active,.column-empty-actions button.active{border-color:#7c3aed;background:#ede9fe;color:#5b21b6}
+.column-sort-reset{display:flex;align-items:center;justify-content:center;gap:6px;background:#f8fafc}
+.column-sort-reset:disabled{cursor:not-allowed;opacity:.45}
+.column-relation-advanced{padding-top:2px}
+th[aria-sort="ascending"],th[aria-sort="descending"]{background:#f5f3ff}
+@media(max-width:700px){.sortable-header-popover{position:fixed;left:10px;right:10px;top:80px;width:auto;max-height:calc(100vh - 100px);overflow:auto}}

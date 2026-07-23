@@ -63,6 +63,20 @@ begin
     v_edt_id, v_support_id, 'Planifié', 'Normale', 0, now()
   ) returning id into v_edt_support_id;
 
+  -- Le diagnostic voit le BT manquant et le dry-run ne crée ni ne lie de BT.
+  if not exists (
+    select 1 from public.diagnostiquer_integrite_edt_v013(v_edt_id)
+     where code = 'BT_MANQUANT' and edt_support_id = v_edt_support_id
+  ) then
+    raise exception 'TEST 1 ÉCHEC: BT manquant absent du diagnostic.';
+  end if;
+  if coalesce((public.reparer_integrite_edt_v013(v_edt_id, false)->>'dry_run')::boolean, false) is not true then
+    raise exception 'TEST 1 ÉCHEC: la réparation de contrôle n''est pas en dry-run.';
+  end if;
+  if (select bon_de_travail_id from public.edt_supports where id = v_edt_support_id) is not null then
+    raise exception 'TEST 1 ÉCHEC: le dry-run a modifié edt_supports.';
+  end if;
+
   insert into public.bons_de_travail(
     no_bt, type_bt, support_id, no_edt, edt_id, edt_support_id,
     priorite, statut, progression, updated_at
@@ -104,6 +118,12 @@ begin
        and date_cible is not distinct from date '2099-12-31'
   ) then
     raise exception 'TEST 4 ÉCHEC: modification BT non propagée à EDT support.';
+  end if;
+  if (select statut from public.suivi_des_edt where id = v_edt_id) is distinct from 'En cours' then
+    raise exception 'TEST 4 ÉCHEC: un EDT terminé n''a pas été rouvert.';
+  end if;
+  if (select date_fin from public.suivi_des_edt where id = v_edt_id) is not null then
+    raise exception 'TEST 4 ÉCHEC: date_fin conservée après réouverture.';
   end if;
 
   -- 5. Retrait direct : la FK conserve le BT et remet son lien à NULL.
@@ -169,7 +189,21 @@ begin
         and pg_get_triggerdef(t.oid) ilike '%AFTER UPDATE%ON public.edt_supports%')
      );
   if v_trigger_count <> 3 then
-    raise exception 'TEST 7 ÉCHEC: triggers v0.13 valides attendus %, trouvés %.', 3, v_trigger_count;
+    raise exception 'TEST 7 ÉCHEC: triggers de synchronisation v0.13 attendus %, trouvés %.', 3, v_trigger_count;
+  end if;
+  if not exists (
+    select 1 from pg_trigger t
+     where not t.tgisinternal
+       and t.tgenabled <> 'D'
+       and t.tgname = 'normaliser_edt_support_v013'
+       and t.tgrelid = 'public.edt_supports'::regclass
+       and t.tgfoid = 'public.normaliser_edt_support_v013()'::regprocedure
+  ) then
+    raise exception 'TEST 7 ÉCHEC: trigger de cycle de vie absent.';
+  end if;
+  if to_regprocedure('public.diagnostiquer_integrite_edt_v013(bigint)') is null
+     or to_regprocedure('public.reparer_integrite_edt_v013(bigint,boolean)') is null then
+    raise exception 'TEST 7 ÉCHEC: RPC de diagnostic ou de réparation absente.';
   end if;
   if exists (
     select 1 from pg_trigger t
@@ -193,6 +227,8 @@ begin
   raise notice 'OK: retrait direct et dél liaison FK';
   raise notice 'OK: RPC retirer_support_edt_v0129';
   raise notice 'OK: structure complète des triggers v0.13';
+  raise notice 'OK: cycle de vie, réouverture EDT et date de fin';
+  raise notice 'OK: diagnostic et réparation dry-run sans écriture';
   raise notice 'OK: aucune récursion ni stack depth exceeded';
 end;
 $$;

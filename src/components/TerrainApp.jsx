@@ -1,12 +1,19 @@
 import React, { useMemo, useState } from 'react';
-import { Camera, CheckCircle2, Save, Search } from 'lucide-react';
+import {
+  AlertTriangle,
+  Camera,
+  CheckCircle2,
+  RefreshCw,
+  Save,
+  Search
+} from 'lucide-react';
 import {
   finalizeTerrainInstallation,
   finalizeTerrainIntervention,
   uploadTerrainPhoto
 } from '../services/terrainService';
 import {
-  listCompatibleVisualsForSupport
+  diagnoseCompatibleVisualsForSupport
 } from '../services/campaignVisualService';
 
 const norm = value => String(value ?? '').toLowerCase();
@@ -20,6 +27,8 @@ export default function TerrainApp({ dataStore, role, session }) {
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(null);
   const [visuals, setVisuals] = useState([]);
+  const [visualDiagnostic, setVisualDiagnostic] = useState(null);
+  const [visualsLoading, setVisualsLoading] = useState(false);
   const [visualId, setVisualId] = useState('');
   const [action, setAction] = useState('installation');
   const [comments, setComments] = useState('');
@@ -46,22 +55,53 @@ export default function TerrainApp({ dataStore, role, session }) {
       : []
   ), [query, rows, idField]);
 
-  async function choose(row) {
-    setSelected(row);
-    setQuery(String(row[idField] || ''));
-    setVisualId('');
+  async function loadVisuals(row) {
+    if (source !== 'Infrastructure') {
+      setVisuals([]);
+      setVisualDiagnostic(null);
+      return;
+    }
+
+    setVisualsLoading(true);
     setMessage('');
     setMessageType('info');
 
     try {
-      setVisuals(
-        source === 'Infrastructure'
-          ? await listCompatibleVisualsForSupport(row)
-          : []
-      );
+      const result = await diagnoseCompatibleVisualsForSupport(row);
+      setVisuals(result.visuals);
+      setVisualDiagnostic(result.diagnostic);
     } catch (error) {
-      setMessage(error.message);
+      setVisuals([]);
+      setVisualDiagnostic({
+        supportId: String(row?.support_id || ''),
+        supportFormat: String(
+          row?.format_affichage || row?.format || row?.type_support || ''
+        ),
+        supportFormatKey: '',
+        totalActiveVisuals: 0,
+        matchingFormat: 0,
+        publishedCampaigns: 0,
+        activeCampaigns: 0,
+        eligibleCount: 0,
+        availableFormats: [],
+        reason: error.message || 'Diagnostic des visuels impossible.'
+      });
+      setMessageType('error');
+      setMessage(error.message || 'Diagnostic des visuels impossible.');
+    } finally {
+      setVisualsLoading(false);
     }
+  }
+
+  async function choose(row) {
+    setSelected(row);
+    setQuery(String(row[idField] || ''));
+    setVisualId('');
+    setVisuals([]);
+    setVisualDiagnostic(null);
+    setMessage('');
+    setMessageType('info');
+    await loadVisuals(row);
   }
 
   async function submit(event) {
@@ -164,6 +204,7 @@ export default function TerrainApp({ dataStore, role, session }) {
                 setSelected(null);
                 setQuery('');
                 setVisuals([]);
+                setVisualDiagnostic(null);
                 setVisualId('');
               }}
             >
@@ -221,10 +262,13 @@ export default function TerrainApp({ dataStore, role, session }) {
                 Visuel compatible
                 <select
                   required
+                  disabled={visualsLoading}
                   value={visualId}
                   onChange={event => setVisualId(event.target.value)}
                 >
-                  <option value="">Sélectionner</option>
+                  <option value="">
+                    {visualsLoading ? 'Chargement des visuels…' : 'Sélectionner'}
+                  </option>
                   {visuals.map(item => (
                     <option key={item.id} value={item.id}>
                       {item.nom_visuel}
@@ -235,9 +279,34 @@ export default function TerrainApp({ dataStore, role, session }) {
                 </select>
               </label>
 
-              {!visuals.length && (
-                <div className="terrain-message error">
-                  Aucun visuel compatible.
+              {!visualsLoading && !visuals.length && visualDiagnostic && (
+                <div className="terrain-visual-diagnostic" role="alert">
+                  <div className="terrain-visual-diagnostic-title">
+                    <AlertTriangle size={18}/>
+                    <strong>Aucun visuel compatible</strong>
+                  </div>
+                  <p>{visualDiagnostic.reason}</p>
+                  <dl>
+                    <div><dt>Support</dt><dd>{visualDiagnostic.supportId || '—'}</dd></div>
+                    <div><dt>Format détecté</dt><dd>{visualDiagnostic.supportFormat || 'Non défini'}</dd></div>
+                    <div><dt>Clé normalisée</dt><dd>{visualDiagnostic.supportFormatKey || 'Indisponible'}</dd></div>
+                    <div><dt>Visuels actifs</dt><dd>{visualDiagnostic.totalActiveVisuals}</dd></div>
+                    <div><dt>Formats compatibles</dt><dd>{visualDiagnostic.matchingFormat}</dd></div>
+                    <div><dt>Campagnes publiées et actives</dt><dd>{visualDiagnostic.activeCampaigns}</dd></div>
+                  </dl>
+                  {visualDiagnostic.availableFormats.length > 0 && (
+                    <details>
+                      <summary>Formats actifs disponibles</summary>
+                      <p>{visualDiagnostic.availableFormats.join(' · ')}</p>
+                    </details>
+                  )}
+                  <button
+                    type="button"
+                    disabled={visualsLoading}
+                    onClick={() => loadVisuals(selected)}
+                  >
+                    <RefreshCw size={16}/> Réessayer
+                  </button>
                 </div>
               )}
             </>

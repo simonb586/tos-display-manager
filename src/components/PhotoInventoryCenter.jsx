@@ -16,12 +16,15 @@ import {
   validateSupportPhoto
 } from '../services/photoInventoryService';
 import { deleteSupportPhoto } from '../services/photoLibraryService';
+import SortableHeader from './SortableHeader';
+import useSortableRows from '../hooks/useSortableRows';
 
 export default function PhotoInventoryCenter({ role }) {
   const [tab, setTab] = useState('photos');
   const [photos, setPhotos] = useState([]);
   const [movements, setMovements] = useState([]);
   const [message, setMessage] = useState('');
+  const {sortedRows:sortedMovements,sortState:movementSort,setSortState:setMovementSort}=useSortableRows(movements, null, 'inventory-movements');
   const [movement, setMovement] = useState({
     item_reference: '',
     movement_type: 'Entrée',
@@ -191,8 +194,15 @@ export default function PhotoInventoryCenter({ role }) {
             <h2>Historique des mouvements</h2>
             <div className="tableWrap">
               <table>
-                <thead><tr><th>Date</th><th>Référence</th><th>Type</th><th>Qté</th><th>EDT</th><th>Support</th></tr></thead>
-                <tbody>{movements.map(item => (
+                <thead><tr>
+                  <SortableHeader label="Date" column="created_at" rows={movements} sortState={movementSort} onSort={setMovementSort} onReset={()=>setMovementSort(null)}/>
+                  <SortableHeader label="Référence" column="item_reference" rows={movements} sortState={movementSort} onSort={setMovementSort} onReset={()=>setMovementSort(null)}/>
+                  <SortableHeader label="Type" column="movement_type" rows={movements} sortState={movementSort} onSort={setMovementSort} onReset={()=>setMovementSort(null)}/>
+                  <SortableHeader label="Qté" column="quantity" rows={movements} sortState={movementSort} onSort={setMovementSort} onReset={()=>setMovementSort(null)}/>
+                  <SortableHeader label="EDT" column="edt_number" rows={movements} sortState={movementSort} onSort={setMovementSort} onReset={()=>setMovementSort(null)}/>
+                  <SortableHeader label="Support" column="support_id" rows={movements} sortState={movementSort} onSort={setMovementSort} onReset={()=>setMovementSort(null)}/>
+                </tr></thead>
+                <tbody>{sortedMovements.map(item => (
                   <tr key={item.id}>
                     <td>{new Date(item.created_at).toLocaleString('fr-CA')}</td>
                     <td>{item.item_reference}</td>

@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Building2, Pencil, Plus, RefreshCw, Shield, UserCheck, UserX, Users } from 'lucide-react';
 import { listClients, listUsers, saveClient, saveUser, toggleUserStatus } from '../services/adminService';
+import SortableHeader from './SortableHeader';
+import useSortableRows from '../hooks/useSortableRows';
 
 const roles = ['Administrateur', 'Coordonnateur', 'Installateur', 'Client-Admin', 'Client'];
 const emptyUser = { nom: '', courriel: '', role: 'Client', organisation: '', statut: 'Actif', client_id: '' };
@@ -15,6 +17,7 @@ export default function AdminPanel({ currentRole }) {
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
   const isAdmin = currentRole === 'Administrateur';
+  const { sortedRows: sortedUsers, sortState: userSort, setSortState: setUserSort } = useSortableRows(users, null, 'admin-users');
 
   async function reload() {
     setStatus('loading');
@@ -126,8 +129,15 @@ export default function AdminPanel({ currentRole }) {
             <h2>Utilisateurs</h2>
             <div className="admin-table-wrap">
               <table className="admin-table">
-                <thead><tr><th>Nom</th><th>Courriel</th><th>Rôle</th><th>Organisation</th><th>Statut</th><th>Actions</th></tr></thead>
-                <tbody>{users.map(user => <tr key={user.id}>
+                <thead><tr>
+                  <SortableHeader label="Nom" column="nom" rows={users} sortState={userSort} onSort={setUserSort} onReset={() => setUserSort(null)}/>
+                  <SortableHeader label="Courriel" column="courriel" rows={users} sortState={userSort} onSort={setUserSort} onReset={() => setUserSort(null)}/>
+                  <SortableHeader label="Rôle" column="role" rows={users} sortState={userSort} onSort={setUserSort} onReset={() => setUserSort(null)}/>
+                  <SortableHeader label="Organisation" column="organisation" rows={users} sortState={userSort} onSort={setUserSort} onReset={() => setUserSort(null)}/>
+                  <SortableHeader label="Statut" column="statut" rows={users} sortState={userSort} onSort={setUserSort} onReset={() => setUserSort(null)}/>
+                  <th>Actions</th>
+                </tr></thead>
+                <tbody>{sortedUsers.map(user => <tr key={user.id}>
                   <td>{user.nom}</td><td>{user.courriel}</td><td>{user.role}</td><td>{user.organisation}</td><td>{user.statut}</td>
                   <td className="row-actions">
                     <button onClick={() => setUserForm({ ...emptyUser, ...user, client_id: user.client_id || '' })}><Pencil size={16} /></button>

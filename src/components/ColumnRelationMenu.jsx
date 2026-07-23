@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  ArrowDown,
+  ArrowUp,
   ChevronDown,
+  ChevronsUpDown,
   Eye,
   EyeOff,
   Link2,
@@ -11,6 +14,7 @@ import {
   Trash2,
   X
 } from 'lucide-react';
+import SortMenuSection from './SortMenuSection';
 import {
   deleteRelationRule,
   loadCompleteRelationCatalog,
@@ -20,7 +24,11 @@ import {
 export default function ColumnRelationMenu({
   sourceTable,
   sourceField,
-  role
+  role,
+  rows = [],
+  sortState,
+  onSort,
+  onResetSort
 }) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState('read');
@@ -87,7 +95,7 @@ export default function ColumnRelationMenu({
     if (!open) return;
 
     positionPopover();
-    load();
+    if (isAdmin) load();
 
     const reposition = () => positionPopover();
     window.addEventListener('resize', reposition);
@@ -98,8 +106,6 @@ export default function ColumnRelationMenu({
       window.removeEventListener('scroll', reposition, true);
     };
   }, [open, sourceTable, sourceField]);
-
-  if (!isAdmin) return null;
 
   async function addRelation() {
     if (!destinationTable || !destinationField) {
@@ -167,9 +173,11 @@ export default function ColumnRelationMenu({
         title="Relations de cette colonne"
         onClick={() => setOpen(value => !value)}
       >
-        <Link2 size={14}/>
+        {sortState?.column === sourceField
+          ? sortState.direction === 'asc' ? <ArrowUp size={14}/> : <ArrowDown size={14}/>
+          : <ChevronsUpDown size={14}/>}
         <ChevronDown size={13}/>
-        {relatedRules.length > 0 && (
+        {isAdmin && relatedRules.length > 0 && (
           <span>{relatedRules.length}</span>
         )}
       </button>
@@ -182,7 +190,7 @@ export default function ColumnRelationMenu({
         >
           <div className="column-relation-head">
             <div>
-              <strong>Relations de la colonne</strong>
+              <strong>Options de la colonne</strong>
               <small>{sourceTable}.{sourceField}</small>
             </div>
             <button type="button" onClick={() => setOpen(false)}>
@@ -190,6 +198,15 @@ export default function ColumnRelationMenu({
             </button>
           </div>
 
+          <SortMenuSection
+            rows={rows}
+            column={sourceField}
+            sortState={sortState}
+            onSort={onSort}
+            onReset={onResetSort}
+          />
+
+          {isAdmin && <div className="column-relation-advanced">
           <div className="column-relation-modes">
             <button
               type="button"
@@ -279,6 +296,7 @@ export default function ColumnRelationMenu({
               <small>Aucune relation pour cette colonne.</small>
             )}
           </div>
+          </div>}
         </div>,
         document.body
       )}

@@ -7,6 +7,9 @@ import {
   removeSupportFromEdt,
   updateEdtSupport
 } from '../services/operationsService';
+import SortableHeader from './SortableHeader';
+import useSortableRows from '../hooks/useSortableRows';
+import EdtIntegrityDiagnostics from './EdtIntegrityDiagnostics';
 
 export default function EdtEnterprisePanel({ edt, data, canManage, busy, run }) {
   const [supportText, setSupportText] = useState('');
@@ -24,6 +27,7 @@ export default function EdtEnterprisePanel({ edt, data, canManage, busy, run }) 
     () => data.phases.filter(item => String(item.edt_id) === String(edt.id)),
     [data.phases, edt.id]
   );
+  const { sortedRows: sortedSupports, sortState, setSortState } = useSortableRows(supports, null, `edt-supports-${edt.id}`);
   const dashboard = (data.dashboard || []).find(item => String(item.edt_id) === String(edt.id));
   const parsedCount = parseSupportIds(supportText).length;
 
@@ -124,11 +128,17 @@ export default function EdtEnterprisePanel({ edt, data, canManage, busy, run }) 
       <div className="edt-support-table tableWrap">
         <table>
           <thead><tr>
-            <th>Support</th><th>Phase</th><th>Statut</th><th>Progression</th>
-            <th>Assigné à</th><th>Date cible</th><th>BT</th>{canManage && <th>Actions</th>}
+            <SortableHeader label="Support" column="support_id" rows={supports} sortState={sortState} onSort={setSortState} onReset={() => setSortState(null)}/>
+            <SortableHeader label="Phase" column="phase_id" rows={supports} sortState={sortState} onSort={setSortState} onReset={() => setSortState(null)}/>
+            <SortableHeader label="Statut" column="statut" rows={supports} sortState={sortState} onSort={setSortState} onReset={() => setSortState(null)}/>
+            <SortableHeader label="Progression" column="progression" rows={supports} sortState={sortState} onSort={setSortState} onReset={() => setSortState(null)}/>
+            <SortableHeader label="Assigné à" column="assigne_a" rows={supports} sortState={sortState} onSort={setSortState} onReset={() => setSortState(null)}/>
+            <SortableHeader label="Date cible" column="date_cible" rows={supports} sortState={sortState} onSort={setSortState} onReset={() => setSortState(null)}/>
+            <SortableHeader label="BT" column="bon_de_travail_id" rows={supports} sortState={sortState} onSort={setSortState} onReset={() => setSortState(null)}/>
+            {canManage && <th>Actions</th>}
           </tr></thead>
           <tbody>
-            {supports.map(item => {
+            {sortedSupports.map(item => {
               const phase = phases.find(p => String(p.id) === String(item.phase_id));
               const bt = data.workOrders.find(b => String(b.id) === String(item.bon_de_travail_id));
               return (
@@ -159,6 +169,7 @@ export default function EdtEnterprisePanel({ edt, data, canManage, busy, run }) 
           </tbody>
         </table>
       </div>
+      {canManage && <EdtIntegrityDiagnostics edtId={edt.id}/>}
     </section>
   );
 }

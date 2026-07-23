@@ -12,6 +12,8 @@ import {
   Users
 } from 'lucide-react';
 import EdtEnterprisePanel from './EdtEnterprisePanel';
+import SortableHeader from './SortableHeader';
+import useSortableRows from '../hooks/useSortableRows';
 import {
   assignUser,
   closeEdt,
@@ -101,6 +103,7 @@ export default function OperationsCenter({ role }) {
   });
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const {sortedRows:sortedHistory,sortState:historySort,setSortState:setHistorySort}=useSortableRows(data.history, null, 'operations-history');
 
   const canManage = ['Administrateur', 'Coordonnateur'].includes(role);
   const selectedEdt = data.edts.find(item => String(item.id) === String(selectedEdtId)) || null;
@@ -397,8 +400,15 @@ export default function OperationsCenter({ role }) {
       {tab === 'history' && (
         <section className="v07-card">
           <h2>Historique des opérations</h2>
-          <div className="tableWrap"><table><thead><tr><th>Date</th><th>Type</th><th>Référence</th><th>Action</th><th>Utilisateur</th><th>Détails</th></tr></thead><tbody>
-            {data.history.map(item => <tr key={item.id}><td>{new Date(item.created_at).toLocaleString('fr-CA')}</td><td>{item.entity_type}</td><td>{item.entity_reference}</td><td>{item.action}</td><td>{item.user_email || '—'}</td><td>{item.details || '—'}</td></tr>)}
+          <div className="tableWrap"><table><thead><tr>
+            <SortableHeader label="Date" column="created_at" rows={data.history} sortState={historySort} onSort={setHistorySort} onReset={()=>setHistorySort(null)}/>
+            <SortableHeader label="Type" column="entity_type" rows={data.history} sortState={historySort} onSort={setHistorySort} onReset={()=>setHistorySort(null)}/>
+            <SortableHeader label="Référence" column="entity_reference" rows={data.history} sortState={historySort} onSort={setHistorySort} onReset={()=>setHistorySort(null)}/>
+            <SortableHeader label="Action" column="action" rows={data.history} sortState={historySort} onSort={setHistorySort} onReset={()=>setHistorySort(null)}/>
+            <SortableHeader label="Utilisateur" column="user_email" rows={data.history} sortState={historySort} onSort={setHistorySort} onReset={()=>setHistorySort(null)}/>
+            <SortableHeader label="Détails" column="details" rows={data.history} sortState={historySort} onSort={setHistorySort} onReset={()=>setHistorySort(null)}/>
+          </tr></thead><tbody>
+            {sortedHistory.map(item => <tr key={item.id}><td>{new Date(item.created_at).toLocaleString('fr-CA')}</td><td>{item.entity_type}</td><td>{item.entity_reference}</td><td>{item.action}</td><td>{item.user_email || '—'}</td><td>{item.details || '—'}</td></tr>)}
           </tbody></table></div>
         </section>
       )}

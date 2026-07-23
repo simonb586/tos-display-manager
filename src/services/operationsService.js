@@ -374,3 +374,22 @@ export async function updateEdtSupport(id, patch) {
   if (error) throw error;
   return data;
 }
+
+export async function diagnoseEdtIntegrity(edtId = null) {
+  ensureSupabase();
+  const { data, error } = await supabase.rpc('diagnostiquer_integrite_edt_v013', {
+    p_edt_id: edtId ? Number(edtId) : null
+  });
+  if (error) throw error;
+  return data || [];
+}
+
+export async function previewEdtRepair(edtId = null) {
+  ensureSupabase();
+  const { data, error } = await supabase.rpc('reparer_integrite_edt_v013', {
+    p_edt_id: edtId ? Number(edtId) : null,
+    p_apply: false
+  });
+  if (error) throw error;
+  return data || { ok: true, dry_run: true, actions_proposees: 0 };
+}

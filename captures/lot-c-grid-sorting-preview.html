@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aperçu lot C — tri des grilles</title>
+<style>
+body{margin:0;background:#f1f5f9;color:#172033;font:14px system-ui}.page{padding:34px}.hero{background:linear-gradient(120deg,#312e81,#6d28d9);color:#fff;padding:24px;border-radius:18px}.hero h1{margin:0 0 7px}.hero p{margin:0;opacity:.85}.card{margin-top:20px;background:#fff;border:1px solid #dbe3ee;border-radius:16px;box-shadow:0 12px 30px #33415518;overflow:visible}.toolbar{padding:15px;display:flex;gap:9px;border-bottom:1px solid #e2e8f0}.toolbar button{border:1px solid #d7deea;background:#fff;border-radius:9px;padding:9px 12px;font-weight:700}table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:13px;border-bottom:1px solid #edf2f7}th{background:#f8fafc}.head{display:flex;justify-content:space-between;align-items:center}.sort{border:0;border-radius:7px;background:#ede9fe;color:#5b21b6;padding:6px;font-weight:900}.active{background:#f5f3ff;color:#5b21b6}.popover{position:absolute;right:50px;top:185px;width:290px;background:#fff;border:1px solid #cbd5e1;border-radius:13px;padding:13px;box-shadow:0 20px 45px #0f172a35}.popover h3{margin:0 0 4px}.popover small{color:#64748b}.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}.actions button,.reset{border:1px solid #d8dee9;border-radius:8px;padding:9px;background:#fff;font-weight:700}.actions .selected{background:#ede9fe;border-color:#7c3aed;color:#5b21b6}.reset{width:100%;margin-top:8px}.note{padding:12px 15px;color:#64748b}
+</style>
+<body><main class="page">
+<section class="hero"><h1>Tri des grilles</h1><p>Aperçu statique du contrôle intégré au menu d’en-tête — lot C</p></section>
+<section class="card"><div class="toolbar"><button>CSV complet trié</button><button>Excel affiché</button><button>PDF affiché</button></div>
+<table><thead><tr><th><div class="head">Support <button class="sort">↕</button></div></th><th class="active"><div class="head">Identifiant <button class="sort">↑</button></div></th><th><div class="head">Date cible <button class="sort">↕</button></div></th><th><div class="head">Statut <button class="sort">↕</button></div></th></tr></thead>
+<tbody><tr><td>Panneau 1</td><td>SUP-1</td><td>2026-08-02</td><td>Planifié</td></tr><tr><td>Panneau 2</td><td>SUP-2</td><td>2026-08-05</td><td>En cours</td></tr><tr><td>Panneau 10</td><td>SUP-10</td><td>2026-08-14</td><td>Planifié</td></tr></tbody></table>
+<div class="note">Ordre naturel actif : SUP-1, SUP-2, SUP-10</div>
+<aside class="popover"><h3>Trier cette colonne</h3><small>Type détecté : natural</small><div class="actions"><button class="selected">↑ Croissant</button><button>↓ Décroissant</button><button>Vides en premier</button><button class="selected">Vides en dernier</button></div><button class="reset">↻ Réinitialiser le tri</button></aside>
+</section></main>

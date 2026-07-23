@@ -20,6 +20,8 @@ import './features/v11/correctifs-urgence.css';
 import './features/v12/bloc-12.css';
 import './features/v12/account-activation.css';
 import './features/v12/installer-terrain-shell.css';
+import './features/v13/automation-assistant.css';
+import './features/v13/grid-sorting.css';
 
 import manifest from './data/manifest.json';
 import infrastructuresJson from './data/infrastructures.json';
@@ -39,7 +41,14 @@ import usersJson from './data/utilisateurs.json';
 import clientsJson from './data/clients.json';
 import journalJson from './data/journal_des_evenements.json';
 
-import { strictMatches, downloadCSV, normalize } from './lib/utils';
+import {
+  strictMatches,
+  downloadCSV,
+  downloadExcel,
+  downloadPDF,
+  normalize
+} from './lib/utils';
+import { sortRows } from './lib/gridSorting';
 import { supabase, supabaseConfigured } from './lib/supabaseClient';
 import { loadManyTables } from './services/dataService';
 
@@ -48,7 +57,6 @@ import TerrainApp from './components/TerrainApp';
 import WorkOrdersPanel from './components/WorkOrdersPanel';
 import CampaignsPanel from './components/CampaignsPanel';
 import CampaignVisualManager from './components/CampaignVisualManager';
-import RelationsStudio from './components/RelationsStudio';
 import ValidationCenter from './components/ValidationCenter';
 import LegacyPhotoImporter from './components/LegacyPhotoImporter';
 import SupportPhotoGallery from './components/SupportPhotoGallery';
@@ -67,6 +75,7 @@ import ColumnRelationMenu from './components/ColumnRelationMenu';
 import AccountActivation from './components/AccountActivation';
 import InstallerTerrainShell from './components/InstallerTerrainShell';
 import TerrainSyncDiagnostics from './components/TerrainSyncDiagnostics';
+import AutomationAssistant from './components/AutomationAssistant';
 import { infrastructureMapUrl } from './services/mapService';
 import { getCurrentProfile } from './services/authProfileService';
 import { getRoleVisibility, canSeeTable, columnsForTable } from './services/roleVisibilityService';
@@ -211,6 +220,13 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   const cols = columnsForTable(rolePermission, name, allCols);
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState({});
+  const [sortState, setSortState] = useState(() => {
+    try {
+      return JSON.parse(sessionStorage.getItem(`tdm-grid-sort:${name}`)) || null;
+    } catch {
+      return null;
+    }
+  });
   const [selected, setSelected] = useState(null);
   const [gridEditing, setGridEditing] = useState(false);
   const [drafts, setDrafts] = useState({});
@@ -220,9 +236,17 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   const filtered = useMemo(() => rows
     .filter(r => strictMatches(r, query, cols))
     .filter(r => Object.entries(filters).every(([c, v]) => !v || normalize(r[c]).includes(normalize(v)))), [rows, query, filters, cols]);
-  const shown = filtered.slice(0, 200);
+  const sorted = useMemo(() => sortRows(filtered, sortState), [filtered, sortState]);
+  const sortedComplete = useMemo(() => sortRows(rows, sortState), [rows, sortState]);
+  const shown = sorted.slice(0, 200);
   const hasMapColumn = name === 'Infrastructures';
   const canEdit = role === 'Administrateur';
+
+  useEffect(() => {
+    const key = `tdm-grid-sort:${name}`;
+    if (sortState) sessionStorage.setItem(key, JSON.stringify(sortState));
+    else sessionStorage.removeItem(key);
+  }, [name, sortState]);
 
   function rowToken(row, index) {
     try {
@@ -275,8 +299,9 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   return <div className="tablePage">
     <header className="pageHead"><div><h1>{icons[name] || '📋'} {name}</h1><p>{filtered.length.toLocaleString('fr-CA')} résultat(s) sur {rows.length.toLocaleString('fr-CA')} ligne(s). Source : {sourceLabel(dataStore, name)}.</p></div><div className="actions">
       {canEdit && !gridEditing && <button onClick={() => { setGridEditing(true); setMessage(''); }}><Edit3/> Modifier la grille</button>}
-      <button onClick={() => downloadCSV(`${name}_table_complete.csv`, rows, cols)}><Download/> Table complète</button>
-      <button onClick={() => downloadCSV(`${name}_resultats_filtres.csv`, filtered, cols)}><FileSpreadsheet/> Résultats filtrés</button>
+      <button onClick={() => downloadCSV(`${name}_table_complete.csv`, sortedComplete, cols)}><Download/> CSV complet trié</button>
+      <button onClick={() => downloadExcel(`${name}_resultats_tries.xlsx`, sorted, cols)}><FileSpreadsheet/> Excel affiché</button>
+      <button onClick={() => downloadPDF(`${name}_resultats_tries.pdf`, `${name} — résultats triés`, sorted, cols)}><FileText/> PDF affiché</button>
     </div></header>
 
     {gridEditing && <div className="grid-edit-toolbar">
@@ -288,7 +313,7 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
     {message && <div className="v07-message">{message}</div>}
 
     <div className="searchbar"><Search/><input placeholder="Recherche exacte dans toutes les colonnes..." value={query} onChange={e => setQuery(e.target.value)}/></div>
-    <div className="tableWrap"><table><thead><tr>{hasMapColumn && <th>Carte</th>}{cols.map(c => <th key={c}><div className="grid-column-header"><div className="grid-column-header-main"><span>{columnLabel(name, c)}</span><input placeholder="Filtrer" value={filters[c] || ''} onChange={e => setFilters({ ...filters, [c]: e.target.value })}/></div><ColumnRelationMenu sourceTable={config.table} sourceField={c} role={role}/></div></th>)}</tr></thead><tbody>{shown.map((r, i) => {
+    <div className="tableWrap"><table><thead><tr>{hasMapColumn && <th>Carte</th>}{cols.map(c => <th key={c} aria-sort={sortState?.column === c ? (sortState.direction === 'asc' ? 'ascending' : 'descending') : 'none'}><div className={`grid-column-header ${sortState?.column === c ? 'sorted' : ''}`}><div className="grid-column-header-main"><span>{columnLabel(name, c)}</span><input placeholder="Filtrer" value={filters[c] || ''} onChange={e => setFilters({ ...filters, [c]: e.target.value })}/></div><ColumnRelationMenu sourceTable={config.table} sourceField={c} role={role} rows={filtered} sortState={sortState} onSort={setSortState} onResetSort={() => setSortState(null)}/></div></th>)}</tr></thead><tbody>{shown.map((r, i) => {
       const token = rowToken(r, i);
       const supportId = r.support_id || r['Support ID'] || '';
       const mapUrl = infrastructureMapUrl(r);
@@ -538,7 +563,7 @@ function App() {
   }, [role]);
 
   const adminItems = role === 'Administrateur'
-    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Diagnostic terrain', 'Rapports finaux', 'Studio des relations', 'Validation système', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats']
+    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Diagnostic terrain', 'Rapports finaux', 'Assistant d’automatisation', 'Validation système', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats']
     : role === 'Coordonnateur'
       ? ['Validation système', 'Campagnes maîtres', 'Campagne — Visuels et formats']
       : [];
@@ -646,7 +671,7 @@ function App() {
   else if (active === 'Diagnostic terrain') content = <TerrainSyncDiagnostics role={role}/>;
   else if (active === 'Rapports finaux') content = <FinalReportsCenter dataStore={dataStore} role={role}/>;
   else if (active === 'Visibilité par rôle') content = <RoleVisibilityAdmin dataStore={dataStore} tableNames={manifest.map(module => module.name)} role={role}/>;
-  else if (active === 'Studio des relations') content = <RelationsStudio role={role}/>;
+  else if (active === 'Assistant d’automatisation') content = <AutomationAssistant role={role}/>;
   else if (active === 'Validation système') content = <ValidationCenter role={role}/>;
   else if (active === 'Import anciennes photos') content = <LegacyPhotoImporter dataStore={dataStore} session={session}/>;
   else if (active === 'Campagnes maîtres') content = <CampaignsPanel role={role} session={session}/>;
@@ -662,7 +687,7 @@ function App() {
     <aside>
       <div className="brand">TOS<span>Display Manager</span></div>
       <span className="role-badge">{profile?.nom || session?.user?.email}<br/>{role}</span>
-      {items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Édition — Historique' ? '🕘' : it === 'Photos et inventaire' ? '🖼️' : it === 'Centre EDT et BT' ? '🛠️' : it === 'Diagnostic terrain' ? '🧪' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Studio des relations' ? '🔗' : it === 'Validation système' ? '✅' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}
+      {items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Édition — Historique' ? '🕘' : it === 'Photos et inventaire' ? '🖼️' : it === 'Centre EDT et BT' ? '🛠️' : it === 'Diagnostic terrain' ? '🧪' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Assistant d’automatisation' ? '🤖' : it === 'Validation système' ? '✅' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}
       <button className="sidebar-logout" onClick={logoutFromPortal}><LogOut size={17}/> Déconnexion</button>
     </aside>
     <main>{dataStore?.__sync_error__&&<div className="sync-error-banner"><strong>Erreur de lecture Supabase</strong><span>Les données locales ne sont pas utilisées en production.</span><button onClick={refreshDataStore}>Recharger depuis Supabase</button></div>}{content}</main>

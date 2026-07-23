@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { AlertTriangle, ClipboardList, History, Image, ListChecks } from 'lucide-react';
 import SupportPhotoGallery from './SupportPhotoGallery';
 import { loadSupport360 } from '../services/support360Service';
+import SortableHeader from './SortableHeader';
+import useSortableRows from '../hooks/useSortableRows';
 
 function DataTable({rows,empty='Aucune donnée.'}) {
+  const {sortedRows,sortState,setSortState}=useSortableRows(rows||[]);
   if(!rows?.length)return <p className="support360-empty">{empty}</p>;
   const cols=[...new Set(rows.flatMap(Object.keys))].filter(c=>!['id'].includes(c)).slice(0,10);
-  return <div className="tableWrap support360-table"><table><thead><tr>{cols.map(c=><th key={c}>{c}</th>)}</tr></thead><tbody>{rows.map((r,i)=><tr key={r.id||i}>{cols.map(c=><td key={c}>{r[c]==null?'—':String(r[c])}</td>)}</tr>)}</tbody></table></div>;
+  return <div className="tableWrap support360-table"><table><thead><tr>{cols.map(c=><SortableHeader key={c} label={c} column={c} rows={rows} sortState={sortState} onSort={setSortState} onReset={()=>setSortState(null)}/>)}</tr></thead><tbody>{sortedRows.map((r,i)=><tr key={r.id||i}>{cols.map(c=><td key={c}>{r[c]==null?'—':String(r[c])}</td>)}</tr>)}</tbody></table></div>;
 }
 
 export default function Support360Panel({supportId,role}) {
