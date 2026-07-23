@@ -239,7 +239,7 @@ export default function RelationsStudio({ role }) {
     )) return;
 
     await runAction(
-      () => deleteRelationRule(rule.id),
+      () => deleteRelationRule(rule),
       'Relation supprimée.'
     );
   }

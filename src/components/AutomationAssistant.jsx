@@ -94,15 +94,21 @@ function AutomationsTab({ rows, busy, reload }) {
   const [query,setQuery]=useState(''); const [status,setStatus]=useState('all');
   const [editing,setEditing]=useState(null); const [preview,setPreview]=useState(null);
   const [message,setMessage]=useState(''); const [history,setHistory]=useState(null);
-  const allRows=useMemo(()=>mergeSystemTemplates(rows,TOS_AUTOMATION_TEMPLATES),[rows]);
-  const filtered=allRows.filter(item=>(status==='all'||item.status===status)&&`${item.name} ${item.description||item.definition?.description||''}`.toLowerCase().includes(query.toLowerCase()));
+  const [disabledTemplates,setDisabledTemplates]=useState(()=>JSON.parse(localStorage.getItem('tdm-disabled-automation-templates')||'[]'));
+  const allRows=useMemo(()=>mergeSystemTemplates(rows,TOS_AUTOMATION_TEMPLATES).map(item=>item.isSystemTemplate&&disabledTemplates.includes(item.id)?{...item,status:'inactive'}:item),[rows,disabledTemplates]);
+  const filtered=allRows.filter(item=>(status==='all'||item.status===status)&&`${item.name} ${item.description||item.definition?.description||''}`.toLowerCase().includes(query.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name,'fr-CA',{numeric:true,sensitivity:'base'}));
 
   async function action(type,item) {
     if (item.isSystemTemplate) {
       if (type==='duplicate') setEditing({...structuredClone(item),id:undefined,isSystemTemplate:false,name:`${item.name} — copie`,status:'draft'});
+      if (type==='deactivate-template'||type==='activate-template') {
+        const next=type==='deactivate-template'?[...new Set([...disabledTemplates,item.id])]:disabledTemplates.filter(id=>id!==item.id);
+        setDisabledTemplates(next);localStorage.setItem('tdm-disabled-automation-templates',JSON.stringify(next));
+        setMessage(type==='deactivate-template'?'Modèle TOS désactivé pour cet espace.':'Modèle TOS réactivé en Brouillon.');
+      }
       return;
     }
-    if (type==='delete'&&!window.confirm(`Supprimer « ${item.name} »?`)) return;
+    if (type==='delete'&&!window.confirm('Voulez-vous supprimer cette configuration?\n\nCette action retirera la configuration, mais ne supprimera pas les données déjà enregistrées dans les autres modules.')) return;
     if (type==='approve'&&!window.confirm(`Activer « ${item.name} »?`)) return;
     try {
       if(type==='duplicate') await duplicateAutomationDefinition(item);
@@ -125,7 +131,8 @@ function AutomationsTab({ rows, busy, reload }) {
       <div className="automation-grid">{filtered.map(item=><article className="automation-card" key={item.id}>
         <div className="automation-card-head"><div><TemplateBadge visible={item.isSystemTemplate}/><h3>{item.name}</h3><p>{item.description||item.definition?.description||'Configuration métier'}</p></div><span className={`automation-status ${item.status}`}>{labelFor(automationStatuses,item.status)}</span></div>
         <dl><div><dt>{UI_LABELS.trigger}</dt><dd>{(item.definition?.triggers||[]).map(v=>labelFor(automationTriggers,v)).join(', ')||'—'}</dd></div><div><dt>Modules concernés</dt><dd>{(item.definition?.targets||[]).map(v=>moduleForKey(v.module)?.[1]||'Module métier').join(', ')||'—'}</dd></div><div><dt>Priorité</dt><dd>{labelFor(automationPriorities,item.priority)}</dd></div><div><dt>Dernière modification</dt><dd>{new Date(item.updated_at).toLocaleDateString('fr-CA')}</dd></div></dl>
-        <div className="automation-card-actions"><button onClick={()=>setPreview(item)}><Eye/> Examiner</button>{!item.isSystemTemplate&&<button onClick={()=>setEditing(structuredClone(item))}><Edit3/> Modifier</button>}<button onClick={()=>action('duplicate',item)}><Copy/> Dupliquer</button>{!item.isSystemTemplate&&(item.status==='active'?<button onClick={()=>action('deactivate',item)}><Power/> Désactiver</button>:<button onClick={()=>action('approve',item)}><CheckCircle2/> Activer</button>)}{!item.isSystemTemplate&&<button onClick={()=>setHistory(item)}><FileClock/> Historique</button>}{!item.isSystemTemplate&&<button className="danger" onClick={()=>action('delete',item)}><Trash2/> Supprimer</button>}</div>
+        {item.isSystemTemplate&&<p className="template-protection-note">Ce modèle TOS est protégé. Vous pouvez le désactiver ou en créer une copie modifiable.</p>}
+        <div className="automation-card-actions"><button onClick={()=>setPreview(item)}><Eye/> Examiner</button>{!item.isSystemTemplate&&<button onClick={()=>setEditing(structuredClone(item))}><Edit3/> Modifier</button>}<button onClick={()=>action('duplicate',item)}><Copy/> Dupliquer</button>{item.isSystemTemplate?(item.status==='inactive'?<button onClick={()=>action('activate-template',item)}><CheckCircle2/> Réactiver</button>:<button onClick={()=>action('deactivate-template',item)}><Power/> Désactiver</button>):(item.status==='active'?<button onClick={()=>action('deactivate',item)}><Power/> Désactiver</button>:<button onClick={()=>action('approve',item)}><CheckCircle2/> Activer</button>)}{!item.isSystemTemplate&&<button onClick={()=>setHistory(item)}><FileClock/> Historique</button>}{!item.isSystemTemplate&&<button className="danger" onClick={()=>action('delete',item)}><Trash2/> Supprimer</button>}</div>
       </article>)}</div>}
     {busy&&<div className="automation-loading"><LoaderCircle className="spin"/> Chargement…</div>}
     {preview&&<AutomationPreview item={preview} onClose={()=>setPreview(null)}/>}
@@ -167,18 +174,19 @@ function ViewForm({ initial, onCancel, onSaved }) {
 
 function ViewsTab({ rows, busy, reload }) {
   const [query,setQuery]=useState('');const[editing,setEditing]=useState(null);const[preview,setPreview]=useState(null);const[message,setMessage]=useState('');
-  const allRows=useMemo(()=>mergeSystemTemplates(rows,TOS_VIEW_TEMPLATES),[rows]);
-  const filtered=allRows.filter(item=>`${item.name} ${item.description}`.toLowerCase().includes(query.toLowerCase()));
+  const [disabledTemplates,setDisabledTemplates]=useState(()=>JSON.parse(localStorage.getItem('tdm-disabled-view-templates')||'[]'));
+  const allRows=useMemo(()=>mergeSystemTemplates(rows,TOS_VIEW_TEMPLATES).map(item=>item.isSystemTemplate&&disabledTemplates.includes(item.id)?{...item,status:'inactive'}:item),[rows,disabledTemplates]);
+  const filtered=allRows.filter(item=>`${item.name} ${item.description}`.toLowerCase().includes(query.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name,'fr-CA',{numeric:true,sensitivity:'base'}));
   async function action(type,item){
-    if(item.isSystemTemplate){if(type==='duplicate')setEditing({...structuredClone(item),id:undefined,isSystemTemplate:false,name:`${item.name} — copie`,status:'draft'});return;}
-    if(type==='delete'&&!window.confirm(`Supprimer « ${item.name} »?`))return;
+    if(item.isSystemTemplate){if(type==='duplicate')setEditing({...structuredClone(item),id:undefined,isSystemTemplate:false,name:`${item.name} — copie`,status:'draft'});if(type==='deactivate-template'||type==='activate-template'){const next=type==='deactivate-template'?[...new Set([...disabledTemplates,item.id])]:disabledTemplates.filter(id=>id!==item.id);setDisabledTemplates(next);localStorage.setItem('tdm-disabled-view-templates',JSON.stringify(next));setMessage(type==='deactivate-template'?'Modèle TOS désactivé pour cet espace.':'Modèle TOS réactivé en Brouillon.');}return;}
+    if(type==='delete'&&!window.confirm('Voulez-vous supprimer cette configuration?\n\nCette action retirera la configuration, mais ne supprimera pas les données déjà enregistrées dans les autres modules.'))return;
     try{if(type==='duplicate')setEditing({...structuredClone(item),id:undefined,name:`${item.name} — copie`,status:'draft'});if(type==='active')await setCrossModuleViewStatus(item.id,'active');if(type==='inactive')await setCrossModuleViewStatus(item.id,'inactive');if(type==='delete')await deleteCrossModuleView(item.id);if(!['duplicate'].includes(type))await reload();}catch(error){setMessage(friendlyError(error));}
   }
   return <>
     <div className="automation-toolbar"><div className="configuration-search"><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Rechercher une vue"/></div><button onClick={()=>setEditing(emptyCrossModuleView())}><Plus/> Nouvelle vue</button></div>
     <div className="automation-safety-note"><ShieldCheck/><div><strong>Modèles sans risque</strong><span>Les {TOS_VIEW_TEMPLATES.length} vues TOS restent en Brouillon jusqu’à une activation explicite.</span></div></div>
     {message&&<div className="automation-message error">{message}</div>}
-    {editing?<ViewForm initial={editing} onCancel={()=>setEditing(null)} onSaved={()=>{setEditing(null);reload();}}/>:<div className="views-table-wrap"><table className="views-table"><thead><tr><th>Nom de la vue</th><th>{UI_LABELS.sourceModule}</th><th>{UI_LABELS.destinationModule}</th><th>Champs visibles</th><th>Mode</th><th>État</th><th>Actions</th></tr></thead><tbody>{filtered.map(item=><tr key={item.id}><td><TemplateBadge visible={item.isSystemTemplate}/><strong>{item.name}</strong><small>{item.description}</small></td><td>{catalogLabel(viewModules,item.source)}</td><td>{catalogLabel(viewDestinations,item.destination)}</td><td>{item.fields.length}</td><td>{catalogLabel(viewModes,item.mode)}</td><td><span className={`automation-status ${item.status}`}>{catalogLabel(viewStatuses,item.status)}</span></td><td><div className="automation-card-actions"><button onClick={()=>setPreview(item)}><Eye/> Examiner</button>{!item.isSystemTemplate&&<button onClick={()=>setEditing(structuredClone(item))}><Edit3/> Modifier</button>}<button onClick={()=>action('duplicate',item)}><Copy/> Dupliquer</button>{!item.isSystemTemplate&&(item.status==='active'?<button onClick={()=>action('inactive',item)}><Power/> Désactiver</button>:<button onClick={()=>action('active',item)}><CheckCircle2/> Activer</button>)}{!item.isSystemTemplate&&<button className="danger" onClick={()=>action('delete',item)}><Trash2/> Supprimer</button>}</div></td></tr>)}</tbody></table></div>}
+    {editing?<ViewForm initial={editing} onCancel={()=>setEditing(null)} onSaved={()=>{setEditing(null);reload();}}/>:<div className="views-table-wrap"><table className="views-table"><thead><tr><th>Nom de la vue</th><th>{UI_LABELS.sourceModule}</th><th>{UI_LABELS.destinationModule}</th><th>Champs visibles</th><th>Mode</th><th>État</th><th>Actions</th></tr></thead><tbody>{filtered.map(item=><tr key={item.id}><td><TemplateBadge visible={item.isSystemTemplate}/><strong>{item.name}</strong><small>{item.description}</small>{item.isSystemTemplate&&<small>Modèle protégé : désactivez-le ou créez une copie modifiable.</small>}</td><td>{catalogLabel(viewModules,item.source)}</td><td>{catalogLabel(viewDestinations,item.destination)}</td><td>{item.fields.length}</td><td>{catalogLabel(viewModes,item.mode)}</td><td><span className={`automation-status ${item.status}`}>{catalogLabel(viewStatuses,item.status)}</span></td><td><div className="automation-card-actions"><button onClick={()=>setPreview(item)}><Eye/> Examiner</button>{!item.isSystemTemplate&&<button onClick={()=>setEditing(structuredClone(item))}><Edit3/> Modifier</button>}<button onClick={()=>action('duplicate',item)}><Copy/> Dupliquer</button>{item.isSystemTemplate?(item.status==='inactive'?<button onClick={()=>action('activate-template',item)}><CheckCircle2/> Réactiver</button>:<button onClick={()=>action('deactivate-template',item)}><Power/> Désactiver</button>):(item.status==='active'?<button onClick={()=>action('inactive',item)}><Power/> Désactiver</button>:<button onClick={()=>action('active',item)}><CheckCircle2/> Activer</button>)}{!item.isSystemTemplate&&<button className="danger" onClick={()=>action('delete',item)}><Trash2/> Supprimer</button>}</div></td></tr>)}</tbody></table></div>}
     {busy&&<div className="automation-loading"><LoaderCircle className="spin"/> Chargement…</div>}
     {preview&&<ViewPreview view={preview} onClose={()=>setPreview(null)}/>}
   </>;

@@ -36,7 +36,7 @@ export default function SupportPhotoGallery({ supportId, canDelete=false, canMan
 
   async function run(label,action){
     setBusy(true);setMessage('');
-    try{await action();await refresh();setChecked({});setSelected(null);setMessage(label);}
+    try{const result=await action();const removed=Array.isArray(result)?result.filter(item=>item.ok).map(item=>String(item.id)):result?.verified?[String(result.id)]:[];if(removed.length)setPhotos(current=>current.filter(photo=>!removed.includes(String(photo.id))));await refresh();setChecked({});setSelected(null);setMessage(label);}
     catch(error){setMessage(error.message||'Opération impossible.');}
     finally{setBusy(false);}
   }

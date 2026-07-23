@@ -82,4 +82,7 @@ export async function deleteAutomationDefinition(id) {
   ready();
   const { error } = await supabase.from('automation_definitions').delete().eq('id', id);
   if (error) throw new Error(friendlyError(error, 'Impossible de supprimer cette automatisation.'));
+  const { data:remaining, error:verifyError } = await supabase.from('automation_definitions').select('id').eq('id',id).maybeSingle();
+  if (verifyError) throw new Error(friendlyError(verifyError, 'Impossible de confirmer la suppression.'));
+  if (remaining) throw new Error('La configuration existe toujours après la suppression. Réessayez ou communiquez avec un administrateur.');
 }

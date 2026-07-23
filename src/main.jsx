@@ -46,11 +46,15 @@ import {
   downloadCSV,
   downloadExcel,
   downloadPDF,
+  professionalExportName,
   normalize
 } from './lib/utils';
 import { sortRows } from './lib/gridSorting';
 import { supabase, supabaseConfigured } from './lib/supabaseClient';
 import { businessFieldLabel, enforceApplicationTitle, friendlyError } from './config/businessLanguage';
+import GridColumnHeader from './components/GridColumnHeader';
+import { defaultSortColumnForTable } from './lib/gridPresentation';
+import { defaultSortForColumn } from './lib/gridSorting';
 import { loadManyTables } from './services/dataService';
 
 import AdminPanel from './components/AdminPanel';
@@ -222,10 +226,13 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   const [filters, setFilters] = useState({});
   const [sortState, setSortState] = useState(() => {
     try {
-      return JSON.parse(sessionStorage.getItem(`tdm-grid-sort:${name}`)) || null;
+      const stored=JSON.parse(sessionStorage.getItem(`tdm-grid-sort:${name}`));
+      if(stored)return stored;
     } catch {
-      return null;
+      // Revenir au classement métier par défaut.
     }
+    const column=defaultSortColumnForTable(name,cols);
+    return column?defaultSortForColumn(rows,column):null;
   });
   const [selected, setSelected] = useState(null);
   const [gridEditing, setGridEditing] = useState(false);
@@ -241,6 +248,8 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   const shown = sorted.slice(0, 200);
   const hasMapColumn = name === 'Infrastructures';
   const canEdit = role === 'Administrateur';
+  const exportLabels = Object.fromEntries(cols.map(column=>[column,columnLabel(name,column)]));
+  const exportOptions = {moduleName:name,labels:exportLabels,filters:{recherche:query,...filters},sortState};
 
   useEffect(() => {
     const key = `tdm-grid-sort:${name}`;
@@ -299,9 +308,9 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   return <div className="tablePage">
     <header className="pageHead"><div><h1>{icons[name] || '📋'} {name}</h1><p>{filtered.length.toLocaleString('fr-CA')} résultat(s) sur {rows.length.toLocaleString('fr-CA')} ligne(s). Source : {sourceLabel(dataStore, name)}.</p></div><div className="actions">
       {canEdit && !gridEditing && <button onClick={() => { setGridEditing(true); setMessage(''); }}><Edit3/> Modifier la grille</button>}
-      <button onClick={() => downloadCSV(`${name}_table_complete.csv`, sortedComplete, cols)}><Download/> CSV complet trié</button>
-      <button onClick={() => downloadExcel(`${name}_resultats_tries.xlsx`, sorted, cols)}><FileSpreadsheet/> Excel affiché</button>
-      <button onClick={() => downloadPDF(`${name}_resultats_tries.pdf`, `${name} — résultats triés`, sorted, cols)}><FileText/> PDF affiché</button>
+      <button onClick={() => downloadCSV(professionalExportName(name,'csv'), sortedComplete, cols.map(key=>({key,label:exportLabels[key]})))}><Download/> CSV complet trié</button>
+      <button onClick={() => downloadExcel(professionalExportName(name,'xlsx'), sorted, cols, {...exportOptions,exportType:'Grille visible'})}><FileSpreadsheet/> Excel affiché</button>
+      <button onClick={() => downloadPDF(professionalExportName(name,'pdf'), `${name} — résultats`, sorted, cols, exportOptions)}><FileText/> PDF affiché</button>
     </div></header>
 
     {gridEditing && <div className="grid-edit-toolbar">
@@ -313,7 +322,7 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
     {message && <div className="v07-message">{message}</div>}
 
     <div className="searchbar"><Search/><input placeholder="Recherche exacte dans toutes les colonnes..." value={query} onChange={e => setQuery(e.target.value)}/></div>
-    <div className="tableWrap"><table><thead><tr>{hasMapColumn && <th>Carte</th>}{cols.map(c => <th key={c} aria-sort={sortState?.column === c ? (sortState.direction === 'asc' ? 'ascending' : 'descending') : 'none'}><div className={`grid-column-header ${sortState?.column === c ? 'sorted' : ''}`}><div className="grid-column-header-main"><span>{columnLabel(name, c)}</span><input placeholder="Filtrer" value={filters[c] || ''} onChange={e => setFilters({ ...filters, [c]: e.target.value })}/></div></div></th>)}</tr></thead><tbody>{shown.map((r, i) => {
+    <div className="tableWrap professional-grid"><table><thead><tr>{hasMapColumn && <th className="action-column">Carte</th>}{cols.map(c => <GridColumnHeader key={c} column={c} label={columnLabel(name,c)} rows={filtered} filterValue={filters[c]} onFilter={value=>setFilters({...filters,[c]:value})} sortState={sortState} onSort={setSortState} onReset={()=>setSortState(null)}/>)}</tr></thead><tbody>{shown.map((r, i) => {
       const token = rowToken(r, i);
       const supportId = r.support_id || r['Support ID'] || '';
       const mapUrl = infrastructureMapUrl(r);

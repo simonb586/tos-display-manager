@@ -186,14 +186,38 @@ export async function saveRelationRule(rule) {
   return data;
 }
 
-export async function deleteRelationRule(ruleId) {
+export async function inspectRelationDependencies(rule) {
   ensureSupabase();
+  const { data, error } = await supabase.from('automation_definitions').select('id,name,definition,status');
+  if (error) throw error;
+  const tokens=[rule?.id,rule?.source_table,rule?.source_field,rule?.destination_table,rule?.destination_field].filter(Boolean).map(String);
+  const dependencies=(data||[]).filter(item=>{
+    const content=JSON.stringify(item.definition||{});
+    return tokens.some(token=>content.includes(token));
+  });
+  return {
+    automations:dependencies.filter(item=>item.definition?.kind!=='cross_module_view'),
+    views:dependencies.filter(item=>item.definition?.kind==='cross_module_view')
+  };
+}
+
+export async function deleteRelationRule(rule) {
+  ensureSupabase();
+  const dependencies=await inspectRelationDependencies(rule);
+  if(dependencies.automations.length||dependencies.views.length){
+    const error=new Error(`Cette relation est utilisée par ${dependencies.views.length} vue(s) et ${dependencies.automations.length} automatisation(s). Retirez d’abord ces dépendances.`);
+    error.dependencies=dependencies;
+    throw error;
+  }
   const { error } = await supabase
     .from('relation_rules')
     .delete()
-    .eq('id', ruleId);
+    .eq('id', rule.id);
 
   if (error) throw error;
+  const {data:remaining,error:verifyError}=await supabase.from('relation_rules').select('id').eq('id',rule.id).maybeSingle();
+  if(verifyError)throw verifyError;
+  if(remaining)throw new Error('La relation existe toujours après la suppression.');
 }
 
 export async function testRelationRule(rule) {
