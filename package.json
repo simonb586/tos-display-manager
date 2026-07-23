@@ -9,7 +9,7 @@
     "preview": "vite preview --host 0.0.0.0",
     "import:bloc1": "node ./scripts/import_bloc1.js",
     "test:bloc13.2": "node ./scripts/verify_bloc_13_2.mjs",
-    "test:bloc13.3": "node ./scripts/verify_bloc_13_3.mjs",
+    "test:bloc13.3": "node ./scripts/verify_bloc_13_3.mjs && node ./scripts/verify_photo_bucket_deletion.mjs",
     "check": "npm run test:bloc13.2 && npm run test:bloc13.3 && npm run build"
   },
   "dependencies": {

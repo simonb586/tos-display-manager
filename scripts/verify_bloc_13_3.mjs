@@ -18,7 +18,7 @@ assert.equal(
 
 const service = await readFile(new URL('../src/services/photoLibraryService.js', import.meta.url), 'utf8');
 for (const required of [
-  'ensureStoragePathIsUnique',
+  'ensureStorageLocationIsUnique',
   'storageObjectExists',
   'recordStillExists',
   'verifyPhotoDeletion',
@@ -26,8 +26,8 @@ for (const required of [
   'verified:true'
 ]) assert.ok(service.includes(required), `Vérification de suppression manquante : ${required}`);
 
-const verificationIndex = service.indexOf('await verifyPhotoDeletion(photo, path)');
-const successIndex = service.indexOf('return { ok:true, id:photo.id, supportId:photo.support_id, verified:true', verificationIndex);
+const verificationIndex = service.indexOf('await verifyPhotoDeletion(photo, location)');
+const successIndex = service.indexOf('verified:true', verificationIndex);
 assert.ok(verificationIndex >= 0 && successIndex > verificationIndex, 'Le succès doit suivre la vérification finale.');
 
 assert.deepEqual(sortRows([{id:'SUP-10'},{id:'SUP-2'},{id:'SUP-1'}],{column:'id',type:'identifier',direction:'asc',emptyPlacement:'last'}).map(row=>row.id),['SUP-1','SUP-2','SUP-10']);

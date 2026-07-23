@@ -1,7 +1,9 @@
 import JSZip from 'jszip';
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
 import { friendlyError } from '../config/businessLanguage';
-import { normalizeStoragePath, storagePathFromPhotoRecord } from '../lib/photoDeletion';
+import {
+  normalizeStoragePath, storageLocationFromPhotoRecord, storagePathFromPhotoRecord
+} from '../lib/photoDeletion';
 
 const ready = () => {
   if (!supabaseConfigured || !supabase) throw new Error('Supabase n’est pas configuré.');
@@ -53,22 +55,25 @@ function splitStoragePath(path) {
   return { path:normalized, folder:parts.slice(0,-1).join('/'), fileName:parts.at(-1) || '' };
 }
 
-async function ensureStoragePathIsUnique(photo, path) {
-  if (!path) return;
+async function ensureStorageLocationIsUnique(photo, location) {
+  if (!location?.path) return;
   const { data, error } = await supabase.from('support_photos')
     .select('id,storage_path,photo_url').neq('id', photo.id);
   if (error) throw error;
-  const duplicates = (data || []).filter(row => storagePathFromPhoto(row) === path);
+  const duplicates = (data || []).filter(row => {
+    const other = storageLocationFromPhotoRecord(row);
+    return other.bucket === location.bucket && other.path === location.path;
+  });
   if (duplicates.length) {
     throw new Error('Plusieurs photos utilisent le même fichier. Une vérification administrative est nécessaire.');
   }
 }
 
-async function storageObjectExists(path) {
-  if (!path) return false;
-  const location = splitStoragePath(path);
+async function storageObjectExists(storageLocation) {
+  if (!storageLocation?.bucket || !storageLocation?.path) return false;
+  const location = splitStoragePath(storageLocation.path);
   if (!location.fileName) return false;
-  const { data, error } = await supabase.storage.from('support-photos')
+  const { data, error } = await supabase.storage.from(storageLocation.bucket)
     .list(location.folder, { limit:100, search:location.fileName });
   if (error) throw error;
   return (data || []).some(item => item.name === location.fileName);
@@ -81,12 +86,24 @@ async function recordStillExists(id) {
   return Boolean(data);
 }
 
-async function verifyPhotoDeletion(photo, path) {
-  const [recordExists, fileExists] = await Promise.all([
+async function infrastructureStillReferences(photo) {
+  if (!photo?.support_id || !photo?.photo_url) return false;
+  const { data, error } = await supabase.from('infrastructures')
+    .select('id,visuel_actuel_cadre,photo_principale_url,photo_miniature_url')
+    .eq('support_id', photo.support_id).limit(10);
+  if (error) throw error;
+  return (data || []).some(row => [
+    row.visuel_actuel_cadre, row.photo_principale_url, row.photo_miniature_url
+  ].includes(photo.photo_url));
+}
+
+async function verifyPhotoDeletion(photo, storageLocation) {
+  const [recordExists, fileExists, infrastructureReference] = await Promise.all([
     recordStillExists(photo.id),
-    storageObjectExists(path)
+    storageObjectExists(storageLocation),
+    infrastructureStillReferences(photo)
   ]);
-  if (recordExists || fileExists) {
+  if (recordExists || fileExists || infrastructureReference) {
     throw new Error('La photo n’a pas pu être supprimée complètement. Une vérification administrative est nécessaire.');
   }
   const remaining = photo.support_id ? await listSupportPhotos(photo.support_id) : [];
@@ -99,9 +116,26 @@ async function verifyPhotoDeletion(photo, path) {
 async function setInfrastructurePrimary(supportId, photo) {
   const { error } = await supabase.from('infrastructures').update({
     photo_principale_url: photo?.photo_url || null,
-    photo_miniature_url: photo?.thumbnail_url || photo?.photo_url || null
+    photo_miniature_url: photo?.thumbnail_url || photo?.photo_url || null,
+    visuel_actuel_cadre: photo?.thumbnail_url || photo?.photo_url || null
   }).eq('support_id', supportId);
   if (error) throw error;
+}
+
+async function replaceInfrastructurePhotoReferences(deletedPhoto, replacement) {
+  if (!deletedPhoto?.support_id || !deletedPhoto?.photo_url) return;
+  const values = {
+    photo_principale_url: replacement?.photo_url || null,
+    photo_miniature_url: replacement?.thumbnail_url || replacement?.photo_url || null,
+    visuel_actuel_cadre: replacement?.thumbnail_url || replacement?.photo_url || null
+  };
+  for (const [field, value] of Object.entries(values)) {
+    const { error } = await supabase.from('infrastructures')
+      .update({ [field]:value })
+      .eq('support_id', deletedPhoto.support_id)
+      .eq(field, deletedPhoto.photo_url);
+    if (error) throw error;
+  }
 }
 
 export async function makeSupportPhotoPrimary(photo) {
@@ -140,19 +174,24 @@ function notifyPhotoDeletion(photo) {
 export async function deleteSupportPhoto(photo) {
   ready();
   if (!photo?.id) throw new Error('Photo invalide : identifiant manquant.');
-  const originalPath = storagePathFromPhoto(photo);
-  if (!originalPath && photo?.photo_url) {
+  const originalLocation = storageLocationFromPhotoRecord(photo);
+  if ((!originalLocation.bucket || !originalLocation.path) && photo?.photo_url) {
     throw new Error('Le chemin de cette ancienne photo est incomplet. Une vérification administrative est nécessaire.');
   }
-  await ensureStoragePathIsUnique(photo, originalPath);
+  await ensureStorageLocationIsUnique(photo, originalLocation);
   if (!(await recordStillExists(photo.id))) {
-    if (originalPath && await storageObjectExists(originalPath)) {
-      const { error } = await supabase.storage.from('support-photos').remove([originalPath]);
+    if (originalLocation.path && await storageObjectExists(originalLocation)) {
+      const { error } = await supabase.storage.from(originalLocation.bucket)
+        .remove([originalLocation.path]);
       if (error) throw error;
     }
-    await verifyPhotoDeletion(photo, originalPath);
+    await replaceInfrastructurePhotoReferences(photo, null);
+    await verifyPhotoDeletion(photo, originalLocation);
     notifyPhotoDeletion(photo);
-    return { ok:true, id:photo.id, supportId:photo.support_id, verified:true, alreadyAbsent:true };
+    return {
+      ok:true, id:photo.id, supportId:photo.support_id, verified:true,
+      alreadyAbsent:true, bucket:originalLocation.bucket
+    };
   }
 
   // Prefer the database RPC because it validates permissions and updates the primary-photo references.
@@ -161,36 +200,51 @@ export async function deleteSupportPhoto(photo) {
   });
   if (!rpcError) {
     if (rpcData?.ok === false) throw new Error('La suppression n’a pas été confirmée.');
-    const path = normalizeStoragePath(rpcData?.storage_path || originalPath);
-    if (path) {
-      const { error: storageError } = await supabase.storage.from('support-photos').remove([path]);
+    const location = {
+      ...originalLocation,
+      path:normalizeStoragePath(rpcData?.storage_path || originalLocation.path)
+    };
+    if (location.path) {
+      const { error: storageError } = await supabase.storage.from(location.bucket)
+        .remove([location.path]);
       if (storageError) throw storageError;
     }
-    const remaining = await verifyPhotoDeletion(photo, path);
-    await setInfrastructurePrimary(photo.support_id, remaining[0] || null);
+    const remaining = photo.support_id ? await listSupportPhotos(photo.support_id) : [];
+    await replaceInfrastructurePhotoReferences(photo, remaining[0] || null);
+    await verifyPhotoDeletion(photo, location);
     notifyPhotoDeletion(photo);
-    return { ok:true, id:photo.id, supportId:photo.support_id, verified:true };
+    return {
+      ok:true, id:photo.id, supportId:photo.support_id, verified:true,
+      bucket:location.bucket
+    };
   }
 
   // Compatibility fallback when the migration has not yet been installed.
   if (!['42883','PGRST202'].includes(rpcError.code)) throw rpcError;
-  const storagePath = originalPath;
-  if (storagePath) {
-    const { error: storageError } = await supabase.storage.from('support-photos').remove([storagePath]);
+  if (originalLocation.path) {
+    const { error: storageError } = await supabase.storage.from(originalLocation.bucket)
+      .remove([originalLocation.path]);
     if (storageError) throw storageError;
   }
-  const { error: rowError } = await supabase.from('support_photos').delete().eq('id', photo.id);
+  const { data:deletedRows, error:rowError } = await supabase.from('support_photos')
+    .delete().eq('id', photo.id).select('id');
   if (rowError) throw rowError;
+  if (!deletedRows?.some(row => String(row.id) === String(photo.id))) {
+    throw new Error('Aucune ligne photo nâ€™a Ã©tÃ© supprimÃ©e. Le succÃ¨s ne peut pas Ãªtre confirmÃ©.');
+  }
 
   const remaining = photo.support_id ? await listSupportPhotos(photo.support_id) : [];
-  await setInfrastructurePrimary(photo.support_id, remaining[0] || null);
+  await replaceInfrastructurePhotoReferences(photo, remaining[0] || null);
   await logPhotoAction('SUPPRESSION', photo, {
     mode:'fallback', type_photo:photo.type_photo || null,
     utilisateur:photo.utilisateur || null, resultat:'CONFIRMEE'
   });
-  await verifyPhotoDeletion(photo, storagePath);
+  await verifyPhotoDeletion(photo, originalLocation);
   notifyPhotoDeletion(photo);
-  return { ok:true, id:photo.id, supportId:photo.support_id, verified:true };
+  return {
+    ok:true, id:photo.id, supportId:photo.support_id, verified:true,
+    bucket:originalLocation.bucket
+  };
 }
 
 export async function deleteSupportPhotos(photos, onProgress=()=>{}) {

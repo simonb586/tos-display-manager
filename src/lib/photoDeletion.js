@@ -4,10 +4,30 @@ export function normalizeStoragePath(value) {
   return path.replace(/^support-photos\//i, '').replace(/\/+/g, '/');
 }
 
+export function storageLocationFromPhotoRecord(photo, fallbackBucket='support-photos') {
+  const url = String(photo?.photo_url || photo?.thumbnail_url || '').trim();
+  const match = url.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/([^/?#]+)\/([^?#]+)/i);
+  if (match) {
+    let bucket = match[1];
+    let path = match[2];
+    try {
+      bucket = decodeURIComponent(bucket);
+      path = decodeURIComponent(path);
+    } catch {
+      // Conserver les valeurs originales si l'URL est mal encodée.
+    }
+    return { bucket, path:normalizeStoragePath(path), source:'url' };
+  }
+
+  let path = normalizeStoragePath(photo?.storage_path);
+  if (!path) return { bucket:'', path:'', source:'missing' };
+  const prefixed = path.match(/^([^/]+)\/(.+)$/);
+  if (prefixed && prefixed[1].toLowerCase() === String(fallbackBucket).toLowerCase()) {
+    path = prefixed[2];
+  }
+  return { bucket:fallbackBucket, path, source:'fallback' };
+}
+
 export function storagePathFromPhotoRecord(photo) {
-  if (photo?.storage_path) return normalizeStoragePath(photo.storage_path);
-  const url = String(photo?.photo_url || '');
-  const marker = '/support-photos/';
-  const index = url.indexOf(marker);
-  return index >= 0 ? normalizeStoragePath(url.slice(index + marker.length).split('?')[0]) : '';
+  return storageLocationFromPhotoRecord(photo).path;
 }
