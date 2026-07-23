@@ -81,7 +81,7 @@ export default function EdtEnterprisePanel({ edt, data, canManage, busy, run }) 
       {canManage && (
         <form className="edt-support-import" onSubmit={submit}>
           <div className="edt-support-import-main">
-            <label>Support ID à ajouter
+            <label>Numéro du support à ajouter
               <textarea
                 value={supportText}
                 onChange={e => setSupportText(e.target.value)}

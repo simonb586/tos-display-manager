@@ -198,7 +198,7 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
                 <input
                   value={filters.query}
                   onChange={event => setFilters({ ...filters, query: event.target.value })}
-                  placeholder="Support ID, site, visuel..."
+                  placeholder="Numéro du support, site, visuel…"
                 />
               </label>
 

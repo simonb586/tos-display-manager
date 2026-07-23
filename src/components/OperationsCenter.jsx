@@ -14,6 +14,7 @@ import {
 import EdtEnterprisePanel from './EdtEnterprisePanel';
 import SortableHeader from './SortableHeader';
 import useSortableRows from '../hooks/useSortableRows';
+import { friendlyError } from '../config/businessLanguage';
 import {
   assignUser,
   closeEdt,
@@ -134,7 +135,7 @@ export default function OperationsCenter({ role }) {
       setMessage(success);
       await reload();
     } catch (error) {
-      setMessage(`Erreur : ${error.message || error}`);
+      setMessage(friendlyError(error));
     } finally {
       setBusy(false);
     }
@@ -339,7 +340,7 @@ export default function OperationsCenter({ role }) {
                 const edt = data.edts.find(item => String(item.id) === e.target.value);
                 setBtForm({...btForm, edt_id:e.target.value, no_edt:edt?.no_edt || ''});
               }}><option value="">Sans EDT</option>{data.edts.map(item => <option key={item.id} value={item.id}>{item.no_edt}</option>)}</select></label>
-              <label>Support ID<input value={btForm.support_id} onChange={e => setBtForm({...btForm, support_id:e.target.value})}/></label>
+              <label>Numéro du support<input value={btForm.support_id} onChange={e => setBtForm({...btForm, support_id:e.target.value})}/></label>
               <label>Assigné à<select value={btForm.assigne_a} onChange={e => setBtForm({...btForm, assigne_a:e.target.value})}><option value="">Non assigné</option>{data.users.filter(u => u.statut === 'Actif').map(u => <option key={u.id} value={u.courriel}>{u.nom || u.courriel}</option>)}</select></label>
               <label>Date cible<input type="date" value={btForm.date_cible} onChange={e => setBtForm({...btForm, date_cible:e.target.value})}/></label>
               <label>Description<textarea value={btForm.description} onChange={e => setBtForm({...btForm, description:e.target.value})}/></label>
@@ -376,7 +377,7 @@ export default function OperationsCenter({ role }) {
             <label>Courriel<input type="email" value={requestForm.demandeur_courriel} onChange={e => setRequestForm({...requestForm, demandeur_courriel:e.target.value})}/></label>
             <label>Type<select value={requestForm.type_requete} onChange={e => setRequestForm({...requestForm, type_requete:e.target.value})}><option>Installation</option><option>Inspection</option><option>Réparation</option><option>Retrait</option></select></label>
             <label>Priorité<select value={requestForm.priorite} onChange={e => setRequestForm({...requestForm, priorite:e.target.value})}><option>Basse</option><option>Normale</option><option>Haute</option><option>Urgente</option></select></label>
-            <label>Support ID<input value={requestForm.support_id} onChange={e => setRequestForm({...requestForm, support_id:e.target.value})}/></label>
+            <label>Numéro du support<input value={requestForm.support_id} onChange={e => setRequestForm({...requestForm, support_id:e.target.value})}/></label>
             <label>Description<textarea value={requestForm.description} onChange={e => setRequestForm({...requestForm, description:e.target.value})}/></label>
             <button className="v07-primary" disabled={busy}>Créer la requête</button>
           </form>

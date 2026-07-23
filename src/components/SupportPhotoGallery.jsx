@@ -4,6 +4,7 @@ import {
   deleteSupportPhoto, deleteSupportPhotos, downloadPhoto, downloadPhotosZip,
   listSupportPhotos, makeSupportPhotoPrimary
 } from '../services/photoLibraryService';
+import { friendlyError } from '../config/businessLanguage';
 
 export default function SupportPhotoGallery({ supportId, canDelete=false, canManage=false }) {
   const [photos,setPhotos]=useState([]);
@@ -17,7 +18,7 @@ export default function SupportPhotoGallery({ supportId, canDelete=false, canMan
     if(!supportId)return;
     setMessage('');
     try{setPhotos(await listSupportPhotos(supportId));}
-    catch(error){setMessage(error.message||'Impossible de charger les photos.');}
+    catch(error){setMessage(friendlyError(error,'Impossible de charger les photos.'));}
   },[supportId]);
 
   useEffect(()=>{refresh();},[refresh]);

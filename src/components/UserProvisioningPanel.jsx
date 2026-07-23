@@ -142,7 +142,7 @@ export default function UserProvisioningPanel({ role }) {
         <section className="admin-panel production-user-panel">
           <h2><UserPlus size={20}/> Inviter un utilisateur</h2>
           <p className="user-production-note">
-            Le lien pointe toujours vers l’adresse publique configurée. Il ne peut jamais utiliser localhost.
+            Le lien d’invitation pointe toujours vers l’adresse publique configurée.
           </p>
 
           <form className="admin-form" onSubmit={submit}>

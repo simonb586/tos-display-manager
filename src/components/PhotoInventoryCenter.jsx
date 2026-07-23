@@ -16,6 +16,7 @@ import {
   validateSupportPhoto
 } from '../services/photoInventoryService';
 import { deleteSupportPhoto } from '../services/photoLibraryService';
+import { friendlyError } from '../config/businessLanguage';
 import SortableHeader from './SortableHeader';
 import useSortableRows from '../hooks/useSortableRows';
 
@@ -46,7 +47,7 @@ export default function PhotoInventoryCenter({ role }) {
       setMovements(nextMovements);
       setMessage('');
     } catch (error) {
-      setMessage(error.message || 'Erreur de chargement.');
+      setMessage(friendlyError(error, 'Impossible de charger les photos et l’inventaire.'));
     }
   }
 
@@ -62,7 +63,7 @@ export default function PhotoInventoryCenter({ role }) {
       setMessage(`Photo ${status.toLowerCase()}.`);
       await reload();
     } catch (error) {
-      setMessage(error.message || 'Erreur de validation.');
+      setMessage(friendlyError(error, 'Impossible de modifier l’état de cette photo.'));
     }
   }
 
@@ -78,7 +79,7 @@ export default function PhotoInventoryCenter({ role }) {
       setMessage('Photo supprimée définitivement.');
       await reload();
     } catch (error) {
-      setMessage(error.message || 'Erreur lors de la suppression de la photo.');
+      setMessage(friendlyError(error, 'Impossible de supprimer cette photo.'));
     }
   }
 
@@ -88,7 +89,7 @@ export default function PhotoInventoryCenter({ role }) {
       setMessage('Photo principale mise à jour.');
       await reload();
     } catch (error) {
-      setMessage(error.message || 'Erreur de photo principale.');
+      setMessage(friendlyError(error, 'Impossible de définir cette photo comme principale.'));
     }
   }
 
@@ -181,7 +182,7 @@ export default function PhotoInventoryCenter({ role }) {
             <label>EDT
               <input value={movement.edt_number} onChange={e => setMovement({...movement, edt_number: e.target.value})}/>
             </label>
-            <label>Support ID
+            <label>Numéro du support
               <input value={movement.support_id} onChange={e => setMovement({...movement, support_id: e.target.value})}/>
             </label>
             <label>Notes

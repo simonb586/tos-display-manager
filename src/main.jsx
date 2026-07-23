@@ -50,6 +50,7 @@ import {
 } from './lib/utils';
 import { sortRows } from './lib/gridSorting';
 import { supabase, supabaseConfigured } from './lib/supabaseClient';
+import { businessFieldLabel, enforceApplicationTitle, friendlyError } from './config/businessLanguage';
 import { loadManyTables } from './services/dataService';
 
 import AdminPanel from './components/AdminPanel';
@@ -71,7 +72,6 @@ import ChangeHistoryPanel from './components/ChangeHistoryPanel';
 import PhotoInventoryCenter from './components/PhotoInventoryCenter';
 import OperationsCenter from './components/OperationsCenter';
 import GlobalButtonFeedback from './components/GlobalButtonFeedback';
-import ColumnRelationMenu from './components/ColumnRelationMenu';
 import AccountActivation from './components/AccountActivation';
 import InstallerTerrainShell from './components/InstallerTerrainShell';
 import TerrainSyncDiagnostics from './components/TerrainSyncDiagnostics';
@@ -111,7 +111,7 @@ const icons = {
 const roles = ['Administrateur', 'Coordonnateur', 'Installateur', 'Client-Admin', 'Client'];
 
 const INFRASTRUCTURE_LABELS = {
-  support_id: 'Support ID',
+  support_id: 'Numéro du support',
   type_support: 'Type de support',
   format_affichage: 'Formats d’affichage',
   medium_recommande: 'Médium recommandé',
@@ -196,7 +196,7 @@ function Dashboard({ setActive, dataStore }) {
   return <div className="dashboard">
     <div className="hero">
       <div><h1>TOS Display Manager</h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
-      <div className="badge"><ShieldCheck/> {supabaseConfigured ? 'Supabase configuré' : 'Mode JSON local'}</div>
+      <div className="badge"><ShieldCheck/> Espace opérationnel sécurisé</div>
     </div>
     <div className="cards"><Card title="Infrastructures" value={infrastructures.length}/><Card title="Arrêts" value={arrets.length}/><Card title="EDT" value={edt.length}/><Card title="Bons de travail" value={bt.length}/></div>
     <div className="dashboard-v12-grid">
@@ -290,7 +290,7 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
       setGridEditing(false);
       setMessage(`${updated.length} ligne(s) enregistrée(s).`);
     } catch (error) {
-      setMessage(`Erreur : ${error.message || error}`);
+      setMessage(friendlyError(error, 'Impossible d’enregistrer ces modifications.'));
     } finally {
       setSaving(false);
     }
@@ -313,7 +313,7 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
     {message && <div className="v07-message">{message}</div>}
 
     <div className="searchbar"><Search/><input placeholder="Recherche exacte dans toutes les colonnes..." value={query} onChange={e => setQuery(e.target.value)}/></div>
-    <div className="tableWrap"><table><thead><tr>{hasMapColumn && <th>Carte</th>}{cols.map(c => <th key={c} aria-sort={sortState?.column === c ? (sortState.direction === 'asc' ? 'ascending' : 'descending') : 'none'}><div className={`grid-column-header ${sortState?.column === c ? 'sorted' : ''}`}><div className="grid-column-header-main"><span>{columnLabel(name, c)}</span><input placeholder="Filtrer" value={filters[c] || ''} onChange={e => setFilters({ ...filters, [c]: e.target.value })}/></div><ColumnRelationMenu sourceTable={config.table} sourceField={c} role={role} rows={filtered} sortState={sortState} onSort={setSortState} onResetSort={() => setSortState(null)}/></div></th>)}</tr></thead><tbody>{shown.map((r, i) => {
+    <div className="tableWrap"><table><thead><tr>{hasMapColumn && <th>Carte</th>}{cols.map(c => <th key={c} aria-sort={sortState?.column === c ? (sortState.direction === 'asc' ? 'ascending' : 'descending') : 'none'}><div className={`grid-column-header ${sortState?.column === c ? 'sorted' : ''}`}><div className="grid-column-header-main"><span>{columnLabel(name, c)}</span><input placeholder="Filtrer" value={filters[c] || ''} onChange={e => setFilters({ ...filters, [c]: e.target.value })}/></div></div></th>)}</tr></thead><tbody>{shown.map((r, i) => {
       const token = rowToken(r, i);
       const supportId = r.support_id || r['Support ID'] || '';
       const mapUrl = infrastructureMapUrl(r);
@@ -378,7 +378,7 @@ function Detail({ name, row, role, config, onSaved, onClose, onOpenMap }) {
       setEditing(false);
       setMessage('Fiche enregistrée.');
     } catch (error) {
-      setMessage(`Erreur : ${error.message || error}`);
+      setMessage(friendlyError(error, 'Impossible d’enregistrer cette fiche.'));
     } finally {
       setSaving(false);
     }
@@ -428,7 +428,7 @@ function FieldSearch({ dataStore }) {
   const idField = source === 'Infrastructures' ? 'support_id' : 'no_arret';
   const result = rows.find(r => normalize(r[idField]) === normalize(id));
   const suggestions = id ? rows.filter(r => normalize(r[idField]).includes(normalize(id))).slice(0, 8) : [];
-  return <section className="panel"><h2><Search/> Recherche terrain</h2><div className="fieldGrid"><label>Type</label><select value={source} onChange={e => { setSource(e.target.value); setId(''); }}><option>Infrastructures</option><option>Arrêts</option></select><label>{source === 'Infrastructures' ? 'Support ID' : 'No d’arrêt'}</label><input value={id} onChange={e => setId(e.target.value)} placeholder="Entrer l’identifiant"/></div>{result ? <div className="found"><b>Résultat trouvé</b><span>{result.emplacement_visibilite || result.site || 'Fiche trouvée'}</span><small>{idField}: {result[idField]}</small></div> : id && <div className="suggestions">{suggestions.map((s, i) => <button key={i} onClick={() => setId(s[idField])}>{s[idField]} — {s.emplacement_visibilite || s.site || ''}</button>)}</div>}</section>;
+  return <section className="panel"><h2><Search/> Recherche terrain</h2><div className="fieldGrid"><label>Type</label><select value={source} onChange={e => { setSource(e.target.value); setId(''); }}><option>Infrastructures</option><option>Arrêts</option></select><label>{source === 'Infrastructures' ? 'Numéro du support' : 'Numéro d’arrêt'}</label><input value={id} onChange={e => setId(e.target.value)} placeholder="Entrer l’identifiant"/></div>{result ? <div className="found"><b>Résultat trouvé</b><span>{result.emplacement_visibilite || result.site || 'Fiche trouvée'}</span><small>{businessFieldLabel(idField)} : {result[idField]}</small></div> : id && <div className="suggestions">{suggestions.map((s, i) => <button key={i} onClick={() => setId(s[idField])}>{s[idField]} — {s.emplacement_visibilite || s.site || ''}</button>)}</div>}</section>;
 }
 
 function LoginView({ session, setSession, role, setRole }) {
@@ -436,9 +436,9 @@ function LoginView({ session, setSession, role, setRole }) {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   async function login() {
-    if (!supabase) { setMessage('Supabase non configuré : connexion en mode démo.'); setSession({ user: { email: email || 'demo@groupetos.com' } }); return; }
+    if (!supabase) { setMessage('Le service de connexion est momentanément indisponible.'); return; }
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) { setMessage(error.message); return; }
+    if (error) { setMessage(friendlyError(error, 'Courriel ou mot de passe invalide.')); return; }
     setSession(data.session); setMessage('Connexion réussie.');
   }
   async function logout() { if (supabase) await supabase.auth.signOut(); setSession(null); }
@@ -446,26 +446,22 @@ function LoginView({ session, setSession, role, setRole }) {
 }
 
 
-function SupabaseConfigurationError() {
+function ServiceConfigurationError() {
   return (
     <div className="production-login-page">
       <div className="production-login-card">
         <div className="production-login-logo">TOS<span>Display Manager</span></div>
         <div className="production-login-icon"><ShieldCheck size={30}/></div>
-        <h1>Configuration Vercel incomplète</h1>
-        <p>
-          Les variables VITE_SUPABASE_URL et VITE_SUPABASE_PUBLISHABLE_KEY
-          ne sont pas disponibles dans cet environnement.
-        </p>
-        <p>
-          Active-les pour Preview et Production dans Vercel, puis redéploie.
-        </p>
+        <h1>Service temporairement indisponible</h1>
+        <p>La connexion sécurisée à votre espace ne peut pas être établie pour le moment.</p>
+        <p>Communiquez avec votre administrateur ou réessayez dans quelques instants.</p>
       </div>
     </div>
   );
 }
 
 function App() {
+  enforceApplicationTitle();
   const [active, setActive] = useState('Tableau de bord');
   const [role, setRole] = useState('Administrateur');
   const [session, setSession] = useState(null);
@@ -563,9 +559,9 @@ function App() {
   }, [role]);
 
   const adminItems = role === 'Administrateur'
-    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Diagnostic terrain', 'Rapports finaux', 'Assistant d’automatisation', 'Validation système', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats']
+    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Rapports finaux', 'Automatisations', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats']
     : role === 'Coordonnateur'
-      ? ['Validation système', 'Campagnes maîtres', 'Campagne — Visuels et formats']
+      ? ['Campagnes maîtres', 'Campagne — Visuels et formats']
       : [];
   const visibleManifestTables = manifest
     .map(module => module.name)
@@ -614,7 +610,7 @@ function App() {
     });
   }
 
-  if (!supabaseConfigured) return <SupabaseConfigurationError/>;
+  if (!supabaseConfigured) return <ServiceConfigurationError/>;
   if (profileLoading || (session && loading)) return (
     <div className="app-startup" role="status" aria-live="polite">
       <div className="app-startup-card">
@@ -671,7 +667,7 @@ function App() {
   else if (active === 'Diagnostic terrain') content = <TerrainSyncDiagnostics role={role}/>;
   else if (active === 'Rapports finaux') content = <FinalReportsCenter dataStore={dataStore} role={role}/>;
   else if (active === 'Visibilité par rôle') content = <RoleVisibilityAdmin dataStore={dataStore} tableNames={manifest.map(module => module.name)} role={role}/>;
-  else if (active === 'Assistant d’automatisation') content = <AutomationAssistant role={role}/>;
+  else if (active === 'Automatisations') content = <AutomationAssistant role={role}/>;
   else if (active === 'Validation système') content = <ValidationCenter role={role}/>;
   else if (active === 'Import anciennes photos') content = <LegacyPhotoImporter dataStore={dataStore} session={session}/>;
   else if (active === 'Campagnes maîtres') content = <CampaignsPanel role={role} session={session}/>;
@@ -687,10 +683,10 @@ function App() {
     <aside>
       <div className="brand">TOS<span>Display Manager</span></div>
       <span className="role-badge">{profile?.nom || session?.user?.email}<br/>{role}</span>
-      {items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Édition — Historique' ? '🕘' : it === 'Photos et inventaire' ? '🖼️' : it === 'Centre EDT et BT' ? '🛠️' : it === 'Diagnostic terrain' ? '🧪' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Assistant d’automatisation' ? '🤖' : it === 'Validation système' ? '✅' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}
+      {items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Édition — Historique' ? '🕘' : it === 'Photos et inventaire' ? '🖼️' : it === 'Centre EDT et BT' ? '🛠️' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Automatisations' ? '🤖' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}
       <button className="sidebar-logout" onClick={logoutFromPortal}><LogOut size={17}/> Déconnexion</button>
     </aside>
-    <main>{dataStore?.__sync_error__&&<div className="sync-error-banner"><strong>Erreur de lecture Supabase</strong><span>Les données locales ne sont pas utilisées en production.</span><button onClick={refreshDataStore}>Recharger depuis Supabase</button></div>}{content}</main>
+    <main>{dataStore?.__sync_error__&&<div className="sync-error-banner"><strong>Données momentanément indisponibles</strong><span>La dernière mise à jour n’a pas pu être chargée.</span><button onClick={refreshDataStore}>Réessayer</button></div>}{content}</main>
   </div>;
 }
 

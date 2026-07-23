@@ -54,7 +54,7 @@ export default function Bloc2SearchPanel() {
       <div className="bloc2-header">
         <div>
           <h2>{title}</h2>
-          <p>Recherche connectée à Supabase — Infrastructure, arrêt ou EDT.</p>
+          <p>Recherche unifiée — Infrastructure, arrêt ou EDT.</p>
         </div>
       </div>
 
@@ -68,7 +68,7 @@ export default function Bloc2SearchPanel() {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ex. Support ID, numéro d'arrêt, campagne..."
+          placeholder="Ex. Numéro du support, numéro d’arrêt, campagne…"
         />
 
         <button type="submit">
@@ -77,7 +77,7 @@ export default function Bloc2SearchPanel() {
         </button>
       </form>
 
-      {error && <div className="bloc2-error">Erreur : {error}</div>}
+      {error && <div className="bloc2-error">{error}</div>}
 
       <div className="bloc2-results-meta">
         {status === 'done' && `${rows.length} résultat(s)`}

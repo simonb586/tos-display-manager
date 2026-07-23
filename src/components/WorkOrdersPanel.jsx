@@ -153,7 +153,7 @@ export default function WorkOrdersPanel({ dataStore, role, session }) {
                   <option>Réparation</option>
                 </select>
               </label>
-              <label>Support ID<input value={form.support_id} onChange={e => setForm({ ...form, support_id: e.target.value })} /></label>
+              <label>Numéro du support<input value={form.support_id} onChange={e => setForm({ ...form, support_id: e.target.value })} /></label>
               <label>No EDT<input value={form.no_edt} onChange={e => setForm({ ...form, no_edt: e.target.value })} /></label>
               <label>Priorité<select value={form.priorite} onChange={e => setForm({ ...form, priorite: e.target.value })}>{priorities.map(p => <option key={p}>{p}</option>)}</select></label>
               <label>Statut<select value={form.statut} onChange={e => setForm({ ...form, statut: e.target.value })}>{statuses.map(s => <option key={s}>{s}</option>)}</select></label>

@@ -73,7 +73,7 @@ export default function Bloc3LoginPanel() {
         <Lock size={24} />
         <div>
           <h2>Connexion</h2>
-          <p>Bloc 3 — Authentification et rôles Supabase.</p>
+          <p>Connexion sécurisée et gestion des rôles.</p>
         </div>
       </div>
 

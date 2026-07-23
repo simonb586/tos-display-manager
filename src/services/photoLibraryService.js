@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
+import { friendlyError } from '../config/businessLanguage';
 
 const ready = () => {
   if (!supabaseConfigured || !supabase) throw new Error('Supabase n’est pas configuré.');
@@ -70,13 +71,22 @@ export async function makeSupportPhotoPrimary(photo) {
 
 async function logPhotoAction(action, photo, details={}) {
   try {
-    await supabase.from('photo_action_log').insert({
+    const { error } = await supabase.from('photo_action_log').insert({
       action, photo_id: photo?.id || null, support_id: photo?.support_id || null,
       nom_fichier: photo?.nom_fichier || null, details
     });
+    if (error) throw error;
   } catch (_) {
     // The log must never make the main operation fail.
   }
+}
+
+function notifyPhotoDeletion(photo) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent('tos-photo-deleted', {
+    detail: { photoId: photo?.id, supportId: photo?.support_id }
+  }));
+  window.dispatchEvent(new CustomEvent('tos-terrain-data-updated'));
 }
 
 export async function deleteSupportPhoto(photo) {
@@ -93,7 +103,7 @@ export async function deleteSupportPhoto(photo) {
       const { error: storageError } = await supabase.storage.from('support-photos').remove([path]);
       if (storageError) throw storageError;
     }
-    await logPhotoAction('SUPPRESSION', photo, { mode:'rpc' });
+    notifyPhotoDeletion(photo);
     return { ok:true, id:photo.id };
   }
 
@@ -110,6 +120,7 @@ export async function deleteSupportPhoto(photo) {
   const remaining = photo.support_id ? await listSupportPhotos(photo.support_id) : [];
   await setInfrastructurePrimary(photo.support_id, remaining[0] || null);
   await logPhotoAction('SUPPRESSION', photo, { mode:'fallback' });
+  notifyPhotoDeletion(photo);
   return { ok:true, id:photo.id };
 }
 
@@ -121,7 +132,7 @@ export async function deleteSupportPhotos(photos, onProgress=()=>{}) {
       await deleteSupportPhoto(photo);
       results.push({id:photo.id,ok:true});
     } catch (error) {
-      results.push({id:photo.id,ok:false,error:error.message||String(error)});
+      results.push({id:photo.id,ok:false,error:friendlyError(error, 'Impossible de supprimer cette photo.')});
     }
     onProgress(i+1, photos.length);
   }
