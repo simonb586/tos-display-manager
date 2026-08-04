@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const component = fs.readFileSync('src/components/OperationalCommandCenter.jsx', 'utf8');
+const main = fs.readFileSync('src/main.jsx', 'utf8');
+const css = fs.readFileSync('src/styles.css', 'utf8');
+for (const marker of ["Aujourd’hui", 'Campagnes', 'Terrain', 'Clients', 'Installateurs', 'Rapports', 'Alertes', 'Activité']) assert.ok(component.includes(marker), marker);
+for (const marker of ['EDT en retard', 'Photos manquantes', 'Enjeux urgents', 'Rapports non envoyés', 'Non disponible']) assert.ok(component.includes(marker), marker);
+assert.ok(component.includes('Aucun classement individuel'));
+assert.ok(main.includes('OperationalCommandCenter'));
+assert.ok(css.includes('.command-center'));
+console.log('Bloc 13.2 Lot 2 : centre de commandement, vues spécialisées, alertes et activité validés.');

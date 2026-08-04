@@ -10,6 +10,7 @@ import {
 import {
   finalizeTerrainInstallation,
   finalizeTerrainIntervention,
+  rollbackUploadedPhoto,
   uploadTerrainPhoto
 } from '../services/terrainService';
 import {
@@ -35,6 +36,7 @@ export default function TerrainApp({ dataStore, role, session }) {
   const [issueType, setIssueType] = useState('');
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState('');
+  const [capturedAt, setCapturedAt] = useState('');
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('info');
   const [busy, setBusy] = useState(false);
@@ -128,13 +130,18 @@ export default function TerrainApp({ dataStore, role, session }) {
 
     try {
       const supportId = selected.support_id || selected.no_arret;
-      const uploaded = await uploadTerrainPhoto(file, supportId, action);
+      const uploaded = await uploadTerrainPhoto(file, supportId, action, {
+        campaignCode:visual?.campagne?.nom_campagne || selected.campagne_actuelle || selected.campagne_selon_visuel,
+        edt:visual?.campagne?.no_edt || selected.edt_associe,
+        capturedAt:capturedAt || undefined,
+        source:'terrain'
+      });
 
-      if (source === 'Infrastructure' && action === 'installation') {
+      try { if (source === 'Infrastructure' && action === 'installation') {
         const result = await finalizeTerrainInstallation({
           supportId: selected.support_id,
           visualId,
-          fileName: file.name || `${selected.support_id}-${action}.jpg`,
+          fileName: uploaded.normalizedFilename,
           storagePath: uploaded.path,
           photoUrl: uploaded.publicUrl,
           userEmail: session?.user?.email || '',
@@ -153,7 +160,7 @@ export default function TerrainApp({ dataStore, role, session }) {
           action,
           issueType,
           comments,
-          fileName: file.name || `${selected.support_id}-${action}.jpg`,
+          fileName: uploaded.normalizedFilename,
           storagePath: uploaded.path,
           photoUrl: uploaded.publicUrl,
           userEmail: session?.user?.email || ''
@@ -162,6 +169,9 @@ export default function TerrainApp({ dataStore, role, session }) {
         if (!result?.ok || !result?.reference) {
           throw new Error('Le serveur n’a pas confirmé toutes les écritures.');
         }
+      }} catch (error) {
+        await rollbackUploadedPhoto(uploaded);
+        throw error;
       }
 
       if (!(source === 'Infrastructure' && action === 'installation')) {
@@ -175,6 +185,7 @@ export default function TerrainApp({ dataStore, role, session }) {
       setIssueType('');
       setFile(null);
       setPreview('');
+      setCapturedAt('');
     } catch (error) {
       setMessageType('error');
       setMessage(`Échec de l’intervention : ${error.message || error}`);
@@ -343,6 +354,8 @@ export default function TerrainApp({ dataStore, role, session }) {
           </label>
 
           <label className="terrain-photo">
+            <span>Date de prise</span>
+            <input type="datetime-local" value={capturedAt} onChange={event=>setCapturedAt(event.target.value)}/>
             <Camera/> Prendre ou joindre une photo
             <input
               required

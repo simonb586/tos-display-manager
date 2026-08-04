@@ -1,6 +1,7 @@
 import React from 'react';
 
-const OFFICIAL_LOGO_PATH = '/assets/logo-groupe-tos-officiel.png';
+// Variante web transparente strictement dérivée de l'actif officiel conservé dans public/assets.
+const OFFICIAL_LOGO_PATH = '/assets/logo-groupe-tos-web-transparent.png';
 
 export default function BrandLogo({ className = '', priority = false }) {
   return (

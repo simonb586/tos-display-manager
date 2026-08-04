@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   Search, Download, FileSpreadsheet, FileText, ShieldCheck, BarChart3,
   ClipboardList, Bell, Lock, LogOut, MapPin, Edit3, Save, X, History
+  , ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, AlertTriangle, Camera, CalendarClock
 } from 'lucide-react';
 import './styles.css';
 import './features/admin/bloc4-admin.css';
@@ -25,23 +26,6 @@ import './features/v13/grid-sorting.css';
 import './features/v13/field-catalog.css';
 
 import manifest from './data/manifest.json';
-import infrastructuresJson from './data/infrastructures.json';
-import campagnesJson from './data/campagnes_et_visuels.json';
-import repertoireJson from './data/repertoire_des_affiches.json';
-import communicationsJson from './data/communications_operationnelles.json';
-import enjeuxJson from './data/enjeux_des_cadres_et_supports.json';
-import ciJson from './data/centres_dinformation.json';
-import ciEnjeuxJson from './data/c_i_avec_enjeux.json';
-import arretsJson from './data/liste_des_arrets.json';
-import voituresJson from './data/voitures_trains.json';
-import photosJson from './data/photos.json';
-import btJson from './data/bons_de_travail.json';
-import histoJson from './data/historique_des_campagnes.json';
-import edtJson from './data/suivi_des_edt.json';
-import usersJson from './data/utilisateurs.json';
-import clientsJson from './data/clients.json';
-import journalJson from './data/journal_des_evenements.json';
-
 import {
   strictMatches,
   downloadCSV,
@@ -58,54 +42,60 @@ import { defaultSortColumnForTable } from './lib/gridPresentation';
 import { defaultSortForColumn } from './lib/gridSorting';
 import { loadManyTables } from './services/dataService';
 
-import AdminPanel from './components/AdminPanel';
-import TerrainApp from './components/TerrainApp';
-import WorkOrdersPanel from './components/WorkOrdersPanel';
-import CampaignsPanel from './components/CampaignsPanel';
-import CampaignVisualManager from './components/CampaignVisualManager';
-import ValidationCenter from './components/ValidationCenter';
-import LegacyPhotoImporter from './components/LegacyPhotoImporter';
 import SupportPhotoGallery from './components/SupportPhotoGallery';
 import Support360Panel from './components/Support360Panel';
-import ProductionLogin from './components/ProductionLogin';
-import UserProvisioningPanel from './components/UserProvisioningPanel';
-import InteractiveMap from './components/InteractiveMap';
-import RoleVisibilityAdmin from './components/RoleVisibilityAdmin';
-import FinalReportsCenter from './components/FinalReportsCenter';
 import EditableField from './components/EditableField';
 import ChangeHistoryPanel from './components/ChangeHistoryPanel';
-import PhotoInventoryCenter from './components/PhotoInventoryCenter';
-import OperationsCenter from './components/OperationsCenter';
 import GlobalButtonFeedback from './components/GlobalButtonFeedback';
 import AccountActivation from './components/AccountActivation';
-import InstallerTerrainShell from './components/InstallerTerrainShell';
-import TerrainSyncDiagnostics from './components/TerrainSyncDiagnostics';
-import AutomationAssistant from './components/AutomationAssistant';
-import FieldCatalogManager from './components/FieldCatalogManager';
 import BrandLogo from './components/BrandLogo';
+import OperationalCommandCenter from './components/OperationalCommandCenter';
 import { infrastructureMapUrl } from './services/mapService';
 import { getCurrentProfile } from './services/authProfileService';
 import { getRoleVisibility, canSeeTable, columnsForTable } from './services/roleVisibilityService';
 import { updateUniversalRow, updateUniversalRows, loadAutomaticFieldRules, primaryKeyFor } from './services/universalEditorService';
 import { requiresAccountActivation } from './services/accountActivationService';
 
+const AdminPanel = lazy(() => import('./components/AdminPanel'));
+const TerrainApp = lazy(() => import('./components/TerrainApp'));
+const WorkOrdersPanel = lazy(() => import('./components/WorkOrdersPanel'));
+const CampaignsPanel = lazy(() => import('./components/CampaignsPanel'));
+const CampaignVisualManager = lazy(() => import('./components/CampaignVisualManager'));
+const ValidationCenter = lazy(() => import('./components/ValidationCenter'));
+const LegacyPhotoImporter = lazy(() => import('./components/LegacyPhotoImporter'));
+const ProductionLogin = lazy(() => import('./components/ProductionLogin'));
+const UserProvisioningPanel = lazy(() => import('./components/UserProvisioningPanel'));
+const InteractiveMap = lazy(() => import('./components/InteractiveMap'));
+const RoleVisibilityAdmin = lazy(() => import('./components/RoleVisibilityAdmin'));
+const FinalReportsCenter = lazy(() => import('./components/FinalReportsCenter'));
+const PhotoInventoryCenter = lazy(() => import('./components/PhotoInventoryCenter'));
+const OperationsCenter = lazy(() => import('./components/OperationsCenter'));
+const InstallerTerrainShell = lazy(() => import('./components/InstallerTerrainShell'));
+const TerrainSyncDiagnostics = lazy(() => import('./components/TerrainSyncDiagnostics'));
+const AutomationAssistant = lazy(() => import('./components/AutomationAssistant'));
+const FieldCatalogManager = lazy(() => import('./components/FieldCatalogManager'));
+
+function ScreenFallback() {
+  return <div className="screen-fallback" role="status" aria-live="polite"><span aria-hidden="true"/>Chargement du module…</div>;
+}
+
 const tableConfig = {
-  Infrastructures: { table: 'infrastructures', fallback: infrastructuresJson, idField: 'support_id', labelField: 'emplacement_visibilite' },
-  'Campagnes et visuels': { table: 'campagnes_et_visuels', fallback: campagnesJson },
-  'Répertoire des affiches': { table: 'repertoire_des_affiches', fallback: repertoireJson },
-  'Communications opérationnelles': { table: 'communications_operationnelles', fallback: communicationsJson },
-  'Enjeux des cadres et supports': { table: 'enjeux_des_cadres_et_supports', fallback: enjeuxJson },
-  "Centres d’information": { table: 'centres_dinformation', fallback: ciJson },
-  'C.I. avec enjeux': { table: 'ci_avec_enjeux', fallback: ciEnjeuxJson },
-  'Liste des arrêts': { table: 'liste_des_arrets', fallback: arretsJson, idField: 'no_arret', labelField: 'emplacement_visibilite' },
-  'Voitures / trains': { table: 'voitures_trains', fallback: voituresJson },
-  Photos: { table: 'photos', fallback: photosJson },
-  'Bons de travail': { table: 'bons_de_travail', fallback: btJson },
-  'Historique des campagnes': { table: 'historique_des_campagnes', fallback: histoJson },
-  'Suivi des EDT': { table: 'suivi_des_edt', fallback: edtJson },
-  Utilisateurs: { table: 'utilisateurs', fallback: usersJson },
-  Clients: { table: 'clients', fallback: clientsJson },
-  'Journal des événements': { table: 'journal_des_evenements', fallback: journalJson }
+  Infrastructures: { table: 'infrastructures', fallback: () => import('./data/infrastructures.json').then(module => module.default), idField: 'support_id', labelField: 'emplacement_visibilite' },
+  'Campagnes et visuels': { table: 'campagnes_et_visuels', fallback: () => import('./data/campagnes_et_visuels.json').then(module => module.default) },
+  'Répertoire des affiches': { table: 'repertoire_des_affiches', fallback: () => import('./data/repertoire_des_affiches.json').then(module => module.default) },
+  'Communications opérationnelles': { table: 'communications_operationnelles', fallback: () => import('./data/communications_operationnelles.json').then(module => module.default) },
+  'Enjeux des cadres et supports': { table: 'enjeux_des_cadres_et_supports', fallback: () => import('./data/enjeux_des_cadres_et_supports.json').then(module => module.default) },
+  "Centres d’information": { table: 'centres_dinformation', fallback: () => import('./data/centres_dinformation.json').then(module => module.default) },
+  'C.I. avec enjeux': { table: 'ci_avec_enjeux', fallback: () => import('./data/c_i_avec_enjeux.json').then(module => module.default) },
+  'Liste des arrêts': { table: 'liste_des_arrets', fallback: () => import('./data/liste_des_arrets.json').then(module => module.default), idField: 'no_arret', labelField: 'emplacement_visibilite' },
+  'Voitures / trains': { table: 'voitures_trains', fallback: () => import('./data/voitures_trains.json').then(module => module.default) },
+  Photos: { table: 'photos', fallback: () => import('./data/photos.json').then(module => module.default) },
+  'Bons de travail': { table: 'bons_de_travail', fallback: () => import('./data/bons_de_travail.json').then(module => module.default) },
+  'Historique des campagnes': { table: 'historique_des_campagnes', fallback: () => import('./data/historique_des_campagnes.json').then(module => module.default) },
+  'Suivi des EDT': { table: 'suivi_des_edt', fallback: () => import('./data/suivi_des_edt.json').then(module => module.default) },
+  Utilisateurs: { table: 'utilisateurs', fallback: () => import('./data/utilisateurs.json').then(module => module.default) },
+  Clients: { table: 'clients', fallback: () => import('./data/clients.json').then(module => module.default) },
+  'Journal des événements': { table: 'journal_des_evenements', fallback: () => import('./data/journal_des_evenements.json').then(module => module.default) }
 };
 
 const icons = {
@@ -153,7 +143,7 @@ const ALWAYS_HIDDEN_COLUMNS = {
 };
 
 const getRows = (dataStore, name) =>
-  dataStore?.[name]?.rows || tableConfig[name]?.fallback || [];
+  dataStore?.[name]?.rows || [];
 
 const getCols = (rows, name) => {
   if (!rows?.length) return [];
@@ -220,6 +210,66 @@ function Dashboard({ setActive, dataStore }) {
 
 function Card({ title, value }) { return <div className="card"><ClipboardList/><span>{title}</span><strong>{Number(value || 0).toLocaleString('fr-CA')}</strong></div>; }
 
+function GridPagination({page,pageCount,pageSize,total,selectedCount,onPage,onPageSize}) {
+  const start=total ? (page-1)*pageSize+1 : 0;
+  const end=Math.min(total,page*pageSize);
+  const candidates=[1,page-1,page,page+1,pageCount].filter(value=>value>=1&&value<=pageCount);
+  const pages=[...new Set(candidates)].sort((a,b)=>a-b);
+  return <nav className="grid-pagination" aria-label="Pagination de la grille">
+    <div className="grid-pagination-summary"><strong>{start.toLocaleString('fr-CA')}–{end.toLocaleString('fr-CA')}</strong> sur {total.toLocaleString('fr-CA')}<span>{selectedCount.toLocaleString('fr-CA')} sélectionnée(s)</span></div>
+    <div className="grid-pagination-controls">
+      <button type="button" aria-label="Première page" disabled={page===1} onClick={()=>onPage(1)}><ChevronsLeft/></button>
+      <button type="button" aria-label="Page précédente" disabled={page===1} onClick={()=>onPage(page-1)}><ChevronLeft/></button>
+      {pages.map((value,index)=><React.Fragment key={value}>{index>0&&value-pages[index-1]>1&&<span>…</span>}<button type="button" className={value===page?'active':''} aria-current={value===page?'page':undefined} onClick={()=>onPage(value)}>{value}</button></React.Fragment>)}
+      <button type="button" aria-label="Page suivante" disabled={page===pageCount} onClick={()=>onPage(page+1)}><ChevronRight/></button>
+      <button type="button" aria-label="Dernière page" disabled={page===pageCount} onClick={()=>onPage(pageCount)}><ChevronsRight/></button>
+    </div>
+    <label>Lignes par page <select value={pageSize} onChange={event=>onPageSize(Number(event.target.value))}>{[25,50,100,200].map(value=><option key={value}>{value}</option>)}</select></label>
+  </nav>;
+}
+
+function ExecutiveDashboard({setActive,dataStore}) {
+  const infra=getRows(dataStore,'Infrastructures');
+  const campaigns=getRows(dataStore,'Campagnes et visuels');
+  const edt=getRows(dataStore,'Suivi des EDT');
+  const photos=getRows(dataStore,'Photos');
+  const issues=getRows(dataStore,'Enjeux des cadres et supports');
+  const work=getRows(dataStore,'Bons de travail');
+  const journal=getRows(dataStore,'Journal des événements');
+  const activeInfra=infra.filter(row=>![false,'false','inactif','inactive'].includes(typeof row.actif==='string'?normalize(row.actif):row.actif)).length;
+  const activeCampaigns=campaigns.filter(row=>['active','actif','en cours'].includes(normalize(row.statut_campagne||row.statut))).length;
+  const plannedInstalls=edt.filter(row=>['planifie','planifiee','brouillon'].includes(normalize(row.statut))).length;
+  const inspections=photos.filter(row=>normalize(row.action||row.type_photo).includes('inspection')).length;
+  const openIssues=issues.filter(row=>!['ferme','fermee','resolu','resolue','annule'].includes(normalize(row.statut))).length;
+  const urgentWork=work.filter(row=>normalize(row.priorite).includes('urgent')&&!['termine','ferme','annule'].includes(normalize(row.statut))).length;
+  const missingPhotos=infra.filter(row=>!thumbnailForInfrastructure(row)).length;
+  const metrics=[
+    ['Supports actifs',activeInfra,'Infrastructures',ClipboardList],
+    ['Campagnes actives',activeCampaigns,'Campagnes maîtres',BarChart3],
+    ['Installations prévues',plannedInstalls,'Suivi des EDT',CalendarClock],
+    ['Inspections',inspections,'Photos et inventaire',ShieldCheck],
+    ['Enjeux ouverts',openIssues,'Enjeux des cadres et supports',AlertTriangle],
+    ['Travaux urgents',urgentWork,'Bons de travail',Bell],
+    ['Synchronisations Terrain',null,'Diagnostic terrain',History],
+    ['Photos manquantes',missingPhotos,'Infrastructures',Camera]
+  ];
+  const recent=[...journal].sort((a,b)=>String(b.created_at||b.date||'').localeCompare(String(a.created_at||a.date||''))).slice(0,6);
+  const priorities=[
+    urgentWork>0&&`${urgentWork} bon(s) de travail urgent(s) à traiter`,
+    openIssues>0&&`${openIssues} enjeu(x) ouvert(s) à examiner`,
+    missingPhotos>0&&`${missingPhotos} support(s) sans photo`,
+    plannedInstalls>0&&`${plannedInstalls} installation(s) planifiée(s)`
+  ].filter(Boolean);
+  return <div className="dashboard executive-dashboard">
+    <header className="executive-hero"><div className="hero-brand"><BrandLogo priority/><div><span className="eyebrow">Centre de pilotage</span><h1>Vue exécutive</h1><p>État opérationnel consolidé à partir des données disponibles.</p></div></div><div className="executive-status"><span className="status-dot"/> Données {dataStore?.__sync_error__?'partiellement disponibles':'synchronisées'}</div></header>
+    <section className="executive-kpis" aria-label="Indicateurs clés">{metrics.map(([label,value,target,Icon])=><button key={label} className="executive-kpi" onClick={()=>setActive(target)}><span><Icon/>{label}</span><strong>{value==null?'Non disponible':value.toLocaleString('fr-CA')}</strong><small>Ouvrir le module</small></button>)}</section>
+    <section className="executive-layout">
+      <article className="executive-panel executive-activity"><header><div><span className="eyebrow">Temps réel</span><h2>Activité récente</h2></div><History/></header>{recent.length?<ol>{recent.map((item,index)=><li key={item.id||index}><span className="activity-marker"/><div><strong>{item.action||item.type_evenement||item.evenement||'Événement'}</strong><p>{item.description||item.details||item.message||'Détail non disponible'}</p></div><time>{item.created_at||item.date||'—'}</time></li>)}</ol>:<div className="executive-empty">Aucune activité récente disponible.</div>}</article>
+      <div className="executive-stack"><article className="executive-panel"><header><div><span className="eyebrow">À surveiller</span><h2>Priorités</h2></div><Bell/></header>{priorities.length?<ul className="priority-list">{priorities.map(item=><li key={item}>{item}</li>)}</ul>:<div className="executive-empty">Aucune priorité calculable.</div>}</article><article className="executive-panel"><header><div><span className="eyebrow">Navigation</span><h2>Accès rapides</h2></div></header><div className="quick-actions">{[['Application terrain','Terrain'],['Carte interactive','Carte'],['Infrastructures','Supports'],['Rapports finaux','Rapports']].map(([target,label])=><button key={target} onClick={()=>setActive(target)}>{label}<ChevronRight/></button>)}</div></article></div>
+    </section>
+  </div>;
+}
+
 function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpdated }) {
   const rows = getRows(dataStore, name);
   const config = tableConfig[name];
@@ -242,13 +292,19 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   const [drafts, setDrafts] = useState({});
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [selectedRows, setSelectedRows] = useState(()=>new Set());
 
   const filtered = useMemo(() => rows
     .filter(r => strictMatches(r, query, cols))
     .filter(r => Object.entries(filters).every(([c, v]) => !v || normalize(r[c]).includes(normalize(v)))), [rows, query, filters, cols]);
   const sorted = useMemo(() => sortRows(filtered, sortState), [filtered, sortState]);
   const sortedComplete = useMemo(() => sortRows(rows, sortState), [rows, sortState]);
-  const shown = sorted.slice(0, 200);
+  const pageCount = Math.max(1,Math.ceil(sorted.length/pageSize));
+  const currentPage = Math.min(page,pageCount);
+  const shown = sorted.slice((currentPage-1)*pageSize,currentPage*pageSize);
+  const selectedFiltered = sorted.filter((row,index)=>selectedRows.has(rowToken(row,index)));
   const hasMapColumn = name === 'Infrastructures';
   const canEdit = role === 'Administrateur';
   const exportLabels = Object.fromEntries(cols.map(column=>[column,columnLabel(name,column)]));
@@ -259,6 +315,8 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
     if (sortState) sessionStorage.setItem(key, JSON.stringify(sortState));
     else sessionStorage.removeItem(key);
   }, [name, sortState]);
+
+  useEffect(()=>setPage(1),[query,filters,sortState,pageSize,name]);
 
   function rowToken(row, index) {
     try {
@@ -311,9 +369,9 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   return <div className="tablePage">
     <header className="pageHead"><div><h1>{icons[name] || '📋'} {name}</h1><p>{filtered.length.toLocaleString('fr-CA')} résultat(s) sur {rows.length.toLocaleString('fr-CA')} ligne(s). Source : {sourceLabel(dataStore, name)}.</p></div><div className="actions">
       {canEdit && !gridEditing && <button onClick={() => { setGridEditing(true); setMessage(''); }}><Edit3/> Modifier la grille</button>}
-      <button onClick={() => downloadCSV(professionalExportName(name,'csv'), sortedComplete, cols.map(key=>({key,label:exportLabels[key]})))}><Download/> CSV complet trié</button>
-      <button onClick={() => downloadExcel(professionalExportName(name,'xlsx'), sorted, cols, {...exportOptions,exportType:'Grille visible'})}><FileSpreadsheet/> Excel affiché</button>
-      <button onClick={() => downloadPDF(professionalExportName(name,'pdf'), `${name} — résultats`, sorted, cols, exportOptions)}><FileText/> PDF affiché</button>
+      <button onClick={() => downloadCSV(professionalExportName(name,'csv'), hasMapColumn?shown:sortedComplete, cols.map(key=>({key,label:exportLabels[key]})))}><Download/> CSV {hasMapColumn?'page visible':'complet trié'}</button>
+      {hasMapColumn&&<button disabled={!selectedFiltered.length} onClick={() => downloadExcel(professionalExportName(name,'xlsx'), selectedFiltered, cols, {...exportOptions,exportType:'Sélection'})}><FileSpreadsheet/> Excel sélection ({selectedFiltered.length})</button>}
+      <button onClick={() => downloadPDF(professionalExportName(name,'pdf'), `${name} — résultats filtrés`, sorted, cols, exportOptions)}><FileText/> PDF ensemble filtré</button>
     </div></header>
 
     {gridEditing && <div className="grid-edit-toolbar">
@@ -325,11 +383,12 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
     {message && <div className="v07-message">{message}</div>}
 
     <div className="searchbar"><Search/><input placeholder="Recherche exacte dans toutes les colonnes..." value={query} onChange={e => setQuery(e.target.value)}/></div>
-    <div className="tableWrap professional-grid"><table><thead><tr>{hasMapColumn && <th className="action-column">Carte</th>}{cols.map(c => <GridColumnHeader key={c} column={c} label={columnLabel(name,c)} rows={filtered} filterValue={filters[c]} onFilter={value=>setFilters({...filters,[c]:value})} sortState={sortState} onSort={setSortState} onReset={()=>setSortState(null)}/>)}</tr></thead><tbody>{shown.map((r, i) => {
-      const token = rowToken(r, i);
+    <div className="tableWrap professional-grid"><table><thead><tr>{hasMapColumn&&<th className="selection-column"><input type="checkbox" aria-label="Sélectionner la page" checked={shown.length>0&&shown.every((row,index)=>selectedRows.has(rowToken(row,(currentPage-1)*pageSize+index)))} onChange={event=>setSelectedRows(current=>{const next=new Set(current);shown.forEach((row,index)=>{const token=rowToken(row,(currentPage-1)*pageSize+index);event.target.checked?next.add(token):next.delete(token)});return next})}/></th>}{hasMapColumn && <th className="action-column">Carte</th>}{cols.map(c => <GridColumnHeader key={c} column={c} label={columnLabel(name,c)} rows={filtered} filterValue={filters[c]} onFilter={value=>setFilters({...filters,[c]:value})} sortState={sortState} onSort={setSortState} onReset={()=>setSortState(null)}/>)}</tr></thead><tbody>{shown.map((r, i) => {
+      const token = rowToken(r, (currentPage-1)*pageSize+i);
       const supportId = r.support_id || r['Support ID'] || '';
       const mapUrl = infrastructureMapUrl(r);
       return <tr key={token} className={drafts[token] ? 'editing-row' : ''} onClick={() => !gridEditing && setSelected(r)}>
+        {hasMapColumn&&<td className="selection-column" onClick={event=>event.stopPropagation()}><input type="checkbox" aria-label={`Sélectionner ${supportId}`} checked={selectedRows.has(token)} onChange={()=>setSelectedRows(current=>{const next=new Set(current);next.has(token)?next.delete(token):next.add(token);return next})}/></td>}
         {hasMapColumn && <td>
           {mapUrl
             ? <button className="table-map-button" title={`Ouvrir ${supportId} sur la carte`} onClick={event => {
@@ -349,6 +408,7 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
         })}
       </tr>;
     })}</tbody></table></div>
+    {hasMapColumn&&<GridPagination page={currentPage} pageCount={pageCount} pageSize={pageSize} total={sorted.length} selectedCount={selectedRows.size} onPage={setPage} onPageSize={setPageSize}/>}
     {selected && <Detail name={name} row={selected} role={role} config={config} onSaved={updated => { onRowsUpdated(name, [updated]); setSelected(updated); }} onClose={() => setSelected(null)} onOpenMap={onOpenMap}/>}
   </div>;
 }
@@ -462,7 +522,7 @@ function ServiceConfigurationError() {
   return (
     <div className="production-login-page">
       <div className="production-login-card">
-        <div className="production-login-logo">TOS<span>Display Manager</span></div>
+        <div className="production-login-logo"><BrandLogo priority/><span>Display Manager</span></div>
         <div className="production-login-icon"><ShieldCheck size={30}/></div>
         <h1>Service temporairement indisponible</h1>
         <p>La connexion sécurisée à votre espace ne peut pas être établie pour le moment.</p>
@@ -581,6 +641,7 @@ function App() {
 
   const items = [
     'Tableau de bord',
+    'Centre de commandement',
     ...(role === 'Administrateur' ? ['Gestionnaire des champs'] : []),
     ...adminItems,
     'Carte interactive',
@@ -634,7 +695,7 @@ function App() {
       </div>
     </div>
   );
-  if (!session) return <ProductionLogin/>;
+  if (!session) return <Suspense fallback={<ScreenFallback/>}><ProductionLogin/></Suspense>;
 
   if (session && profile && requiresAccountActivation(session, profile)) {
     return <AccountActivation session={session} profile={profile} onActivated={async () => {
@@ -657,7 +718,7 @@ function App() {
   }
 
   if (role === 'Installateur') {
-    return <InstallerTerrainShell
+    return <Suspense fallback={<ScreenFallback/>}><InstallerTerrainShell
       dataStore={dataStore}
       role={role}
       session={session}
@@ -666,11 +727,12 @@ function App() {
         setSession(null);
         setProfile(null);
       }}
-    />;
+    /></Suspense>;
   }
 
   let content;
-  if (active === 'Tableau de bord') content = <Dashboard setActive={setActive} dataStore={dataStore}/>;
+  if (active === 'Tableau de bord') content = <ExecutiveDashboard setActive={setActive} dataStore={dataStore}/>;
+  else if (active === 'Centre de commandement') content = <OperationalCommandCenter dataStore={dataStore} onNavigate={setActive}/>;
   else if (active === 'Connexion') content = <LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>;
   else if (active === 'Administration') content = <AdminPanel role={role} currentRole={role} session={session}/>;
   else if (active === 'Gestionnaire des champs') content = <FieldCatalogManager role={role}/>;
@@ -700,7 +762,7 @@ function App() {
       {items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Édition — Historique' ? '🕘' : it === 'Photos et inventaire' ? '🖼️' : it === 'Centre EDT et BT' ? '🛠️' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Automatisations' ? '🤖' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}
       <button className="sidebar-logout" onClick={logoutFromPortal}><LogOut size={17}/> Déconnexion</button>
     </aside>
-    <main>{dataStore?.__sync_error__&&<div className="sync-error-banner"><strong>Données momentanément indisponibles</strong><span>La dernière mise à jour n’a pas pu être chargée.</span><button onClick={refreshDataStore}>Réessayer</button></div>}{content}</main>
+    <main>{dataStore?.__sync_error__&&<div className="sync-error-banner"><strong>Données momentanément indisponibles</strong><span>La dernière mise à jour n’a pas pu être chargée.</span><button onClick={refreshDataStore}>Réessayer</button></div>}<Suspense fallback={<ScreenFallback/>}>{content}</Suspense></main>
   </div>;
 }
 

@@ -18,7 +18,9 @@ export async function loadOperationsData() {
     historyResult,
     usersResult,
     edtSupportsResult,
-    dashboardResult
+    dashboardResult,
+    campaignsResult,
+    reportsResult
   ] = await Promise.all([
     supabase.from('suivi_des_edt').select('*').order('date_debut', { ascending: false, nullsFirst: false }),
     supabase.from('bons_de_travail').select('*').order('date_cible', { ascending: true, nullsFirst: false }),
@@ -28,7 +30,9 @@ export async function loadOperationsData() {
     supabase.from('operations_history').select('*').order('created_at', { ascending: false }).limit(500),
     supabase.from('utilisateurs').select('id,nom,courriel,role,statut').order('nom'),
     supabase.from('edt_supports').select('*').order('updated_at', { ascending: false }),
-    supabase.rpc('tableau_bord_edt_v0129', { p_edt_id: null })
+    supabase.rpc('tableau_bord_edt_v0129', { p_edt_id: null }),
+    supabase.from('campagnes_maitres').select('id,code_campagne,nom_campagne,date_debut,date_fin,statut').order('date_fin',{ascending:false,nullsFirst:false}),
+    supabase.from('edt_phase_reports').select('*').order('version',{ascending:false})
   ]);
 
   for (const result of [
@@ -40,7 +44,9 @@ export async function loadOperationsData() {
     historyResult,
     usersResult,
     edtSupportsResult,
-    dashboardResult
+    dashboardResult,
+    campaignsResult,
+    reportsResult
   ]) {
     if (result.error) throw result.error;
   }
@@ -54,18 +60,27 @@ export async function loadOperationsData() {
     history: historyResult.data || [],
     users: usersResult.data || [],
     edtSupports: edtSupportsResult.data || [],
-    dashboard: dashboardResult.data || []
+    dashboard: dashboardResult.data || [],
+    campaigns: campaignsResult.data || [],
+    phaseReports: reportsResult.data || []
   };
 }
 
 export async function createEdt(payload) {
   ensureSupabase();
+  if (!payload.campagne_id) throw new Error('Une campagne valide est obligatoire.');
+  const {data:campaign,error:campaignError}=await supabase.from('campagnes_maitres').select('id,nom_campagne,date_fin').eq('id',payload.campagne_id).single();
+  if(campaignError)throw campaignError;
+  if(!campaign?.date_fin)throw new Error('La campagne doit avoir une date de fin.');
   const { data, error } = await supabase
     .from('suivi_des_edt')
     .insert({
       no_edt: payload.no_edt?.trim() || `EDT-${Date.now()}`,
       nom: payload.nom?.trim() || payload.campagne?.trim() || 'Nouvel EDT',
-      campagne: payload.campagne?.trim() || null,
+      campagne_id: Number(payload.campagne_id),
+      campagne: campaign.nom_campagne,
+      lifecycle_status: payload.lifecycle_status || 'brouillon',
+      retrait_date_proposee: campaign.date_fin,
       client: payload.client?.trim() || null,
       statut: payload.statut || 'Planifié',
       priorite: payload.priorite || 'Normale',
@@ -372,8 +387,15 @@ export async function updateEdtSupport(id, patch) {
     .select()
     .single();
   if (error) throw error;
+  await initializeEdtLifecycle(data.id,campaign.id);
   return data;
 }
+
+export async function initializeEdtLifecycle(edtId,campaignId){ensureSupabase();const{data,error}=await supabase.rpc('initialiser_cycle_edt_v132p1',{p_edt_id:Number(edtId),p_campagne_id:Number(campaignId)});if(error)throw error;return data;}
+export async function transitionEdtPhase(phaseId,action,{comment='',anomalies=[],photoException='',dateException=''}={}){ensureSupabase();const{data,error}=await supabase.rpc('transition_phase_edt_v132p1',{p_phase_id:Number(phaseId),p_action:action,p_commentaire:comment||null,p_anomalies:anomalies,p_photo_exception:photoException||null,p_exception_date:dateException||null});if(error)throw error;return data;}
+export async function scheduleEdtRemoval(phaseId,date,justification=''){ensureSupabase();const{data,error}=await supabase.rpc('planifier_retrait_edt_v132p1',{p_phase_id:Number(phaseId),p_date:date,p_justification:justification||null});if(error)throw error;return data;}
+export async function closeEdtLifecycle(edtId,reason=''){ensureSupabase();const{data,error}=await supabase.rpc('fermer_edt_v132p1',{p_edt_id:Number(edtId),p_motif:reason||null});if(error)throw error;return data;}
+export async function markPhaseReportSent(reportId,recipient,providerMessageId=null){ensureSupabase();const{data,error}=await supabase.rpc('marquer_rapport_phase_envoye_v132p1',{p_report_id:Number(reportId),p_recipient:recipient,p_provider_message_id:providerMessageId});if(error)throw error;return data;}
 
 export async function diagnoseEdtIntegrity(edtId = null) {
   ensureSupabase();

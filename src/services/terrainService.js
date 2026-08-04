@@ -1,4 +1,5 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
+import { prepareAndUploadPhoto, rollbackUploadedPhoto } from './photoWorkflowService';
 
 const QUEUE_KEY = 'tos-terrain-offline-queue-v1';
 
@@ -21,7 +22,7 @@ export function queueInspection(payload) {
   setOfflineQueue(items);
 }
 
-export async function uploadTerrainPhoto(file, supportId, action = 'inspection') {
+async function uploadTerrainPhotoLegacy(file, supportId, action = 'inspection') {
   if (!supabaseConfigured || !supabase) {
     throw new Error('Supabase n’est pas configuré.');
   }
@@ -40,6 +41,17 @@ export async function uploadTerrainPhoto(file, supportId, action = 'inspection')
   const { data } = supabase.storage.from('terrain-photos').getPublicUrl(path);
   return { path, publicUrl: data?.publicUrl || '' };
 }
+
+export async function uploadTerrainPhoto(file, supportId, action = 'inspection', context = {}) {
+  const uploaded = await prepareAndUploadPhoto(file, {
+    supportId, type:action === 'photo' ? 'autre' : action,
+    campaignCode:context.campaignCode || 'NONE', edt:context.edt || 'NONE',
+    capturedAt:context.capturedAt, source:context.source || 'terrain'
+  }, 'terrain-photos');
+  return { ...uploaded, path:uploaded.storagePath };
+}
+
+export { rollbackUploadedPhoto };
 
 
 export async function registerTerrainSupportPhoto({
@@ -119,7 +131,10 @@ export async function saveInspection(payload, file = null) {
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    if (photo) await rollbackUploadedPhoto(photo);
+    throw error;
+  }
   return { queued: false, data };
 }
 

@@ -12,6 +12,7 @@ import {
   Users
 } from 'lucide-react';
 import EdtEnterprisePanel from './EdtEnterprisePanel';
+import EdtLifecyclePanel from './EdtLifecyclePanel';
 import SortableHeader from './SortableHeader';
 import useSortableRows from '../hooks/useSortableRows';
 import { friendlyError } from '../config/businessLanguage';
@@ -34,6 +35,8 @@ const emptyEdt = {
   no_edt: '',
   nom: '',
   campagne: '',
+  campagne_id: '',
+  lifecycle_status: 'brouillon',
   client: '',
   statut: 'Planifié',
   priorite: 'Normale',
@@ -82,6 +85,7 @@ export default function OperationsCenter({ role }) {
     users: [],
     edtSupports: [],
     dashboard: []
+    ,campaigns: [], phaseReports: []
   });
   const [selectedEdtId, setSelectedEdtId] = useState('');
   const [edtForm, setEdtForm] = useState(emptyEdt);
@@ -235,7 +239,7 @@ export default function OperationsCenter({ role }) {
               <h2><Plus/> {edtForm.id ? 'Modifier l’EDT' : 'Créer un EDT'}</h2>
               <label>No EDT<input value={edtForm.no_edt} onChange={e => setEdtForm({...edtForm, no_edt:e.target.value})}/></label>
               <label>Nom<input value={edtForm.nom} onChange={e => setEdtForm({...edtForm, nom:e.target.value})}/></label>
-              <label>Campagne<input value={edtForm.campagne} onChange={e => setEdtForm({...edtForm, campagne:e.target.value})}/></label>
+              <label>Campagne<select required value={edtForm.campagne_id||''} onChange={e=>{const campaign=data.campaigns.find(item=>String(item.id)===e.target.value);setEdtForm({...edtForm,campagne_id:e.target.value,campagne:campaign?.nom_campagne||''})}}><option value="">Choisir une campagne</option>{data.campaigns.map(item=><option key={item.id} value={item.id} disabled={!item.date_fin}>{item.nom_campagne} — fin {item.date_fin||'absente'}</option>)}</select></label>
               <label>Client<input value={edtForm.client} onChange={e => setEdtForm({...edtForm, client:e.target.value})}/></label>
               <label>Statut<select value={edtForm.statut} onChange={e => setEdtForm({...edtForm, statut:e.target.value})}>
                 {['Planifié','En préparation','En cours','En attente','Terminé','Annulé'].map(item => <option key={item}>{item}</option>)}
@@ -313,6 +317,10 @@ export default function OperationsCenter({ role }) {
                 </div>
               </div>
             </section>
+          )}
+
+          {selectedEdt && (
+            <EdtLifecyclePanel edt={selectedEdt} data={data} canManage={canManage} busy={busy} run={run}/>
           )}
 
           {selectedEdt && (

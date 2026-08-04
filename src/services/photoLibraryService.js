@@ -4,6 +4,7 @@ import { friendlyError } from '../config/businessLanguage';
 import {
   normalizeStoragePath, storageLocationFromPhotoRecord, storagePathFromPhotoRecord
 } from '../lib/photoDeletion';
+import { prepareAndUploadPhoto, insertPhotoWithRollback } from './photoWorkflowService';
 
 const ready = () => {
   if (!supabaseConfigured || !supabase) throw new Error('Supabase n’est pas configuré.');
@@ -19,7 +20,7 @@ export function detectLegacyPhotoMetadata(name, ids = []) {
   return { supportId:id, date:m?`${m[1]}-${m[2]||'01'}-${m[3]||'01'}`:'', confidence:id?(m?'Élevée':'Moyenne'):'Faible' };
 }
 
-export async function importLegacyPhoto({file,supportId,date,userEmail,sequence=1}) {
+async function importLegacyPhotoPrevious({file,supportId,date,userEmail,sequence=1}) {
   ready();
   const d=date?new Date(`${date}T12:00:00`):new Date(file.lastModified||Date.now());
   const ext=file.name.split('.').pop()||'jpg';
@@ -45,6 +46,18 @@ export async function listSupportPhotos(supportId) {
 
 export function storagePathFromPhoto(photo) {
   return storagePathFromPhotoRecord(photo);
+}
+
+export async function importLegacyPhoto({file,supportId,date,userEmail,sequence=1}) {
+  ready();
+  const capturedAt=date?new Date(`${date}T12:00:00`):new Date(file.lastModified||Date.now());
+  const uploaded=await prepareAndUploadPhoto(file,{
+    supportId,capturedAt,type:'historique',sequence,campaignCode:'NONE',edt:'NONE'
+  },'support-photos');
+  return insertPhotoWithRollback(uploaded,{
+    supportId,source:'import_historique',userEmail,uploadedBy:userEmail,status:'active',
+    metadata:{legacy:true}
+  });
 }
 
 export { normalizeStoragePath };
@@ -279,6 +292,16 @@ export async function downloadPhoto(photo) {
   a.download=safeFileName(photo.nom_fichier || `photo-${photo.id}.jpg`);
   document.body.appendChild(a); a.click(); a.remove();
   URL.revokeObjectURL(a.href);
+}
+
+export function downloadPhotoHistoryCsv(photos, supportId) {
+  const fields=['support_id','captured_at','uploaded_at','type_photo','campagne_id','edt_id','source','utilisateur','status','nom_fichier','storage_bucket','storage_path'];
+  const quote=value=>`"${String(value??'').replace(/"/g,'""')}"`;
+  const csv=[fields.join(','),...(photos||[]).map(row=>fields.map(field=>quote(row[field])).join(','))].join('\r\n');
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  link.download=`${safeFileName(supportId)}-historique-photos.csv`;
+  document.body.appendChild(link);link.click();link.remove();
 }
 
 export async function downloadPhotosZip(photos, supportId, onProgress=()=>{}) {

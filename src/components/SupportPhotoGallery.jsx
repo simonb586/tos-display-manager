@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CheckSquare, Download, Image, Square, Star, Trash2, X } from 'lucide-react';
 import {
-  deleteSupportPhoto, deleteSupportPhotos, downloadPhoto, downloadPhotosZip,
+  deleteSupportPhoto, deleteSupportPhotos, downloadPhoto, downloadPhotosZip, downloadPhotoHistoryCsv,
   listSupportPhotos, makeSupportPhotoPrimary
 } from '../services/photoLibraryService';
 import { friendlyError } from '../config/businessLanguage';
@@ -12,7 +12,7 @@ export default function SupportPhotoGallery({ supportId, canDelete=false, canMan
   const [checked,setChecked]=useState({});
   const [message,setMessage]=useState('');
   const [busy,setBusy]=useState(false);
-  const [filter,setFilter]=useState({type:'',status:'',text:''});
+  const [filter,setFilter]=useState({type:'',status:'',campaign:'',edt:'',source:'',text:''});
 
   const refresh=useCallback(async()=>{
     if(!supportId)return;
@@ -27,12 +27,18 @@ export default function SupportPhotoGallery({ supportId, canDelete=false, canMan
     const text=`${photo.nom_fichier||''} ${photo.type_photo||''} ${photo.statut_validation||''}`.toLowerCase();
     return (!filter.type||photo.type_photo===filter.type)
       &&(!filter.status||photo.statut_validation===filter.status)
+      &&(!filter.campaign||String(photo.campagne_id||'')===filter.campaign)
+      &&(!filter.edt||String(photo.edt_id||'')===filter.edt)
+      &&(!filter.source||String(photo.source||'')===filter.source)
       &&(!filter.text||text.includes(filter.text.toLowerCase()));
   }),[photos,filter]);
 
   const selectedPhotos=photos.filter(p=>checked[p.id]);
   const types=[...new Set(photos.map(p=>p.type_photo).filter(Boolean))];
   const statuses=[...new Set(photos.map(p=>p.statut_validation).filter(Boolean))];
+  const campaigns=[...new Set(photos.map(p=>String(p.campagne_id||'')).filter(Boolean))];
+  const edts=[...new Set(photos.map(p=>String(p.edt_id||'')).filter(Boolean))];
+  const sources=[...new Set(photos.map(p=>String(p.source||'')).filter(Boolean))];
 
   async function run(label,action){
     setBusy(true);setMessage('');
@@ -55,6 +61,7 @@ export default function SupportPhotoGallery({ supportId, canDelete=false, canMan
     <div className="support-gallery-heading">
       <div><h3><Image size={18}/> Galerie du support</h3><small>{photos.length} photo(s)</small></div>
       <div className="support-gallery-toolbar">
+        <button type="button" disabled={!photos.length} onClick={()=>downloadPhotoHistoryCsv(filtered,supportId)}><Download size={16}/> Historique CSV</button>
         <button type="button" disabled={busy||!photos.length} onClick={()=>run('Téléchargement ZIP lancé.',()=>downloadPhotosZip(selectedPhotos.length?selectedPhotos:filtered,supportId))}><Download size={16}/> ZIP</button>
         {canDelete&&<button type="button" className="danger" disabled={busy||!selectedPhotos.length} onClick={removeSelected}><Trash2 size={16}/> Supprimer la sélection ({selectedPhotos.length})</button>}
       </div>
@@ -64,6 +71,9 @@ export default function SupportPhotoGallery({ supportId, canDelete=false, canMan
       <input placeholder="Rechercher une photo…" value={filter.text} onChange={e=>setFilter({...filter,text:e.target.value})}/>
       <select value={filter.type} onChange={e=>setFilter({...filter,type:e.target.value})}><option value="">Tous les types</option>{types.map(x=><option key={x}>{x}</option>)}</select>
       <select value={filter.status} onChange={e=>setFilter({...filter,status:e.target.value})}><option value="">Tous les statuts</option>{statuses.map(x=><option key={x}>{x}</option>)}</select>
+      <select value={filter.campaign} onChange={e=>setFilter({...filter,campaign:e.target.value})}><option value="">Toutes les campagnes</option>{campaigns.map(x=><option key={x}>{x}</option>)}</select>
+      <select value={filter.edt} onChange={e=>setFilter({...filter,edt:e.target.value})}><option value="">Tous les EDT</option>{edts.map(x=><option key={x}>{x}</option>)}</select>
+      <select value={filter.source} onChange={e=>setFilter({...filter,source:e.target.value})}><option value="">Toutes les sources</option>{sources.map(x=><option key={x}>{x}</option>)}</select>
     </div>
 
     {message&&<p className="v07-message" role="status">{message}</p>}

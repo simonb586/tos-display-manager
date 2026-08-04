@@ -22,8 +22,9 @@ export async function loadAllRows(tableName, pageSize = PAGE_SIZE) {
 }
 
 export async function loadTable(tableName, fallbackData = []) {
+  const resolveFallback = async () => typeof fallbackData === 'function' ? await fallbackData() : fallbackData;
   if (!supabaseConfigured || !supabase) {
-    return { rows: fallbackData, source: 'json', error: null, complete: true };
+    return { rows: await resolveFallback(), source: 'json', error: null, complete: true };
   }
   try {
     const rows = await loadAllRows(tableName);
@@ -36,7 +37,7 @@ export async function loadTable(tableName, fallbackData = []) {
     if (allowFallback) {
       console.warn(`[TDM] Fallback JSON de développement pour ${tableName}:`, error.message);
       return {
-        rows: fallbackData,
+        rows: await resolveFallback(),
         source: 'json-dev-fallback',
         error,
         complete: false

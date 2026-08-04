@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, ClipboardList, History, Image, ListChecks } from 'lucide-react';
+import { Activity, AlertTriangle, ClipboardList, History, Image, ListChecks } from 'lucide-react';
 import SupportPhotoGallery from './SupportPhotoGallery';
 import { loadSupport360 } from '../services/support360Service';
 import SortableHeader from './SortableHeader';
@@ -25,6 +25,7 @@ export default function Support360Panel({supportId,role}) {
     ['edt',ListChecks,'EDT'],
     ['issues',AlertTriangle,'Enjeux et inspections'],
     ['orders',ClipboardList,'Bons de travail'],
+    ['activity',Activity,'Activité'],
   ];
   return <section className="support360-module">
     <div className="support360-tabs">{tabs.map(([id,Icon,label])=><button type="button" key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}><Icon size={16}/>{label}</button>)}</div>
@@ -34,5 +35,6 @@ export default function Support360Panel({supportId,role}) {
     {tab==='edt'&&<DataTable rows={data.edtLinks} empty="Aucun EDT associé à ce support."/>}
     {tab==='issues'&&<><h3>Enjeux</h3><DataTable rows={data.issues} empty="Aucun enjeu."/><h3>Inspections</h3><DataTable rows={data.inspections} empty="Aucune inspection."/></>}
     {tab==='orders'&&<DataTable rows={data.workOrders} empty="Aucun bon de travail."/>}
+    {tab==='activity'&&<DataTable rows={data.logs} empty="Aucune activité photo consignée."/>}
   </section>;
 }
