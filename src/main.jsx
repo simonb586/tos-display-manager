@@ -22,6 +22,7 @@ import './features/v12/account-activation.css';
 import './features/v12/installer-terrain-shell.css';
 import './features/v13/automation-assistant.css';
 import './features/v13/grid-sorting.css';
+import './features/v13/field-catalog.css';
 
 import manifest from './data/manifest.json';
 import infrastructuresJson from './data/infrastructures.json';
@@ -80,6 +81,8 @@ import AccountActivation from './components/AccountActivation';
 import InstallerTerrainShell from './components/InstallerTerrainShell';
 import TerrainSyncDiagnostics from './components/TerrainSyncDiagnostics';
 import AutomationAssistant from './components/AutomationAssistant';
+import FieldCatalogManager from './components/FieldCatalogManager';
+import BrandLogo from './components/BrandLogo';
 import { infrastructureMapUrl } from './services/mapService';
 import { getCurrentProfile } from './services/authProfileService';
 import { getRoleVisibility, canSeeTable, columnsForTable } from './services/roleVisibilityService';
@@ -199,7 +202,7 @@ function Dashboard({ setActive, dataStore }) {
 
   return <div className="dashboard">
     <div className="hero">
-      <div><h1>TOS Display Manager</h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div>
+      <div className="hero-brand"><BrandLogo/><div><h1>TOS Display Manager</h1><p>Données, campagnes, relations, terrain, photos et validation système.</p></div></div>
       <div className="badge"><ShieldCheck/> Espace opérationnel sécurisé</div>
     </div>
     <div className="cards"><Card title="Infrastructures" value={infrastructures.length}/><Card title="Arrêts" value={arrets.length}/><Card title="EDT" value={edt.length}/><Card title="Bons de travail" value={bt.length}/></div>
@@ -578,6 +581,7 @@ function App() {
 
   const items = [
     'Tableau de bord',
+    ...(role === 'Administrateur' ? ['Gestionnaire des champs'] : []),
     ...adminItems,
     'Carte interactive',
     'Application terrain',
@@ -669,6 +673,7 @@ function App() {
   if (active === 'Tableau de bord') content = <Dashboard setActive={setActive} dataStore={dataStore}/>;
   else if (active === 'Connexion') content = <LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>;
   else if (active === 'Administration') content = <AdminPanel role={role} currentRole={role} session={session}/>;
+  else if (active === 'Gestionnaire des champs') content = <FieldCatalogManager role={role}/>;
   else if (active === 'Utilisateurs réels') content = <UserProvisioningPanel role={role}/>;
   else if (active === 'Édition — Historique') content = <ChangeHistoryPanel role={role}/>;
   else if (active === 'Photos et inventaire') content = <PhotoInventoryCenter role={role}/>;
@@ -690,7 +695,7 @@ function App() {
   return <div className="app">
     <GlobalButtonFeedback/>
     <aside>
-      <div className="brand">TOS<span>Display Manager</span></div>
+      <div className="brand"><BrandLogo priority/><span>Display Manager</span></div>
       <span className="role-badge">{profile?.nom || session?.user?.email}<br/>{role}</span>
       {items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Édition — Historique' ? '🕘' : it === 'Photos et inventaire' ? '🖼️' : it === 'Centre EDT et BT' ? '🛠️' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Automatisations' ? '🤖' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}
       <button className="sidebar-logout" onClick={logoutFromPortal}><LogOut size={17}/> Déconnexion</button>

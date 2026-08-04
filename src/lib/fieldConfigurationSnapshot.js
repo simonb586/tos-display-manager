@@ -1,0 +1,3 @@
+import{resolveFieldConfiguration}from'./fieldConfigurationResolver.js';
+export function createFieldConfigurationSnapshot(field={},context={}){return{snapshotVersion:'1.0.0',createdAt:context.createdAt||new Date(0).toISOString(),createdBy:context.createdBy||null,persisted:false,activationAllowed:false,field:{id:field.fieldId||null,table:field.tableName||field.table_name||null,name:field.technicalName||field.field_name||null},resolution:resolveFieldConfiguration(field)}}
+export const serializeFieldConfigurationSnapshot=(field,context)=>JSON.stringify(createFieldConfigurationSnapshot(field,context),null,2);

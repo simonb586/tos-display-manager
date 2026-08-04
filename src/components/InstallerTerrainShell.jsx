@@ -4,11 +4,11 @@ import {
   Cloud,
   CloudOff,
   LogOut,
-  RefreshCw,
-  Smartphone
+  RefreshCw
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import TerrainApp from './TerrainApp';
+import BrandLogo from './BrandLogo';
 
 export default function InstallerTerrainShell({
   dataStore,
@@ -48,9 +48,7 @@ export default function InstallerTerrainShell({
     <div className="installer-shell">
       <header className="installer-shell-header">
         <div className="installer-shell-brand">
-          <div className="installer-shell-logo">
-            <Smartphone size={23}/>
-          </div>
+          <div className="installer-shell-logo"><BrandLogo/></div>
           <div>
             <strong>TOS Terrain</strong>
             <span>Application installateur</span>

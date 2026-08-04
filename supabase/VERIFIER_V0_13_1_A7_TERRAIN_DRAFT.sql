@@ -1,0 +1,5 @@
+-- Vérificateur non mutatif; exécution manuelle ultérieure seulement sur autorisation.
+select c.relname,a.attname from pg_catalog.pg_class c join pg_catalog.pg_attribute a on a.attrelid=c.oid where c.relnamespace='public'::pg_catalog.regnamespace and c.relname='relation_fields'and a.attname='terrain_config'and not a.attisdropped;
+select p.proname,p.prosecdef,p.proconfig,pg_catalog.pg_get_userbyid(p.proowner)owner from pg_catalog.pg_proc p where p.pronamespace='public'::pg_catalog.regnamespace and p.proname in('normalize_terrain_config_v0131a7','save_relation_field_terrain_draft_v0131a7');
+select grantee,privilege_type from information_schema.routine_privileges where routine_schema='public'and routine_name='save_relation_field_terrain_draft_v0131a7'order by grantee;
+select conname,convalidated from pg_catalog.pg_constraint where conrelid in('public.relation_fields'::pg_catalog.regclass,'public.relation_field_config_audit'::pg_catalog.regclass)and conname like'%v0131a7%';

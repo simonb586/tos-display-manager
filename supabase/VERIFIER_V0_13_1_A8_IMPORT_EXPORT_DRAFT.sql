@@ -1,0 +1,2 @@
+-- Lecture seule, exécution manuelle ultérieure.
+select p.proname,p.prosecdef,p.proconfig,pg_catalog.pg_get_userbyid(p.proowner)owner from pg_catalog.pg_proc p where p.pronamespace='public'::pg_catalog.regnamespace and p.proname like'%import_export%v0131a8';select grantee,privilege_type from information_schema.routine_privileges where routine_name='save_relation_field_import_export_draft_v0131a8';

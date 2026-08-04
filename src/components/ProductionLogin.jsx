@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Lock, Mail, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { requestPasswordReset } from '../services/authProfileService';
+import BrandLogo from './BrandLogo';
 import '../features/production/bloc-7-5-production.css';
 
 export default function ProductionLogin() {
@@ -43,7 +44,7 @@ export default function ProductionLogin() {
   return (
     <div className="production-login-page">
       <form className="production-login-card" onSubmit={login}>
-        <div className="production-login-logo">TOS<span>Display Manager</span></div>
+        <div className="production-login-logo"><BrandLogo priority/><span>Display Manager</span></div>
         <div className="production-login-icon"><ShieldCheck size={30}/></div>
         <h1>Connexion sécurisée</h1>
         <p>Accès réservé aux utilisateurs autorisés de Groupe TOS.</p>

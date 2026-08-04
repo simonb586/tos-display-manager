@@ -1,0 +1,4 @@
+export const CONFIGURATION_LAYERS=Object.freeze(['historical','display','validation','permissions','terrain','importExport','relation','calculation']);
+const clone=v=>v===undefined?undefined:JSON.parse(JSON.stringify(v));
+export function mergeDefined(base={},overlay={}){const out=clone(base)||{};for(const[key,value]of Object.entries(overlay||{})){if(value===null||value===undefined)continue;if(value&&typeof value==='object'&&!Array.isArray(value)&&out[key]&&typeof out[key]==='object'&&!Array.isArray(out[key]))out[key]=mergeDefined(out[key],value);else out[key]=clone(value)}return out}
+export function mergeConfigurationLayers(layers={}){let projection={};const trace=[];for(const name of CONFIGURATION_LAYERS){const value=layers[name]||{};projection=mergeDefined(projection,value);trace.push({layer:name,input:clone(value),projection:clone(projection)})}return{projection,trace}}

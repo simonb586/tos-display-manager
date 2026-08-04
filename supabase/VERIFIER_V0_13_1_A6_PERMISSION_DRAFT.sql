@@ -1,0 +1,5 @@
+-- Lecture seule; à exécuter manuellement après autorisation et après la migration A6.
+select c.relname,a.attname from pg_catalog.pg_class c join pg_catalog.pg_attribute a on a.attrelid=c.oid where c.relnamespace='public'::pg_catalog.regnamespace and c.relname='relation_fields' and a.attname='role_permissions' and not a.attisdropped;
+select p.proname,p.prosecdef,p.proconfig,pg_catalog.pg_get_userbyid(p.proowner) owner from pg_catalog.pg_proc p where p.pronamespace='public'::pg_catalog.regnamespace and p.proname in('normalize_permission_config_v0131a6','save_relation_field_permission_draft_v0131a6');
+select grantee,privilege_type from information_schema.routine_privileges where routine_schema='public' and routine_name='save_relation_field_permission_draft_v0131a6' order by grantee;
+select conname,convalidated from pg_catalog.pg_constraint where conrelid in('public.relation_fields'::pg_catalog.regclass,'public.relation_field_config_audit'::pg_catalog.regclass) and conname like '%v0131a6%';
