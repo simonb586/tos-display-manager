@@ -302,7 +302,14 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
         </aside>
 
         <section className="map-canvas">
-          <MapContainer center={DEFAULT_CENTER} zoom={DEFAULT_ZOOM} preferCanvas className="tos-map">
+          <MapContainer
+            center={DEFAULT_CENTER}
+            zoom={DEFAULT_ZOOM}
+            scrollWheelZoom
+            preferCanvas
+            className="tos-map"
+            style={{ width: '100%', minHeight: '520px' }}
+          >
             <TileLayer
               attribution='&copy; OpenStreetMap contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

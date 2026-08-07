@@ -9,12 +9,19 @@ const main=fs.readFileSync('src/main.jsx','utf8');
 const css=fs.readFileSync('src/features/v08/bloc-8-map.css','utf8');
 
 ok(main.includes("active === 'Carte interactive'")&&main.includes('<InteractiveMap'),'Route carte absente');
+ok(main.includes("lazy(() => import('./components/InteractiveMap'))"),'Import lazy de la carte absent');
+ok(main.includes("import 'leaflet/dist/leaflet.css'"),'CSS Leaflet absent du point d’entrée de production');
 ok(component.includes("from 'react-leaflet'")&&component.includes('OpenStreetMap'),'Fournisseur cartographique incorrect');
+ok(component.includes('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),'URL HTTPS des tuiles OpenStreetMap incorrecte');
+ok(component.includes("style={{ width: '100%', minHeight: '520px' }}"),'Dimensions intrinsèques du MapContainer absentes');
+ok(!/if\s*\(\s*!\s*(?:markers|points|visiblePoints)\.length\s*\)\s*return/.test(component),'Le rendu de la carte dépend encore de la présence de marqueurs');
 for(const token of ['MapContainer','TileLayer','CircleMarker','clusterMapPoints','MapStateBridge','renderedPoints','map-legend','map-detail-actions'])ok(component.includes(token),`Carte incomplète: ${token}`);
 for(const token of ['client','campaign','edt','supportType','status','installer','zone','issueOnly','inspectionOnly','photo'])ok(component.includes(token),`Filtre absent: ${token}`);
 for(const token of ['Ouvrir / Fiche 360','Photos','EDT / Travaux','Historique'])ok(component.includes(token),`Navigation absente: ${token}`);
 for(const token of ['45.5017, -73.5673','DEFAULT_ZOOM = 10','map-empty-notice','Infrastructures non encore géolocalisées','Sans coordonnées','ne possède pas encore de localisation GPS'])ok(component.includes(token),`État sans coordonnées incomplet: ${token}`);
 ok(css.includes('.map-empty-notice')&&css.includes('pointer-events:none'),'Panneau vide bloquant');
+ok(css.includes('.map-canvas{min-height:600px}'),'Hauteur robuste du wrapper absente');
+ok(css.includes('.map-canvas>.leaflet-container,.tos-map')&&css.includes('min-height:600px'),'Hauteur robuste du conteneur Leaflet absente');
 ok(css.includes('@media(max-width:760px)'),'Responsive absent');
 ok(css.includes(':focus-visible'),'Focus accessible absent');
 
