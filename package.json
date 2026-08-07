@@ -34,7 +34,8 @@
     "test:bloc13.2-lot2": "node ./scripts/verify_bloc_13_2_lot2.mjs",
     "test:bloc13.2-lot3": "node ./scripts/verify_bloc_13_2_lot3.mjs",
     "test:edt-p1": "node ./scripts/verify_edt_lifecycle_v132p1.mjs",
-    "check": "npm run test:bloc13.1a && npm run test:bloc13.1a2 && npm run test:bloc13.1a30 && npm run test:bloc13.1a3 && npm run test:bloc13.1a32 && npm run test:bloc13.1a42 && npm run test:bloc13.1a43i && npm run test:bloc13.1a44 && npm run test:bloc13.1a45 && npm run test:bloc13.1a5 && npm run test:bloc13.1a6 && npm run test:bloc13.1a7 && npm run test:bloc13.1a8 && npm run test:bloc13.1a9 && npm run test:bloc13.1a10 && npm run test:bloc13.1.1 && npm run test:bloc13.1.1c1 && npm run test:preproduction-v13.1 && npm run test:deployment-v1 && npm run test:bloc13.2 && npm run test:bloc13.2-lot1 && npm run test:bloc13.2-lot2 && npm run test:bloc13.2-lot3 && npm run test:edt-p1 && npm run test:bloc13.3 && npm run build"
+    "test:v1.1.1": "node ./scripts/verify_urgent_fixes_v111.mjs",
+    "check": "npm run test:bloc13.1a && npm run test:bloc13.1a2 && npm run test:bloc13.1a30 && npm run test:bloc13.1a3 && npm run test:bloc13.1a32 && npm run test:bloc13.1a42 && npm run test:bloc13.1a43i && npm run test:bloc13.1a44 && npm run test:bloc13.1a45 && npm run test:bloc13.1a5 && npm run test:bloc13.1a6 && npm run test:bloc13.1a7 && npm run test:bloc13.1a8 && npm run test:bloc13.1a9 && npm run test:bloc13.1a10 && npm run test:bloc13.1.1 && npm run test:bloc13.1.1c1 && npm run test:preproduction-v13.1 && npm run test:deployment-v1 && npm run test:bloc13.2 && npm run test:bloc13.2-lot1 && npm run test:bloc13.2-lot2 && npm run test:bloc13.2-lot3 && npm run test:photo-p0 && npm run test:edt-p1 && npm run test:bloc13.3 && npm run test:v1.1.1 && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.52.0",

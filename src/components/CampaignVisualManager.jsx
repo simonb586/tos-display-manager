@@ -15,6 +15,7 @@ const empty = {
   format_support: '',
   quantite_prevue: 0,
   actif: true,
+  is_out_of_frame: false,
   instructions_terrain: ''
 };
 
@@ -93,6 +94,7 @@ export default function CampaignVisualManager({ role }) {
       format_support: visual.format_support || '',
       quantite_prevue: visual.quantite_prevue || 0,
       actif: visual.actif !== false,
+      is_out_of_frame: visual.is_out_of_frame === true,
       instructions_terrain: visual.instructions_terrain || ''
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -187,6 +189,12 @@ export default function CampaignVisualManager({ role }) {
                   onChange={event => setForm({ ...form, actif: event.target.checked })}
                 />
                 Visuel actif
+              </label>
+
+              <label className="visual-active-check">
+                <input type="checkbox" checked={form.is_out_of_frame === true}
+                  onChange={event => setForm({ ...form, is_out_of_frame: event.target.checked })}/>
+                <span><b>Hors-Cadre</b><small>Permet d’utiliser ce visuel sans limiter les supports selon son format.</small></span>
               </label>
 
               <div className="visual-form-actions">

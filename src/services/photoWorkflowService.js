@@ -1,5 +1,5 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
-import { generatePhotoIdentity } from '../lib/photoWorkflow';
+import { classifyPhotoContext, generatePhotoIdentity } from '../lib/photoWorkflow';
 
 const ready=()=>{if(!supabaseConfigured||!supabase)throw new Error('Supabase n’est pas configuré.');};
 
@@ -13,15 +13,17 @@ async function pathExists(bucket, path) {
 export async function prepareAndUploadPhoto(file, context, bucket='support-photos') {
   ready();
   if(!file)throw new Error('Une photo est obligatoire.');
+  const classification=classifyPhotoContext(context);
+  const classifiedContext={...context,type:context.type||classification.type};
   let sequence=Number(context.sequence)||1, identity;
   do {
-    identity=generatePhotoIdentity({...context,sequence,originalFilename:file.name,mimeType:file.type});
+    identity=generatePhotoIdentity({...classifiedContext,sequence,originalFilename:file.name,mimeType:file.type});
     sequence+=1;
   } while(await pathExists(bucket,identity.storagePath));
   const {error}=await supabase.storage.from(bucket).upload(identity.storagePath,file,{cacheControl:'3600',upsert:false});
   if(error)throw error;
   const {data}=supabase.storage.from(bucket).getPublicUrl(identity.storagePath);
-  return {...identity,bucket,publicUrl:data?.publicUrl||''};
+  return {...identity,bucket,publicUrl:data?.publicUrl||'',classification};
 }
 
 export async function rollbackUploadedPhoto(uploaded) {
@@ -31,8 +33,9 @@ export async function rollbackUploadedPhoto(uploaded) {
 }
 
 export function photoHistoryRow(uploaded, context={}) {
+  const classification=uploaded.classification||classifyPhotoContext({...context,explicitType:uploaded.type});
   return {
-    support_id:String(context.supportId), campagne_id:context.campaignId||null, edt_id:context.edtId||null,
+    support_id:String(context.supportId), campagne_id:context.campaignId||classification.campaignId||null, edt_id:context.edtId||classification.edtId||null,
     type_photo:uploaded.type, source:context.source||'administration', original_filename:uploaded.originalFilename,
     normalized_filename:uploaded.normalizedFilename, nom_fichier:uploaded.normalizedFilename,
     storage_bucket:uploaded.bucket, storage_path:uploaded.storagePath, photo_url:uploaded.publicUrl||null,
@@ -41,7 +44,7 @@ export function photoHistoryRow(uploaded, context={}) {
     intervention_id:context.interventionId||null, inspection_id:context.inspectionId||null,
     issue_id:context.issueId||null, is_current_visual:Boolean(context.isCurrentVisual),
     est_principale:Boolean(context.isCurrentVisual), status:context.status||'active',
-    metadata:{original_name:uploaded.originalFilename,normalized_name:uploaded.normalizedFilename,source:context.source||'administration',...(context.metadata||{})}
+    metadata:{original_name:uploaded.originalFilename,normalized_name:uploaded.normalizedFilename,source:context.source||'administration',classification_source:classification.source,classification_reason:classification.reason,...(context.metadata||{})}
   };
 }
 

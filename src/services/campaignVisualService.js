@@ -4,8 +4,11 @@ import {
   normalizeDisplayFormat,
   supportDisplayFormat
 } from '../lib/displayFormat';
+import { isVisualFormatCompatible } from '../lib/visualCompatibility';
 
 export { normalizeDisplayFormat, supportDisplayFormat } from '../lib/displayFormat';
+
+export { isVisualFormatCompatible } from '../lib/visualCompatibility';
 
 function ready() {
   if (!supabaseConfigured || !supabase) {
@@ -53,9 +56,7 @@ export async function diagnoseCompatibleVisualsForSupport(support) {
   }
 
   const activeVisuals = data || [];
-  const sameFormat = activeVisuals.filter(
-    visual => normalizeDisplayFormat(visual.format_support) === supportFormatKey
-  );
+  const sameFormat = activeVisuals.filter(visual => isVisualFormatCompatible(visual, support));
   const published = sameFormat.filter(
     visual => visual.campagne?.publiee_terrain === true
   );
@@ -120,6 +121,7 @@ export async function saveCampaignVisual(visual) {
     quantite_prevue: Number(visual.quantite_prevue || 0),
     actif: visual.actif !== false,
     instructions_terrain: visual.instructions_terrain?.trim() || null,
+    is_out_of_frame: Boolean(visual.is_out_of_frame),
     updated_at: new Date().toISOString()
   };
 

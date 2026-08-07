@@ -38,6 +38,15 @@ export async function saveMasterCampaign(campaign) {
   return data;
 }
 
+export async function deleteOrArchiveMasterCampaign(id) {
+  ensureSupabase();
+  const { data, error } = await supabase.rpc('delete_or_archive_master_campaign_v111', {
+    p_campaign_id: Number(id)
+  });
+  if (error) throw error;
+  return data;
+}
+
 export async function applyCampaignToSupport({ supportId, campaignId, userEmail, photoUrl, photoPath }) {
   ensureSupabase();
   const { data, error } = await supabase.rpc('appliquer_campagne_support', {

@@ -15,6 +15,24 @@ export function normalizePhotoType(value) {
   return normalized;
 }
 
+export const DEFAULT_INSPECTION_NOTICE = 'Aucun événement actif n’a été trouvé pour cette date. La photo a été classée comme inspection.';
+
+const one = values => Array.isArray(values) && values.length === 1 ? values[0] : null;
+
+// Point d’entrée unique de classement. Les appelants fournissent uniquement les
+// relations réellement connues à la date de prise de vue.
+export function classifyPhotoContext(context = {}) {
+  if (context.issueId) return { type:'enjeu', source:'explicit', reason:'explicit_issue', issueId:context.issueId };
+  const installation = context.activeInstallationEdt || one(context.activeInstallationEdts);
+  if (installation) return { type:'installation', source:'automatic', reason:'active_installation_edt', edtId:installation.id ?? installation, campaignId:installation.campagne_id ?? null };
+  const removal = context.activeRemovalEdt || one(context.activeRemovalEdts);
+  if (removal) return { type:'retrait', source:'automatic', reason:'active_removal_edt', edtId:removal.id ?? removal, campaignId:removal.campagne_id ?? null };
+  if (context.inspectionId || context.explicitType === 'inspection') return { type:'inspection', source:'explicit', reason:'explicit_inspection', inspectionId:context.inspectionId ?? null };
+  const campaign = context.explicitCampaign || one(context.activeCampaigns);
+  if (campaign) return { type:context.explicitType ? normalizePhotoType(context.explicitType) : 'inspection', source:context.explicitType ? 'explicit' : 'automatic', reason:'determining_campaign', campaignId:campaign.id ?? campaign };
+  return { type:'inspection', source:'automatic', reason:'no_active_business_context', campaignId:null, edtId:null, notice:DEFAULT_INSPECTION_NOTICE };
+}
+
 export function realExtension(name, mimeType='') {
   const fromName = String(name || '').match(/\.([a-zA-Z0-9]{2,5})$/)?.[1]?.toLowerCase();
   if (fromName) return fromName === 'jpeg' ? 'jpg' : fromName;
@@ -32,7 +50,7 @@ export function photoDate(value, fallback=new Date()) {
 export function generatePhotoIdentity({supportId, capturedAt, uploadedAt=new Date(), type, campaignCode='NONE', edt='NONE', sequence=1, originalFilename='', mimeType=''}) {
   const support = ascii(supportId);
   if (!support) throw new Error('Un support valide est obligatoire.');
-  const normalizedType = normalizePhotoType(type);
+  const normalizedType = normalizePhotoType(type || 'inspection');
   const date = photoDate(capturedAt, uploadedAt);
   const ymd = `${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}`;
   const seq = String(Number(sequence) || 1).padStart(3, '0');
