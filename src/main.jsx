@@ -23,6 +23,7 @@ import './features/v12/account-activation.css';
 import './features/v12/installer-terrain-shell.css';
 import './features/v13/automation-assistant.css';
 import './features/v13/grid-sorting.css';
+import './features/v13/recent-activity.css';
 import './features/v13/field-catalog.css';
 
 import manifest from './data/manifest.json';
@@ -49,6 +50,7 @@ import Support360Panel from './components/Support360Panel';
 import EditableField from './components/EditableField';
 import ChangeHistoryPanel from './components/ChangeHistoryPanel';
 import GlobalButtonFeedback from './components/GlobalButtonFeedback';
+import RecentActivityWidget from './components/RecentActivityWidget';
 import AccountActivation from './components/AccountActivation';
 import BrandLogo from './components/BrandLogo';
 import OperationalCommandCenter from './components/OperationalCommandCenter';
@@ -211,14 +213,13 @@ function Dashboard({ setActive, dataStore }) {
 
 function Card({ title, value }) { return <div className="card"><ClipboardList/><span>{title}</span><strong>{Number(value || 0).toLocaleString('fr-CA')}</strong></div>; }
 
-function ExecutiveDashboard({setActive,dataStore,terrainSyncStatus}) {
+function ExecutiveDashboard({setActive,dataStore,terrainSyncStatus,role}) {
   const infra=getRows(dataStore,'Infrastructures');
   const campaigns=getRows(dataStore,'Campagnes et visuels');
   const edt=getRows(dataStore,'Suivi des EDT');
   const photos=getRows(dataStore,'Photos');
   const issues=getRows(dataStore,'Enjeux des cadres et supports');
   const work=getRows(dataStore,'Bons de travail');
-  const journal=getRows(dataStore,'Journal des événements');
   const activeInfra=infra.filter(row=>![false,'false','inactif','inactive'].includes(typeof row.actif==='string'?normalize(row.actif):row.actif)).length;
   const activeCampaigns=campaigns.filter(row=>['active','actif','en cours'].includes(normalize(row.statut_campagne||row.statut))).length;
   const plannedInstalls=edt.filter(row=>['planifie','planifiee','brouillon'].includes(normalize(row.statut))).length;
@@ -236,7 +237,6 @@ function ExecutiveDashboard({setActive,dataStore,terrainSyncStatus}) {
     ['Synchronisations Terrain',terrainSyncStatus,'Diagnostic terrain',History],
     ['Photos manquantes',missingPhotos,'Infrastructures',Camera]
   ];
-  const recent=[...journal].sort((a,b)=>String(b.created_at||b.date||'').localeCompare(String(a.created_at||a.date||''))).slice(0,6);
   const priorities=[
     urgentWork>0&&`${urgentWork} bon(s) de travail urgent(s) à traiter`,
     openIssues>0&&`${openIssues} enjeu(x) ouvert(s) à examiner`,
@@ -247,7 +247,7 @@ function ExecutiveDashboard({setActive,dataStore,terrainSyncStatus}) {
     <header className="executive-hero"><div className="hero-brand"><BrandLogo priority/><div><span className="eyebrow">Centre de pilotage</span><h1>Vue exécutive</h1><p>État opérationnel consolidé à partir des données disponibles.</p></div></div><div className="executive-status"><span className="status-dot"/> Données {dataStore?.__sync_error__?'partiellement disponibles':'synchronisées'}</div></header>
     <section className="executive-kpis" aria-label="Indicateurs clés">{metrics.map(([label,value,target,Icon])=><button key={label} className="executive-kpi" onClick={()=>setActive(target)}><span><Icon/>{label}</span><strong>{value==null?'Non disponible':typeof value==='number'?value.toLocaleString('fr-CA'):value}</strong><small>Ouvrir le module</small></button>)}</section>
     <section className="executive-layout">
-      <article className="executive-panel executive-activity"><header><div><span className="eyebrow">Temps réel</span><h2>Activité récente</h2></div><History/></header>{recent.length?<ol>{recent.map((item,index)=><li key={item.id||index}><span className="activity-marker"/><div><strong>{item.action||item.type_evenement||item.evenement||'Événement'}</strong><p>{item.description||item.details||item.message||'Détail non disponible'}</p></div><time>{item.created_at||item.date||'—'}</time></li>)}</ol>:<div className="executive-empty">Aucune activité récente disponible.</div>}</article>
+      <RecentActivityWidget onNavigate={setActive} role={role}/>
       <div className="executive-stack"><article className="executive-panel"><header><div><span className="eyebrow">À surveiller</span><h2>Priorités</h2></div><Bell/></header>{priorities.length?<ul className="priority-list">{priorities.map(item=><li key={item}>{item}</li>)}</ul>:<div className="executive-empty">Aucune priorité calculable.</div>}</article><article className="executive-panel"><header><div><span className="eyebrow">Navigation</span><h2>Accès rapides</h2></div></header><div className="quick-actions">{[['Application terrain','Terrain'],['Carte interactive','Carte'],['Infrastructures','Supports'],['Rapports finaux','Rapports']].map(([target,label])=><button key={target} onClick={()=>setActive(target)}>{label}<ChevronRight/></button>)}</div></article></div>
     </section>
   </div>;
@@ -720,7 +720,7 @@ function App() {
   }
 
   let content;
-  if (active === 'Tableau de bord') content = <ExecutiveDashboard setActive={setActive} dataStore={dataStore} terrainSyncStatus={terrainSyncStatus}/>;
+  if (active === 'Tableau de bord') content = <ExecutiveDashboard setActive={setActive} dataStore={dataStore} terrainSyncStatus={terrainSyncStatus} role={role}/>;
   else if (active === 'Centre de commandement') content = <OperationalCommandCenter dataStore={dataStore} onNavigate={setActive}/>;
   else if (active === 'Connexion') content = <LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>;
   else if (active === 'Administration') content = <AdminPanel role={role} currentRole={role} session={session}/>;

@@ -1,4 +1,5 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
+import { prepareRecentBusinessActivity, RECENT_ACTIVITY_LIMIT } from '../lib/recentActivity.js';
 
 const PAGE_SIZES = new Set([25,50,100,200]);
 export function normalizeActivityPageSize(value) { return PAGE_SIZES.has(Number(value)) ? Number(value) : 50; }
@@ -14,6 +15,17 @@ export async function listActivityEvents({ page=1,pageSize=50,query='',filters={
   const {data,error,count}=await request.order('occurred_at',{ascending:false}).order('id',{ascending:false}).range(from,from+size-1);
   if(error) throw error;
   return {rows:data||[],total:count||0,page:Math.max(1,page),pageSize:size};
+}
+
+const RECENT_ACTIVITY_FIELDS = 'id,occurred_at,actor_email,actor_role,action,module,entity_type,entity_id,campaign_id,edt_id,support_id,status,source_system';
+
+export async function listRecentBusinessActivity() {
+  if (!supabaseConfigured || !supabase) throw new Error('L’activité récente est indisponible.');
+  let request = supabase.from('activity_events').select(RECENT_ACTIVITY_FIELDS);
+  for (const pattern of ['%initialisation%', '%démarrage système%', '%migration%', '%chargement supabase%', '%diagnostic technique%', '%log développeur%']) request = request.not('action', 'ilike', pattern);
+  const { data, error } = await request.order('occurred_at', { ascending: false }).order('id', { ascending: false }).limit(RECENT_ACTIVITY_LIMIT);
+  if (error) throw error;
+  return prepareRecentBusinessActivity(data || []);
 }
 
 export async function recordActivityEvent(event) {
