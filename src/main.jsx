@@ -545,8 +545,12 @@ function App() {
     if (!session) return;
     setLoading(true);
     refreshDataStore().finally(() => setLoading(false));
-    loadTerrainSyncStatus().then(setTerrainSyncStatus);
   }, [session?.user?.id]);
+
+  useEffect(() => {
+    if (!session || active !== 'Tableau de bord') return;
+    loadTerrainSyncStatus().then(setTerrainSyncStatus);
+  }, [session?.user?.id, active]);
 
   useEffect(() => {
     if (!supabase || !session) return undefined;

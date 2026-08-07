@@ -49,7 +49,7 @@ for (const name of componentNames) {
   verify(!/>[^<{]*Supabase[^<{]*</i.test(source), `Texte Supabase directement rendu : ${name}`);
 }
 
-for (const token of ["from('terrain_sync_diagnostics')", "'attente'", "'erreur'", 'Dernière synchro', 'État global non centralisé']) {
+for (const token of ['getTerrainSyncTimeline', 'timeline[0]', 'occurred_at', 'Dernière synchro', 'État global non centralisé']) {
   verify(terrainStatus.includes(token), `État Terrain non relié ou incomplet : ${token}`);
 }
 verify(main.includes('loadTerrainSyncStatus().then(setTerrainSyncStatus)'), 'Le tableau de bord ne charge pas la source Terrain réelle.');
