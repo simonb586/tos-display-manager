@@ -213,7 +213,7 @@ function Dashboard({ setActive, dataStore }) {
 
 function Card({ title, value }) { return <div className="card"><ClipboardList/><span>{title}</span><strong>{Number(value || 0).toLocaleString('fr-CA')}</strong></div>; }
 
-function ExecutiveDashboard({setActive,dataStore,terrainSyncStatus,role}) {
+function ExecutiveDashboard({setActive,dataStore,terrainSyncStatus,role,rolePermission}) {
   const infra=getRows(dataStore,'Infrastructures');
   const campaigns=getRows(dataStore,'Campagnes et visuels');
   const edt=getRows(dataStore,'Suivi des EDT');
@@ -247,7 +247,7 @@ function ExecutiveDashboard({setActive,dataStore,terrainSyncStatus,role}) {
     <header className="executive-hero"><div className="hero-brand"><BrandLogo priority/><div><span className="eyebrow">Centre de pilotage</span><h1>Vue exécutive</h1><p>État opérationnel consolidé à partir des données disponibles.</p></div></div><div className="executive-status"><span className="status-dot"/> Données {dataStore?.__sync_error__?'partiellement disponibles':'synchronisées'}</div></header>
     <section className="executive-kpis" aria-label="Indicateurs clés">{metrics.map(([label,value,target,Icon])=><button key={label} className="executive-kpi" onClick={()=>setActive(target)}><span><Icon/>{label}</span><strong>{value==null?'Non disponible':typeof value==='number'?value.toLocaleString('fr-CA'):value}</strong><small>Ouvrir le module</small></button>)}</section>
     <section className="executive-layout">
-      <RecentActivityWidget onNavigate={setActive} role={role}/>
+      <RecentActivityWidget onNavigate={setActive} role={role} permission={rolePermission}/>
       <div className="executive-stack"><article className="executive-panel"><header><div><span className="eyebrow">À surveiller</span><h2>Priorités</h2></div><Bell/></header>{priorities.length?<ul className="priority-list">{priorities.map(item=><li key={item}>{item}</li>)}</ul>:<div className="executive-empty">Aucune priorité calculable.</div>}</article><article className="executive-panel"><header><div><span className="eyebrow">Navigation</span><h2>Accès rapides</h2></div></header><div className="quick-actions">{[['Application terrain','Terrain'],['Carte interactive','Carte'],['Infrastructures','Supports'],['Rapports finaux','Rapports']].map(([target,label])=><button key={target} onClick={()=>setActive(target)}>{label}<ChevronRight/></button>)}</div></article></div>
     </section>
   </div>;
@@ -720,7 +720,7 @@ function App() {
   }
 
   let content;
-  if (active === 'Tableau de bord') content = <ExecutiveDashboard setActive={setActive} dataStore={dataStore} terrainSyncStatus={terrainSyncStatus} role={role}/>;
+  if (active === 'Tableau de bord') content = <ExecutiveDashboard setActive={setActive} dataStore={dataStore} terrainSyncStatus={terrainSyncStatus} role={role} rolePermission={rolePermission}/>;
   else if (active === 'Centre de commandement') content = <OperationalCommandCenter dataStore={dataStore} onNavigate={setActive}/>;
   else if (active === 'Connexion') content = <LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>;
   else if (active === 'Administration') content = <AdminPanel role={role} currentRole={role} session={session}/>;
