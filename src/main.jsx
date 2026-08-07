@@ -74,6 +74,7 @@ const PhotoInventoryCenter = lazy(() => import('./components/PhotoInventoryCente
 const OperationsCenter = lazy(() => import('./components/OperationsCenter'));
 const InstallerTerrainShell = lazy(() => import('./components/InstallerTerrainShell'));
 const TerrainSyncDiagnostics = lazy(() => import('./components/TerrainSyncDiagnostics'));
+const ActivityJournal = lazy(() => import('./components/ActivityJournal'));
 const AutomationAssistant = lazy(() => import('./components/AutomationAssistant'));
 const FieldCatalogManager = lazy(() => import('./components/FieldCatalogManager'));
 
@@ -725,6 +726,7 @@ function App() {
   else if (active === 'Photos et inventaire') content = <PhotoInventoryCenter role={role}/>;
   else if (active === 'Centre EDT et BT') content = <OperationsCenter role={role}/>;
   else if (active === 'Diagnostic terrain') content = <TerrainSyncDiagnostics role={role}/>;
+  else if (active === 'Journal des événements') content = <ActivityJournal role={role}/>;
   else if (active === 'Rapports finaux') content = <FinalReportsCenter dataStore={dataStore} role={role}/>;
   else if (active === 'Visibilité par rôle') content = <RoleVisibilityAdmin dataStore={dataStore} tableNames={manifest.map(module => module.name)} role={role}/>;
   else if (active === 'Automatisations') content = <AutomationAssistant role={role}/>;
@@ -732,7 +734,7 @@ function App() {
   else if (active === 'Import anciennes photos') content = <LegacyPhotoImporter dataStore={dataStore} session={session}/>;
   else if (active === 'Campagnes maîtres') content = <CampaignsPanel role={role} session={session}/>;
   else if (active === 'Campagne — Visuels et formats') content = <CampaignVisualManager role={role}/>;
-  else if (active === 'Carte interactive') content = <InteractiveMap dataStore={dataStore} focusSupportId={mapFocusSupportId} onClearFocus={() => setMapFocusSupportId('')}/>;
+  else if (active === 'Carte interactive') content = <InteractiveMap dataStore={dataStore} focusSupportId={mapFocusSupportId} onClearFocus={() => setMapFocusSupportId('')} onNavigate={setActive} role={role}/>;
   else if (active === 'Application terrain') content = <TerrainApp dataStore={dataStore} role={role} session={session}/>;
   else if (active === 'Recherche terrain') content = <div className="dashboard"><FieldSearch dataStore={dataStore}/></div>;
   else if (active === 'Bons de travail') content = <WorkOrdersPanel dataStore={dataStore} role={role} session={session}/>;

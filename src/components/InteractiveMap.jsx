@@ -24,16 +24,20 @@ import {
   clusterMapPoints,
   filterMapPoints,
   infrastructureMapUrl,
-  normalizeInfrastructureForMap
+  prepareMapInfrastructureRows
 } from '../services/mapService';
 
 const DEFAULT_CENTER = [52.0, -71.5];
 const DEFAULT_ZOOM = 5;
 
-function MapStateBridge({ onZoom }) {
+function MapStateBridge({ onZoom, onBounds }) {
   useMapEvents({
     zoomend(event) {
       onZoom(event.target.getZoom());
+      onBounds(event.target.getBounds());
+    },
+    moveend(event) {
+      onBounds(event.target.getBounds());
     }
   });
   return null;
@@ -105,9 +109,10 @@ const clusterIcon = count => L.divIcon({
   iconAnchor: [22, 22]
 });
 
-export default function InteractiveMap({ dataStore, focusSupportId = '', onClearFocus }) {
+export default function InteractiveMap({ dataStore, focusSupportId = '', onClearFocus, onNavigate, role }) {
   const infrastructures = dataStore?.Infrastructures?.rows || [];
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
+  const [bounds, setBounds] = useState(null);
   const [selected, setSelected] = useState(null);
   const [autoFit, setAutoFit] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(true);
@@ -116,23 +121,33 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
     supportType: '',
     campaign: '',
     edt: '',
-    issueOnly: false
+    client: '',
+    status: '',
+    installer: '',
+    zone: '',
+    issueOnly: false,
+    inspectionOnly: false,
+    photo: ''
   });
 
-  const points = useMemo(
-    () => infrastructures.map(normalizeInfrastructureForMap).filter(Boolean),
+  const prepared = useMemo(
+    () => prepareMapInfrastructureRows(infrastructures),
     [infrastructures]
   );
+  const points = prepared.points;
 
   const visiblePoints = useMemo(
     () => filterMapPoints(points, filters),
     [points, filters]
   );
 
-  const clusters = useMemo(
-    () => clusterMapPoints(visiblePoints, zoom),
-    [visiblePoints, zoom]
-  );
+  const renderedPoints = useMemo(() => {
+    if (!bounds || zoom < 13) return visiblePoints;
+    const padded = bounds.pad(0.35);
+    return visiblePoints.filter(point => padded.contains([point.latitude, point.longitude]));
+  }, [visiblePoints, bounds, zoom]);
+
+  const clusters = useMemo(() => clusterMapPoints(renderedPoints, zoom), [renderedPoints, zoom]);
 
   const focusedPoint = useMemo(
     () => focusSupportId
@@ -144,6 +159,10 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
   const supportTypes = useMemo(() => buildMapOptions(points, 'supportType'), [points]);
   const campaigns = useMemo(() => buildMapOptions(points, 'campaignLabel'), [points]);
   const edts = useMemo(() => buildMapOptions(points, 'edtLabel'), [points]);
+  const clients = useMemo(() => buildMapOptions(points, 'clientLabel'), [points]);
+  const statuses = useMemo(() => buildMapOptions(points, 'activeLabel'), [points]);
+  const installers = useMemo(() => buildMapOptions(points, 'installerLabel'), [points]);
+  const zones = useMemo(() => buildMapOptions(points, 'zoneLabel'), [points]);
 
   function resetFilters() {
     setFilters({
@@ -151,7 +170,8 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
       supportType: '',
       campaign: '',
       edt: '',
-      issueOnly: false
+      client: '', status: '', installer: '', zone: '',
+      issueOnly: false, inspectionOnly: false, photo: ''
     });
     setAutoFit(true);
     window.setTimeout(() => setAutoFit(false), 250);
@@ -178,7 +198,7 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
         </div>
         <div className="map-kpis">
           <span><strong>{infrastructures.length.toLocaleString('fr-CA')}</strong> infrastructures</span>
-          <span><strong>{points.length.toLocaleString('fr-CA')}</strong> géolocalisées</span>
+          <span><strong>{prepared.counters.displayable.toLocaleString('fr-CA')}</strong> affichables</span>
           <span><strong>{visiblePoints.length.toLocaleString('fr-CA')}</strong> visibles</span>
         </div>
       </header>
@@ -232,6 +252,15 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
                 </select>
               </label>
 
+              {[['client','Client',clients],['status','Statut',statuses],['installer','Installateur',installers],['zone','Zone',zones]].map(([key,label,options]) => (
+                <label key={key}>{label}
+                  <select value={filters[key]} onChange={event => setFilters({ ...filters, [key]: event.target.value })}>
+                    <option value="">Tous</option>
+                    {options.map(item => <option key={item}>{item}</option>)}
+                  </select>
+                </label>
+              ))}
+
               <label className="map-check">
                 <input
                   type="checkbox"
@@ -239,6 +268,12 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
                   onChange={event => setFilters({ ...filters, issueOnly: event.target.checked })}
                 />
                 Afficher seulement les supports avec enjeux
+              </label>
+              <label className="map-check"><input type="checkbox" checked={filters.inspectionOnly} onChange={event => setFilters({ ...filters, inspectionOnly: event.target.checked })}/> Avec inspection</label>
+              <label>Photos
+                <select value={filters.photo} onChange={event => setFilters({ ...filters, photo: event.target.value })}>
+                  <option value="">Toutes</option><option value="with">Avec photo</option><option value="without">Sans photo</option>
+                </select>
               </label>
 
               <div className="map-filter-actions">
@@ -259,7 +294,9 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
                     ? Math.round(points.length / infrastructures.length * 100)
                     : 0}% des infrastructures
                 </span>
+                <small>{prepared.counters.missing.toLocaleString('fr-CA')} sans coordonnées • {prepared.counters.invalid.toLocaleString('fr-CA')} invalides • {prepared.counters.duplicates.toLocaleString('fr-CA')} doublons ignorés</small>
               </div>
+              <div className="map-legend" aria-label="Légende de la carte"><strong>Légende</strong><span><i className="map-dot map-dot-normal"/> Support</span><span><i className="map-dot map-dot-issue"/> Enjeu signalé</span><span><i className="map-dot map-dot-cluster"/> Groupe de supports</span></div>
             </>
           )}
         </aside>
@@ -270,7 +307,7 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
               attribution='&copy; OpenStreetMap contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <MapStateBridge onZoom={setZoom}/>
+            <MapStateBridge onZoom={setZoom} onBounds={setBounds}/>
             <MapResizeGuard/>
             <FocusSupport point={focusedPoint}/>
             <FitVisiblePoints points={visiblePoints} enabled={autoFit}/>
@@ -331,7 +368,7 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
           </MapContainer>
 
           {!points.length && (
-            <div className="map-empty-card">
+            <div className="map-empty">
               <AlertTriangle/>
               <div>
                 <h2>Aucun support géolocalisé pour le moment</h2>
@@ -355,7 +392,13 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
               <div><dt>Visuel</dt><dd>{selected.visualLabel || '—'}</dd></div>
               <div><dt>EDT</dt><dd>{selected.edtLabel || '—'}</dd></div>
               <div><dt>Enjeux</dt><dd>{selected.issueLabel || 'Aucun'}</dd></div>
+              <div><dt>Client</dt><dd>{selected.clientLabel || '—'}</dd></div>
+              <div><dt>État</dt><dd>{selected.activeLabel || '—'}</dd></div>
+              <div><dt>Inspection</dt><dd>{selected.inspectionLabel || '—'}</dd></div>
+              <div><dt>Activité</dt><dd>{selected.lastActivity || '—'}</dd></div>
             </dl>
+
+            {selected.photoUrl && <img className="map-detail-photo" src={selected.photoUrl} alt={`Dernière photo du support ${selected.supportId}`}/>}
 
             <div className="map-coordinates">
               {selected.latitude.toFixed(6)}, {selected.longitude.toFixed(6)}
@@ -364,6 +407,13 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
             <a href={infrastructureMapUrl(selected)} target="_blank" rel="noreferrer">
               <ExternalLink size={17}/> Ouvrir dans OpenStreetMap
             </a>
+
+            <div className="map-detail-actions">
+              <button onClick={() => onNavigate?.('Infrastructures')}>Ouvrir / Fiche 360</button>
+              {role === 'Administrateur' && <button onClick={() => onNavigate?.('Photos et inventaire')}>Photos</button>}
+              {['Administrateur','Coordonnateur'].includes(role) && <button onClick={() => onNavigate?.('Centre EDT et BT')}>EDT / Travaux</button>}
+              {['Administrateur','Coordonnateur'].includes(role) && <button onClick={() => onNavigate?.('Journal des événements')}>Historique</button>}
+            </div>
 
             {focusSupportId && (
               <button onClick={onClearFocus}>Retirer le ciblage</button>
