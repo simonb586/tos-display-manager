@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import {
   Search, Download, FileSpreadsheet, FileText, ShieldCheck, BarChart3,
   ClipboardList, Bell, Lock, LogOut, MapPin, Edit3, Save, X, History
-  , ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, AlertTriangle, Camera, CalendarClock
+  , ChevronRight, AlertTriangle, Camera, CalendarClock
 } from 'lucide-react';
 import './styles.css';
 import './features/admin/bloc4-admin.css';
@@ -38,9 +38,11 @@ import { sortRows } from './lib/gridSorting';
 import { supabase, supabaseConfigured } from './lib/supabaseClient';
 import { businessFieldLabel, enforceApplicationTitle, friendlyError } from './config/businessLanguage';
 import GridColumnHeader from './components/GridColumnHeader';
+import GridPagination from './components/GridPagination';
 import { defaultSortColumnForTable } from './lib/gridPresentation';
 import { defaultSortForColumn } from './lib/gridSorting';
 import { loadManyTables } from './services/dataService';
+import { loadTerrainSyncStatus } from './services/terrainSyncStatus';
 
 import SupportPhotoGallery from './components/SupportPhotoGallery';
 import Support360Panel from './components/Support360Panel';
@@ -161,8 +163,6 @@ const columnLabel = (tableName, column) =>
     ? (INFRASTRUCTURE_LABELS[column] || column)
     : column;
 
-const sourceLabel = (dataStore, name) => dataStore?.[name]?.source || 'json';
-
 const thumbnailForInfrastructure = row =>
   row.photo_miniature_url ||
   row.photo_principale_url ||
@@ -210,25 +210,7 @@ function Dashboard({ setActive, dataStore }) {
 
 function Card({ title, value }) { return <div className="card"><ClipboardList/><span>{title}</span><strong>{Number(value || 0).toLocaleString('fr-CA')}</strong></div>; }
 
-function GridPagination({page,pageCount,pageSize,total,selectedCount,onPage,onPageSize}) {
-  const start=total ? (page-1)*pageSize+1 : 0;
-  const end=Math.min(total,page*pageSize);
-  const candidates=[1,page-1,page,page+1,pageCount].filter(value=>value>=1&&value<=pageCount);
-  const pages=[...new Set(candidates)].sort((a,b)=>a-b);
-  return <nav className="grid-pagination" aria-label="Pagination de la grille">
-    <div className="grid-pagination-summary"><strong>{start.toLocaleString('fr-CA')}–{end.toLocaleString('fr-CA')}</strong> sur {total.toLocaleString('fr-CA')}<span>{selectedCount.toLocaleString('fr-CA')} sélectionnée(s)</span></div>
-    <div className="grid-pagination-controls">
-      <button type="button" aria-label="Première page" disabled={page===1} onClick={()=>onPage(1)}><ChevronsLeft/></button>
-      <button type="button" aria-label="Page précédente" disabled={page===1} onClick={()=>onPage(page-1)}><ChevronLeft/></button>
-      {pages.map((value,index)=><React.Fragment key={value}>{index>0&&value-pages[index-1]>1&&<span>…</span>}<button type="button" className={value===page?'active':''} aria-current={value===page?'page':undefined} onClick={()=>onPage(value)}>{value}</button></React.Fragment>)}
-      <button type="button" aria-label="Page suivante" disabled={page===pageCount} onClick={()=>onPage(page+1)}><ChevronRight/></button>
-      <button type="button" aria-label="Dernière page" disabled={page===pageCount} onClick={()=>onPage(pageCount)}><ChevronsRight/></button>
-    </div>
-    <label>Lignes par page <select value={pageSize} onChange={event=>onPageSize(Number(event.target.value))}>{[25,50,100,200].map(value=><option key={value}>{value}</option>)}</select></label>
-  </nav>;
-}
-
-function ExecutiveDashboard({setActive,dataStore}) {
+function ExecutiveDashboard({setActive,dataStore,terrainSyncStatus}) {
   const infra=getRows(dataStore,'Infrastructures');
   const campaigns=getRows(dataStore,'Campagnes et visuels');
   const edt=getRows(dataStore,'Suivi des EDT');
@@ -250,7 +232,7 @@ function ExecutiveDashboard({setActive,dataStore}) {
     ['Inspections',inspections,'Photos et inventaire',ShieldCheck],
     ['Enjeux ouverts',openIssues,'Enjeux des cadres et supports',AlertTriangle],
     ['Travaux urgents',urgentWork,'Bons de travail',Bell],
-    ['Synchronisations Terrain',null,'Diagnostic terrain',History],
+    ['Synchronisations Terrain',terrainSyncStatus,'Diagnostic terrain',History],
     ['Photos manquantes',missingPhotos,'Infrastructures',Camera]
   ];
   const recent=[...journal].sort((a,b)=>String(b.created_at||b.date||'').localeCompare(String(a.created_at||a.date||''))).slice(0,6);
@@ -262,7 +244,7 @@ function ExecutiveDashboard({setActive,dataStore}) {
   ].filter(Boolean);
   return <div className="dashboard executive-dashboard">
     <header className="executive-hero"><div className="hero-brand"><BrandLogo priority/><div><span className="eyebrow">Centre de pilotage</span><h1>Vue exécutive</h1><p>État opérationnel consolidé à partir des données disponibles.</p></div></div><div className="executive-status"><span className="status-dot"/> Données {dataStore?.__sync_error__?'partiellement disponibles':'synchronisées'}</div></header>
-    <section className="executive-kpis" aria-label="Indicateurs clés">{metrics.map(([label,value,target,Icon])=><button key={label} className="executive-kpi" onClick={()=>setActive(target)}><span><Icon/>{label}</span><strong>{value==null?'Non disponible':value.toLocaleString('fr-CA')}</strong><small>Ouvrir le module</small></button>)}</section>
+    <section className="executive-kpis" aria-label="Indicateurs clés">{metrics.map(([label,value,target,Icon])=><button key={label} className="executive-kpi" onClick={()=>setActive(target)}><span><Icon/>{label}</span><strong>{value==null?'Non disponible':typeof value==='number'?value.toLocaleString('fr-CA'):value}</strong><small>Ouvrir le module</small></button>)}</section>
     <section className="executive-layout">
       <article className="executive-panel executive-activity"><header><div><span className="eyebrow">Temps réel</span><h2>Activité récente</h2></div><History/></header>{recent.length?<ol>{recent.map((item,index)=><li key={item.id||index}><span className="activity-marker"/><div><strong>{item.action||item.type_evenement||item.evenement||'Événement'}</strong><p>{item.description||item.details||item.message||'Détail non disponible'}</p></div><time>{item.created_at||item.date||'—'}</time></li>)}</ol>:<div className="executive-empty">Aucune activité récente disponible.</div>}</article>
       <div className="executive-stack"><article className="executive-panel"><header><div><span className="eyebrow">À surveiller</span><h2>Priorités</h2></div><Bell/></header>{priorities.length?<ul className="priority-list">{priorities.map(item=><li key={item}>{item}</li>)}</ul>:<div className="executive-empty">Aucune priorité calculable.</div>}</article><article className="executive-panel"><header><div><span className="eyebrow">Navigation</span><h2>Accès rapides</h2></div></header><div className="quick-actions">{[['Application terrain','Terrain'],['Carte interactive','Carte'],['Infrastructures','Supports'],['Rapports finaux','Rapports']].map(([target,label])=><button key={target} onClick={()=>setActive(target)}>{label}<ChevronRight/></button>)}</div></article></div>
@@ -367,7 +349,7 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   }
 
   return <div className="tablePage">
-    <header className="pageHead"><div><h1>{icons[name] || '📋'} {name}</h1><p>{filtered.length.toLocaleString('fr-CA')} résultat(s) sur {rows.length.toLocaleString('fr-CA')} ligne(s). Source : {sourceLabel(dataStore, name)}.</p></div><div className="actions">
+    <header className="pageHead"><div><h1>{icons[name] || '📋'} {name}</h1><p>{filtered.length.toLocaleString('fr-CA')} résultat(s) sur {rows.length.toLocaleString('fr-CA')} ligne(s).</p></div><div className="actions">
       {canEdit && !gridEditing && <button onClick={() => { setGridEditing(true); setMessage(''); }}><Edit3/> Modifier la grille</button>}
       <button onClick={() => downloadCSV(professionalExportName(name,'csv'), hasMapColumn?shown:sortedComplete, cols.map(key=>({key,label:exportLabels[key]})))}><Download/> CSV {hasMapColumn?'page visible':'complet trié'}</button>
       {hasMapColumn&&<button disabled={!selectedFiltered.length} onClick={() => downloadExcel(professionalExportName(name,'xlsx'), selectedFiltered, cols, {...exportOptions,exportType:'Sélection'})}><FileSpreadsheet/> Excel sélection ({selectedFiltered.length})</button>}
@@ -408,7 +390,7 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
         })}
       </tr>;
     })}</tbody></table></div>
-    {hasMapColumn&&<GridPagination page={currentPage} pageCount={pageCount} pageSize={pageSize} total={sorted.length} selectedCount={selectedRows.size} onPage={setPage} onPageSize={setPageSize}/>}
+    <GridPagination page={currentPage} pageCount={pageCount} pageSize={pageSize} total={sorted.length} selectedCount={hasMapColumn?selectedRows.size:0} onPage={setPage} onPageSize={setPageSize}/>
     {selected && <Detail name={name} row={selected} role={role} config={config} onSaved={updated => { onRowsUpdated(name, [updated]); setSelected(updated); }} onClose={() => setSelected(null)} onOpenMap={onOpenMap}/>}
   </div>;
 }
@@ -543,6 +525,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [mapFocusSupportId, setMapFocusSupportId] = useState('');
   const [rolePermission, setRolePermission] = useState({ visible_tables: ['*'], visible_columns: {} });
+  const [terrainSyncStatus, setTerrainSyncStatus] = useState('État global non centralisé');
 
   async function refreshDataStore() {
     if (!session) return null;
@@ -561,6 +544,7 @@ function App() {
     if (!session) return;
     setLoading(true);
     refreshDataStore().finally(() => setLoading(false));
+    loadTerrainSyncStatus().then(setTerrainSyncStatus);
   }, [session?.user?.id]);
 
   useEffect(() => {
@@ -731,7 +715,7 @@ function App() {
   }
 
   let content;
-  if (active === 'Tableau de bord') content = <ExecutiveDashboard setActive={setActive} dataStore={dataStore}/>;
+  if (active === 'Tableau de bord') content = <ExecutiveDashboard setActive={setActive} dataStore={dataStore} terrainSyncStatus={terrainSyncStatus}/>;
   else if (active === 'Centre de commandement') content = <OperationalCommandCenter dataStore={dataStore} onNavigate={setActive}/>;
   else if (active === 'Connexion') content = <LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>;
   else if (active === 'Administration') content = <AdminPanel role={role} currentRole={role} session={session}/>;

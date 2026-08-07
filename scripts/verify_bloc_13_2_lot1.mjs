@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const main=fs.readFileSync('src/main.jsx','utf8');
+const pagination=fs.readFileSync('src/components/GridPagination.jsx','utf8');
 const css=fs.readFileSync('src/styles.css','utf8');
-for(const marker of ['GridPagination','Première page','Page précédente','Page suivante','Dernière page','Lignes par page','selectedRows','pageSize','pageCount'])assert.ok(main.includes(marker),marker);
-assert.match(main,/\[25,50,100,200\]/);
+for(const marker of ['GridPagination','Première page','Page précédente','Page suivante','Dernière page','Lignes par page','selectedRows','pageSize','pageCount'])assert.ok(`${main}\n${pagination}`.includes(marker),marker);
+assert.match(pagination,/\[25,\s*50,\s*100,\s*200\]/);
 assert.match(main,/sorted\.slice\(\(currentPage-1\)\*pageSize,currentPage\*pageSize\)/);
 assert.match(main,/CSV \{hasMapColumn\?'page visible'/);
 assert.match(main,/Excel sélection/);
