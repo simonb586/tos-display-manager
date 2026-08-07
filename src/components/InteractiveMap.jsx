@@ -27,8 +27,8 @@ import {
   prepareMapInfrastructureRows
 } from '../services/mapService';
 
-const DEFAULT_CENTER = [52.0, -71.5];
-const DEFAULT_ZOOM = 5;
+const DEFAULT_CENTER = [45.5017, -73.5673];
+const DEFAULT_ZOOM = 10;
 
 function MapStateBridge({ onZoom, onBounds }) {
   useMapEvents({
@@ -368,12 +368,20 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
           </MapContainer>
 
           {!points.length && (
-            <div className="map-empty">
+            <div className="map-empty-notice" role="status" aria-live="polite">
               <AlertTriangle/>
               <div>
-                <h2>Aucun support géolocalisé pour le moment</h2>
-                <p>La carte demeure centrée sur le Québec. Les marqueurs apparaîtront automatiquement dès que des coordonnées GPS seront enregistrées.</p>
+                <h2>Infrastructures non encore géolocalisées</h2>
+                <p>La carte demeure disponible et centrée sur le Grand Montréal. Les marqueurs apparaîtront automatiquement lorsque des coordonnées GPS réelles seront enregistrées.</p>
+                <dl><div><dt>Total</dt><dd>{prepared.counters.total.toLocaleString('fr-CA')}</dd></div><div><dt>Géolocalisées</dt><dd>{prepared.counters.displayable.toLocaleString('fr-CA')}</dd></div><div><dt>Sans coordonnées</dt><dd>{prepared.counters.missing.toLocaleString('fr-CA')}</dd></div></dl>
               </div>
+            </div>
+          )}
+
+          {focusSupportId && !focusedPoint && (
+            <div className="map-focus-notice" role="status">
+              Le support {focusSupportId} ne possède pas encore de localisation GPS.
+              <button type="button" onClick={onClearFocus}>Fermer</button>
             </div>
           )}
         </section>
