@@ -25,6 +25,7 @@ import './features/v13/automation-assistant.css';
 import './features/v13/grid-sorting.css';
 import './features/v13/recent-activity.css';
 import './features/v13/field-catalog.css';
+import './features/v14/module-14.css';
 
 import manifest from './data/manifest.json';
 import {
@@ -79,6 +80,8 @@ const TerrainSyncDiagnostics = lazy(() => import('./components/TerrainSyncDiagno
 const ActivityJournal = lazy(() => import('./components/ActivityJournal'));
 const AutomationAssistant = lazy(() => import('./components/AutomationAssistant'));
 const FieldCatalogManager = lazy(() => import('./components/FieldCatalogManager'));
+const Module14Dashboard = lazy(() => import('./components/Module14Dashboard'));
+import { BUSINESS_CONTEXT } from './lib/businessContext';
 
 function ScreenFallback() {
   return <div className="screen-fallback" role="status" aria-live="polite"><span aria-hidden="true"/>Chargement du module…</div>;
@@ -620,9 +623,9 @@ function App() {
   }, [role]);
 
   const adminItems = role === 'Administrateur'
-    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Rapports finaux', 'Automatisations', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats']
+    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Rapports finaux', 'Automatisations', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats', 'Communications opérationnelles', 'Communication opérationnelle — Visuels']
     : role === 'Coordonnateur'
-      ? ['Campagnes maîtres', 'Campagne — Visuels et formats']
+      ? ['Campagnes maîtres', 'Campagne — Visuels et formats', 'Communications opérationnelles', 'Communication opérationnelle — Visuels']
       : [];
   const visibleManifestTables = manifest
     .map(module => module.name)
@@ -630,7 +633,7 @@ function App() {
 
   const items = [
     'Tableau de bord',
-    'Centre de commandement',
+    ...(['Administrateur','Coordonnateur'].includes(role) ? ['Centre de commandement'] : []),
     ...(role === 'Administrateur' ? ['Gestionnaire des champs'] : []),
     ...adminItems,
     'Carte interactive',
@@ -720,7 +723,7 @@ function App() {
   }
 
   let content;
-  if (active === 'Tableau de bord') content = <ExecutiveDashboard setActive={setActive} dataStore={dataStore} terrainSyncStatus={terrainSyncStatus} role={role} rolePermission={rolePermission}/>;
+  if (active === 'Tableau de bord') content = ['Administrateur','Coordonnateur'].includes(role)?<Module14Dashboard dataStore={dataStore} onNavigate={setActive} terrainSyncStatus={terrainSyncStatus} role={role} permission={rolePermission}/>:<Dashboard setActive={setActive} dataStore={dataStore}/>;
   else if (active === 'Centre de commandement') content = <OperationalCommandCenter dataStore={dataStore} onNavigate={setActive}/>;
   else if (active === 'Connexion') content = <LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>;
   else if (active === 'Administration') content = <AdminPanel role={role} currentRole={role} session={session}/>;
@@ -736,8 +739,10 @@ function App() {
   else if (active === 'Automatisations') content = <AutomationAssistant role={role}/>;
   else if (active === 'Validation système') content = <ValidationCenter role={role}/>;
   else if (active === 'Import anciennes photos') content = <LegacyPhotoImporter dataStore={dataStore} session={session}/>;
-  else if (active === 'Campagnes maîtres') content = <CampaignsPanel role={role} session={session}/>;
-  else if (active === 'Campagne — Visuels et formats') content = <CampaignVisualManager role={role}/>;
+  else if (active === 'Campagnes maîtres') content = <CampaignsPanel role={role} session={session} businessContext={BUSINESS_CONTEXT.MARKETING}/>;
+  else if (active === 'Campagne — Visuels et formats') content = <CampaignVisualManager role={role} businessContext={BUSINESS_CONTEXT.MARKETING}/>;
+  else if (active === 'Communications opérationnelles') content = <CampaignsPanel role={role} session={session} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
+  else if (active === 'Communication opérationnelle — Visuels') content = <CampaignVisualManager role={role} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
   else if (active === 'Carte interactive') content = <InteractiveMap dataStore={dataStore} focusSupportId={mapFocusSupportId} onClearFocus={() => setMapFocusSupportId('')} onNavigate={setActive} role={role}/>;
   else if (active === 'Application terrain') content = <TerrainApp dataStore={dataStore} role={role} session={session}/>;
   else if (active === 'Recherche terrain') content = <div className="dashboard"><FieldSearch dataStore={dataStore}/></div>;

@@ -5,6 +5,7 @@ import {
   supportDisplayFormat
 } from '../lib/displayFormat';
 import { isVisualFormatCompatible } from '../lib/visualCompatibility';
+import { BUSINESS_CONTEXT } from '../lib/businessContext';
 
 export { normalizeDisplayFormat, supportDisplayFormat } from '../lib/displayFormat';
 
@@ -58,7 +59,7 @@ export async function diagnoseCompatibleVisualsForSupport(support) {
   const activeVisuals = data || [];
   const sameFormat = activeVisuals.filter(visual => isVisualFormatCompatible(visual, support));
   const published = sameFormat.filter(
-    visual => visual.campagne?.publiee_terrain === true
+    visual => visual.campagne?.publiee_terrain === true && (visual.campagne?.business_context || BUSINESS_CONTEXT.MARKETING) === BUSINESS_CONTEXT.MARKETING
   );
   const activeCampaigns = published.filter(
     visual => normalizeCampaignStatus(visual.campagne?.statut) === 'active'

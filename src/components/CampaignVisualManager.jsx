@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Archive, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { listMasterCampaigns } from '../services/campaignService';
+import { BUSINESS_CONTEXT, isBusinessContext } from '../lib/businessContext';
 import {
   deleteOrArchiveCampaignVisual,
   listCampaignVisuals,
@@ -19,7 +20,7 @@ const empty = {
   instructions_terrain: ''
 };
 
-export default function CampaignVisualManager({ role }) {
+export default function CampaignVisualManager({ role, businessContext = BUSINESS_CONTEXT.MARKETING }) {
   const [campaigns, setCampaigns] = useState([]);
   const [visuals, setVisuals] = useState([]);
   const [form, setForm] = useState(empty);
@@ -31,11 +32,11 @@ export default function CampaignVisualManager({ role }) {
   async function reload() {
     try {
       const [nextCampaigns, nextVisuals] = await Promise.all([
-        listMasterCampaigns(),
+        listMasterCampaigns(false, businessContext),
         listCampaignVisuals()
       ]);
       setCampaigns(nextCampaigns);
-      setVisuals(nextVisuals);
+      setVisuals(nextVisuals.filter(visual => isBusinessContext(visual.campagne, businessContext)));
     } catch (error) {
       setMessage(error.message);
     }
@@ -43,7 +44,7 @@ export default function CampaignVisualManager({ role }) {
 
   useEffect(() => {
     reload();
-  }, []);
+  }, [businessContext]);
 
   async function submit(event) {
     event.preventDefault();

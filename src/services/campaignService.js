@@ -1,13 +1,15 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
+import { BUSINESS_CONTEXT, normalizeBusinessContext } from '../lib/businessContext';
 
 function ensureSupabase() {
   if (!supabaseConfigured || !supabase) throw new Error('Supabase n’est pas configuré.');
 }
 
-export async function listMasterCampaigns(publishedOnly = false) {
+export async function listMasterCampaigns(publishedOnly = false, businessContext = null) {
   ensureSupabase();
   let query = supabase.from('campagnes_maitres').select('*').order('nom_campagne');
   if (publishedOnly) query = query.eq('publiee_terrain', true);
+  if (businessContext) query = query.eq('business_context', normalizeBusinessContext(businessContext));
   const { data, error } = await query;
   if (error) throw error;
   return data || [];
@@ -27,6 +29,7 @@ export async function saveMasterCampaign(campaign) {
     statut: campaign.statut || 'Brouillon',
     publiee_terrain: Boolean(campaign.publiee_terrain),
     instructions_terrain: campaign.instructions_terrain?.trim() || null,
+    business_context: normalizeBusinessContext(campaign.business_context || BUSINESS_CONTEXT.MARKETING),
     updated_at: new Date().toISOString()
   };
   if (!payload.nom_campagne) throw new Error('Le nom de campagne est obligatoire.');

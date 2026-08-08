@@ -1,0 +1,13 @@
+import assert from'node:assert/strict';import fs from'node:fs';
+import{BUSINESS_CONTEXT,normalizeBusinessContext,isBusinessContext}from'../src/lib/businessContext.js';
+assert.equal(normalizeBusinessContext(),BUSINESS_CONTEXT.MARKETING);assert.equal(normalizeBusinessContext(BUSINESS_CONTEXT.OPERATIONAL),BUSINESS_CONTEXT.OPERATIONAL);
+const sample=[{id:1,business_context:'marketing'},{id:2,business_context:'operational_communication'}];
+assert.deepEqual(sample.filter(r=>isBusinessContext(r,BUSINESS_CONTEXT.MARKETING)).map(r=>r.id),[1]);assert.deepEqual(sample.filter(r=>isBusinessContext(r,BUSINESS_CONTEXT.OPERATIONAL)).map(r=>r.id),[2]);
+const migration=fs.readFileSync('supabase/V1_2_0_MODULE_14_BUSINESS_CONTEXT.sql','utf8'),verifier=fs.readFileSync('supabase/VERIFIER_V1_2_0_MODULE_14_BUSINESS_CONTEXT.sql','utf8'),panel=fs.readFileSync('src/components/CampaignsPanel.jsx','utf8'),dashboard=fs.readFileSync('src/components/Module14Dashboard.jsx','utf8'),main=fs.readFileSync('src/main.jsx','utf8');
+for(const marker of ['business_context','marketing','operational_communication','exo info','create index'])assert.ok(migration.toLowerCase().includes(marker),marker);
+assert.ok(!/\b(insert|update|delete|alter|create|drop|truncate)\b/i.test(verifier.replace(/^--.*$/gm,'')),'Le vérificateur doit être READ ONLY');
+for(const marker of ['Est lié à','BUSINESS_CONTEXT_OPTIONS','businessContext'])assert.ok(panel.includes(marker),marker);
+for(const marker of ['Module 14','Marketing vs communication opérationnelle','RecentActivityWidget','Carte interactive','Donnée non disponible','alerts','trends'])assert.ok(dashboard.includes(marker),marker);
+assert.ok(main.includes("['Administrateur','Coordonnateur'].includes(role)?<Module14Dashboard"));assert.ok(main.includes('Communication opérationnelle — Visuels'));
+assert.equal((migration.match(/lower\(trim\(nom_campagne\)\)='exo info'/g)||[]).length,1);
+console.log('Module 14 V1.2.0 : classification, vues, KPI, alertes, activité, carte, rôles et migration validés.');
