@@ -26,6 +26,7 @@ import './features/v13/grid-sorting.css';
 import './features/v13/recent-activity.css';
 import './features/v13/field-catalog.css';
 import './features/v14/module-14.css';
+import './features/v17/client-portal.css';
 
 import manifest from './data/manifest.json';
 import {
@@ -81,6 +82,8 @@ const ActivityJournal = lazy(() => import('./components/ActivityJournal'));
 const AutomationAssistant = lazy(() => import('./components/AutomationAssistant'));
 const FieldCatalogManager = lazy(() => import('./components/FieldCatalogManager'));
 const Module14Dashboard = lazy(() => import('./components/Module14Dashboard'));
+const ClientPortal = lazy(() => import('./components/ClientPortal'));
+const SiteSupportAssignmentsView = lazy(() => import('./components/SiteSupportAssignmentsView'));
 import { BUSINESS_CONTEXT } from './lib/businessContext';
 
 function ScreenFallback() {
@@ -545,10 +548,11 @@ function App() {
   }
 
   useEffect(() => {
-    if (!session) return;
+    if (!session || profileLoading || !profile) return;
+    if (['Client','Client-Admin'].includes(profile.role)) { setDataStore(null); setLoading(false); return; }
     setLoading(true);
     refreshDataStore().finally(() => setLoading(false));
-  }, [session?.user?.id]);
+  }, [session?.user?.id, profile?.id, profileLoading]);
 
   useEffect(() => {
     if (!session || active !== 'Tableau de bord') return;
@@ -623,9 +627,9 @@ function App() {
   }, [role]);
 
   const adminItems = role === 'Administrateur'
-    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Rapports finaux', 'Automatisations', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats', 'Communications opérationnelles', 'Communication opérationnelle — Visuels']
+    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Rapports finaux', 'Automatisations', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats', 'Campagnes et visuels par site et supports', 'Communications opérationnelles', 'Communication opérationnelle — Visuels', 'Communications opérationnelles par site et supports']
     : role === 'Coordonnateur'
-      ? ['Campagnes maîtres', 'Campagne — Visuels et formats', 'Communications opérationnelles', 'Communication opérationnelle — Visuels']
+      ? ['Campagnes maîtres', 'Campagne — Visuels et formats', 'Campagnes et visuels par site et supports', 'Communications opérationnelles', 'Communication opérationnelle — Visuels', 'Communications opérationnelles par site et supports']
       : [];
   const visibleManifestTables = manifest
     .map(module => module.name)
@@ -709,6 +713,10 @@ function App() {
     }
   }
 
+  if (['Client','Client-Admin'].includes(role)) {
+    return <Suspense fallback={<ScreenFallback/>}><ClientPortal profile={profile} onLogout={logoutFromPortal}/></Suspense>;
+  }
+
   if (role === 'Installateur') {
     return <Suspense fallback={<ScreenFallback/>}><InstallerTerrainShell
       dataStore={dataStore}
@@ -743,6 +751,8 @@ function App() {
   else if (active === 'Campagne — Visuels et formats') content = <CampaignVisualManager role={role} businessContext={BUSINESS_CONTEXT.MARKETING}/>;
   else if (active === 'Communications opérationnelles') content = <CampaignsPanel role={role} session={session} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
   else if (active === 'Communication opérationnelle — Visuels') content = <CampaignVisualManager role={role} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
+  else if (active === 'Campagnes et visuels par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.MARKETING}/>;
+  else if (active === 'Communications opérationnelles par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.OPERATIONAL}/>;
   else if (active === 'Carte interactive') content = <InteractiveMap dataStore={dataStore} focusSupportId={mapFocusSupportId} onClearFocus={() => setMapFocusSupportId('')} onNavigate={setActive} role={role}/>;
   else if (active === 'Application terrain') content = <TerrainApp dataStore={dataStore} role={role} session={session}/>;
   else if (active === 'Recherche terrain') content = <div className="dashboard"><FieldSearch dataStore={dataStore}/></div>;

@@ -1,0 +1,10 @@
+-- STRICTEMENT READ ONLY. À exécuter séparément après la migration, jamais avant approbation.
+select table_name,column_name,data_type from information_schema.columns where table_schema='public' and ((table_name='campagnes_maitres' and column_name in ('client_id','client_published')) or column_name='client_visible') order by table_name,column_name;
+select table_name from information_schema.tables where table_schema='public' and table_name in ('client_campaign_access','client_member_invitations') order by table_name;
+select routine_name,security_type from information_schema.routines where routine_schema='public' and routine_name like '%client%v120' order by routine_name;
+select schemaname,tablename,policyname,cmd,roles,qual,with_check from pg_policies where schemaname in ('public','storage') and policyname like '%v120' order by tablename,policyname;
+select c.business_context,count(*) total,count(*) filter(where c.client_id is null) sans_client,count(*) filter(where c.client_published) publiees from public.campagnes_maitres c group by c.business_context order by c.business_context;
+select c.client_id,c.id campaign_id,count(*) logical_rows,count(distinct concat_ws('|',i.site,cs.support_id,c.id,coalesce(v.id::text,cs.visuel_attendu,''))) unique_rows from public.campagnes_maitres c join public.campagnes_supports cs on cs.campagne_id=c.id join public.infrastructures i on i.support_id=cs.support_id left join public.campagne_visuels_formats v on v.campagne_id=c.id and (v.nom_visuel=cs.visuel_attendu or v.id is null) group by c.client_id,c.id having count(*)<>count(distinct concat_ws('|',i.site,cs.support_id,c.id,coalesce(v.id::text,cs.visuel_attendu,'')));
+select u.client_id,u.role,count(*) from public.utilisateurs u where u.role in ('Client','Client-Admin') group by u.client_id,u.role order by u.client_id,u.role;
+select count(*) invalid_client_profiles from public.utilisateurs where role in ('Client','Client-Admin') and client_id is null;
+select count(*) public_support_photo_policies from pg_policies where schemaname='public' and tablename='support_photos' and ('public'=any(roles) or 'anon'=any(roles));

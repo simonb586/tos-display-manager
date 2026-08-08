@@ -1,7 +1,12 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
-export default function GridPagination({ page, pageCount, pageSize, total, selectedCount = 0, onPage, onPageSize }) {
+export default function GridPagination({ page: pageProp, currentPage, pageCount: pageCountProp, pageSize, total: totalProp, totalRows, selectedCount = 0, onPage: onPageProp, onPageChange, onPageSize: onPageSizeProp, onPageSizeChange }) {
+  const page = pageProp ?? currentPage ?? 1;
+  const total = totalProp ?? totalRows ?? 0;
+  const pageCount = pageCountProp ?? Math.max(1, Math.ceil(total / pageSize));
+  const onPage = onPageProp ?? onPageChange;
+  const onPageSize = onPageSizeProp ?? onPageSizeChange;
   const start = total ? (page - 1) * pageSize + 1 : 0;
   const end = Math.min(total, page * pageSize);
   const candidates = [1, page - 1, page, page + 1, pageCount].filter(value => value >= 1 && value <= pageCount);
