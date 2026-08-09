@@ -627,9 +627,9 @@ function App() {
   }, [role]);
 
   const adminItems = role === 'Administrateur'
-    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Rapports finaux', 'Automatisations', 'Import anciennes photos', 'Campagnes maîtres', 'Campagne — Visuels et formats', 'Campagnes et visuels par site et supports', 'Communications opérationnelles', 'Communication opérationnelle — Visuels', 'Communications opérationnelles par site et supports']
+    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Rapports finaux', 'Automatisations', 'Campagnes et visuels par site et supports', 'Communications opérationnelles par site et supports']
     : role === 'Coordonnateur'
-      ? ['Campagnes maîtres', 'Campagne — Visuels et formats', 'Campagnes et visuels par site et supports', 'Communications opérationnelles', 'Communication opérationnelle — Visuels', 'Communications opérationnelles par site et supports']
+      ? ['Campagnes et visuels par site et supports', 'Communications opérationnelles par site et supports']
       : [];
   const visibleManifestTables = manifest
     .map(module => module.name)
@@ -751,8 +751,8 @@ function App() {
   else if (active === 'Campagne — Visuels et formats') content = <CampaignVisualManager role={role} businessContext={BUSINESS_CONTEXT.MARKETING}/>;
   else if (active === 'Communications opérationnelles') content = <CampaignsPanel role={role} session={session} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
   else if (active === 'Communication opérationnelle — Visuels') content = <CampaignVisualManager role={role} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
-  else if (active === 'Campagnes et visuels par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.MARKETING}/>;
-  else if (active === 'Communications opérationnelles par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.OPERATIONAL}/>;
+  else if (active === 'Campagnes et visuels par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.MARKETING} role={role} onNavigate={setActive}/>;
+  else if (active === 'Communications opérationnelles par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.OPERATIONAL} role={role} onNavigate={setActive}/>;
   else if (active === 'Carte interactive') content = <InteractiveMap dataStore={dataStore} focusSupportId={mapFocusSupportId} onClearFocus={() => setMapFocusSupportId('')} onNavigate={setActive} role={role}/>;
   else if (active === 'Application terrain') content = <TerrainApp dataStore={dataStore} role={role} session={session}/>;
   else if (active === 'Recherche terrain') content = <div className="dashboard"><FieldSearch dataStore={dataStore}/></div>;

@@ -4,16 +4,16 @@ import { availableKpi, unavailableKpi } from '../lib/module14Kpi.js';
 import { assignmentsForContext, normalizeUniqueAssignments } from '../lib/siteSupportAssignments';
 import { getTerrainSyncTimeline } from './terrainDiagnosticsService.js';
 import { listFinalCommunications } from './finalReportService';
+import { getMarketingAssignmentsBySiteAndSupport, getOperationalCommunicationAssignmentsBySiteAndSupport } from './siteSupportBusinessService.js';
 
 const unwrap = result => { if(result.error) throw result.error; return result.data || []; };
 export async function loadModule14Data(){
  if(!supabaseConfigured||!supabase) return {campaigns:[],assignments:[],visuals:[],available:false};
- const [campaigns,assignments,visuals]=await Promise.all([
-  supabase.from('campagnes_maitres').select('id,nom_campagne,client,statut,date_debut,date_fin,supports_cibles,supports_completes,business_context').order('date_fin',{ascending:true,nullsFirst:false}).limit(250),
-  supabase.from('campagnes_supports').select('id,support_id,statut,campagne:campagne_id(id,nom_campagne,business_context)').order('updated_at',{ascending:false}).limit(500),
-  supabase.from('campagne_visuels_formats').select('id,nom_visuel,actif,campagne:campagne_id(id,business_context)').order('id',{ascending:false}).limit(250)
- ]);
- return {campaigns:unwrap(campaigns),assignments:normalizeUniqueAssignments(unwrap(assignments).map(row=>({...row,campaign_id:row.campagne?.id,visual_id:row.visuel_id??row.visuel_attendu,site_id:row.site??row.support_id?.split('-')[0]}))),visuals:unwrap(visuals),available:true};
+ const all=async loader=>{const first=await loader({page:1,pageSize:200}),pages=Math.ceil(first.total/200),rows=[...first.rows];for(let page=2;page<=pages;page++)rows.push(...(await loader({page,pageSize:200})).rows);return normalizeUniqueAssignments(rows)};
+ const [marketing,operational]=await Promise.all([all(getMarketingAssignmentsBySiteAndSupport),all(getOperationalCommunicationAssignmentsBySiteAndSupport)]),assignments=[...marketing,...operational];
+ const distinct=(rows,key)=>[...new Map(rows.filter(row=>row[key]!=null).map(row=>[`${row.business_context}:${row[key]}`,row])).values()];
+ const campaigns=distinct(assignments.map(row=>({...row,id:row.campaign_id,nom_campagne:row.campaign})),'id'),visuals=distinct(assignments.map(row=>({...row,id:row.visual_id,nom_visuel:row.visual,actif:row.statut!=='Inactif'})),'id');
+ return {campaigns,assignments,visuals,available:true};
 }
 export const marketingRows=rows=>rows.filter(row=>(row.business_context||row.campagne?.business_context||BUSINESS_CONTEXT.MARKETING)===BUSINESS_CONTEXT.MARKETING);
 export const operationalRows=rows=>rows.filter(row=>(row.business_context||row.campagne?.business_context||BUSINESS_CONTEXT.MARKETING)===BUSINESS_CONTEXT.OPERATIONAL);

@@ -5,16 +5,21 @@ import { assignmentsForContext, normalizeUniqueAssignments } from '../lib/siteSu
 const PAGE_SIZES = [25, 50, 100, 200];
 const safePageSize = value => PAGE_SIZES.includes(Number(value)) ? Number(value) : 25;
 
-export async function getAssignmentsBySiteAndSupport({ context, page = 1, pageSize = 25 } = {}) {
+export async function getAssignmentsBySiteAndSupport({ context, page = 1, pageSize = 25, filters = {} } = {}) {
   if (!supabaseConfigured || !supabase) return { rows: [], total: 0, page: 1, pageSize: safePageSize(pageSize) };
   const size = safePageSize(pageSize);
   const from = Math.max(0, Number(page) - 1) * size;
-  const { data, error, count } = await supabase
+  let allowedSupportIds=null;
+  if(filters.site||filters.format||filters.issue){let infrastructureQuery=supabase.from('infrastructures').select('support_id');if(filters.site)infrastructureQuery=infrastructureQuery.eq('site',filters.site);if(filters.format)infrastructureQuery=infrastructureQuery.eq('format_affichage',filters.format);const infra=await infrastructureQuery;if(infra.error)throw infra.error;allowedSupportIds=(infra.data||[]).map(row=>row.support_id);
+    if(filters.issue){const issues=await supabase.from('enjeux_des_cadres_et_supports').select('support_id').ilike('type_enjeu',`%${filters.issue}%`);if(issues.error)throw issues.error;const issueIds=new Set((issues.data||[]).map(row=>String(row.support_id)));allowedSupportIds=allowedSupportIds.filter(id=>issueIds.has(String(id)))}
+  }
+  let query = supabase
     .from('campagnes_supports')
-    .select('id,support_id,statut,visuel_attendu,no_edt,photo_url,date_completion,campagne_id,campagne:campagne_id(id,nom_campagne,client,date_debut,date_fin,business_context)', { count: 'exact' })
-    .eq('campagne.business_context', context)
-    .order('id', { ascending: false })
-    .range(from, from + size - 1);
+    .select('id,support_id,statut,visuel_attendu,no_edt,photo_url,date_completion,updated_at,campagne_id,campagne:campagne_id!inner(id,nom_campagne,client,date_debut,date_fin,business_context)', { count: 'exact' })
+    .eq('campagne.business_context', context);
+  if(allowedSupportIds)query=allowedSupportIds.length?query.in('support_id',allowedSupportIds):query.eq('support_id','__none__');
+  if(filters.support)query=query.ilike('support_id',`%${filters.support}%`);if(filters.client)query=query.ilike('campagne.client',`%${filters.client}%`);if(filters.campaign)query=query.ilike('campagne.nom_campagne',`%${filters.campaign}%`);if(filters.visual)query=query.ilike('visuel_attendu',`%${filters.visual}%`);if(filters.status)query=query.eq('statut',filters.status);if(filters.edt)query=query.ilike('no_edt',`%${filters.edt}%`);if(filters.dateFrom)query=query.gte('campagne.date_fin',filters.dateFrom);if(filters.dateTo)query=query.lte('campagne.date_debut',filters.dateTo);
+  const { data, error, count } = await query.order('id', { ascending: false }).range(from, from + size - 1);
   if (error) throw error;
   const supportIds = [...new Set((data || []).map(row => row.support_id).filter(Boolean))];
   const infrastructureResult = supportIds.length
@@ -36,7 +41,8 @@ export async function getAssignmentsBySiteAndSupport({ context, page = 1, pageSi
     format: infrastructureBySupport.get(String(row.support_id))?.format_affichage,
     infrastructure: infrastructureBySupport.get(String(row.support_id))?.emplacement_visibilite,
     date_debut: row.campagne?.date_debut,
-    date_fin: row.campagne?.date_fin
+    date_fin: row.campagne?.date_fin,
+    derniere_activite: row.updated_at
   }));
   const rows = assignmentsForContext(projected, context);
   return { rows, total: count ?? rows.length, page: Math.max(1, Number(page) || 1), pageSize: size };

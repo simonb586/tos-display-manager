@@ -6,6 +6,7 @@ import {
   RefreshCw,
   Star,
   Trash2,
+  UploadCloud,
   XCircle
 } from 'lucide-react';
 import {
@@ -19,6 +20,7 @@ import { deleteSupportPhoto } from '../services/photoLibraryService';
 import { friendlyError } from '../config/businessLanguage';
 import SortableHeader from './SortableHeader';
 import useSortableRows from '../hooks/useSortableRows';
+import MassPhotoImporter from './MassPhotoImporter';
 
 export default function PhotoInventoryCenter({ role }) {
   const [tab, setTab] = useState('photos');
@@ -131,9 +133,10 @@ export default function PhotoInventoryCenter({ role }) {
         <button className={tab === 'inventory' ? 'active' : ''} onClick={() => setTab('inventory')}>
           <Package size={17}/> Inventaire
         </button>
+        {canManage && <button className={tab === 'mass-import' ? 'active' : ''} onClick={() => setTab('mass-import')}><UploadCloud size={17}/> Import massif de photos</button>}
       </div>
 
-      {tab === 'photos' ? (
+      {tab === 'mass-import' ? <MassPhotoImporter role={role}/> : tab === 'photos' ? (
         <div className="photo-review-grid">
           {photos.map(photo => (
             <article key={photo.id}>
