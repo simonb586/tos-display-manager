@@ -1,4 +1,5 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
+import { getSignedPhotoUrls } from './photoAccessService';
 
 export async function listSupportPhotosForValidation() {
   if (!supabaseConfigured || !supabase) return [];
@@ -6,9 +7,9 @@ export async function listSupportPhotosForValidation() {
     .from('support_photos')
     .select('*')
     .order('prise_le', { ascending: false })
-    .limit(500);
+    .limit(50);
   if (error) throw error;
-  return data || [];
+  return getSignedPhotoUrls(data || [], { purpose:'preview' });
 }
 
 export async function validateSupportPhoto(id, status, comment = '') {

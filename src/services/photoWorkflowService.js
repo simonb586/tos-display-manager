@@ -22,8 +22,11 @@ export async function prepareAndUploadPhoto(file, context, bucket='support-photo
   } while(await pathExists(bucket,identity.storagePath));
   const {error}=await supabase.storage.from(bucket).upload(identity.storagePath,file,{cacheControl:'3600',upsert:false});
   if(error)throw error;
-  const {data}=supabase.storage.from(bucket).getPublicUrl(identity.storagePath);
-  return {...identity,bucket,publicUrl:data?.publicUrl||'',classification};
+  if (bucket !== 'support-photos') {
+    const { data } = supabase.storage.from(bucket).getPublicUrl(identity.storagePath);
+    return {...identity,bucket,publicUrl:data?.publicUrl||'',classification};
+  }
+  return {...identity,bucket,classification};
 }
 
 export async function rollbackUploadedPhoto(uploaded) {
@@ -38,8 +41,8 @@ export function photoHistoryRow(uploaded, context={}) {
     support_id:String(context.supportId), campagne_id:context.campaignId||classification.campaignId||null, edt_id:context.edtId||classification.edtId||null,
     type_photo:uploaded.type, source:context.source||'administration', original_filename:uploaded.originalFilename,
     normalized_filename:uploaded.normalizedFilename, nom_fichier:uploaded.normalizedFilename,
-    storage_bucket:uploaded.bucket, storage_path:uploaded.storagePath, photo_url:uploaded.publicUrl||null,
-    thumbnail_url:uploaded.publicUrl||null, captured_at:uploaded.capturedAt, prise_le:uploaded.capturedAt,
+    storage_bucket:uploaded.bucket, storage_path:uploaded.storagePath, photo_url:null,
+    thumbnail_url:null, captured_at:uploaded.capturedAt, prise_le:uploaded.capturedAt,
     uploaded_at:uploaded.uploadedAt, uploaded_by:context.uploadedBy||null, utilisateur:context.userEmail||null,
     intervention_id:context.interventionId||null, inspection_id:context.inspectionId||null,
     issue_id:context.issueId||null, is_current_visual:Boolean(context.isCurrentVisual),

@@ -94,7 +94,7 @@ begin
       order by i.site,i.support_id,c.id limit v_limit offset v_offset) q;
   elsif p_section='photos' then
     select count(*),coalesce(jsonb_agg(to_jsonb(q)),'[]') into v_total,v_rows from (
-      select p.id,p.support_id,p.campagne_id,p.visuel_id,p.type_photo,p.nom_fichier,p.thumbnail_url,p.photo_url,p.prise_le,p.statut_validation
+      select p.id,p.support_id,p.campagne_id,p.visuel_id,p.type_photo,p.nom_fichier,p.storage_bucket,p.storage_path,p.prise_le,p.statut_validation
       from public.support_photos p join public.campagnes_maitres c on c.id=p.campagne_id
       where c.client_id=v_client and c.client_published and p.client_visible and public.client_can_access_campaign_v120(c.id)
       order by p.prise_le desc,p.id desc limit v_limit offset v_offset) q;
@@ -105,10 +105,10 @@ begin
       order by r.created_at desc limit v_limit offset v_offset) q;
   elsif p_section='edt' then
     select count(*),coalesce(jsonb_agg(to_jsonb(q)),'[]') into v_total,v_rows from (
-      select e.id,e.numero_edt,e.statut,e.date_debut,e.date_fin,e.rapport_final_envoye,e.rapport_final_path,e.campagne_id
+      select e.id,e.no_edt,e.statut,e.date_debut_prevue,e.date_fin_prevue,e.rapport_final_envoye,e.rapport_final_path,e.campagne_id
       from public.suivi_des_edt e join public.campagnes_maitres c on c.id=e.campagne_id
       where c.client_id=v_client and c.client_published and e.client_visible and public.client_can_access_campaign_v120(c.id)
-      order by e.date_fin desc nulls last,e.id desc limit v_limit offset v_offset) q;
+      order by e.date_fin_prevue desc nulls last,e.id desc limit v_limit offset v_offset) q;
   elsif p_section='issues' then
     select count(*),coalesce(jsonb_agg(to_jsonb(q)),'[]') into v_total,v_rows from (
       select e.id,e.reference,e.support_id,e.type_enjeu,e.description,e.statut,e.priorite,e.created_at
@@ -191,5 +191,29 @@ drop policy if exists "communications_finales_read" on public.communications_fin
 create policy communications_finales_scoped_read_v120 on public.communications_finales for select to authenticated using(public.current_app_role() in ('Administrateur','Coordonnateur') or (client_published and client_id=(select u.client_id from public.utilisateurs u where u.auth_user_id=auth.uid() and u.role in ('Client','Client-Admin'))));
 drop policy if exists "final_reports_authenticated_read" on storage.objects;
 create policy final_reports_scoped_read_v120 on storage.objects for select to authenticated using(bucket_id='final-reports' and (public.current_app_role() in ('Administrateur','Coordonnateur') or exists(select 1 from public.communications_finales r where r.report_path=name and r.client_published and r.client_id=(select u.client_id from public.utilisateurs u where u.auth_user_id=auth.uid()))));
+
+-- support-photos devient privé. Aucun fichier ni objet Storage n'est supprimé.
+update storage.buckets set public=false where id='support-photos';
+drop policy if exists sp_storage_read on storage.objects;
+drop policy if exists sp_storage_insert on storage.objects;
+drop policy if exists support_photos_storage_scoped_read_v120 on storage.objects;
+create policy support_photos_storage_scoped_read_v120 on storage.objects
+for select to authenticated using (
+  bucket_id='support-photos' and (
+    public.current_app_role() in ('Administrateur','Coordonnateur','Installateur')
+    or exists (
+      select 1 from public.support_photos p
+      join public.campagnes_maitres c on c.id=p.campagne_id
+      join public.utilisateurs u on u.auth_user_id=auth.uid()
+      where p.storage_path=storage.objects.name
+        and p.client_visible
+        and c.client_published
+        and c.client_id=u.client_id
+        and u.statut='Actif'
+        and u.role in ('Client','Client-Admin')
+        and public.client_can_access_campaign_v120(c.id)
+    )
+  )
+);
 
 commit;

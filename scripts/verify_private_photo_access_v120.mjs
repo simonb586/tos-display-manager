@@ -1,0 +1,18 @@
+import assert from'node:assert/strict';import fs from'node:fs';
+const read=file=>fs.readFileSync(file,'utf8');
+const access=read('src/services/photoAccessService.js'),workflow=read('src/services/photoWorkflowService.js'),library=read('src/services/photoLibraryService.js'),inventory=read('src/services/photoInventoryService.js'),gallery=read('src/components/SupportPhotoGallery.jsx'),client=read('src/components/ClientPortal.jsx'),clientService=read('src/services/clientPortalService.js'),map=read('src/components/InteractiveMap.jsx'),terrain=read('src/services/terrainService.js'),migration=read('supabase/V1_2_0_MODULE_17_CLIENT_PORTAL_SECURITY_PREPARED.sql');
+for(const marker of ['createSignedUrl','getSignedPhotoUrl','getSignedPhotoUrls','getSignedDownloadUrl','signedUrlCache','CACHE_SAFETY_SECONDS','preview: 300','download: 120','report: 900'])assert.ok(access.includes(marker),marker);
+assert.ok(!workflow.match(/from\(bucket\)\.getPublicUrl[\s\S]{0,100}bucket==='support-photos'/),'support-photos ne dépend pas de getPublicUrl');
+assert.ok(workflow.includes("bucket !== 'support-photos'"),'Terrain conserve son comportement public');
+assert.ok(workflow.includes('photo_url:null')&&workflow.includes('thumbnail_url:null'),'URL signée jamais persistée');
+assert.ok(library.includes('getSignedDownloadUrl')&&library.includes('getSignedPhotoUrls'),'Galerie et téléchargements centralisés');
+assert.ok(library.includes(".limit(50)"),'Galerie limitée aux photos visibles');
+assert.ok(inventory.includes('.limit(50)')&&inventory.includes('getSignedPhotoUrls'),'Inventaire limité à la page visible');
+for(const source of [gallery,client,map])assert.ok(source.includes('signed_')||source.includes('getSignedPhotoUrl'),'Affichage privé signé');
+assert.ok(gallery.includes('loading="lazy"')&&client.includes('loading="lazy"')&&map.includes('loading="lazy"'),'Lazy loading');
+assert.ok(clientService.includes("section === 'photos'")&&clientService.includes('getSignedPhotoUrls'),'Signature après RPC client scellée');
+for(const guard of ['p.client_visible','c.client_published','c.client_id=u.client_id',"u.role in ('Client','Client-Admin')",'client_can_access_campaign_v120'])assert.ok(migration.includes(guard),guard);
+assert.ok(migration.includes("update storage.buckets set public=false where id='support-photos'"),'Bucket privé');
+assert.ok(terrain.includes("from('terrain-photos')"),'Terrain inchangé');
+assert.ok(!read('src/services/finalReportService.js').includes("from('support_photos')"),'Rapports actuels ne chargent pas support-photos');
+console.log('V1.2.0 photos privées : signatures temporaires, cache, galerie, inventaire, carte, client, téléchargements et Terrain validés.');

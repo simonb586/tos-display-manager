@@ -1,6 +1,9 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
 import { BUSINESS_CONTEXT } from '../lib/businessContext';
+import { availableKpi, unavailableKpi } from '../lib/module14Kpi.js';
 import { assignmentsForContext, normalizeUniqueAssignments } from '../lib/siteSupportAssignments';
+import { getTerrainSyncTimeline } from './terrainDiagnosticsService.js';
+import { listFinalCommunications } from './finalReportService';
 
 const unwrap = result => { if(result.error) throw result.error; return result.data || []; };
 export async function loadModule14Data(){
@@ -16,3 +19,11 @@ export const marketingRows=rows=>rows.filter(row=>(row.business_context||row.cam
 export const operationalRows=rows=>rows.filter(row=>(row.business_context||row.campagne?.business_context||BUSINESS_CONTEXT.MARKETING)===BUSINESS_CONTEXT.OPERATIONAL);
 export const uniqueMarketingAssignments=rows=>assignmentsForContext(rows,BUSINESS_CONTEXT.MARKETING);
 export const uniqueOperationalAssignments=rows=>assignmentsForContext(rows,BUSINESS_CONTEXT.OPERATIONAL);
+
+export async function loadModule14OperationalKpis() {
+ const [terrainResult,reportResult]=await Promise.allSettled([getTerrainSyncTimeline({page:1,pageSize:1}),listFinalCommunications()]);
+ return {
+  terrain:terrainResult.status==='fulfilled'?availableKpi(terrainResult.value.total):unavailableKpi(terrainResult.reason),
+  reports:reportResult.status==='fulfilled'?availableKpi(reportResult.value.filter(row=>!['brouillon','échec','echec','erreur'].includes(String(row.statut||'').toLowerCase())).length):unavailableKpi(reportResult.reason)
+ };
+}

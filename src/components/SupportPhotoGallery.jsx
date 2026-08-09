@@ -82,9 +82,9 @@ export default function SupportPhotoGallery({ supportId, canDelete=false, canMan
         <button className="support-gallery-check" type="button" onClick={()=>toggle(photo.id)} aria-label="Sélectionner la photo">
           {checked[photo.id]?<CheckSquare size={20}/>:<Square size={20}/>}
         </button>
-        {(photo.est_principale||photo.photo_url===photos.find(x=>x.est_principale)?.photo_url)&&<span className="primary-badge"><Star size={13}/> Principale</span>}
+        {photo.est_principale&&<span className="primary-badge"><Star size={13}/> Principale</span>}
         <button className="support-gallery-open" type="button" onClick={()=>setSelected(photo)}>
-          <img src={photo.thumbnail_url||photo.photo_url} alt={photo.nom_fichier||'Photo du support'}/>
+          {photo.signed_thumbnail_url?<img loading="lazy" src={photo.signed_thumbnail_url} alt={photo.nom_fichier||'Photo du support'}/>:<span>Aperçu indisponible</span>}
           <span>{photo.prise_le?new Date(photo.prise_le).toLocaleDateString('fr-CA'):'Date inconnue'}</span>
           <small>{photo.type_photo||'Photo'} · {photo.statut_validation||'Non validée'}</small>
         </button>
@@ -99,7 +99,7 @@ export default function SupportPhotoGallery({ supportId, canDelete=false, canMan
 
     {selected&&<div className="photo-lightbox" role="dialog" aria-modal="true">
       <button type="button" className="close" onClick={()=>setSelected(null)} aria-label="Fermer"><X/></button>
-      <img src={selected.photo_url} alt={selected.nom_fichier||'Photo du support'}/>
+      {selected.signed_url?<img src={selected.signed_url} alt={selected.nom_fichier||'Photo du support'}/>:<p>{selected.photo_access_error||'Photo inaccessible.'}</p>}
       <div className="photo-lightbox-info">
         <strong>{selected.nom_fichier||'Photo'}</strong>
         <span>{selected.prise_le?new Date(selected.prise_le).toLocaleString('fr-CA'):'Date inconnue'}</span>

@@ -138,8 +138,8 @@ export default function PhotoInventoryCenter({ role }) {
           {photos.map(photo => (
             <article key={photo.id}>
               <div className="photo-review-image">
-                {photo.thumbnail_url || photo.photo_url
-                  ? <img src={photo.thumbnail_url || photo.photo_url} alt={photo.nom_fichier}/>
+                {photo.signed_thumbnail_url
+                  ? <img loading="lazy" src={photo.signed_thumbnail_url} alt={photo.nom_fichier}/>
                   : <span>Aperçu indisponible</span>}
               </div>
               <div className="photo-review-body">

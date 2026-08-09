@@ -5,6 +5,7 @@ import {
   normalizeStoragePath, storageLocationFromPhotoRecord, storagePathFromPhotoRecord
 } from '../lib/photoDeletion';
 import { prepareAndUploadPhoto, insertPhotoWithRollback } from './photoWorkflowService';
+import { getSignedDownloadUrl, getSignedPhotoUrls } from './photoAccessService';
 
 const ready = () => {
   if (!supabaseConfigured || !supabase) throw new Error('Supabase n’est pas configuré.');
@@ -28,10 +29,9 @@ async function importLegacyPhotoPrevious({file,supportId,date,userEmail,sequence
   const path=`${supportId}/${filename}`;
   const {error:up}=await supabase.storage.from('support-photos').upload(path,file,{upsert:false});
   if(up)throw up;
-  const {data:u}=supabase.storage.from('support-photos').getPublicUrl(path);
   const {error}=await supabase.from('support_photos').insert({
     support_id:supportId,type_photo:'HISTORIQUE',nom_fichier:filename,storage_path:path,
-    photo_url:u?.publicUrl||'',prise_le:d.toISOString(),utilisateur:userEmail,statut_validation:'Validée'
+    photo_url:null,thumbnail_url:null,prise_le:d.toISOString(),utilisateur:userEmail,statut_validation:'Validée'
   });
   if(error)throw error;
 }
@@ -39,9 +39,9 @@ async function importLegacyPhotoPrevious({file,supportId,date,userEmail,sequence
 export async function listSupportPhotos(supportId) {
   ready();
   const { data, error } = await supabase.from('support_photos').select('*')
-    .eq('support_id', supportId).order('prise_le', { ascending: false });
+    .eq('support_id', supportId).order('prise_le', { ascending: false }).limit(50);
   if(error) throw error;
-  return data || [];
+  return getSignedPhotoUrls(data || [], { purpose:'preview' });
 }
 
 export function storagePathFromPhoto(photo) {
@@ -100,14 +100,18 @@ async function recordStillExists(id) {
 }
 
 async function infrastructureStillReferences(photo) {
-  if (!photo?.support_id || !photo?.photo_url) return false;
+  if (!photo?.support_id) return false;
+  const references = [photo.photo_url, photo.thumbnail_url,
+    photo.storage_path ? `${photo.storage_bucket || 'support-photos'}/${normalizeStoragePath(photo.storage_path)}` : null
+  ].filter(Boolean);
+  if (!references.length) return false;
   const { data, error } = await supabase.from('infrastructures')
     .select('id,visuel_actuel_cadre,photo_principale_url,photo_miniature_url')
     .eq('support_id', photo.support_id).limit(10);
   if (error) throw error;
   return (data || []).some(row => [
     row.visuel_actuel_cadre, row.photo_principale_url, row.photo_miniature_url
-  ].includes(photo.photo_url));
+  ].some(value => references.includes(value)));
 }
 
 async function verifyPhotoDeletion(photo, storageLocation) {
@@ -127,27 +131,37 @@ async function verifyPhotoDeletion(photo, storageLocation) {
 }
 
 async function setInfrastructurePrimary(supportId, photo) {
+  const stableReference = photo?.storage_path ? `${photo.storage_bucket || 'support-photos'}/${normalizeStoragePath(photo.storage_path)}` : null;
   const { error } = await supabase.from('infrastructures').update({
-    photo_principale_url: photo?.photo_url || null,
-    photo_miniature_url: photo?.thumbnail_url || photo?.photo_url || null,
-    visuel_actuel_cadre: photo?.thumbnail_url || photo?.photo_url || null
+    photo_principale_url: stableReference,
+    photo_miniature_url: stableReference,
+    visuel_actuel_cadre: stableReference
   }).eq('support_id', supportId);
   if (error) throw error;
 }
 
 async function replaceInfrastructurePhotoReferences(deletedPhoto, replacement) {
-  if (!deletedPhoto?.support_id || !deletedPhoto?.photo_url) return;
+  if (!deletedPhoto?.support_id) return;
+  const deletedReferences = [deletedPhoto.photo_url, deletedPhoto.thumbnail_url,
+    deletedPhoto.storage_path ? `${deletedPhoto.storage_bucket || 'support-photos'}/${normalizeStoragePath(deletedPhoto.storage_path)}` : null
+  ].filter(Boolean);
+  if (!deletedReferences.length) return;
+  const replacementReference = replacement?.storage_path
+    ? `${replacement.storage_bucket || 'support-photos'}/${normalizeStoragePath(replacement.storage_path)}`
+    : null;
   const values = {
-    photo_principale_url: replacement?.photo_url || null,
-    photo_miniature_url: replacement?.thumbnail_url || replacement?.photo_url || null,
-    visuel_actuel_cadre: replacement?.thumbnail_url || replacement?.photo_url || null
+    photo_principale_url: replacementReference,
+    photo_miniature_url: replacementReference,
+    visuel_actuel_cadre: replacementReference
   };
   for (const [field, value] of Object.entries(values)) {
-    const { error } = await supabase.from('infrastructures')
-      .update({ [field]:value })
-      .eq('support_id', deletedPhoto.support_id)
-      .eq(field, deletedPhoto.photo_url);
-    if (error) throw error;
+    for (const reference of deletedReferences) {
+      const { error } = await supabase.from('infrastructures')
+        .update({ [field]:value })
+        .eq('support_id', deletedPhoto.support_id)
+        .eq(field, reference);
+      if (error) throw error;
+    }
   }
 }
 
@@ -282,8 +296,7 @@ function safeFileName(value) {
 }
 
 export async function downloadPhoto(photo) {
-  const url=photo?.photo_url;
-  if (!url) throw new Error('Adresse de photo absente.');
+  const url=await getSignedDownloadUrl(photo);
   const response=await fetch(url);
   if (!response.ok) throw new Error(`Téléchargement impossible (${response.status}).`);
   const blob=await response.blob();
@@ -309,7 +322,7 @@ export async function downloadPhotosZip(photos, supportId, onProgress=()=>{}) {
   const zip=new JSZip();
   for (let i=0;i<photos.length;i+=1) {
     const photo=photos[i];
-    const response=await fetch(photo.photo_url);
+    const response=await fetch(await getSignedDownloadUrl(photo));
     if (!response.ok) throw new Error(`Impossible de télécharger ${photo.nom_fichier || photo.id}.`);
     zip.file(safeFileName(photo.nom_fichier || `photo-${photo.id}.jpg`), await response.blob());
     onProgress(i+1, photos.length);

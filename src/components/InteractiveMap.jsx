@@ -26,6 +26,7 @@ import {
   infrastructureMapUrl,
   prepareMapInfrastructureRows
 } from '../services/mapService';
+import { getSignedPhotoUrl } from '../services/photoAccessService';
 
 const DEFAULT_CENTER = [45.5017, -73.5673];
 const DEFAULT_ZOOM = 10;
@@ -114,6 +115,7 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [bounds, setBounds] = useState(null);
   const [selected, setSelected] = useState(null);
+  const [selectedPhotoUrl, setSelectedPhotoUrl] = useState('');
   const [autoFit, setAutoFit] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(true);
   const [filters, setFilters] = useState({
@@ -129,6 +131,8 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
     inspectionOnly: false,
     photo: ''
   });
+
+  useEffect(()=>{let live=true;setSelectedPhotoUrl('');if(selected?.photoUrl)getSignedPhotoUrl({storage_path:selected.photoUrl}).then(url=>live&&setSelectedPhotoUrl(url)).catch(()=>{});return()=>{live=false};},[selected?.photoUrl]);
 
   const prepared = useMemo(
     () => prepareMapInfrastructureRows(infrastructures),
@@ -413,7 +417,7 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
               <div><dt>Activité</dt><dd>{selected.lastActivity || '—'}</dd></div>
             </dl>
 
-            {selected.photoUrl && <img className="map-detail-photo" src={selected.photoUrl} alt={`Dernière photo du support ${selected.supportId}`}/>}
+            {selectedPhotoUrl && <img loading="lazy" className="map-detail-photo" src={selectedPhotoUrl} alt={`Dernière photo du support ${selected.supportId}`}/>}
 
             <div className="map-coordinates">
               {selected.latitude.toFixed(6)}, {selected.longitude.toFixed(6)}

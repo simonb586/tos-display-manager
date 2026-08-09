@@ -1,4 +1,5 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
+import { getSignedPhotoUrls } from './photoAccessService';
 
 const ALLOWED_SECTIONS = new Set(['dashboard','campaigns','communications','supports','photos','reports','edt','issues','history','members']);
 const clampSize = (section, size) => Math.min(section === 'photos' ? 50 : 100, Math.max(1, Number(size) || 25));
@@ -11,12 +12,14 @@ const rpc = async (name, args = {}) => {
 
 export async function listClientPortalSection(section, { page = 1, pageSize = 25, filters = {} } = {}) {
   if (!ALLOWED_SECTIONS.has(section)) throw new Error('Section client non autorisée.');
-  return rpc('client_portal_list_v120', {
+  const result = await rpc('client_portal_list_v120', {
     p_section: section,
     p_page: Math.max(1, Number(page) || 1),
     p_page_size: clampSize(section, pageSize),
     p_filters: filters
   });
+  if (section === 'photos') result.rows = await getSignedPhotoUrls(result.rows || [], { purpose:'preview' });
+  return result;
 }
 
 export const inviteClientMember = ({ email, name }) => rpc('client_admin_invite_member_v120', { p_email: email, p_name: name });
