@@ -4,11 +4,11 @@ import SortMenuSection from './SortMenuSection';
 import { adaptiveColumnWidth } from '../lib/gridPresentation';
 
 export default function GridColumnHeader({
-  column, label, rows, filterValue, onFilter, sortState, onSort, onReset
+  column, label, rows, filterValue, onFilter, sortState, onSort, onReset, preferredWidth
 }) {
   const [open,setOpen]=useState(false);
   const active=sortState?.column===column;
-  const width=adaptiveColumnWidth(rows,column,label);
+  const width=preferredWidth||adaptiveColumnWidth(rows,column,label);
   return <th style={{width,minWidth:Math.min(width,160),maxWidth:width}} aria-sort={active?(sortState.direction==='asc'?'ascending':'descending'):'none'}>
     <div className={`grid-column-header ${active?'sorted':''}`}>
       <div className="grid-column-header-main"><span title={label}>{label}</span><input placeholder="Filtrer" value={filterValue||''} onChange={event=>onFilter(event.target.value)}/></div>

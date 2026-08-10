@@ -24,3 +24,26 @@ export function adaptiveColumnWidth(rows, column, label = '') {
   const max = widePattern.test(key) ? 360 : 260;
   return Math.max(min, Math.min(max, longest * 8 + 34));
 }
+
+const assignmentProfiles = {
+  compact: { minWidth: 88, preferredWidth: 112, maxWidth: 150 },
+  medium: { minWidth: 132, preferredWidth: 176, maxWidth: 240 },
+  wide: { minWidth: 190, preferredWidth: 260, maxWidth: 380 },
+  long: { minWidth: 220, preferredWidth: 310, maxWidth: 420 },
+  actions: { minWidth: 196, preferredWidth: 220, maxWidth: 240 }
+};
+
+export function assignmentColumnProfile(column, label = '') {
+  const key = `${column} ${label}`;
+  if (column === 'actions') return assignmentProfiles.actions;
+  if (/(^id$|_id$|statut|status|date|created|updated|edt|num[eé]ro|no_|legacy|contexte)/i.test(key)) return assignmentProfiles.compact;
+  if (/(raw_data|donn[eé]es source|comment|historique|metadata)/i.test(key)) return assignmentProfiles.long;
+  if (/(campagne|communication|message|visuel|emplacement|infrastructure)/i.test(key)) return assignmentProfiles.wide;
+  return assignmentProfiles.medium;
+}
+
+export function assignmentColumnWidth(rows, column, label = '') {
+  const profile = assignmentColumnProfile(column, label);
+  const measured = adaptiveColumnWidth((rows || []).slice(0, 50), column, label);
+  return Math.max(profile.minWidth, Math.min(profile.maxWidth, Math.max(profile.preferredWidth, measured)));
+}
