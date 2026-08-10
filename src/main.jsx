@@ -41,6 +41,9 @@ import { sortRows } from './lib/gridSorting';
 import { supabase, supabaseConfigured } from './lib/supabaseClient';
 import { businessFieldLabel, enforceApplicationTitle, friendlyError } from './config/businessLanguage';
 import GridColumnHeader from './components/GridColumnHeader';
+import DataGridFilterRow from './components/DataGridFilterRow';
+import { matchesGridFilters } from './components/DataGridColumnFilter';
+import DataGridSettings, { useDataGridSettings } from './components/DataGridSettings';
 import GridPagination from './components/GridPagination';
 import { defaultSortColumnForTable } from './lib/gridPresentation';
 import { defaultSortForColumn } from './lib/gridSorting';
@@ -261,7 +264,9 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   const rows = getRows(dataStore, name);
   const config = tableConfig[name];
   const allCols = getCols(rows, name);
-  const cols = columnsForTable(rolePermission, name, allCols);
+  const permittedCols = columnsForTable(rolePermission, name, allCols);
+  const gridSettings = useDataGridSettings(`table-${name}`, permittedCols);
+  const cols = gridSettings.columns;
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState({});
   const [sortState, setSortState] = useState(() => {
@@ -285,7 +290,7 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
 
   const filtered = useMemo(() => rows
     .filter(r => strictMatches(r, query, cols))
-    .filter(r => Object.entries(filters).every(([c, v]) => !v || normalize(r[c]).includes(normalize(v)))), [rows, query, filters, cols]);
+    .filter(r => matchesGridFilters(r, filters)), [rows, query, filters, cols]);
   const sorted = useMemo(() => sortRows(filtered, sortState), [filtered, sortState]);
   const sortedComplete = useMemo(() => sortRows(rows, sortState), [rows, sortState]);
   const pageCount = Math.max(1,Math.ceil(sorted.length/pageSize));
@@ -295,7 +300,8 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   const hasMapColumn = name === 'Infrastructures';
   const canEdit = role === 'Administrateur';
   const exportLabels = Object.fromEntries(cols.map(column=>[column,columnLabel(name,column)]));
-  const exportOptions = {moduleName:name,labels:exportLabels,filters:{recherche:query,...filters},sortState};
+  const exportOptions = {moduleName:name,labels:exportLabels,filters:{recherche:query,...Object.fromEntries(Object.entries(filters).map(([key,value])=>[key,value.join(' | ')]))},sortState};
+  const activeFilterCount = Object.values(filters).filter(value => value?.length).length;
 
   useEffect(() => {
     const key = `tdm-grid-sort:${name}`;
@@ -355,6 +361,7 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
 
   return <div className="tablePage">
     <header className="pageHead"><div><h1>{icons[name] || '📋'} {name}</h1><p>{filtered.length.toLocaleString('fr-CA')} résultat(s) sur {rows.length.toLocaleString('fr-CA')} ligne(s).</p></div><div className="actions">
+      <DataGridSettings gridId={`table-${name}`} columns={permittedCols} labels={Object.fromEntries(permittedCols.map(column=>[column,columnLabel(name,column)]))} preferences={gridSettings.preferences} setPreferences={gridSettings.setPreferences} onReset={gridSettings.reset}/>
       {canEdit && !gridEditing && <button onClick={() => { setGridEditing(true); setMessage(''); }}><Edit3/> Modifier la grille</button>}
       <button onClick={() => downloadCSV(professionalExportName(name,'csv'), hasMapColumn?shown:sortedComplete, cols.map(key=>({key,label:exportLabels[key]})))}><Download/> CSV {hasMapColumn?'page visible':'complet trié'}</button>
       {hasMapColumn&&<button disabled={!selectedFiltered.length} onClick={() => downloadExcel(professionalExportName(name,'xlsx'), selectedFiltered, cols, {...exportOptions,exportType:'Sélection'})}><FileSpreadsheet/> Excel sélection ({selectedFiltered.length})</button>}
@@ -369,8 +376,8 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
 
     {message && <div className="v07-message">{message}</div>}
 
-    <div className="searchbar"><Search/><input placeholder="Recherche exacte dans toutes les colonnes..." value={query} onChange={e => setQuery(e.target.value)}/></div>
-    <div className="tableWrap professional-grid"><table><thead><tr>{hasMapColumn&&<th className="selection-column"><input type="checkbox" aria-label="Sélectionner la page" checked={shown.length>0&&shown.every((row,index)=>selectedRows.has(rowToken(row,(currentPage-1)*pageSize+index)))} onChange={event=>setSelectedRows(current=>{const next=new Set(current);shown.forEach((row,index)=>{const token=rowToken(row,(currentPage-1)*pageSize+index);event.target.checked?next.add(token):next.delete(token)});return next})}/></th>}{hasMapColumn && <th className="action-column">Carte</th>}{cols.map(c => <GridColumnHeader key={c} column={c} label={columnLabel(name,c)} rows={filtered} filterValue={filters[c]} onFilter={value=>setFilters({...filters,[c]:value})} sortState={sortState} onSort={setSortState} onReset={()=>setSortState(null)}/>)}</tr></thead><tbody>{shown.map((r, i) => {
+    <div className="data-grid-toolbar"><div className="searchbar"><Search/><input aria-label={`Recherche globale — ${name}`} placeholder="Recherche exacte dans toutes les colonnes..." value={query} onChange={e => setQuery(e.target.value)}/></div>{activeFilterCount>0&&<><span className="grid-active-filter-count">Filtres actifs : {activeFilterCount}</span><button type="button" onClick={()=>setFilters({})}>Effacer tous les filtres</button></>}</div>
+    <div className="tableWrap professional-grid" data-grid-id={`table-${name}`}><table><thead><tr className="data-grid-header-row" data-grid-zone="headers">{hasMapColumn&&<th className="selection-column"><input type="checkbox" aria-label="Sélectionner la page" checked={shown.length>0&&shown.every((row,index)=>selectedRows.has(rowToken(row,(currentPage-1)*pageSize+index)))} onChange={event=>setSelectedRows(current=>{const next=new Set(current);shown.forEach((row,index)=>{const token=rowToken(row,(currentPage-1)*pageSize+index);event.target.checked?next.add(token):next.delete(token)});return next})}/></th>}{hasMapColumn && <th className="action-column">Carte</th>}{cols.map(c => <GridColumnHeader key={c} column={c} label={columnLabel(name,c)} rows={filtered} sortState={sortState} onSort={setSortState} onReset={()=>setSortState(null)}/>)}</tr><DataGridFilterRow columns={cols.map(c=>({key:c,label:columnLabel(name,c)}))} rows={rows} filters={filters} onFilter={(column,value)=>setFilters(current=>({...current,[column]:value}))} leadingCells={hasMapColumn?2:0}/></thead><tbody>{shown.map((r, i) => {
       const token = rowToken(r, (currentPage-1)*pageSize+i);
       const supportId = r.support_id || r['Support ID'] || '';
       const mapUrl = infrastructureMapUrl(r);

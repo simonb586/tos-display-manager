@@ -74,6 +74,7 @@ export function filterRows(rows,context,search,filters){
   return rows.filter(row=>{
     if(global&&!searchableFor(context).some(column=>normalizedText(row[column]).includes(global)))return false;
     return Object.entries(filters).every(([column,value])=>{
+      if(Array.isArray(value))return !value.length||value.some(selected=>selected==='__TDM_EMPTY__'?(row[column]===null||row[column]===undefined||row[column]===''):String(row[column]??'')===String(selected));
       const term=normalizedText(value);if(!term)return true;
       const candidate=normalizedText(row[column]);
       return exactFilterColumns.has(column)?candidate===term:candidate.includes(term);

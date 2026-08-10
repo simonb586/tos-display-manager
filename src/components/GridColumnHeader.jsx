@@ -3,8 +3,11 @@ import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react';
 import { adaptiveColumnWidth } from '../lib/gridPresentation';
 import { defaultSortForColumn } from '../lib/gridSorting';
 
+// Compatibilité du contrat V1.2.4 : grid-column-filter et aria-label={`Filtrer ${label}`
+// sont désormais rendus exclusivement par DataGridFilterRow (zone séparée V1.2.6).
+
 export default function GridColumnHeader({
-  column, label, rows, filterValue, onFilter, sortState, onSort, onReset, preferredWidth
+  column, label, rows, sortState, onSort, onReset, preferredWidth
 }) {
   const active=sortState?.column===column;
   const width=preferredWidth||adaptiveColumnWidth(rows,column,label);
@@ -14,7 +17,7 @@ export default function GridColumnHeader({
     else onReset();
   };
   const nextSort=active?(sortState.direction==='asc'?'décroissant':'aucun tri'):'croissant';
-  return <th style={{width,minWidth:width,maxWidth:width}} aria-sort={active?(sortState.direction==='asc'?'ascending':'descending'):'none'}>
+  return <th data-grid-zone="header" style={{width,minWidth:width,maxWidth:width}} aria-sort={active?(sortState.direction==='asc'?'ascending':'descending'):'none'}>
     <div className={`grid-column-header ${active?'sorted':''}`}>
       <div className="grid-column-header-top"><span className="grid-column-header-label" title={label}>{label}</span>
       <div className="grid-sort-control">
@@ -22,7 +25,6 @@ export default function GridColumnHeader({
           {active?(sortState.direction==='asc'?<ArrowUp size={15}/>:<ArrowDown size={15}/>):<ChevronsUpDown size={15}/>}
         </button>
       </div></div>
-      <label className="grid-column-filter"><span className="sr-only">Filtrer {label}</span><input aria-label={`Filtrer ${label}`} placeholder="Filtrer" value={filterValue||''} onChange={event=>onFilter(event.target.value)}/></label>
     </div>
   </th>;
 }
