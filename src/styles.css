@@ -78,10 +78,9 @@ body{background:var(--tos-bg)}
 .assignment-page .assignment-search{width:100%;max-width:none;box-sizing:border-box}
 .assignment-grid-wrap{width:100%;max-width:100%;overflow-x:auto;overflow-y:auto;overscroll-behavior-inline:contain;scrollbar-gutter:stable}
 .assignment-grid-wrap table{table-layout:fixed;width:max-content;min-width:100%}
-.assignment-grid-wrap th,.assignment-grid-wrap td{box-sizing:border-box;max-width:none;padding:7px 9px;vertical-align:middle;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.assignment-grid-wrap th,.assignment-grid-wrap td{box-sizing:border-box;max-width:none;padding:7px 9px;vertical-align:middle;white-space:nowrap}.assignment-grid-wrap td{overflow:hidden;text-overflow:ellipsis}
 .assignment-grid-wrap thead th{position:sticky;top:0;z-index:2}
-.assignment-grid-wrap .grid-column-header-main{min-width:0}
-.assignment-grid-wrap .grid-column-header-main>span,.assignment-grid-wrap .grid-column-header-main input{box-sizing:border-box;width:100%;min-width:0}
+.assignment-grid-wrap .grid-column-header{display:grid;gap:6px;min-width:0;overflow:visible}.assignment-grid-wrap .grid-column-header-top{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}.assignment-grid-wrap .grid-column-header-label{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.assignment-grid-wrap .grid-column-filter{display:block;min-width:0}.assignment-grid-wrap .grid-column-filter input{box-sizing:border-box;width:100%;min-width:0;padding:5px 7px;border:1px solid #cbd5e1;border-radius:7px;background:#fff}.assignment-grid-wrap .grid-sort-control>button{width:34px;height:34px;min-width:34px}.assignment-grid-wrap .grid-sort-control>button:hover{background:#e2e8f0}.assignment-grid-wrap .grid-sort-control>button:focus-visible{outline:3px solid #77b7ff;outline-offset:2px}
 .assignment-grid-wrap .assignment-select-col{width:42px}
 .assignment-grid-wrap td.is-long .assignment-cell-text{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;white-space:normal;line-height:1.25;max-height:2.5em}
 .assignment-grid-wrap td.is-compact{font-variant-numeric:tabular-nums}

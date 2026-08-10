@@ -4,13 +4,15 @@ import { availableKpi, unavailableKpi } from '../lib/module14Kpi.js';
 import { assignmentsForContext, normalizeUniqueAssignments } from '../lib/siteSupportAssignments';
 import { getTerrainSyncTimeline } from './terrainDiagnosticsService.js';
 import { listFinalCommunications } from './finalReportService';
-import { getMarketingAssignmentsBySiteAndSupport, getOperationalCommunicationAssignmentsBySiteAndSupport } from './siteSupportBusinessService.js';
+import { getAllAssignmentsBySiteAndSupport, getMarketingAssignmentsBySiteAndSupport, getOperationalCommunicationAssignmentsBySiteAndSupport } from './siteSupportBusinessService.js';
 
 const unwrap = result => { if(result.error) throw result.error; return result.data || []; };
 export async function loadModule14Data(){
  if(!supabaseConfigured||!supabase) return {campaigns:[],assignments:[],visuals:[],available:false};
- const all=async loader=>{const first=await loader({page:1,pageSize:200}),pages=Math.ceil(first.total/200),rows=[...first.rows];for(let page=2;page<=pages;page++)rows.push(...(await loader({page,pageSize:200})).rows);return normalizeUniqueAssignments(rows)};
- const [marketing,operational]=await Promise.all([all(getMarketingAssignmentsBySiteAndSupport),all(getOperationalCommunicationAssignmentsBySiteAndSupport)]),assignments=[...marketing,...operational];
+ const [marketing,operational]=await Promise.all([
+  getAllAssignmentsBySiteAndSupport({context:BUSINESS_CONTEXT.MARKETING}),
+  getAllAssignmentsBySiteAndSupport({context:BUSINESS_CONTEXT.OPERATIONAL})
+ ]),assignments=normalizeUniqueAssignments([...marketing,...operational]);
  const distinct=(rows,key)=>[...new Map(rows.filter(row=>row[key]!=null).map(row=>[`${row.business_context}:${row[key]}`,row])).values()];
  const campaigns=distinct(assignments.map(row=>({...row,id:row.campaign_id,nom_campagne:row.campaign})),'id'),visuals=distinct(assignments.map(row=>({...row,id:row.visual_id,nom_visuel:row.visual,actif:row.statut!=='Inactif'})),'id');
  return {campaigns,assignments,visuals,available:true};

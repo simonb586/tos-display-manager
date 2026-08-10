@@ -26,8 +26,8 @@ export function adaptiveColumnWidth(rows, column, label = '') {
 }
 
 const assignmentProfiles = {
-  compact: { minWidth: 88, preferredWidth: 112, maxWidth: 150 },
-  medium: { minWidth: 132, preferredWidth: 176, maxWidth: 240 },
+  compact: { minWidth: 128, preferredWidth: 144, maxWidth: 180 },
+  medium: { minWidth: 148, preferredWidth: 184, maxWidth: 240 },
   wide: { minWidth: 190, preferredWidth: 260, maxWidth: 380 },
   long: { minWidth: 220, preferredWidth: 310, maxWidth: 420 },
   actions: { minWidth: 196, preferredWidth: 220, maxWidth: 240 }
