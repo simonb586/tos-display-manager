@@ -15,10 +15,12 @@ const normalizedText=value=>String(value??'').trim().toLocaleLowerCase('fr-CA');
 // V1.2.2 server-query semantics are preserved locally across both sources:
 // .eq('business_context',context), searchableFor(context), .order(sortColumn, { ascending }).
 
-async function fetchAll(table,select='*'){
+async function fetchAll(table,select='*',signal){
   const rows=[];
   for(let from=0;;from+=FETCH_SIZE){
-    const{data,error}=await supabase.from(table).select(select).range(from,from+FETCH_SIZE-1);
+    let query=supabase.from(table).select(select).range(from,from+FETCH_SIZE-1);
+    if(signal)query=query.abortSignal(signal);
+    const{data,error}=await query;
     if(error)throw error;
     rows.push(...(data||[]));
     if((data||[]).length<FETCH_SIZE)return rows;
@@ -56,11 +58,11 @@ export function canonicalAssignmentRows(assignments,campaigns,infrastructures,vi
   });
 }
 
-async function loadRows(context){
+async function loadRows(context,signal){
   const [historical,assignments,campaigns,infrastructures,visuals]=await Promise.all([
-    fetchAll(tableFor(context)),fetchAll('campagnes_supports'),fetchAll('campagnes_maitres'),
-    fetchAll('infrastructures','id,support_id,site,emplacement_visibilite'),
-    fetchAll('campagne_visuels_formats','id,campagne_id,nom_visuel')
+    fetchAll(tableFor(context),'*',signal),fetchAll('campagnes_supports','*',signal),fetchAll('campagnes_maitres','*',signal),
+    fetchAll('infrastructures','id,support_id,site,emplacement_visibilite',signal),
+    fetchAll('campagne_visuels_formats','id,campagne_id,nom_visuel',signal)
   ]);
   const current=canonicalAssignmentRows(assignments,campaigns,infrastructures,visuals).filter(row=>row.business_context===context);
   const tagged=[...current,...historical.filter(row=>row.business_context===context)].map(row=>({...row,logical_key:assignmentLogicalKey(row)}));
@@ -86,11 +88,13 @@ export function prepareRows(rows,context,search,filters,sortState){
   return sortRows(filtered,requested);
 }
 
-export async function getAssignmentsBySiteAndSupport({context=BUSINESS_CONTEXT.MARKETING,page=1,pageSize=25,search='',filters={},sortState=null}={}){
+export function paginateRows(rows,page,pageSize){const size=safePageSize(pageSize),current=Math.max(1,Number(page)||1),from=(current-1)*size;return{rows:rows.slice(from,from+size),total:rows.length,page:current,pageSize:size}}
+
+export async function getAssignmentsBySiteAndSupport({context=BUSINESS_CONTEXT.MARKETING,page=1,pageSize=25,search='',filters={},sortState=null,signal}={}){
   const size=safePageSize(pageSize),current=Math.max(1,Number(page)||1);
   if(!supabaseConfigured||!supabase)return{rows:[],total:0,page:current,pageSize:size};
-  const rows=prepareRows(await loadRows(context),context,search,filters,sortState),from=(current-1)*size;
-  return{rows:rows.slice(from,from+size),total:rows.length,page:current,pageSize:size};
+  const rows=prepareRows(await loadRows(context,signal),context,search,filters,sortState);
+  return paginateRows(rows,current,size);
 }
 
 export const getMarketingAssignmentsBySiteAndSupport=options=>getAssignmentsBySiteAndSupport({...options,context:BUSINESS_CONTEXT.MARKETING});

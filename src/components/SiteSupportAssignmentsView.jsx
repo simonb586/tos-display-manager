@@ -1,36 +1,35 @@
-import React,{useEffect,useMemo,useState}from'react';
+import React,{useCallback,useEffect,useMemo,useRef,useState}from'react';
 import{ArrowDown,ArrowUp,Download,ExternalLink,Search,Settings2}from'lucide-react';
 import GridColumnHeader from'./GridColumnHeader';
 import GridPagination from'./GridPagination';
 import{getAllAssignmentsBySiteAndSupport,getMarketingAssignmentsBySiteAndSupport,getOperationalCommunicationAssignmentsBySiteAndSupport}from'../services/siteSupportBusinessService';
 import{BUSINESS_CONTEXT}from'../lib/businessContext';
 import{assignmentColumnProfile,assignmentColumnWidth}from'../lib/gridPresentation';
+import{assignmentColumns,formatAssignmentCell,isLatestAssignmentRequest,mergeAssignmentPreferences}from'../lib/assignmentGrid';
 
-const campaignColumns=[['id','ID'],['nom_campagne','Nom campagne'],['visuel_terrain','Visuel terrain'],['date_debut','Date début'],['date_fin','Date fin'],['statut_campagne','Statut'],['support_id','Support'],['emplacement','Infrastructure'],['date_mise_a_jour','Date mise à jour'],['created_at','Créé le'],['updated_at','Modifié le'],['raw_data','Données source']];
-const operationalColumns=[['id','ID'],['emplacement','Emplacement'],['message','Communication'],['date_debut','Date début'],['date_fin','Date fin'],['statut','Statut'],['no_arret','No arrêt'],['site_ou_arret','Site ou arrêt'],['support_id','Support'],['no_edt','EDT'],['related_voiture','Voiture'],['visuel_message','Visuel message'],['visuel_terrain','Visuel terrain'],['created_at','Créé le'],['updated_at','Dernière activité'],['raw_data','Données source']];
-const enrichment=[['site','Site'],['infrastructure_id','Infrastructure ID'],['campaign_id','Relation campagne'],['visual_id','Relation visuel'],['business_context','Contexte métier'],['legacy_id','ID historique']];
-campaignColumns.splice(8,0,['no_edt','EDT'],['date_completion','Installation']);
-operationalColumns.splice(10,0,['date_completion','Installation']);
 const dateKeys=new Set(['date_debut','date_fin','date_completion','date_mise_a_jour','created_at','updated_at']);
-const dateFormatter=new Intl.DateTimeFormat('fr-CA',{timeZone:'America/Toronto',day:'2-digit',month:'short',year:'numeric'});
 const csvCell=value=>`"${String(typeof value==='object'?JSON.stringify(value):value??'').replaceAll('"','""')}"`;
 
 function exportCsv(rows,columns,name){const content=[columns.map(([,label])=>csvCell(label)).join(','),...rows.map(row=>columns.map(([key])=>csvCell(row[key])).join(','))].join('\r\n'),url=URL.createObjectURL(new Blob(['\ufeff',content],{type:'text/csv;charset=utf-8'})),link=document.createElement('a');link.href=url;link.download=name;link.click();URL.revokeObjectURL(url)}
-function displayValue(key,value){if(value==null||value==='')return'—';if(dateKeys.has(key)){const date=new Date(value);if(!Number.isNaN(date.getTime()))return dateFormatter.format(date)}return typeof value==='object'?JSON.stringify(value):String(value)}
+function displayValue(key,value){return formatAssignmentCell(key,value)}
 const cellKind=key=>dateKeys.has(key)?'is-compact':/(statut|status)/i.test(key)?'is-status':/(raw_data|message|campagne|visuel|emplacement)/i.test(key)?'is-long':'';
 
 export default function SiteSupportAssignmentsView({context,onNavigate,role}){
  const operational=context===BUSINESS_CONTEXT.OPERATIONAL;
- const available=useMemo(()=>[...(operational?operationalColumns:campaignColumns),...enrichment],[operational]);
+ const definitions=useMemo(()=>assignmentColumns(context),[context]);
+ const available=useMemo(()=>definitions.map(({id,label})=>[id,label]),[definitions]);
  const storageKey=`tos-grid-layout-v123-${operational?'operational':'campaign'}`;
  const[columns,setColumns]=useState(available),[widths,setWidths]=useState({}),[gridEditing,setGridEditing]=useState(false),[hydratedKey,setHydratedKey]=useState(null);
- const[result,setResult]=useState({rows:[],total:0,page:1,pageSize:25}),[search,setSearch]=useState(''),[filters,setFilters]=useState({}),[sortState,setSortState]=useState({column:'id',direction:'desc'});
- const[selected,setSelected]=useState(new Set()),[error,setError]=useState(''),[loading,setLoading]=useState(true),[exporting,setExporting]=useState(false);
+ const[result,setResult]=useState({rows:[],total:0,page:1,pageSize:25,context:null}),[search,setSearch]=useState(''),[filters,setFilters]=useState({}),[sortState,setSortState]=useState({column:'id',direction:'desc'});
+ const[selected,setSelected]=useState(new Set()),[error,setError]=useState(''),[isLoading,setLoading]=useState(true),[exporting,setExporting]=useState(false);
+ const loading=isLoading||hydratedKey!==storageKey||result.context!==context;
  const canEdit=['Administrateur','Coordonnateur'].includes(role),title=operational?'Communications opérationnelles par site et supports':'Campagnes et visuels par site et supports';
- async function load(page=1,pageSize=result.pageSize){setLoading(true);setError('');try{const loader=operational?getOperationalCommunicationAssignmentsBySiteAndSupport:getMarketingAssignmentsBySiteAndSupport;setResult(await loader({page,pageSize,search,filters,sortState}))}catch(e){setError(e.message)}finally{setLoading(false)}}
- useEffect(()=>{setHydratedKey(null);let saved;try{saved=JSON.parse(localStorage.getItem(storageKey)||'null')}catch{}const byKey=new Map(available);const restored=(saved?.order||[]).filter(key=>byKey.has(key)).map(key=>byKey.get(key));setColumns(restored.length?restored:available);setWidths(saved?.widths||{});setFilters({});setSearch('');setSelected(new Set());setSortState({column:'id',direction:'desc'});setHydratedKey(storageKey)},[context,available,storageKey]);
+ const requestRef=useRef(0),abortRef=useRef(null);
+ const load=useCallback(async(page=1,pageSize=result.pageSize)=>{const requestId=++requestRef.current;abortRef.current?.abort();const controller=new AbortController();abortRef.current=controller;setLoading(true);setError('');try{const loader=operational?getOperationalCommunicationAssignmentsBySiteAndSupport:getMarketingAssignmentsBySiteAndSupport;const next=await loader({page,pageSize,search,filters,sortState,signal:controller.signal});if(isLatestAssignmentRequest(requestId,requestRef.current,controller.signal))setResult({...next,context})}catch(e){if(e?.name!=='AbortError'&&requestId===requestRef.current)setError(e.message||'Erreur de chargement')}finally{if(requestId===requestRef.current)setLoading(false)}},[context,operational,search,filters,sortState,result.pageSize]);
+ useEffect(()=>()=>{requestRef.current+=1;abortRef.current?.abort()},[]);
+ useEffect(()=>{setHydratedKey(null);let saved;try{saved=JSON.parse(localStorage.getItem(storageKey)||'null')}catch{}const merged=mergeAssignmentPreferences(definitions,saved);setColumns(merged.columns.map(({id,label})=>[id,label]));setWidths(merged.widths);setFilters({});setSearch('');setSelected(new Set());setSortState({column:'id',direction:'desc'});setHydratedKey(storageKey)},[context,definitions,storageKey]);
  useEffect(()=>{if(hydratedKey===storageKey)localStorage.setItem(storageKey,JSON.stringify({order:columns.map(([key])=>key),widths}))},[columns,widths,storageKey,hydratedKey]);
- useEffect(()=>{const timer=setTimeout(()=>load(1,result.pageSize),250);return()=>clearTimeout(timer)},[context,search,filters,sortState]);
+ useEffect(()=>{if(hydratedKey===storageKey)load(1,result.pageSize)},[load,hydratedKey,storageKey]);
  const picked=result.rows.filter(row=>selected.has(row.logical_key));
  const go=(target,row,action)=>{sessionStorage.setItem('tos_assignment_context',JSON.stringify({action,support_id:row.support_id,campaign_id:row.campaign_id,visual_id:row.visual_id,edt:row.no_edt,business_context:context}));onNavigate?.(target,row)};
  const exportFiltered=async()=>{setExporting(true);setError('');try{exportCsv(await getAllAssignmentsBySiteAndSupport({context,search,filters,sortState}),columns,'affectations-ensemble-filtre.csv')}catch(e){setError(e.message)}finally{setExporting(false)}};
