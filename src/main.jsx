@@ -92,7 +92,6 @@ function ScreenFallback() {
 
 const tableConfig = {
   Infrastructures: { table: 'infrastructures', fallback: () => import('./data/infrastructures.json').then(module => module.default), idField: 'support_id', labelField: 'emplacement_visibilite' },
-  'Campagnes et visuels': { table: 'campagnes_et_visuels', fallback: () => import('./data/campagnes_et_visuels.json').then(module => module.default) },
   'Répertoire des affiches': { table: 'repertoire_des_affiches', fallback: () => import('./data/repertoire_des_affiches.json').then(module => module.default) },
   'Communications opérationnelles': { table: 'communications_operationnelles', fallback: () => import('./data/communications_operationnelles.json').then(module => module.default) },
   'Enjeux des cadres et supports': { table: 'enjeux_des_cadres_et_supports', fallback: () => import('./data/enjeux_des_cadres_et_supports.json').then(module => module.default) },
@@ -208,7 +207,7 @@ function Dashboard({ setActive, dataStore }) {
     <div className="dashboard-v12-grid">
       <div className="dashboard-v12-card"><h3>Enjeux ouverts</h3><strong>{getRows(dataStore, 'Enjeux des cadres et supports').length.toLocaleString('fr-CA')}</strong><p>Éléments nécessitant un suivi.</p></div>
       <div className="dashboard-v12-card"><h3>Photos</h3><strong>{getRows(dataStore, 'Photos').length.toLocaleString('fr-CA')}</strong><p>Preuves et miniatures disponibles.</p></div>
-      <div className="dashboard-v12-card"><h3>Campagnes</h3><strong>{getRows(dataStore, 'Campagnes et visuels').length.toLocaleString('fr-CA')}</strong><p>Campagnes et visuels suivis.</p></div>
+      <div className="dashboard-v12-card"><h3>Campagnes</h3><strong>Module 14</strong><p>Indicateurs issus de la source consolidée.</p></div>
     </div>
     <div className="grid2">
       <section className="panel"><h2><BarChart3/> Avancement des EDT</h2>{edtData.map(e => <div className="progress" key={e.name}><span>{e.name}</span><div><i style={{ width: `${Math.min(100, e.progress)}%` }}/></div><b>{e.progress}%</b></div>)}<button onClick={() => setActive('Suivi des EDT')}>Ouvrir le suivi des EDT</button></section>
@@ -221,13 +220,12 @@ function Card({ title, value }) { return <div className="card"><ClipboardList/><
 
 function ExecutiveDashboard({setActive,dataStore,terrainSyncStatus,role,rolePermission}) {
   const infra=getRows(dataStore,'Infrastructures');
-  const campaigns=getRows(dataStore,'Campagnes et visuels');
   const edt=getRows(dataStore,'Suivi des EDT');
   const photos=getRows(dataStore,'Photos');
   const issues=getRows(dataStore,'Enjeux des cadres et supports');
   const work=getRows(dataStore,'Bons de travail');
   const activeInfra=infra.filter(row=>![false,'false','inactif','inactive'].includes(typeof row.actif==='string'?normalize(row.actif):row.actif)).length;
-  const activeCampaigns=campaigns.filter(row=>['active','actif','en cours'].includes(normalize(row.statut_campagne||row.statut))).length;
+  const activeCampaigns=null;
   const plannedInstalls=edt.filter(row=>['planifie','planifiee','brouillon'].includes(normalize(row.statut))).length;
   const inspections=photos.filter(row=>normalize(row.action||row.type_photo).includes('inspection')).length;
   const openIssues=issues.filter(row=>!['ferme','fermee','resolu','resolue','annule'].includes(normalize(row.statut))).length;
@@ -633,6 +631,7 @@ function App() {
       : [];
   const visibleManifestTables = manifest
     .map(module => module.name)
+    .filter(tableName => !['Campagnes et visuels','Communications opérationnelles'].includes(tableName))
     .filter(tableName => canSeeTable(rolePermission, tableName));
 
   const items = [
