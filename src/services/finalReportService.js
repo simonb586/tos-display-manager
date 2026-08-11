@@ -15,7 +15,7 @@ const safeNumber = value => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-export function normalizeFinalReportContext({ edt, campaign, client, issues = [], supports = [] }) {
+export function normalizeFinalReportContext({ edt, campaign, client, requester = {}, issues = [], supports = [], photos = [] }) {
   const planned = safeNumber(firstValue(edt, [
     'supports_prevus', 'nombre_supports_prevus', 'total_prevus', 'quantite_prevue'
   ], supports.length));
@@ -38,6 +38,12 @@ export function normalizeFinalReportContext({ edt, campaign, client, issues = []
     startDate: String(firstValue(edt, ['date_debut', 'debut', 'date_debut_travaux'], '—')),
     endDate: String(firstValue(edt, ['date_fin', 'fin', 'date_fin_travaux'], new Date().toISOString().slice(0, 10))),
     coordinator: String(firstValue(edt, ['coordonnateur', 'responsable', 'assigne_a'], 'Groupe TOS')),
+    requesterName: String(firstValue(requester, ['nom', 'name'], firstValue(edt,['requester_name'],'—'))),
+    requesterEmail: String(firstValue(requester, ['courriel', 'email'], firstValue(edt,['requester_email'],'—'))),
+    finalStatus: String(firstValue(edt,['statut','status'],'Complété')),
+    completionDate: String(firstValue(edt,['date_fin','completed_at'],new Date().toISOString().slice(0,10))),
+    workSummary: String(firstValue(edt,['description','commentaires','travaux_realises'],'Travaux associés à l’EDT complétés.')),
+    photoCount: photos.length,
     planned,
     installed,
     notInstalled,
@@ -120,6 +126,8 @@ export async function generateFinalReportPdf(context) {
   addSummaryLine(doc, 'Date de début', context.startDate, y); y += 8;
   addSummaryLine(doc, 'Date de fin', context.endDate, y); y += 8;
   addSummaryLine(doc, 'Coordonnateur', context.coordinator, y); y += 13;
+  addSummaryLine(doc, 'Requérant', `${context.requesterName} — ${context.requesterEmail}`, y); y += 8;
+  addSummaryLine(doc, 'Statut final', context.finalStatus, y); y += 8;
 
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');

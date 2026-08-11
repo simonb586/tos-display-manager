@@ -13,8 +13,8 @@ for(const marker of ['business_context','marketing','operational_communication',
 assert.ok(!/\b(insert|update|delete|alter|create|drop|truncate)\b/i.test(verifier.replace(/^--.*$/gm,'')),'Le vérificateur doit être READ ONLY');
 for(const marker of ['Est lié à','BUSINESS_CONTEXT_OPTIONS','businessContext'])assert.ok(panel.includes(marker),marker);
 for(const marker of ['Module 14','Marketing vs communication opérationnelle','RecentActivityWidget','Carte interactive','alerts','trends'])assert.ok(dashboard.includes(marker),marker);
-for(const marker of ['getTerrainSyncTimeline','listReports','reportsPublished','reportsDraft','reportsToProduce','Promise.allSettled'])assert.ok(module14Service.includes(marker),marker);
-for(const marker of ['operationalKpis.terrain','operationalKpis.reports','operationalKpis.reportsPublished','operationalKpis.reportsDraft','operationalKpis.reportsToProduce','Diagnostic terrain','Rapports et livrables'])assert.ok(dashboard.includes(marker),marker);
+for(const marker of ['getTerrainSyncTimeline','loadEdtReportTracking','reportsSent','reportsToSend','reportsErrors','Promise.allSettled'])assert.ok(module14Service.includes(marker),marker);
+for(const marker of ['operationalKpis.terrain','operationalKpis.reports','operationalKpis.reportsSent','operationalKpis.reportsToSend','operationalKpis.reportsErrors','Diagnostic terrain','Rapports EDT'])assert.ok(dashboard.includes(marker),marker);
 assert.ok(main.includes("['Administrateur','Coordonnateur'].includes(role)?<Module14Dashboard"));assert.ok(main.includes('Communication opérationnelle — Visuels'));
 assert.equal((migration.match(/lower\(trim\(nom_campagne\)\)='exo info'/g)||[]).length,1);
 console.log('Module 14 V1.2.0 : classification, vues, KPI, alertes, activité, carte, rôles et migration validés.');

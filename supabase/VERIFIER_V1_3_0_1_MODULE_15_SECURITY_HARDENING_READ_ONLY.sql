@@ -1,0 +1,17 @@
+-- STRICTEMENT READ ONLY — à exécuter après V1_3_0_1_MODULE_15_SECURITY_HARDENING.sql
+begin read only;
+select c.relname,c.relrowsecurity,c.relforcerowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relname='edt_reports';
+select column_name,data_type,is_nullable from information_schema.columns where table_schema='public' and table_name='edt_reports' order by ordinal_position;
+select conname,contype,pg_get_constraintdef(oid) definition from pg_constraint where conrelid='public.edt_reports'::regclass order by conname;
+select indexname,indexdef from pg_indexes where schemaname='public' and tablename='edt_reports' order by indexname;
+select policyname,roles,cmd,qual,with_check from pg_policies where schemaname='public' and tablename='edt_reports' order by policyname;
+select grantee,privilege_type from information_schema.role_table_grants where table_schema='public' and table_name='edt_reports' and grantee in ('PUBLIC','anon','authenticated','service_role') order by grantee,privilege_type;
+select has_table_privilege('anon','public.edt_reports','select') anon_select,has_table_privilege('authenticated','public.edt_reports','select') authenticated_select,has_table_privilege('authenticated','public.edt_reports','delete') authenticated_delete;
+select p.proname,pg_get_function_identity_arguments(p.oid) arguments,p.prosecdef security_definer,p.proconfig configuration,pg_get_functiondef(p.oid) definition from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname in ('next_edt_report_version_v130','create_edt_report_v1301','validate_edt_report_requester_v1301','module15_client_edt_reports_v130','edt_report_activity_v130') order by p.proname;
+select p.proname,case when x.grantee=0 then 'PUBLIC' else r.rolname end grantee,x.privilege_type,x.is_grantable from pg_proc p join pg_namespace n on n.oid=p.pronamespace cross join lateral aclexplode(coalesce(p.proacl,acldefault('f',p.proowner)))x left join pg_roles r on r.oid=x.grantee where n.nspname='public' and p.proname in ('next_edt_report_version_v130','create_edt_report_v1301','validate_edt_report_requester_v1301','module15_client_edt_reports_v130','edt_report_activity_v130') order by p.proname,grantee;
+select t.tgname,pg_get_triggerdef(t.oid) definition from pg_trigger t where t.tgrelid='public.edt_reports'::regclass and not t.tgisinternal order by t.tgname;
+select count(*) requester_client_mismatches from public.edt_reports r join public.suivi_des_edt e on e.id=r.edt_id left join public.campagnes_maitres c on c.id=e.campagne_id left join public.utilisateurs u on u.id=r.requester_contact_id where c.client_id is null or u.client_id is null or u.client_id<>c.client_id;
+select case when (select count(distinct client_id) from public.utilisateurs where client_id is not null)>=2 then 'cross_client_fixture_available' else 'cross_client_fixture_unavailable' end cross_client_fixture;
+select e.id edt_id,c.client_id edt_client_id,u.id foreign_requester_id,u.client_id requester_client_id,'would_be_rejected' expected from public.suivi_des_edt e join public.campagnes_maitres c on c.id=e.campagne_id cross join lateral(select id,client_id from public.utilisateurs where client_id is not null and client_id<>c.client_id order by id limit 1)u where c.client_id is not null order by e.id limit 5;
+select table_name from information_schema.tables where table_schema='public' and table_name in ('edt_reports','reports','edt_phase_reports','communications_finales') order by table_name;
+rollback;

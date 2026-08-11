@@ -649,9 +649,9 @@ function App() {
   }, [role]);
 
   const adminItems = role === 'Administrateur'
-    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Rapports et livrables', 'Automatisations', 'Campagnes maîtres', 'Campagne — Visuels et formats', 'Campagnes et visuels par site et supports', 'Communications opérationnelles', 'Communication opérationnelle — Visuels', 'Communications opérationnelles par site et supports']
+    ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Rapports EDT', 'Automatisations', 'Campagnes maîtres', 'Campagne — Visuels et formats', 'Campagnes et visuels par site et supports', 'Communications opérationnelles', 'Communication opérationnelle — Visuels', 'Communications opérationnelles par site et supports']
     : role === 'Coordonnateur'
-      ? ['Rapports et livrables', 'Campagnes maîtres', 'Campagne — Visuels et formats', 'Campagnes et visuels par site et supports', 'Communications opérationnelles', 'Communication opérationnelle — Visuels', 'Communications opérationnelles par site et supports']
+      ? ['Rapports EDT', 'Campagnes maîtres', 'Campagne — Visuels et formats', 'Campagnes et visuels par site et supports', 'Communications opérationnelles', 'Communication opérationnelle — Visuels', 'Communications opérationnelles par site et supports']
       : [];
   const visibleManifestTables = manifest
     .map(module => module.name)
@@ -766,7 +766,7 @@ function App() {
   else if (active === 'Diagnostic terrain') content = <TerrainSyncDiagnostics role={role}/>;
   else if (active === 'Journal des événements') content = <ActivityJournal role={role}/>;
   else if (active === 'Rapports finaux') content = <FinalReportsCenter dataStore={dataStore} role={role}/>;
-  else if (active === 'Rapports et livrables') content = <Module15Reports dataStore={dataStore} role={role}/>;
+  else if (active === 'Rapports EDT') content = <Module15Reports dataStore={dataStore} role={role}/>;
   else if (active === 'Visibilité par rôle') content = <RoleVisibilityAdmin dataStore={dataStore} tableNames={manifest.map(module => module.name)} role={role}/>;
   else if (active === 'Automatisations') content = <AutomationAssistant role={role}/>;
   else if (active === 'Validation système') content = <ValidationCenter role={role}/>;

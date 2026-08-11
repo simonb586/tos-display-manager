@@ -3,7 +3,7 @@ import { BUSINESS_CONTEXT } from '../lib/businessContext';
 import { availableKpi, unavailableKpi } from '../lib/module14Kpi.js';
 import { assignmentsForContext, normalizeUniqueAssignments } from '../lib/siteSupportAssignments';
 import { getTerrainSyncTimeline } from './terrainDiagnosticsService.js';
-import { listReports } from './reportDataService';
+import { loadEdtReportTracking } from './reportDataService';
 import { getAllAssignmentsBySiteAndSupport, getMarketingAssignmentsBySiteAndSupport, getOperationalCommunicationAssignmentsBySiteAndSupport } from './siteSupportBusinessService.js';
 
 const unwrap = result => { if(result.error) throw result.error; return result.data || []; };
@@ -23,12 +23,12 @@ export const uniqueMarketingAssignments=rows=>assignmentsForContext(rows,BUSINES
 export const uniqueOperationalAssignments=rows=>assignmentsForContext(rows,BUSINESS_CONTEXT.OPERATIONAL);
 
 export async function loadModule14OperationalKpis() {
- const [terrainResult,reportResult]=await Promise.allSettled([getTerrainSyncTimeline({page:1,pageSize:1}),listReports()]);
+ const [terrainResult,reportResult]=await Promise.allSettled([getTerrainSyncTimeline({page:1,pageSize:1}),loadEdtReportTracking()]);
  return {
   terrain:terrainResult.status==='fulfilled'?availableKpi(terrainResult.value.total):unavailableKpi(terrainResult.reason),
-  reports:reportResult.status==='fulfilled'?availableKpi(reportResult.value.length):unavailableKpi(reportResult.reason),
-  reportsPublished:reportResult.status==='fulfilled'?availableKpi(reportResult.value.filter(row=>row.status==='published'&&row.client_published).length):unavailableKpi(reportResult.reason),
-  reportsDraft:reportResult.status==='fulfilled'?availableKpi(reportResult.value.filter(row=>row.status==='draft').length):unavailableKpi(reportResult.reason),
-  reportsToProduce:reportResult.status==='fulfilled'?availableKpi(reportResult.value.filter(row=>['draft','error'].includes(row.status)).length):unavailableKpi(reportResult.reason)
+  reports:reportResult.status==='fulfilled'?availableKpi(reportResult.value.kpis.completed):unavailableKpi(reportResult.reason),
+  reportsSent:reportResult.status==='fulfilled'?availableKpi(reportResult.value.kpis.sent):unavailableKpi(reportResult.reason),
+  reportsToSend:reportResult.status==='fulfilled'?availableKpi(reportResult.value.kpis.toSend):unavailableKpi(reportResult.reason),
+  reportsErrors:reportResult.status==='fulfilled'?availableKpi(reportResult.value.kpis.errors):unavailableKpi(reportResult.reason)
  };
 }
