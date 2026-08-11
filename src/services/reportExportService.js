@@ -1,0 +1,4 @@
+const cell=value=>`"${String(value??'').replaceAll('"','""')}"`;
+const save=(blob,name)=>{const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;link.click();URL.revokeObjectURL(url)};
+export function exportReportCsv(rows,name='rapport.csv'){const keys=[...new Set(rows.flatMap(row=>Object.keys(row)))],content=[keys.map(cell).join(','),...rows.map(row=>keys.map(key=>cell(row[key])).join(','))].join('\r\n');save(new Blob(['\ufeff',content],{type:'text/csv;charset=utf-8'}),name)}
+export async function exportReportExcel(rows,name='rapport.xlsx'){const XLSX=await import('xlsx'),book=XLSX.utils.book_new();XLSX.utils.book_append_sheet(book,XLSX.utils.json_to_sheet(rows),'Rapport');save(new Blob([XLSX.write(book,{type:'array',bookType:'xlsx'})]),name)}

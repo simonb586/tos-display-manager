@@ -24,6 +24,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
   const [campaigns, setCampaigns] = useState([]);
   const [visuals, setVisuals] = useState([]);
   const [form, setForm] = useState(empty);
+  const [formOpen, setFormOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -48,12 +49,14 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
 
   async function submit(event) {
     event.preventDefault();
+    if (busy) return;
     setBusy(true);
 
     try {
       await saveCampaignVisual(form);
       setMessage(form.id ? 'Visuel modifié.' : 'Visuel enregistré.');
       setForm(empty);
+      setFormOpen(false);
       await reload();
     } catch (error) {
       setMessage(error.message);
@@ -63,7 +66,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
   }
 
   async function removeVisual(visual) {
-    if (!window.confirm(
+    if (busy || !window.confirm(
       `Supprimer ou archiver le visuel « ${visual.nom_visuel} »? L’historique déjà utilisé sera protégé.`
     )) return;
 
@@ -98,20 +101,22 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
       is_out_of_frame: visual.is_out_of_frame === true,
       instructions_terrain: visual.instructions_terrain || ''
     });
+    setFormOpen(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   return (
     <div className="v74-page">
       <header className="v74-hero">
-        <h1>Campagne — Visuels et formats</h1>
-        <p>Une campagne peut contenir plusieurs phases, visuels, formats et EDT.</p>
+        <div><h1>Campagne — Visuels et formats</h1>
+        <p>Une campagne peut contenir plusieurs phases, visuels, formats et EDT.</p></div>
+        {canManage && <button type="button" className="business-primary-action" onClick={() => { setForm(empty); setFormOpen(true); }}><Plus/> Créer un visuel</button>}
       </header>
 
       {message && <div className="v74-msg">{message}</div>}
 
-      <div className="v74-grid">
-        {canManage && (
+      <div className={formOpen ? 'v74-grid' : 'v74-grid v74-list-only'}>
+        {canManage && formOpen && (
           <section className="v74-card">
             <h2>{form.id ? <Pencil/> : <Plus/>} {form.id ? 'Modifier le visuel' : 'Ajouter un visuel'}</h2>
 
@@ -207,7 +212,8 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
                   <button
                     type="button"
                     className="secondary"
-                    onClick={() => setForm(empty)}
+                    disabled={busy}
+                    onClick={() => { setForm(empty); setFormOpen(false); }}
                   >
                     <X/> Annuler
                   </button>
@@ -226,7 +232,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
                 <b>{visual.nom_visuel}</b>
                 <span>{visual.campagne?.nom_campagne}</span>
                 <small>
-                  {visual.phase || 'Sans phase'} — {visual.format_support}
+                  {visual.phase || 'Sans phase'} — {visual.format_support} {visual.is_out_of_frame ? '— Hors-Cadre' : ''}
                 </small>
               </div>
 

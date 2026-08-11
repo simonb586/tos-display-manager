@@ -16,7 +16,7 @@ for(const [key,label] of [['id','ID'],['support_id','Support'],['message','Commu
  assert.ok(width>=profile.minWidth&&width<=profile.maxWidth,`${key}: largeur bornée`);
 }
 assert.ok(view.includes('.slice(0, 50)')||read('src/lib/gridPresentation.js').includes('.slice(0, 50)'),'Échantillon limité');
-for(const marker of['preferredWidth={widths[key]||assignmentColumnWidth','localStorage.setItem(storageKey','localStorage.removeItem(storageKey)',"operational?'operational':'campaign'",'assignment-status','title={value}','GridPagination','filterValue={filters[key]}','assignment-grid-wrap'])assert.ok(view.includes(marker),marker);
+for(const marker of['width:widths[id]||assignmentColumnWidth','localStorage.setItem(storageKey','localStorage.removeItem(storageKey)',"operational?'operational-site-supports':'campaigns-site-supports'",'assignment-status','title={value}','GridPagination','filters={filters}','UnifiedDataGrid'])assert.ok(view.includes(marker),marker);
 assert.ok(header.includes('preferredWidth||adaptiveColumnWidth'),'Moteur partagé par les en-têtes');
 for(const marker of['table-layout:fixed','overflow-x:auto','text-overflow:ellipsis','-webkit-line-clamp:2','@media(max-width:1024px)','@media(max-width:760px)','@media(max-width:480px)','position:sticky'])assert.ok(css.includes(marker),marker);
 assert.ok(css.includes('.assignment-page{')&&css.includes('max-width:none'),'Page utilise la largeur disponible');

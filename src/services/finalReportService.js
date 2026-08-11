@@ -1,5 +1,3 @@
-import { jsPDF } from 'jspdf';
-import * as XLSX from 'xlsx';
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
 
 const firstValue = (row, keys, fallback = '') => {
@@ -82,6 +80,7 @@ function addSummaryLine(doc, label, value, y) {
 }
 
 export async function generateFinalReportPdf(context) {
+  const { jsPDF } = await import('jspdf');
   const doc = new jsPDF({ unit: 'mm', format: 'letter' });
   const generatedAt = new Date();
   const logo = await imageToDataUrl(context.clientLogoUrl);
@@ -181,7 +180,8 @@ export async function generateFinalReportPdf(context) {
   return doc.output('blob');
 }
 
-export function generateFinalReportExcel(context, supports = []) {
+export async function generateFinalReportExcel(context, supports = []) {
+  const XLSX = await import('xlsx');
   const summary = [
     ['Client', context.clientName],
     ['Campagne', context.campaignName],

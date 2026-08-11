@@ -129,9 +129,9 @@ export default function FinalReportsCenter({ dataStore, role }) {
     downloadBlob(blob, `rapport-final-${context.edtNumber}.pdf`);
   }
 
-  function downloadExcel() {
+  async function downloadExcel() {
     if (!context) return;
-    const array = generateFinalReportExcel(context, supports);
+    const array = await generateFinalReportExcel(context, supports);
     downloadBlob(
       new Blob([array], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
       `rapport-final-${context.edtNumber}.xlsx`
