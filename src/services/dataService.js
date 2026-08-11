@@ -1,6 +1,9 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
 
 const PAGE_SIZE = 1000;
+const CACHE_TTL_MS = 30_000;
+const tableCache = new Map();
+const pendingLoads = new Map();
 
 async function fetchPage(tableName, from, to, attempt = 1) {
   const { data, error } = await supabase.from(tableName).select('*').range(from, to);
@@ -21,7 +24,22 @@ export async function loadAllRows(tableName, pageSize = PAGE_SIZE) {
   return rows;
 }
 
-export async function loadTable(tableName, fallbackData = []) {
+export async function loadTable(tableName, fallbackData = [], { force = false } = {}) {
+  const cached = tableCache.get(tableName);
+  if (!force && cached && Date.now() - cached.loadedAt < CACHE_TTL_MS) return cached.value;
+  if (!force && pendingLoads.has(tableName)) return pendingLoads.get(tableName);
+  const request = loadTableUncached(tableName, fallbackData);
+  pendingLoads.set(tableName, request);
+  try {
+    const value = await request;
+    tableCache.set(tableName, { loadedAt: Date.now(), value });
+    return value;
+  } finally {
+    pendingLoads.delete(tableName);
+  }
+}
+
+async function loadTableUncached(tableName, fallbackData = []) {
   const resolveFallback = async () => typeof fallbackData === 'function' ? await fallbackData() : fallbackData;
   if (!supabaseConfigured || !supabase) {
     return { rows: await resolveFallback(), source: 'json', error: null, complete: true };
@@ -58,4 +76,9 @@ export async function loadManyTables(tableConfig) {
     })
   );
   return Object.fromEntries(entries);
+}
+
+export function clearTableCache(tableNames = []) {
+  if (!tableNames.length) tableCache.clear();
+  else tableNames.forEach(tableName => tableCache.delete(tableName));
 }

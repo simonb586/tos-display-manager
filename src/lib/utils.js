@@ -1,6 +1,3 @@
-import { jsPDF } from 'jspdf';
-import * as XLSX from 'xlsx';
-
 export const normalize = (value = '') => String(value ?? '')
   .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
@@ -45,7 +42,8 @@ export function downloadCSV(filename, rows, columns){
   const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
 }
 
-export function createProfessionalWorkbook({ moduleName, rows, columns, labels={}, filters={}, sortState=null, exportType='Grille visible', user='' }) {
+export async function createProfessionalWorkbook({ moduleName, rows, columns, labels={}, filters={}, sortState=null, exportType='Grille visible', user='' }) {
+  const XLSX = await import('xlsx');
   const safe=normalizeExportColumns(columns,labels);
   const now=new Date();
   const filterText=Object.entries(filters).filter(([,value])=>value).map(([key,value])=>`${labels[key]||key}: ${value}`).join(' | ')||'Aucun';
@@ -91,15 +89,16 @@ export function createProfessionalWorkbook({ moduleName, rows, columns, labels={
   return workbook;
 }
 
-export function downloadExcel(filename, rows, columns, options={}) {
-  const workbook=createProfessionalWorkbook({
+export async function downloadExcel(filename, rows, columns, options={}) {
+  const [XLSX, workbook]=await Promise.all([import('xlsx'), createProfessionalWorkbook({
     moduleName:options.moduleName||'Données',rows,columns,labels:options.labels,
     filters:options.filters,sortState:options.sortState,exportType:options.exportType,user:options.user
-  });
+  })]);
   XLSX.writeFile(workbook,filename);
 }
 
-export function createProfessionalPdf({ title, moduleName, rows, columns, labels={}, filters={} }) {
+export async function createProfessionalPdf({ title, moduleName, rows, columns, labels={}, filters={} }) {
+  const { jsPDF } = await import('jspdf');
   const safe=normalizeExportColumns(columns,labels);
   const orientation=safe.length>6?'landscape':'portrait';
   const doc=new jsPDF({orientation,unit:'mm',format:'letter'});
@@ -137,8 +136,9 @@ export function createProfessionalPdf({ title, moduleName, rows, columns, labels
   return doc;
 }
 
-export function downloadPDF(filename,title,rows,columns,options={}){
-  createProfessionalPdf({title,moduleName:options.moduleName||title,rows,columns,labels:options.labels,filters:options.filters}).save(filename);
+export async function downloadPDF(filename,title,rows,columns,options={}){
+  const document = await createProfessionalPdf({title,moduleName:options.moduleName||title,rows,columns,labels:options.labels,filters:options.filters});
+  document.save(filename);
 }
 
 export function photoName(supportId, action='installation', index=1, date=new Date()){

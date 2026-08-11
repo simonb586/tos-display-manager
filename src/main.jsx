@@ -47,7 +47,7 @@ import DataGridSettings, { useDataGridSettings } from './components/DataGridSett
 import GridPagination from './components/GridPagination';
 import { defaultSortColumnForTable } from './lib/gridPresentation';
 import { defaultSortForColumn } from './lib/gridSorting';
-import { loadManyTables } from './services/dataService';
+import { clearTableCache, loadManyTables } from './services/dataService';
 import { loadTerrainSyncStatus } from './services/terrainSyncStatus';
 
 import SupportPhotoGallery from './components/SupportPhotoGallery';
@@ -110,6 +110,11 @@ const tableConfig = {
   Clients: { table: 'clients', fallback: () => import('./data/clients.json').then(module => module.default) },
   'Journal des événements': { table: 'journal_des_evenements', fallback: () => import('./data/journal_des_evenements.json').then(module => module.default) }
 };
+
+const STARTUP_TABLES = [
+  'Infrastructures', 'Liste des arrêts', 'Suivi des EDT',
+  'Bons de travail', 'Enjeux des cadres et supports', 'Photos'
+];
 
 const icons = {
   Infrastructures: '🏗️', 'Campagnes et visuels': '🎯', 'Répertoire des affiches': '📦',
@@ -539,11 +544,13 @@ function App() {
   const [rolePermission, setRolePermission] = useState({ visible_tables: ['*'], visible_columns: {} });
   const [terrainSyncStatus, setTerrainSyncStatus] = useState('État global non centralisé');
 
-  async function refreshDataStore() {
+  async function refreshDataStore(labels = STARTUP_TABLES, { force = false } = {}) {
     if (!session) return null;
     try {
-      const ds = await loadManyTables(tableConfig);
-      setDataStore(ds);
+      const selectedConfig = Object.fromEntries(labels.filter(label => tableConfig[label]).map(label => [label, tableConfig[label]]));
+      if (force) clearTableCache(Object.values(selectedConfig).map(config => config.table));
+      const ds = await loadManyTables(selectedConfig);
+      setDataStore(current => ({ ...(current || {}), ...ds }));
       return ds;
     } catch (error) {
       console.error('Rafraîchissement Supabase impossible', error);
@@ -556,8 +563,13 @@ function App() {
     if (!session || profileLoading || !profile) return;
     if (['Client','Client-Admin'].includes(profile.role)) { setDataStore(null); setLoading(false); return; }
     setLoading(true);
-    refreshDataStore().finally(() => setLoading(false));
+    refreshDataStore(STARTUP_TABLES).finally(() => setLoading(false));
   }, [session?.user?.id, profile?.id, profileLoading]);
+
+  useEffect(() => {
+    if (!session || !profile || !tableConfig[active] || dataStore?.[active]) return;
+    refreshDataStore([active]);
+  }, [active, session?.user?.id, profile?.id, dataStore?.[active]]);
 
   useEffect(() => {
     if (!session || active !== 'Tableau de bord') return;
@@ -566,7 +578,10 @@ function App() {
 
   useEffect(() => {
     if (!supabase || !session) return undefined;
-    const refresh = () => refreshDataStore();
+    const refresh = () => refreshDataStore(
+      Object.keys(dataStore || {}).filter(label => tableConfig[label]),
+      { force: true }
+    );
     window.addEventListener('tos-terrain-data-updated', refresh);
     const channel = supabase
       .channel(`tos-terrain-live-sync-${session.user.id}`)
@@ -574,7 +589,7 @@ function App() {
       .on('postgres_changes',{event:'*',schema:'public',table:'support_photos'},refresh)
       .subscribe();
     return () => {window.removeEventListener('tos-terrain-data-updated',refresh);supabase.removeChannel(channel);};
-  }, [session?.user?.id]);
+  }, [session?.user?.id, dataStore]);
 
   useEffect(() => {
     if (!supabase) {
@@ -763,6 +778,7 @@ function App() {
   else if (active === 'Application terrain') content = <TerrainApp dataStore={dataStore} role={role} session={session}/>;
   else if (active === 'Recherche terrain') content = <div className="dashboard"><FieldSearch dataStore={dataStore}/></div>;
   else if (active === 'Bons de travail') content = <WorkOrdersPanel dataStore={dataStore} role={role} session={session}/>;
+  else if (tableConfig[active] && !dataStore?.[active]) content = <ScreenFallback/>;
   else content = <TableView name={active} dataStore={dataStore} rolePermission={rolePermission} role={role} onRowsUpdated={applyUpdatedRows} onOpenMap={supportId => { setMapFocusSupportId(String(supportId || '')); setActive('Carte interactive'); }}/>;
 
   return <div className="app">

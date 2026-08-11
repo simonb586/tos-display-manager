@@ -57,12 +57,12 @@ assert.equal(exportDisplayValue(true),'Oui');
 assert.equal(exportDisplayValue(false),'Non');
 assert.equal(exportDisplayValue({raw:'value'}),'Information disponible dans la fiche détaillée');
 assert.equal(professionalExportName('Historique des campagnes','xlsx',new Date('2026-07-23T12:00:00Z')),'TOS_Historique_des_campagnes_2026-07-23.xlsx');
-const workbook=createProfessionalWorkbook({moduleName:'Infrastructures',rows:[{support_id:'SUP-2',description:'Été'}],columns:['support_id','description'],labels:{support_id:'Numéro du support',description:'Description'},filters:{description:'Été'},sortState:{column:'support_id',direction:'asc'}});
+const workbook=await createProfessionalWorkbook({moduleName:'Infrastructures',rows:[{support_id:'SUP-2',description:'Été'}],columns:['support_id','description'],labels:{support_id:'Numéro du support',description:'Description'},filters:{description:'Été'},sortState:{column:'support_id',direction:'asc'}});
 assert.deepEqual(workbook.SheetNames,['Données','Informations sur l’export']);
 assert.ok(workbook.Sheets.Données['!autofilter']);
 assert.ok(workbook.Sheets.Données['!freeze']);
 assert.equal(workbook.Sheets.Données.A6.v,'Numéro du support');
-const pdf=createProfessionalPdf({title:'Rapport',moduleName:'Infrastructures',rows:[{support_id:'SUP-1'}],columns:['support_id'],labels:{support_id:'Numéro du support'}});
+const pdf=await createProfessionalPdf({title:'Rapport',moduleName:'Infrastructures',rows:[{support_id:'SUP-1'}],columns:['support_id'],labels:{support_id:'Numéro du support'}});
 assert.equal(pdf.getNumberOfPages(),1);
 
 console.log('Bloc 13.3 — Lots A-E : 34 contrôles réussis.');
