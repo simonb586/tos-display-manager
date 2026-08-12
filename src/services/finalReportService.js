@@ -188,6 +188,30 @@ export async function generateFinalReportPdf(context) {
   return doc.output('blob');
 }
 
+const reportValue=value=>String(value??'—');
+export async function generateEdtReportPdf(snapshot){
+  const{jsPDF}=await import('jspdf'),doc=new jsPDF({unit:'mm',format:'letter'}),pageWidth=216,pageHeight=279,margin=16;
+  let y=18;
+  const footer=()=>{const pages=doc.getNumberOfPages();for(let page=1;page<=pages;page++){doc.setPage(page);doc.setFontSize(8);doc.setTextColor(100);doc.text(`Rapport EDT ${reportValue(snapshot.edt.no_edt)} · ${page} / ${pages}`,margin,pageHeight-9);doc.text(`Généré le ${new Date().toLocaleDateString('fr-CA')}`,pageWidth-margin,pageHeight-9,{align:'right'})}};
+  const next=(height=8)=>{if(y+height>pageHeight-18){doc.addPage();y=16}};
+  const heading=title=>{next(14);doc.setTextColor(15,23,42);doc.setFont('helvetica','bold');doc.setFontSize(13);doc.text(title,margin,y);y+=8};
+  const paragraph=value=>{doc.setFont('helvetica','normal');doc.setFontSize(9.5);const lines=doc.splitTextToSize(reportValue(value),pageWidth-margin*2);for(const line of lines){next(5);doc.text(line,margin,y);y+=5}y+=3};
+  doc.setFillColor(18,32,58);doc.rect(0,0,pageWidth,34,'F');doc.setTextColor(255);doc.setFont('helvetica','bold');doc.setFontSize(18);doc.text(reportValue(snapshot.title),margin,17);doc.setFontSize(9);doc.text('Groupe TOS',margin,26);y=45;
+  [['No EDT',snapshot.edt.no_edt],['Client',snapshot.edt.client],['Campagne / Communication',snapshot.edt.campaign_name],['Requérant',`${reportValue(snapshot.edt.requester_name)} · ${reportValue(snapshot.edt.requester_email)}`],['Période',`${reportValue(snapshot.edt.date_debut_prevue)} — ${reportValue(snapshot.edt.date_fin_prevue||snapshot.edt.date_fin)}`],['Statut',snapshot.edt.statut],['Date de complétion',snapshot.edt.date_fin]].forEach(([label,value])=>{doc.setTextColor(15,23,42);doc.setFontSize(9);doc.setFont('helvetica','bold');doc.text(label,margin,y);doc.setFont('helvetica','normal');doc.text(reportValue(value),67,y);y+=6});y+=3;
+  for(const section of snapshot.section_order||[]){
+    if(section==='summary'){heading('Résumé des travaux');paragraph(snapshot.summary||'—')}
+    if(section==='supports'){
+      heading(`Emplacements d’installation — ${snapshot.supports.length}`);const secondary=new Set(snapshot.secondary_columns||[]),headers=['Site','Support ID','Infrastructure','Emplacement'];if(secondary.has('installation_status'))headers.push('Statut');
+      const widths=headers.length===5?[30,29,38,55,32]:[35,32,43,74];const drawHeader=()=>{next(9);doc.setFillColor(226,232,240);doc.rect(margin,y,pageWidth-margin*2,7,'F');doc.setFont('helvetica','bold');doc.setFontSize(7);let x=margin+1;headers.forEach((header,index)=>{doc.text(header,x,y+4.5);x+=widths[index]});y+=8};drawHeader();
+      for(const support of snapshot.supports){next(support.comment?14:9);if(y<20)drawHeader();doc.setFont('helvetica','normal');doc.setFontSize(7);let x=margin+1;const cells=[support.site,support.support_id,support.infrastructure,support.location];if(secondary.has('installation_status'))cells.push(support.installation_status);cells.forEach((cell,index)=>{doc.text(doc.splitTextToSize(reportValue(cell),widths[index]-2).slice(0,2),x,y+4);x+=widths[index]});y+=support.comment?12:8;if(support.comment){doc.setFont('helvetica','italic');doc.text(doc.splitTextToSize(`Commentaire : ${support.comment}`,pageWidth-margin*2-4).slice(0,2),margin+2,y-5)}}
+    }
+    if(section==='photos'){heading('Photos');const photos=(snapshot.photos||[]).filter(photo=>photo.selected);if(!photos.length)paragraph('Aucune photo sélectionnée pour ce rapport.');else for(const photo of photos){next(14);paragraph(`${photo.support_id} — ${photo.caption||'Photo d’installation'}`)}}
+    if(section==='issues'){heading('Enjeux / écarts');const issues=(snapshot.issues||[]).filter(issue=>issue.selected);paragraph(issues.length?issues.map(issue=>issue.description||issue.enjeux||issue.type_enjeux||'Enjeu').join(' • '):'Aucun enjeu pertinent à afficher.')}
+    if(section==='conclusion'){heading('Conclusion');paragraph(snapshot.conclusion||'—')}
+  }
+  footer();return doc.output('blob');
+}
+
 export async function generateFinalReportExcel(context, supports = []) {
   const XLSX = await import('xlsx');
   const summary = [
