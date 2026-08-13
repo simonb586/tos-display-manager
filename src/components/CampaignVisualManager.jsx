@@ -4,6 +4,7 @@ import { listMasterCampaigns } from '../services/campaignService';
 import { BUSINESS_CONTEXT, isBusinessContext } from '../lib/businessContext';
 import {
   deleteOrArchiveCampaignVisual,
+  listEdtPhasesForCampaign,
   listCampaignVisuals,
   saveCampaignVisual
 } from '../services/campaignVisualService';
@@ -17,7 +18,8 @@ const empty = {
   quantite_prevue: 0,
   actif: true,
   is_out_of_frame: false,
-  instructions_terrain: ''
+  instructions_terrain: '',
+  edt_phase_id: ''
 };
 
 export default function CampaignVisualManager({ role, businessContext = BUSINESS_CONTEXT.MARKETING }) {
@@ -27,6 +29,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
   const [formOpen, setFormOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const [edts, setEdts] = useState([]);
 
   const canManage = ['Administrateur', 'Coordonnateur'].includes(role);
 
@@ -46,6 +49,10 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
   useEffect(() => {
     reload();
   }, [businessContext]);
+
+  useEffect(() => {
+    listEdtPhasesForCampaign(form.campagne_id).then(setEdts).catch(error => setMessage(error.message));
+  }, [form.campagne_id]);
 
   async function submit(event) {
     event.preventDefault();
@@ -99,7 +106,8 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
       quantite_prevue: visual.quantite_prevue || 0,
       actif: visual.actif !== false,
       is_out_of_frame: visual.is_out_of_frame === true,
-      instructions_terrain: visual.instructions_terrain || ''
+      instructions_terrain: visual.instructions_terrain || '',
+      edt_phase_id: visual.edt_phase_id || ''
     });
     setFormOpen(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -134,6 +142,14 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
                       {campaign.nom_campagne}
                     </option>
                   ))}
+                </select>
+              </label>
+
+              <label>
+                EDT associé
+                <select value={form.edt_phase_id || ''} onChange={event => setForm({ ...form, edt_phase_id: event.target.value })}>
+                  <option value="">Aucun EDT associé</option>
+                  {edts.map(phase => <option key={phase.id} value={phase.id}>{phase.edt?.no_edt} — {phase.phase_type === 'retrait' ? 'Retrait' : 'Installation'}</option>)}
                 </select>
               </label>
 
@@ -232,7 +248,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
                 <b>{visual.nom_visuel}</b>
                 <span>{visual.campagne?.nom_campagne}</span>
                 <small>
-                  {visual.phase || 'Sans phase'} — {visual.format_support} {visual.is_out_of_frame ? '— Hors-Cadre' : ''}
+                  {visual.phase || 'Sans phase'} — {visual.format_support} {visual.is_out_of_frame ? '— Hors-Cadre' : ''} {visual.edt_phase ? `— ${visual.edt_phase.edt?.no_edt} — ${visual.edt_phase.phase_type === 'retrait' ? 'Retrait' : 'Installation'}` : ''}
                 </small>
               </div>
 

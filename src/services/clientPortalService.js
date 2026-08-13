@@ -33,3 +33,4 @@ export async function listAllClientPortalSection(section,{filters={}}={}){
 export const inviteClientMember = ({ email, name }) => rpc('client_admin_invite_member_v120', { p_email: email, p_name: name });
 export const deactivateClientMember = memberId => rpc('client_admin_deactivate_member_v120', { p_member_id: memberId });
 export const updateClientMemberCampaignAccess = ({ memberId, campaignId, allowed }) => rpc('client_admin_set_campaign_access_v120', { p_member_id: memberId, p_campaign_id: campaignId, p_allowed: Boolean(allowed) });
+export const createMultiSupportClientRequest = ({type,priority,description,supportIds}) => rpc('creer_requete_client_multi_supports_v133',{p_type:type,p_priorite:priority,p_description:description,p_support_ids:[...new Set(supportIds.map(String))]});

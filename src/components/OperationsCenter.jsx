@@ -40,8 +40,9 @@ const emptyEdt = {
   client: '',
   statut: 'Planifié',
   priorite: 'Normale',
-  date_debut: '',
-  date_fin_prevue: '',
+  date_debut_prevue: '',
+  date_retrait_prevue: '',
+  creer_retrait: false,
   coordonnateur: '',
   supports_prevus: 0,
   description: ''
@@ -239,7 +240,7 @@ export default function OperationsCenter({ role }) {
               <h2><Plus/> {edtForm.id ? 'Modifier l’EDT' : 'Créer un EDT'}</h2>
               <label>No EDT<input value={edtForm.no_edt} onChange={e => setEdtForm({...edtForm, no_edt:e.target.value})}/></label>
               <label>Nom<input value={edtForm.nom} onChange={e => setEdtForm({...edtForm, nom:e.target.value})}/></label>
-              <label>Campagne<select required value={edtForm.campagne_id||''} onChange={e=>{const campaign=data.campaigns.find(item=>String(item.id)===e.target.value);setEdtForm({...edtForm,campagne_id:e.target.value,campagne:campaign?.nom_campagne||''})}}><option value="">Choisir une campagne</option>{data.campaigns.map(item=><option key={item.id} value={item.id} disabled={!item.date_fin}>{item.nom_campagne} — fin {item.date_fin||'absente'}</option>)}</select></label>
+              <label>Campagne<select required value={edtForm.campagne_id||''} onChange={e=>{const campaign=data.campaigns.find(item=>String(item.id)===e.target.value);setEdtForm({...edtForm,campagne_id:e.target.value,campagne:campaign?.nom_campagne||''})}}><option value="">Choisir une campagne</option>{data.campaigns.map(item=><option key={item.id} value={item.id}>{item.nom_campagne}</option>)}</select></label>
               <label>Client<input value={edtForm.client} onChange={e => setEdtForm({...edtForm, client:e.target.value})}/></label>
               <label>Statut<select value={edtForm.statut} onChange={e => setEdtForm({...edtForm, statut:e.target.value})}>
                 {['Planifié','En préparation','En cours','En attente','Terminé','Annulé'].map(item => <option key={item}>{item}</option>)}
@@ -247,8 +248,9 @@ export default function OperationsCenter({ role }) {
               <label>Priorité<select value={edtForm.priorite} onChange={e => setEdtForm({...edtForm, priorite:e.target.value})}>
                 {['Basse','Normale','Haute','Urgente'].map(item => <option key={item}>{item}</option>)}
               </select></label>
-              <label>Début<input type="date" value={edtForm.date_debut || ''} onChange={e => setEdtForm({...edtForm, date_debut:e.target.value})}/></label>
-              <label>Fin prévue<input type="date" value={edtForm.date_fin_prevue || ''} onChange={e => setEdtForm({...edtForm, date_fin_prevue:e.target.value})}/></label>
+              <label>Date de début de l’installation<input required type="date" value={edtForm.date_debut_prevue || ''} onChange={e => setEdtForm({...edtForm, date_debut_prevue:e.target.value})}/></label>
+              {!edtForm.id && <label className="edt-checkbox"><input type="checkbox" checked={edtForm.creer_retrait} onChange={e=>setEdtForm({...edtForm,creer_retrait:e.target.checked,date_retrait_prevue:e.target.checked?edtForm.date_retrait_prevue:''})}/> Créer également une phase Retrait ?</label>}
+              {!edtForm.id && edtForm.creer_retrait && <label>Date prévue du retrait<input required type="date" min={edtForm.date_debut_prevue||''} value={edtForm.date_retrait_prevue || ''} onChange={e => setEdtForm({...edtForm, date_retrait_prevue:e.target.value})}/></label>}
               <label>Coordonnateur<input value={edtForm.coordonnateur} onChange={e => setEdtForm({...edtForm, coordonnateur:e.target.value})}/></label>
               <label>Supports prévus<input type="number" value={edtForm.supports_prevus} onChange={e => setEdtForm({...edtForm, supports_prevus:e.target.value})}/></label>
               <label>Description<textarea value={edtForm.description} onChange={e => setEdtForm({...edtForm, description:e.target.value})}/></label>
@@ -360,7 +362,7 @@ export default function OperationsCenter({ role }) {
             <h2>Bons de travail</h2>
             <div className="bt-grid">
               {data.workOrders.map(order => (
-                <article key={order.id}>
+                <article key={order.id} id={`bt-${order.id}`}>
                   <div><strong>{order.no_bt || `BT-${order.id}`}</strong><span>{order.statut}</span></div>
                   <p>{order.description || order.type_bt}</p>
                   <small>Support {order.support_id || '—'} · EDT {order.no_edt || '—'} · {order.assigne_a || 'Non assigné'}</small>

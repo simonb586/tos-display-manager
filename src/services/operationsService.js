@@ -68,32 +68,33 @@ export async function loadOperationsData() {
 
 export async function createEdt(payload) {
   ensureSupabase();
-  if (!payload.campagne_id) throw new Error('Une campagne valide est obligatoire.');
-  const {data:campaign,error:campaignError}=await supabase.from('campagnes_maitres').select('id,nom_campagne,date_fin').eq('id',payload.campagne_id).single();
-  if(campaignError)throw campaignError;
-  if(!campaign?.date_fin)throw new Error('La campagne doit avoir une date de fin.');
-  const { data, error } = await supabase
-    .from('suivi_des_edt')
-    .insert({
-      no_edt: payload.no_edt?.trim() || `EDT-${Date.now()}`,
-      nom: payload.nom?.trim() || payload.campagne?.trim() || 'Nouvel EDT',
-      campagne_id: Number(payload.campagne_id),
-      campagne: campaign.nom_campagne,
-      lifecycle_status: payload.lifecycle_status || 'brouillon',
-      retrait_date_proposee: campaign.date_fin,
-      client: payload.client?.trim() || null,
-      statut: payload.statut || 'Planifié',
-      priorite: payload.priorite || 'Normale',
-      date_debut: payload.date_debut || null,
-      date_fin_prevue: payload.date_fin_prevue || null,
-      coordonnateur: payload.coordonnateur || null,
-      supports_prevus: Number(payload.supports_prevus || 0),
-      description: payload.description?.trim() || null,
-      updated_at: new Date().toISOString()
-    })
-    .select()
-    .single();
+  if (!payload.campagne_id || !payload.date_debut_prevue) {
+    throw new Error('Campagne et date de début de l’installation obligatoires.');
+  }
+  const { data, error } = await supabase.rpc('creer_edt_v133', {
+    p_campagne_id: Number(payload.campagne_id),
+    p_no_edt: payload.no_edt?.trim() || null,
+    p_date_installation: payload.date_debut_prevue,
+    p_creer_retrait: Boolean(payload.creer_retrait),
+    p_date_retrait: payload.creer_retrait ? payload.date_retrait_prevue || null : null,
+    p_client: payload.client?.trim() || null,
+    p_priorite: payload.priorite || 'Normale',
+    p_description: payload.description?.trim() || null
+  });
+  if (error) throw error;
+  return data;
+}
 
+export async function createRemovalPhase(edtId, date) {
+  ensureSupabase();
+  const { data, error } = await supabase.rpc('creer_phase_retrait_v133', { p_edt_id:Number(edtId), p_date_retrait:date });
+  if (error) throw error;
+  return data;
+}
+
+export async function convertPhaseToWorkOrder(phaseId) {
+  ensureSupabase();
+  const { data, error } = await supabase.rpc('convertir_phase_en_bt_v133', { p_phase_id:Number(phaseId) });
   if (error) throw error;
   return data;
 }

@@ -105,8 +105,19 @@ export async function listCampaignVisuals() {
   ready();
   const { data, error } = await supabase
     .from('campagne_visuels_formats')
-    .select('*, campagne:campagne_id(*)')
+    .select('*, campagne:campagne_id(*), edt_phase:edt_phase_id(id,phase_type,edt:edt_id(id,no_edt))')
     .order('nom_visuel');
+  if (error) throw error;
+  return data || [];
+}
+
+export async function listEdtPhasesForCampaign(campaignId) {
+  ready();
+  if (!campaignId) return [];
+  const { data, error } = await supabase.from('edt_phases')
+    .select('id,phase_type,date_debut_prevue,edt:edt_id!inner(id,no_edt,campagne_id,statut)')
+    .eq('edt.campagne_id', Number(campaignId))
+    .order('date_debut_prevue', { ascending: false, nullsFirst: false });
   if (error) throw error;
   return data || [];
 }
@@ -123,6 +134,7 @@ export async function saveCampaignVisual(visual) {
     actif: visual.actif !== false,
     instructions_terrain: visual.instructions_terrain?.trim() || null,
     is_out_of_frame: Boolean(visual.is_out_of_frame),
+    edt_phase_id: visual.edt_phase_id ? Number(visual.edt_phase_id) : null,
     updated_at: new Date().toISOString()
   };
 

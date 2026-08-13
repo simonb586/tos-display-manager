@@ -1,0 +1,10 @@
+-- READ ONLY: executer seulement apres la migration V1.3.3.
+select table_name,column_name,data_type from information_schema.columns where table_schema='public' and ((table_name='campagne_visuels_formats' and column_name='edt_phase_id') or (table_name='requetes_clients' and column_name='client_id')) order by table_name;
+select indexname,indexdef from pg_indexes where schemaname='public' and indexname in ('edt_phases_parent_type_v133_uq','edt_supports_phase_support_v133_uq','bons_de_travail_phase_v133_uq','campagne_visuels_formats_phase_v133_idx');
+select conrelid::regclass table_name,conname,pg_get_constraintdef(oid) definition from pg_constraint where conrelid in ('public.client_request_supports'::regclass,'public.campagne_visuels_formats'::regclass) order by 1,2;
+select policyname,tablename,cmd,roles,qual from pg_policies where schemaname='public' and tablename in ('requetes_clients','client_request_supports') order by tablename,policyname;
+select routine_name,security_type from information_schema.routines where routine_schema='public' and routine_name in ('creer_edt_v133','creer_phase_retrait_v133','convertir_phase_en_bt_v133','creer_requete_client_multi_supports_v133','source_rapport_phase_v133') order by routine_name;
+select edt_id,phase_type,count(*) from public.edt_phases where phase_type in ('installation','retrait') group by edt_id,phase_type having count(*)>1;
+select phase_id,count(*) from public.bons_de_travail where phase_id is not null group by phase_id having count(*)>1;
+select r.id request_id,r.client_id,c.client_id campaign_client_id,crs.support_id from public.client_request_supports crs join public.requetes_clients r on r.id=crs.request_id left join public.campagnes_supports cs on cs.support_id=crs.support_id left join public.campagnes_maitres c on c.id=cs.campagne_id where r.client_id is not null group by r.id,r.client_id,c.client_id,crs.support_id having bool_and(c.client_id is distinct from r.client_id);
+select count(*) legacy_edts_preserved from public.suivi_des_edt;
