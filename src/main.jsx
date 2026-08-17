@@ -535,6 +535,7 @@ function ServiceConfigurationError() {
 
 function App() {
   enforceApplicationTitle();
+  const isSetPasswordRoute = window.location.pathname.replace(/\/+$/, '') === '/set-password';
   const [active, setActive] = useState('Tableau de bord');
   const [role, setRole] = useState('Administrateur');
   const [session, setSession] = useState(null);
@@ -704,6 +705,21 @@ function App() {
   }
 
   if (!supabaseConfigured) return <ServiceConfigurationError/>;
+  if (isSetPasswordRoute) return <AccountActivation
+    session={session}
+    profile={profile}
+    loading={profileLoading}
+    onActivated={async () => {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData.user) throw authError || new Error('Session utilisateur introuvable.');
+      const nextProfile = await getCurrentProfile({ ...session, user: authData.user });
+      if (!nextProfile?.role || !nextProfile?.client_id && ['Client', 'Client-Admin'].includes(nextProfile?.role)) throw new Error('Profil applicatif complet introuvable.');
+      setSession(current => ({ ...current, user: authData.user }));
+      setProfile(nextProfile);
+      setRole(nextProfile.role);
+      window.history.replaceState({}, '', '/');
+    }}
+  />;
   if (profileLoading || (session && loading)) return (
     <div className="app-startup" role="status" aria-live="polite">
       <div className="app-startup-card">

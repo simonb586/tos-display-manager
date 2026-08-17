@@ -10,3 +10,12 @@ select edt_id,phase_type,count(*) from public.edt_phases where phase_type in ('i
 select phase_id,count(*) from public.bons_de_travail where phase_id is not null group by phase_id having count(*)>1;
 select r.id request_id,r.client_id,c.client_id campaign_client_id,crs.support_id from public.client_request_supports crs join public.requetes_clients r on r.id=crs.request_id left join public.campagnes_supports cs on cs.support_id=crs.support_id left join public.campagnes_maitres c on c.id=cs.campagne_id where r.client_id is not null group by r.id,r.client_id,c.client_id,crs.support_id having bool_and(c.client_id is distinct from r.client_id);
 select count(*) legacy_edts_preserved from public.suivi_des_edt;
+select to_regclass('public.edt_phases') edt_phases_table;
+select conname,pg_get_constraintdef(oid) definition from pg_constraint where conrelid='public.edt_phases'::regclass and conname='edt_phases_phase_type_v133_ck';
+select p.proname,has_function_privilege('anon',p.oid,'EXECUTE') anon_execute,has_function_privilege('authenticated',p.oid,'EXECUTE') authenticated_execute from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname in ('transition_edt_phase_v133','creer_phase_retrait_v133');
+select relrowsecurity rls_enabled from pg_class where oid='public.edt_phases'::regclass;
+select policyname,cmd,roles,qual from pg_policies where schemaname='public' and tablename='edt_phases' order by policyname;
+select e.id,e.no_edt from public.suivi_des_edt e where not exists(select 1 from public.edt_phases p where p.edt_id=e.id and p.phase_type='installation');
+select e.id,e.no_edt,i.statut installation_statut,r.statut retrait_statut,e.statut parent_statut from public.suivi_des_edt e left join public.edt_phases i on i.edt_id=e.id and i.phase_type='installation' left join public.edt_phases r on r.edt_id=e.id and r.phase_type='retrait' order by e.id;
+select p.id phase_id,p.phase_type,count(r.id) report_count,count(b.id) work_order_count from public.edt_phases p left join public.edt_phase_reports r on r.phase_id=p.id left join public.bons_de_travail b on b.phase_id=p.id group by p.id,p.phase_type order by p.id;
+select routine_name from information_schema.routines where routine_schema='public' and routine_name in ('source_rapport_phase_v133','delete_or_archive_edt_v133') order by routine_name;

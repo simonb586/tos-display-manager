@@ -17,6 +17,7 @@ const json = (body: unknown, status = 200) => new Response(
 
 function publicSiteUrl() {
   const raw =
+    Deno.env.get('CLIENT_PORTAL_URL') ||
     Deno.env.get('PUBLIC_SITE_URL') ||
     Deno.env.get('APP_PUBLIC_URL') ||
     '';
@@ -173,7 +174,7 @@ Deno.serve(async request => {
     if (action === 'resend_invite') {
       if (!email) return json({ error: 'Courriel absent.' }, 400);
 
-      const redirectTo = `${publicSiteUrl()}/`;
+      const redirectTo = `${publicSiteUrl()}/set-password`;
 
       if (authUser?.email_confirmed_at) {
         const { error } = await admin.auth.resetPasswordForEmail(email, {

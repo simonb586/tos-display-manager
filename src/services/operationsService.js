@@ -94,8 +94,11 @@ export async function loadEdtLifecycleData(edtId) {
     supabase.from('edt_phase_reports').select('*').eq('edt_id', id).order('version', { ascending: false }),
     supabase.from('operations_history').select('*').eq('entity_type', 'edt_lifecycle').eq('entity_id', String(id)).order('created_at', { ascending: false }).limit(50)
   ]);
-  for (const result of [edtResult, phasesResult, reportsResult, historyResult]) {
-    if (result.error) throw result.error;
+  for (const [source, result] of [['suivi_des_edt',edtResult],['edt_phases',phasesResult],['edt_phase_reports',reportsResult],['operations_history',historyResult]]) {
+    if (result.error) {
+      console.error(`Chargement ${source} impossible pour l'EDT`, { edtId:id, error:result.error });
+      throw result.error;
+    }
   }
   return { edt: edtResult.data, phases: phasesResult.data || [], phaseReports: reportsResult.data || [], history: historyResult.data || [] };
 }

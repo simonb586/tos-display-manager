@@ -15,7 +15,7 @@ export async function getCurrentProfile(session) {
 
 export async function requestPasswordReset(email) {
   if (!supabaseConfigured || !supabase) throw new Error('Supabase n’est pas configuré.');
-  const redirectTo = `${window.location.origin}/`;
+  const redirectTo = `${window.location.origin}/update-password`;
   const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
   if (error) throw error;
 }

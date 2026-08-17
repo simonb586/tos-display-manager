@@ -44,3 +44,18 @@ export function validateReopening({role,reason}){
   if(!String(reason||'').trim())errors.push('REASON_REQUIRED');
   return {valid:errors.length===0,errors};
 }
+
+export function phasesForEdt(phases,edtId){
+  return ['installation','retrait'].reduce((result,phaseType)=>{
+    result[phaseType]=(phases||[]).find(phase=>String(phase.edt_id)===String(edtId)&&phase.phase_type===phaseType)||null;
+    return result;
+  },{});
+}
+
+export function applyPhaseTransition(phases,phaseId,targetStatus){
+  return phases.map(phase=>String(phase.id)===String(phaseId)?{...phase,statut:targetStatus}:phase);
+}
+
+export function isLatestLifecycleRequest(requestId,currentRequestId){
+  return requestId===currentRequestId;
+}

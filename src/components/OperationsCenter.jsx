@@ -94,6 +94,7 @@ export default function OperationsCenter({ role }) {
   });
   const [selectedEdtId, setSelectedEdtId] = useState('');
   const [lifecycleDetail, setLifecycleDetail] = useState(null);
+  const [lifecycleError, setLifecycleError] = useState(null);
   const [lifecycleLoading, setLifecycleLoading] = useState(false);
   const [lifecycleRevision, setLifecycleRevision] = useState(0);
   const [deleteDialog, setDeleteDialog] = useState(null);
@@ -138,11 +139,14 @@ export default function OperationsCenter({ role }) {
   useEffect(() => {
     const requestId = ++selectionRequest.current;
     setLifecycleDetail(null);
+    setLifecycleError(null);
     if (!selectedEdtId) { setLifecycleLoading(false); return; }
     setLifecycleLoading(true);
     loadEdtLifecycleData(selectedEdtId).then(detail => {
       if (requestId === selectionRequest.current) setLifecycleDetail(detail);
     }).catch(error => {
+      console.error('Impossible de charger le cycle de vie EDT', { edtId: selectedEdtId, error });
+      if (requestId === selectionRequest.current) setLifecycleError(error);
       if (requestId === selectionRequest.current) setMessage(friendlyError(error));
     }).finally(() => {
       if (requestId === selectionRequest.current) setLifecycleLoading(false);
@@ -373,7 +377,16 @@ export default function OperationsCenter({ role }) {
           )}
 
           {selectedEdt && (
-            <EdtLifecyclePanel edt={lifecycleDetail?.edt || selectedEdt} data={lifecycleDetail ? {...data,...lifecycleDetail} : {...data,phases:[],phaseReports:[],history:[]}} canManage={canManage} busy={busy} run={run} loading={lifecycleLoading}/>
+            <EdtLifecyclePanel
+              edt={lifecycleDetail?.edt || selectedEdt}
+              data={lifecycleDetail ? {...data,...lifecycleDetail} : {...data,phases:[],phaseReports:[],history:[]}}
+              canManage={canManage}
+              busy={busy}
+              run={run}
+              loading={lifecycleLoading}
+              error={lifecycleError}
+              onRetry={() => setLifecycleRevision(value => value + 1)}
+            />
           )}
 
           {selectedEdt && (

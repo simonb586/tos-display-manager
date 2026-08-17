@@ -39,7 +39,7 @@ for(const file of sequence){
  const markerPosition=executableNormalized.indexOf(marker,executableCursor+1)
  assert(markerPosition>executableCursor,`section exécutable absente ou désordonnée: ${file}`)
  assert(executableNormalized.indexOf(sourceNormalized,markerPosition)>=markerPosition,`contenu source non fidèle: ${file}`)
- const digest=createHash('sha256').update(source).digest('hex')
+ const digest=createHash('sha256').update(sourceNormalized).digest('hex')
  assert(manifest.includes(`${digest}  supabase/${file}`),`empreinte source incohérente: ${file}`)
  executableCursor=markerPosition
 }
