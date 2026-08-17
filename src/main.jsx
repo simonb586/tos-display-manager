@@ -58,6 +58,7 @@ import ChangeHistoryPanel from './components/ChangeHistoryPanel';
 import GlobalButtonFeedback from './components/GlobalButtonFeedback';
 import RecentActivityWidget from './components/RecentActivityWidget';
 import AccountActivation from './components/AccountActivation';
+import InvitationAcceptance from './components/InvitationAcceptance';
 import BrandLogo from './components/BrandLogo';
 import OperationalCommandCenter from './components/OperationalCommandCenter';
 import { infrastructureMapUrl } from './services/mapService';
@@ -535,6 +536,7 @@ function ServiceConfigurationError() {
 
 function App() {
   enforceApplicationTitle();
+  const isAcceptInvitationRoute = window.location.pathname.replace(/\/+$/, '') === '/accept-invitation';
   const isSetPasswordRoute = window.location.pathname.replace(/\/+$/, '') === '/set-password';
   const [active, setActive] = useState('Tableau de bord');
   const [role, setRole] = useState('Administrateur');
@@ -705,6 +707,7 @@ function App() {
   }
 
   if (!supabaseConfigured) return <ServiceConfigurationError/>;
+  if (isAcceptInvitationRoute) return <InvitationAcceptance/>;
   if (isSetPasswordRoute) return <AccountActivation
     session={session}
     profile={profile}

@@ -174,11 +174,11 @@ Deno.serve(async request => {
     if (action === 'resend_invite') {
       if (!email) return json({ error: 'Courriel absent.' }, 400);
 
-      const redirectTo = `${publicSiteUrl()}/set-password`;
+      const redirectTo = `${publicSiteUrl()}/accept-invitation`;
 
       if (authUser?.email_confirmed_at) {
         const { error } = await admin.auth.resetPasswordForEmail(email, {
-          redirectTo
+          redirectTo: `${publicSiteUrl()}/update-password`
         });
         if (error) throw error;
 

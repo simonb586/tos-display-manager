@@ -56,7 +56,7 @@ Deno.serve(async request=>{
     let role=String(body.role||'Installateur').trim();
     let organisation=String(body.organisation||'').trim();
     let clientId=body.client_id?Number(body.client_id):null;
-    const redirectTo=`${publicSiteUrl()}/set-password`;
+    const redirectTo=`${publicSiteUrl()}/accept-invitation`;
     if(!email||!email.includes('@'))return json({error:'Courriel valide obligatoire.'},400);
 
     if(clientAdminOrigin){

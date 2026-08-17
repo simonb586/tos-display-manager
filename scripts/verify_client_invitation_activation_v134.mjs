@@ -12,8 +12,8 @@ const vercel = JSON.parse(read('vercel.json'));
 
 assert.match(invite, /auth\.admin\.inviteUserByEmail/);
 assert.match(invite, /Deno\.env\.get\('CLIENT_PORTAL_URL'\)/);
-assert.match(invite, /`\$\{publicSiteUrl\(\)\}\/set-password`/);
-assert.match(manage, /`\$\{publicSiteUrl\(\)\}\/set-password`/);
+assert.match(invite, /`\$\{publicSiteUrl\(\)\}\/accept-invitation`/);
+assert.match(manage, /`\$\{publicSiteUrl\(\)\}\/accept-invitation`/);
 assert.match(main, /pathname\.replace[\s\S]*'\/set-password'/);
 assert.match(main, /if \(isSetPasswordRoute\) return <AccountActivation/);
 const activationRouteIndex = main.indexOf('if (isSetPasswordRoute) return <AccountActivation');

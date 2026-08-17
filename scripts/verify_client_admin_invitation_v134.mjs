@@ -29,7 +29,7 @@ for(const token of [
   'auth.admin.inviteUserByEmail',
   "auth.resend({type:'invite'",
   'Un compte existe déjà pour cette adresse.',
-  "`${publicSiteUrl()}/set-password`",
+  "`${publicSiteUrl()}/accept-invitation`",
   "body.action==='complete_client_activation'",
   ".update({status:'accepted'})"
 ])assert.ok(edge.includes(token),token);
