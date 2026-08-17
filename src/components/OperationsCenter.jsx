@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
   CalendarDays,
@@ -8,6 +8,7 @@ import {
   Plus,
   RefreshCw,
   Send,
+  Trash2,
   UserPlus,
   Users
 } from 'lucide-react';
@@ -25,6 +26,9 @@ import {
   createEdt,
   createPhase,
   createWorkOrderV11,
+  deleteOrArchiveEdt,
+  inspectEdtDeletion,
+  loadEdtLifecycleData,
   loadOperationsData,
   updateEdt,
   updatePhase,
@@ -89,6 +93,11 @@ export default function OperationsCenter({ role }) {
     ,campaigns: [], phaseReports: []
   });
   const [selectedEdtId, setSelectedEdtId] = useState('');
+  const [lifecycleDetail, setLifecycleDetail] = useState(null);
+  const [lifecycleLoading, setLifecycleLoading] = useState(false);
+  const [lifecycleRevision, setLifecycleRevision] = useState(0);
+  const [deleteDialog, setDeleteDialog] = useState(null);
+  const selectionRequest = useRef(0);
   const [edtForm, setEdtForm] = useState(emptyEdt);
   const [requestForm, setRequestForm] = useState(emptyRequest);
   const [btForm, setBtForm] = useState(emptyWorkOrder);
@@ -112,6 +121,7 @@ export default function OperationsCenter({ role }) {
   const {sortedRows:sortedHistory,sortState:historySort,setSortState:setHistorySort}=useSortableRows(data.history, null, 'operations-history');
 
   const canManage = ['Administrateur', 'Coordonnateur'].includes(role);
+  const canDeleteEdt = role === 'Administrateur';
   const selectedEdt = data.edts.find(item => String(item.id) === String(selectedEdtId)) || null;
 
   async function reload() {
@@ -124,6 +134,21 @@ export default function OperationsCenter({ role }) {
   }
 
   useEffect(() => { reload(); }, []);
+
+  useEffect(() => {
+    const requestId = ++selectionRequest.current;
+    setLifecycleDetail(null);
+    if (!selectedEdtId) { setLifecycleLoading(false); return; }
+    setLifecycleLoading(true);
+    loadEdtLifecycleData(selectedEdtId).then(detail => {
+      if (requestId === selectionRequest.current) setLifecycleDetail(detail);
+    }).catch(error => {
+      if (requestId === selectionRequest.current) setMessage(friendlyError(error));
+    }).finally(() => {
+      if (requestId === selectionRequest.current) setLifecycleLoading(false);
+    });
+    return () => { selectionRequest.current += 1; };
+  }, [selectedEdtId, lifecycleRevision]);
 
   const stats = useMemo(() => ({
     activeEdts: data.edts.filter(item => !['Terminé', 'Annulé'].includes(item.statut)).length,
@@ -139,11 +164,36 @@ export default function OperationsCenter({ role }) {
       await action();
       setMessage(success);
       await reload();
+      setLifecycleRevision(value => value + 1);
     } catch (error) {
       setMessage(friendlyError(error));
     } finally {
       setBusy(false);
     }
+  }
+
+  async function openDeleteDialog(edt) {
+    if (busy || !canDeleteEdt) return;
+    setBusy(true);
+    setMessage('');
+    try { setDeleteDialog({ edt, impact: await inspectEdtDeletion(edt.id) }); }
+    catch (error) { setMessage(friendlyError(error)); }
+    finally { setBusy(false); }
+  }
+
+  async function confirmDeleteEdt() {
+    if (!deleteDialog || busy) return;
+    const edtId = deleteDialog.edt.id;
+    setBusy(true);
+    try {
+      const result = await deleteOrArchiveEdt(edtId);
+      setDeleteDialog(null);
+      setSelectedEdtId('');
+      setLifecycleDetail(null);
+      await reload();
+      setMessage(result.result === 'deleted' ? 'EDT supprim\u00e9.' : 'EDT archiv\u00e9.');
+    } catch (error) { setMessage(friendlyError(error)); }
+    finally { setBusy(false); }
   }
 
   async function submitEdt(event) {
@@ -272,6 +322,7 @@ export default function OperationsCenter({ role }) {
                   <small>{progress}% — {edt.client || 'Client non précisé'} — fin prévue {edt.date_fin_prevue || '—'}</small>
                   {canManage && <div className="edt-actions">
                     <button onClick={() => setEdtForm({...emptyEdt, ...edt})}>Modifier</button>
+                    {canDeleteEdt && <button className="danger" disabled={busy} onClick={() => openDeleteDialog(edt)}><Trash2 size={15}/> Supprimer l'EDT</button>}
                     <button onClick={() => run(() => closeEdt(edt.id), 'EDT clôturé.')}>Clôturer</button>
                   </div>}
                 </article>;
@@ -322,7 +373,7 @@ export default function OperationsCenter({ role }) {
           )}
 
           {selectedEdt && (
-            <EdtLifecyclePanel edt={selectedEdt} data={data} canManage={canManage} busy={busy} run={run}/>
+            <EdtLifecyclePanel edt={lifecycleDetail?.edt || selectedEdt} data={lifecycleDetail ? {...data,...lifecycleDetail} : {...data,phases:[],phaseReports:[],history:[]}} canManage={canManage} busy={busy} run={run} loading={lifecycleLoading}/>
           )}
 
           {selectedEdt && (
@@ -423,6 +474,14 @@ export default function OperationsCenter({ role }) {
           </tbody></table></div>
         </section>
       )}
+      {deleteDialog && <div className="edt-delete-backdrop" onMouseDown={event => event.target === event.currentTarget && !busy && setDeleteDialog(null)}>
+        <section className="edt-delete-dialog" role="dialog" aria-modal="true" aria-labelledby="edt-delete-title">
+          <h2 id="edt-delete-title">Supprimer cet EDT ?</h2>
+          <dl><div><dt>No EDT</dt><dd>{deleteDialog.impact.no_edt}</dd></div><div><dt>Client</dt><dd>{deleteDialog.impact.client || '-'}</dd></div><div><dt>Campagne / communication</dt><dd>{deleteDialog.impact.campagne || '-'}</dd></div><div><dt>Phases</dt><dd>{deleteDialog.impact.phase_count}</dd></div><div><dt>Supports</dt><dd>{deleteDialog.impact.support_count}</dd></div><div><dt>Bons de travail</dt><dd>{deleteDialog.impact.work_order_count ? 'Oui' : 'Non'}</dd></div><div><dt>Rapports</dt><dd>{deleteDialog.impact.report_count ? 'Oui' : 'Non'}</dd></div></dl>
+          <p>{deleteDialog.impact.decision === 'deleted' ? "Cet EDT n'a aucun historique op\u00e9rationnel. Il peut \u00eatre supprim\u00e9 d\u00e9finitivement." : "Cet EDT poss\u00e8de d\u00e9j\u00e0 un historique et ne peut pas \u00eatre supprim\u00e9 d\u00e9finitivement. Il sera archiv\u00e9 afin de pr\u00e9server les rapports et les op\u00e9rations associ\u00e9es."}</p>
+          <footer><button disabled={busy} onClick={() => setDeleteDialog(null)}>Annuler</button><button className="danger" disabled={busy} onClick={confirmDeleteEdt}>{deleteDialog.impact.decision === 'deleted' ? "Supprimer l'EDT" : "Archiver l'EDT"}</button></footer>
+        </section>
+      </div>}
     </div>
   );
 }

@@ -5,7 +5,7 @@ import{closeEdtLifecycle,convertPhaseToWorkOrder,createRemovalPhase,initializeEd
 const labels={installation:'Installation',retrait:'Retrait'};
 const fmt=value=>value?new Date(value).toLocaleString('fr-CA'):'—';
 
-export default function EdtLifecyclePanel({edt,data,canManage,busy,run}){
+export default function EdtLifecyclePanel({edt,data,canManage,busy,run,loading=false}){
   const[campaignId,setCampaignId]=useState(edt.campagne_id||'');
   const[removalDate,setRemovalDate]=useState('');
   const[justification,setJustification]=useState('');
@@ -29,6 +29,7 @@ export default function EdtLifecyclePanel({edt,data,canManage,busy,run}){
     run(()=>transitionEdtPhase(phase.id,action,{comment,photoException,anomalies:comment?[{description:comment}]:[]}),`${labels[phase.phase_type]} : action « ${action} » enregistrée.`);
   }
 
+  if(loading)return <section className="v07-card operations-wide edt-lifecycle" aria-busy="true"><p className="executive-empty">Chargement du cycle de vie...</p></section>;
   return <section className="v07-card operations-wide edt-lifecycle">
     <header className="edt-lifecycle-head"><div><span className="eyebrow">Bloc 13.2-P1</span><h2>Cycle de vie Installation / Retrait</h2><p>Deux fermetures indépendantes, rapports versionnés et historique permanent.</p></div><span className={`lifecycle-status status-${edt.lifecycle_status||'brouillon'}`}>{edt.lifecycle_status||'brouillon'}</span></header>
     {!edt.campagne_id?<div className="lifecycle-setup"><AlertTriangle/><div><strong>Campagne obligatoire</strong><p>Sélectionnez une campagne possédant une date de fin exploitable.</p></div><select value={campaignId} onChange={event=>setCampaignId(event.target.value)}><option value="">Choisir</option>{(data.campaigns||[]).map(item=><option key={item.id} value={item.id} disabled={!item.date_fin}>{item.nom_campagne} — fin {item.date_fin||'absente'}</option>)}</select>{canManage&&<button disabled={busy||!campaignId} onClick={()=>run(()=>initializeEdtLifecycle(edt.id,campaignId),'Cycle EDT initialisé.')}>Initialiser</button>}</div>:<div className="lifecycle-campaign"><CalendarClock/><div><strong>{campaign?.nom_campagne||edt.campagne}</strong><span>Fin de campagne : {campaign?.date_fin||'Non disponible'} · retrait proposé : {edt.retrait_date_proposee||campaign?.date_fin||'—'}</span></div></div>}

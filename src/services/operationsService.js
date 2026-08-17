@@ -22,7 +22,7 @@ export async function loadOperationsData() {
     campaignsResult,
     reportsResult
   ] = await Promise.all([
-    supabase.from('suivi_des_edt').select('*').order('date_debut', { ascending: false, nullsFirst: false }),
+    supabase.from('suivi_des_edt').select('*').is('archived_at', null).order('date_debut', { ascending: false, nullsFirst: false }),
     supabase.from('bons_de_travail').select('*').order('date_cible', { ascending: true, nullsFirst: false }),
     supabase.from('requetes_clients').select('*').order('created_at', { ascending: false }),
     supabase.from('edt_phases').select('*').order('ordre', { ascending: true }),
@@ -81,6 +81,35 @@ export async function createEdt(payload) {
     p_priorite: payload.priorite || 'Normale',
     p_description: payload.description?.trim() || null
   });
+  if (error) throw error;
+  return data;
+}
+
+export async function loadEdtLifecycleData(edtId) {
+  ensureSupabase();
+  const id = Number(edtId);
+  const [edtResult, phasesResult, reportsResult, historyResult] = await Promise.all([
+    supabase.from('suivi_des_edt').select('*').eq('id', id).single(),
+    supabase.from('edt_phases').select('*').eq('edt_id', id).order('ordre', { ascending: true }),
+    supabase.from('edt_phase_reports').select('*').eq('edt_id', id).order('version', { ascending: false }),
+    supabase.from('operations_history').select('*').eq('entity_type', 'edt_lifecycle').eq('entity_id', String(id)).order('created_at', { ascending: false }).limit(50)
+  ]);
+  for (const result of [edtResult, phasesResult, reportsResult, historyResult]) {
+    if (result.error) throw result.error;
+  }
+  return { edt: edtResult.data, phases: phasesResult.data || [], phaseReports: reportsResult.data || [], history: historyResult.data || [] };
+}
+
+export async function inspectEdtDeletion(edtId) {
+  ensureSupabase();
+  const { data, error } = await supabase.rpc('edt_deletion_impact_v133', { p_edt_id: Number(edtId) });
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteOrArchiveEdt(edtId) {
+  ensureSupabase();
+  const { data, error } = await supabase.rpc('delete_or_archive_edt_v133', { p_edt_id: Number(edtId) });
   if (error) throw error;
   return data;
 }

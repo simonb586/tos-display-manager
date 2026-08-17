@@ -19,6 +19,14 @@ alter table public.campagne_visuels_formats
 create index if not exists campagne_visuels_formats_phase_v133_idx
   on public.campagne_visuels_formats(edt_phase_id) where edt_phase_id is not null;
 
+-- Archivage explicite: les EDT avec historique quittent les listes actives sans perdre leurs liens.
+alter table public.suivi_des_edt
+  add column if not exists archived_at timestamptz,
+  add column if not exists archived_by uuid,
+  add column if not exists archive_reason text;
+create index if not exists suivi_des_edt_active_v133_idx
+  on public.suivi_des_edt(updated_at desc) where archived_at is null;
+
 -- Un seul BT produit par phase par ce workflow.
 alter table public.bons_de_travail add column if not exists phase_conversion_v133 boolean not null default false;
 create unique index if not exists bons_de_travail_phase_v133_uq
@@ -131,15 +139,61 @@ begin
  return jsonb_build_object('request_id',r.id,'support_count',cardinality(v_allowed));
 end $$;
 
+-- Inventaire serveur commun a la confirmation et a la decision transactionnelle.
+create or replace function public.edt_deletion_impact_v133(p_edt_id bigint)
+returns jsonb language plpgsql stable security definer set search_path=public,pg_temp as $$
+declare e public.suivi_des_edt%rowtype;v_phases bigint;v_supports bigint;v_bt bigint;v_reports bigint;v_emails bigint;v_history bigint;v_completed bigint;v_visuals bigint;v_decision text;
+begin
+ if auth.uid() is null or public.current_app_role()<>'Administrateur' then raise exception 'permission_denied' using errcode='42501';end if;
+ select * into e from public.suivi_des_edt where id=p_edt_id;if not found then raise exception 'edt_not_found';end if;
+ select count(*) into v_phases from public.edt_phases where edt_id=e.id;
+ select count(*) into v_supports from public.edt_supports where edt_id=e.id;
+ select count(*) into v_bt from public.bons_de_travail where edt_id=e.id or no_edt=e.no_edt;
+ select (select count(*) from public.edt_reports where edt_id=e.id)+(select count(*) from public.edt_phase_reports where edt_id=e.id) into v_reports;
+ select (select count(*) from public.email_outbox where edt_id=e.id)+(select count(*) from public.email_delivery_log where edt_id=e.id) into v_emails;
+ select (select count(*) from public.operations_history where entity_id=e.id::text or entity_reference=e.no_edt)+(select count(*) from public.activity_events where edt_id=e.id::text or (entity_type='suivi_des_edt' and entity_id=e.id::text)) into v_history;
+ select count(*) into v_completed from public.edt_phases where edt_id=e.id and (closed_at is not null or progression>=100 or lower(statut) like 'termin%' or lower(statut) like 'ferm%');
+ select count(*) into v_visuals from public.campagne_visuels_formats where edt_phase_id in(select id from public.edt_phases where edt_id=e.id);
+ v_decision:=case when v_bt+v_reports+v_emails+v_history+v_completed=0 then 'deleted' else 'archived' end;
+ return jsonb_build_object('edt_id',e.id,'no_edt',e.no_edt,'client',e.client,'campagne',e.campagne,'phase_count',v_phases,'support_count',v_supports,'work_order_count',v_bt,'report_count',v_reports,'email_count',v_emails,'history_count',v_history,'completed_phase_count',v_completed,'visual_count',v_visuals,'decision',v_decision);
+end $$;
+
+-- Suppression physique limitee aux dependances techniques vierges; sinon archivage idempotent.
+create or replace function public.delete_or_archive_edt_v133(p_edt_id bigint)
+returns jsonb language plpgsql security definer set search_path=public,pg_temp as $$
+declare e public.suivi_des_edt%rowtype;impact jsonb;v_result text;
+begin
+ if auth.uid() is null or public.current_app_role()<>'Administrateur' then raise exception 'permission_denied' using errcode='42501';end if;
+ select * into e from public.suivi_des_edt where id=p_edt_id for update;if not found then raise exception 'edt_not_found';end if;
+ if e.archived_at is not null then return jsonb_build_object('result','archived','message','Cet EDT est deja archive.');end if;
+ impact:=public.edt_deletion_impact_v133(e.id);v_result:=impact->>'decision';
+ if v_result='deleted' then
+   update public.campagne_visuels_formats set edt_phase_id=null where edt_phase_id in(select id from public.edt_phases where edt_id=e.id);
+   delete from public.edt_supports where edt_id=e.id;
+   delete from public.edt_assignments where edt_id=e.id;
+   delete from public.edt_phases where edt_id=e.id;
+   delete from public.suivi_des_edt where id=e.id;
+   return jsonb_build_object('result','deleted','message','EDT supprime definitivement.','impact',impact);
+ end if;
+ update public.suivi_des_edt set archived_at=now(),archived_by=auth.uid(),archive_reason='Suppression demandee; historique operationnel preserve',statut='Annule',lifecycle_status='annule',updated_at=now() where id=e.id;
+ insert into public.operations_history(entity_type,entity_id,entity_reference,action,old_data,new_data,details,user_id)
+ values('suivi_des_edt',e.id::text,e.no_edt,'ARCHIVAGE_EDT',to_jsonb(e),(select to_jsonb(x) from public.suivi_des_edt x where x.id=e.id),'Suppression logique V1.3.3: historique protege.',auth.uid());
+ return jsonb_build_object('result','archived','message','EDT archive; rapports et operations preserves.','impact',impact);
+end $$;
+
 revoke all on function public.creer_edt_v133(bigint,text,date,boolean,date,text,text,text) from public,anon;
 revoke all on function public.creer_phase_retrait_v133(bigint,date) from public,anon;
 revoke all on function public.convertir_phase_en_bt_v133(bigint) from public,anon;
 revoke all on function public.creer_requete_client_multi_supports_v133(text,text,text,text[]) from public,anon;
 revoke all on function public.source_rapport_phase_v133(bigint) from public,anon;
+revoke all on function public.edt_deletion_impact_v133(bigint) from public,anon;
+revoke all on function public.delete_or_archive_edt_v133(bigint) from public,anon;
 grant execute on function public.creer_edt_v133(bigint,text,date,boolean,date,text,text,text) to authenticated;
 grant execute on function public.creer_phase_retrait_v133(bigint,date) to authenticated;
 grant execute on function public.convertir_phase_en_bt_v133(bigint) to authenticated;
 grant execute on function public.creer_requete_client_multi_supports_v133(text,text,text,text[]) to authenticated;
 grant execute on function public.source_rapport_phase_v133(bigint) to authenticated;
+grant execute on function public.edt_deletion_impact_v133(bigint) to authenticated;
+grant execute on function public.delete_or_archive_edt_v133(bigint) to authenticated;
 
 commit;
