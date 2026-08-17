@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createServer } from 'vite';
@@ -23,6 +24,9 @@ assert.equal(changed[0].statut, 'fermee', 'Compléter Retrait ne modifie pas Ins
 assert.equal(changed[1].statut, 'terminee');
 assert.equal(isLatestLifecycleRequest(1, 2), false, 'La réponse A est ignorée après sélection B');
 assert.equal(isLatestLifecycleRequest(2, 2), true);
+
+const main = fs.readFileSync('src/main.jsx', 'utf8');
+assert.match(main, /active === 'Centre EDT et BT' \|\| active === 'Suivi des EDT'\) content = <OperationsCenter/);
 
 const vite = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'silent' });
 try {

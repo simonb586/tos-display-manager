@@ -778,7 +778,7 @@ function App() {
   else if (active === 'Utilisateurs réels') content = <UserProvisioningPanel role={role}/>;
   else if (active === 'Édition — Historique') content = <ChangeHistoryPanel role={role}/>;
   else if (active === 'Photos et inventaire') content = <PhotoInventoryCenter role={role}/>;
-  else if (active === 'Centre EDT et BT') content = <OperationsCenter role={role}/>;
+  else if (active === 'Centre EDT et BT' || active === 'Suivi des EDT') content = <OperationsCenter role={role}/>;
   else if (active === 'Diagnostic terrain') content = <TerrainSyncDiagnostics role={role}/>;
   else if (active === 'Journal des événements') content = <ActivityJournal role={role}/>;
   else if (active === 'Rapports finaux') content = <FinalReportsCenter dataStore={dataStore} role={role}/>;
