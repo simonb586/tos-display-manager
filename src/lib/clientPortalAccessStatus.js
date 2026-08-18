@@ -1,0 +1,2 @@
+export const PORTAL_ACCESS={ACTIVE:'ACTIF',PENDING:'INVITATION EN ATTENTE',READY:'À ACTIVER',INCOMPLETE:'INCOMPLET'};
+export function clientPortalAccessStatus(c={}){if(+c.active_authenticated_count>0)return PORTAL_ACCESS.ACTIVE;if(+c.pending_invitation_count>0)return PORTAL_ACCESS.PENDING;if(+c.active_member_count>0||+c.inconsistent_member_count>0)return PORTAL_ACCESS.INCOMPLETE;return PORTAL_ACCESS.READY;}

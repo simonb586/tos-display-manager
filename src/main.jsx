@@ -76,6 +76,7 @@ const ValidationCenter = lazy(() => import('./components/ValidationCenter'));
 const LegacyPhotoImporter = lazy(() => import('./components/LegacyPhotoImporter'));
 const ProductionLogin = lazy(() => import('./components/ProductionLogin'));
 const UserProvisioningPanel = lazy(() => import('./components/UserProvisioningPanel'));
+const ClientsAccessAdmin = lazy(() => import('./components/ClientsAccessAdmin'));
 const InteractiveMap = lazy(() => import('./components/InteractiveMap'));
 const RoleVisibilityAdmin = lazy(() => import('./components/RoleVisibilityAdmin'));
 const FinalReportsCenter = lazy(() => import('./components/FinalReportsCenter'));
@@ -779,6 +780,7 @@ function App() {
   else if (active === 'Administration') content = <AdminPanel role={role} currentRole={role} session={session}/>;
   else if (active === 'Gestionnaire des champs') content = <FieldCatalogManager role={role}/>;
   else if (active === 'Utilisateurs réels') content = <UserProvisioningPanel role={role}/>;
+  else if (active === 'Clients') content = <ClientsAccessAdmin role={role}/>;
   else if (active === 'Édition — Historique') content = <ChangeHistoryPanel role={role}/>;
   else if (active === 'Photos et inventaire') content = <PhotoInventoryCenter role={role}/>;
   else if (active === 'Centre EDT et BT' || active === 'Suivi des EDT') content = <OperationsCenter role={role}/>;
