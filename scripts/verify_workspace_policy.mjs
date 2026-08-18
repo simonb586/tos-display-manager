@@ -1,24 +1,14 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const files = [
-  'package.json',
-  'scripts/verify_official_workspace.mjs',
-  'scripts/verify_workspace_policy.mjs',
-  'scripts/verify_terrain_issue_reporting_p0.mjs',
-  'scripts/verify_terrain_p0_regression.mjs',
-  'src/components/TerrainApp.jsx',
-  'src/features/terrain/terrain-issue-reporting-p0.css'
-];
-const forbidden = [
-  ['one', 'drive'].join(''),
-  ['tos-display-manager', 'stable'].join('-'),
-  ['c:', 'users', 'sim-0'].join('\\')
-];
+const official = 'c:\\users\\sim-0\\onedrive\\documents\\github\\tos-display-manager\\tos-display-manager-stable';
+const policy = readFileSync('WORKSPACE_POLICY.md', 'utf8').toLowerCase();
+const guard = readFileSync('scripts/verify_official_workspace.mjs', 'utf8').toLowerCase();
 
-for (const file of files) {
-  const source = readFileSync(file, 'utf8').toLowerCase();
-  for (const fragment of forbidden) assert.ok(!source.includes(fragment), `${file} dépend d’un ancien chemin interdit.`);
-}
+assert.ok(policy.includes(official), 'La politique ne désigne pas le chemin stable officiel exact.');
+assert.ok(policy.includes('c:\\dev\\tos-display-manager'), 'La politique ne classe pas C:\\dev comme ancienne copie.');
+assert.match(policy, /comparaisons|comparaison/, 'La politique doit limiter C:\\dev à la comparaison/récupération.');
+assert.ok(guard.includes(official.replaceAll('\\', '\\\\')), 'Le garde ne contient pas le chemin stable officiel exact.');
+assert.ok(!guard.includes("['one', 'drive']"), 'Le garde ne doit plus interdire OneDrive en général.');
 
-console.log(`Politique workspace : ${files.length} sources actives indépendantes de l’ancien arbre.`);
+console.log('Politique workspace : stable officiel exact; parent, C:\\dev et autres copies interdits hors CI/Vercel.');
