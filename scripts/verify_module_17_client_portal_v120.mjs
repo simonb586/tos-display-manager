@@ -32,7 +32,8 @@ assert.ok(!migration.includes("where id='terrain-photos'"),'Le bucket Terrain re
 assert.ok(!migration.toLowerCase().includes('service_role'),'Aucune clé privilégiée');
 assert.ok(!service.includes('client_id')&&!service.includes('organization_id'),'Le navigateur ne choisit jamais le périmètre');
 assert.ok(service.includes("section === 'photos' ? 50"),'Photothèque plafonnée');
-for(const label of ['Accueil','Campagnes','Communications opérationnelles','Sites et supports','Photos','Rapports','EDT / Progression','Enjeux','Historique','Mon organisation'])assert.ok(portal.includes(label),label);
+for(const label of ['Campagnes','Communications opérationnelles','Infrastructures','Photos','Rapports','EDT / Progression','Enjeux','Historique','Mon organisation','Nouvelle requête'])assert.ok(portal.includes(label)||fs.readFileSync('src/lib/clientPortalViewRegistry.js','utf8').includes(label),label);
+assert.ok(portal.includes('getCurrentUserVisibleViews'),'Navigation Module 17 pilotée par Vue par rôle');
 assert.ok(portal.includes('loading="lazy"'),'Miniatures lazy-loadées');
 assert.ok(main.includes("['Client','Client-Admin'].includes(role)"),'Portail distinct');
 assert.ok(main.includes('<ClientPortal'),'Routage client');

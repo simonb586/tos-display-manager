@@ -9,3 +9,14 @@ export async function getClientPortalIdentity() {
   if (!data?.organization_id || !isClientRole(data?.role)) throw new Error('Identité client non autorisée.');
   return Object.freeze(data);
 }
+
+export async function getCurrentUserVisibleViews() {
+  if (!supabaseConfigured || !supabase) throw new Error('Service sécurisé indisponible.');
+  const { data, error } = await supabase.rpc('current_user_visible_views_v136');
+  if (error) throw error;
+  return Object.freeze({
+    role: data?.role || null,
+    client_id: data?.client_id || null,
+    visible_tables: Array.isArray(data?.visible_tables) ? data.visible_tables : []
+  });
+}

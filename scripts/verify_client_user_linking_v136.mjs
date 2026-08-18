@@ -1,0 +1,14 @@
+import assert from'node:assert/strict';
+import fs from'node:fs';
+const sql=fs.readFileSync('supabase/V1_3_6_CLIENT_ROLE_VIEWS_USER_LINKING_PREPARED.sql','utf8');
+const ui=fs.readFileSync('src/components/ClientsAccessAdmin.jsx','utf8');
+const service=fs.readFileSync('src/services/clientAccessAdminService.js','utf8');
+for(const fn of ['admin_link_user_to_client_v136','admin_unlink_user_from_client_v136','admin_transfer_user_client_v136','admin_change_client_user_role_v136','admin_search_client_users_v136'])assert.ok(sql.includes(fn),fn);
+for(const event of ['USER_LINKED_TO_CLIENT','USER_UNLINKED_FROM_CLIENT','USER_TRANSFERRED_CLIENT','CLIENT_USER_ROLE_CHANGED'])assert.ok(sql.includes(event),event);
+for(const marker of ["p_role not in('Client','Client-Admin')","role='Administrateur'",'user_already_linked_use_transfer','delete from public.client_campaign_access','set client_id=null','auth_user_id'])assert.ok(sql.includes(marker),marker);
+assert.ok(!/delete from public\.utilisateurs|delete from auth\.users/.test(sql),'compte et profil non supprimés');
+assert.match(sql,/security definer set search_path=''/);
+assert.match(sql,/revoke all on function public\.admin_link_user_to_client_v136\(bigint,bigint,text\)from public,anon/);
+for(const label of ['Rattacher un utilisateur','Modifier le rôle','Détacher','Transférer vers','Client-Admin'])assert.ok(ui.includes(label),label);
+for(const call of ['linkUserToClient','unlinkUserFromClient','transferUserClient','changeClientUserRole','inviteClientUser'])assert.ok(service.includes(call),call);
+console.log('V1.3.6 rattachement : N utilisateurs/client, rôles Client et Client-Admin, transfert, détachement, invitations et audit validés.');

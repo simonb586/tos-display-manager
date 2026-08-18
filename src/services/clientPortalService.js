@@ -1,7 +1,7 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
 import { getSignedPhotoUrls } from './photoAccessService';
 
-const ALLOWED_SECTIONS = new Set(['dashboard','campaigns','communications','supports','photos','reports','edt','issues','history','members']);
+const ALLOWED_SECTIONS = new Set(['campaigns','communications','supports','photos','reports','edt','issues','history','members']);
 const clampSize = (section, size) => Math.min(section === 'photos' ? 50 : 100, Math.max(1, Number(size) || 25));
 const rpc = async (name, args = {}) => {
   if (!supabaseConfigured || !supabase) throw new Error('Service sécurisé indisponible.');
