@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const sql=fs.readFileSync('supabase/V1_3_4_2_TERRAIN_SECURITY_CONTEXT_PREPARED.sql','utf8').toLowerCase(),service=fs.readFileSync('src/services/terrainService.js','utf8'),ui=fs.readFileSync('src/components/TerrainApp.jsx','utf8');
+let checks=0;const ok=(value,message)=>{assert.ok(value,message);checks++};
+const contexts=[{phase_id:11,edt_id:1,support_id:'S-1',phase_type:'installation',client_id:7},{phase_id:12,edt_id:1,support_id:'S-1',phase_type:'retrait',client_id:7},{phase_id:21,edt_id:2,support_id:'S-1',phase_type:'installation',client_id:8},{phase_id:31,edt_id:3,support_id:'S-2',phase_type:'installation',client_id:7}];
+const accepts=(support,phase,client)=>contexts.some(x=>x.support_id===support&&x.phase_id===phase&&x.client_id===client);
+assert.equal(accepts('S-1',11,7),true);checks++;assert.equal(accepts('S-1',12,7),true);checks++;assert.notEqual(11,12);checks++;assert.equal(accepts('S-1',21,7),false);checks++;assert.equal(accepts('S-1',999,7),false);checks++;assert.equal(accepts('S-2',11,7),false);checks++;
+ok(sql.includes('add column if not exists edt_phase_id bigint references public.edt_phases(id) on delete restrict'),'FK phase absente.');
+ok(!sql.includes('add column if not exists edt_id'),'edt_id dupliqué inutilement.');ok(!sql.includes('add column if not exists client_id'),'client_id dupliqué inutilement.');
+ok(sql.includes('having count(distinct phase_id)=1'),'Backfill non déterministe.');ok(sql.includes('where e.edt_phase_id is null'),'Historique NULL non préservé.');
+ok(sql.includes("if lower(trim(p_action))='enjeu' and p_edt_phase_id is null"),'Phase enjeu non obligatoire.');
+ok(service.includes("supabase.rpc('finaliser_intervention_terrain_v1342'")&&service.includes('p_edt_phase_id'),'Service sans phase V1.3.4.2.');
+ok(ui.includes('contexts.length === 1')&&ui.includes('Contexte EDT / phase'),'Sélection automatique/ambiguë absente.');
+console.log(`V1.3.4.2 contexte enjeu : ${checks} scénarios et contrôles réussis.`);

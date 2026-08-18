@@ -53,6 +53,15 @@ export async function uploadTerrainPhoto(file, supportId, action = 'inspection',
 
 export { rollbackUploadedPhoto };
 
+export async function listTerrainIssueContexts(supportId) {
+  if (!supabaseConfigured || !supabase) throw new Error('Supabase n’est pas configuré.');
+  const { data, error } = await supabase.rpc('lister_contextes_terrain_v1342', {
+    p_support_id: String(supportId)
+  });
+  if (error) throw error;
+  return Array.isArray(data) ? data : [];
+}
+
 
 export async function registerTerrainSupportPhoto({
   supportId,
@@ -206,6 +215,7 @@ export async function finalizeTerrainInstallation({
 
 export async function finalizeTerrainIntervention({
   supportId,
+  phaseId = null,
   action,
   issueType = '',
   comments = '',
@@ -219,8 +229,9 @@ export async function finalizeTerrainIntervention({
   }
 
   const reference = `TERRAIN-${String(action).toUpperCase()}-${String(supportId)}-${String(storagePath)}`;
-  const { data, error } = await supabase.rpc('finaliser_intervention_terrain_v01273', {
+  const { data, error } = await supabase.rpc('finaliser_intervention_terrain_v1342', {
     p_support_id: String(supportId),
+    p_edt_phase_id: phaseId === null ? null : Number(phaseId),
     p_action: String(action),
     p_type_enjeu: issueType || null,
     p_commentaires: comments || null,

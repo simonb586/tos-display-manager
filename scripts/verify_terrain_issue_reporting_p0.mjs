@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+const read = file => readFileSync(file, 'utf8');
+const component = read('src/components/TerrainApp.jsx');
+const service = read('src/services/terrainService.js');
+const css = read('src/features/terrain/terrain-issue-reporting-p0.css');
+const main = read('src/main.jsx');
+let checks = 0;
+const match = (value, pattern, message) => { assert.match(value, pattern, message); checks += 1; };
+
+match(main, /active === 'Application terrain'[\s\S]*<TerrainApp/, 'TerrainApp doit être réellement monté.');
+match(component, /fileInputRef\.current\?\.click\(\)/, 'Ouverture explicite de l’input absente.');
+match(component, /type="file" accept="image\/\*"/, 'Contrat mobile image absent.');
+match(component, /type="button" className="terrain-photo"/, 'Le bouton photo ne doit pas soumettre.');
+match(component, /Photo prête à enregistrer/, 'Aperçu prêt absent.');
+match(component, /> Remplacer</, 'Remplacement absent.');
+match(component, /> Retirer</, 'Retrait absent.');
+match(component, /type="submit" className="terrain-save"/, 'Submit Terminer absent.');
+match(component, /submittingRef\.current/, 'Protection double clic absente.');
+match(component, /aria-busy=\{busy\}/, 'État async inaccessible.');
+match(component, /role=\{messageType === 'error' \? 'alert' : 'status'\}/, 'Erreur visible absente.');
+match(component, /console\.error\('Échec de l’intervention Terrain'/, 'Journalisation absente.');
+match(component, /setSelected\(null\)/, 'Fermeture après succès absente.');
+match(service, /tos-terrain-data-updated/, 'Rafraîchissement après succès absent.');
+match(component, /selected\.support_id/, 'Contexte support absent.');
+match(component, /issueContexts[\s\S]*edt_number/, 'Contexte EDT disponible absent.');
+match(component, /issuePhaseId[\s\S]*phase_name/, 'Contexte phase disponible absent.');
+match(css, /terrain-form-footer\{position:sticky/, 'Footer sticky absent.');
+match(css, /safe-area-inset-bottom/, 'Safe-area absente.');
+assert.doesNotMatch(css, /pointer-events\s*:\s*none/i); checks += 1;
+assert.doesNotMatch(component, /capture="environment"|datetime-local|Date de prise/); checks += 1;
+console.log(`P0 Terrain enjeux : ${checks} contrôles réussis.`);
