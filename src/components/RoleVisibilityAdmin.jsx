@@ -4,6 +4,7 @@ import {
   listRoleVisibility,
   saveRoleVisibility
 } from '../services/roleVisibilityService';
+import { CLIENT_PORTAL_ROLES, isClientPortalViewSupported } from '../lib/clientPortalViewRegistry';
 
 const ROLES = ['Administrateur', 'Coordonnateur', 'Installateur', 'Client-Admin', 'Client'];
 
@@ -60,6 +61,10 @@ export default function RoleVisibilityAdmin({ dataStore, tableNames, role }) {
 
   function toggleTable(checked) {
     if (selectedRole === 'Administrateur') return;
+    if (checked && CLIENT_PORTAL_ROLES.includes(selectedRole) && !isClientPortalViewSupported(selectedTable)) {
+      setMessage('Cette vue n’est pas encore disponible dans le portail Client.');
+      return;
+    }
 
     const currentTables = (current.visible_tables || []).filter(item => item !== '*');
     const next = checked
@@ -95,6 +100,13 @@ export default function RoleVisibilityAdmin({ dataStore, tableNames, role }) {
 
   async function save() {
     try {
+      const invalid = CLIENT_PORTAL_ROLES.includes(current.role)
+        ? (current.visible_tables || []).filter(item => item !== '*' && !isClientPortalViewSupported(item))
+        : [];
+      if (invalid.length) {
+        setMessage(`Cette vue n’est pas encore disponible dans le portail Client. (${invalid.join(', ')})`);
+        return;
+      }
       const saved = await saveRoleVisibility(current);
       setPermissions(items => items.map(item => item.role === saved.role ? saved : item));
       setMessage(`Visibilité enregistrée pour le rôle ${saved.role}.`);

@@ -19,5 +19,6 @@ export const linkUserToClient = ({ userId, clientId, role }) => rpc('admin_link_
 export const unlinkUserFromClient = userId => rpc('admin_unlink_user_from_client_v136', { p_user_id: +userId });
 export const transferUserClient = ({ userId, clientId, role }) => rpc('admin_transfer_user_client_v136', { p_user_id: +userId, p_client_id: +clientId, p_role: role });
 export const changeClientUserRole = ({ userId, role }) => rpc('admin_change_client_user_role_v136', { p_user_id: +userId, p_role: role });
+export const getAdminClientPortalPreview = userId => rpc('admin_preview_client_portal_context_v1361', { p_target_user_id: +userId });
 export const inviteClientUser = (client, form) => inviteRealUser({ nom: form.nom, courriel: form.courriel, role: form.role, organisation: client.nom_client, client_id: client.client_id });
 export const inviteClientAdmin = (client, form) => inviteClientUser(client, { ...form, role: 'Client-Admin' });

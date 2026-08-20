@@ -1,7 +1,8 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
 import { getSignedPhotoUrls } from './photoAccessService';
 
-const ALLOWED_SECTIONS = new Set(['campaigns','communications','supports','photos','reports','edt','issues','history','members']);
+const ALLOWED_SECTIONS = new Set(['campaigns','communications','supports','poster_directory','information_centers','information_centers_issues','stops','vehicles_trains','photos','reports','edt','issues','history','members']);
+const V1361_SECTIONS = new Set(['poster_directory','information_centers','information_centers_issues','stops','vehicles_trains']);
 const clampSize = (section, size) => Math.min(section === 'photos' ? 50 : 100, Math.max(1, Number(size) || 25));
 const rpc = async (name, args = {}) => {
   if (!supabaseConfigured || !supabase) throw new Error('Service sécurisé indisponible.');
@@ -21,6 +22,7 @@ async function invokeInvitation(body){
 export async function listClientPortalSection(section, { page = 1, pageSize = 25, filters = {} } = {}) {
   if (!ALLOWED_SECTIONS.has(section)) throw new Error('Section client non autorisée.');
   if(section==='reports')return rpc('module15_client_edt_reports_v130',{p_page:Math.max(1,Number(page)||1),p_page_size:clampSize(section,pageSize)});
+  if(V1361_SECTIONS.has(section))return rpc('client_portal_list_v1361',{p_section:section,p_page:Math.max(1,Number(page)||1),p_page_size:clampSize(section,pageSize),p_filters:filters});
   const result = await rpc('client_portal_list_v120', {p_section:section,p_page:Math.max(1,Number(page)||1),p_page_size:clampSize(section,pageSize),p_filters:filters});
   if (section === 'photos') result.rows = await getSignedPhotoUrls(result.rows || [], { purpose:'preview' });
   return result;

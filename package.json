@@ -47,6 +47,9 @@
     "test:clients-v135": "node ./scripts/verify_clients_access_admin_v135.mjs",
     "test:client-role-views-v136": "node ./scripts/verify_client_role_views_v136.mjs",
     "test:client-user-linking-v136": "node ./scripts/verify_client_user_linking_v136.mjs",
+    "test:client-portal-view-coverage-v1361": "node ./scripts/verify_client_portal_view_coverage_v1361.mjs",
+    "test:client-portal-admin-preview-v1361": "node ./scripts/verify_client_portal_admin_preview_v1361.mjs",
+    "test:client-portal-data-scope-v1361": "node ./scripts/verify_client_portal_data_scope_v1361.mjs",
     "test:v1.1.5-activity": "node ./scripts/verify_recent_activity_v115.mjs",
     "test:module14": "node ./scripts/verify_module_14_v120.mjs",
     "test:module17": "node ./scripts/verify_module_17_client_portal_v120.mjs",
@@ -69,7 +72,7 @@
     "test:v1.2.7-ux": "node ./scripts/verify_clean_business_ui_v127.mjs",
     "test:v1.2.7-performance": "node ./scripts/verify_startup_performance_v127.mjs",
     "precheck": "node ./scripts/verify_official_workspace.mjs && npm run test:terrain-rpc-security-v1342 && npm run test:terrain-issue-context-v1342",
-    "check": "npm run test:workspace && npm run test:client-role-views-v136 && npm run test:client-user-linking-v136 && npm run test:clients-v135 && npm run test:terrain-issue-p0 && npm run test:terrain-p0-regression && npm run test:bloc13.1a && npm run test:bloc13.1a2 && npm run test:bloc13.1a30 && npm run test:bloc13.1a3 && npm run test:bloc13.1a32 && npm run test:bloc13.1a42 && npm run test:bloc13.1a43i && npm run test:bloc13.1a44 && npm run test:bloc13.1a45 && npm run test:bloc13.1a5 && npm run test:bloc13.1a6 && npm run test:bloc13.1a7 && npm run test:bloc13.1a8 && npm run test:bloc13.1a9 && npm run test:bloc13.1a10 && npm run test:bloc13.1.1 && npm run test:bloc13.1.1c1 && npm run test:preproduction-v13.1 && npm run test:deployment-v1 && npm run test:bloc13.2 && npm run test:bloc13.2-lot1 && npm run test:bloc13.2-lot2 && npm run test:bloc13.2-lot3 && npm run test:photo-p0 && npm run test:edt-p1 && npm run test:bloc13.3 && npm run test:v1.1.1 && npm run test:v1.1.2 && npm run test:v1.1.3-history && npm run test:v1.1.4-map && npm run test:v1.1.4c-terrain && npm run test:v1.1.5-activity && npm run build"
+    "check": "npm run test:workspace && npm run test:client-role-views-v136 && npm run test:client-user-linking-v136 && npm run test:client-portal-view-coverage-v1361 && npm run test:client-portal-admin-preview-v1361 && npm run test:client-portal-data-scope-v1361 && npm run test:clients-v135 && npm run test:terrain-issue-p0 && npm run test:terrain-p0-regression && npm run test:bloc13.1a && npm run test:bloc13.1a2 && npm run test:bloc13.1a30 && npm run test:bloc13.1a3 && npm run test:bloc13.1a32 && npm run test:bloc13.1a42 && npm run test:bloc13.1a43i && npm run test:bloc13.1a44 && npm run test:bloc13.1a45 && npm run test:bloc13.1a5 && npm run test:bloc13.1a6 && npm run test:bloc13.1a7 && npm run test:bloc13.1a8 && npm run test:bloc13.1a9 && npm run test:bloc13.1a10 && npm run test:bloc13.1.1 && npm run test:bloc13.1.1c1 && npm run test:preproduction-v13.1 && npm run test:deployment-v1 && npm run test:bloc13.2 && npm run test:bloc13.2-lot1 && npm run test:bloc13.2-lot2 && npm run test:bloc13.2-lot3 && npm run test:photo-p0 && npm run test:edt-p1 && npm run test:bloc13.3 && npm run test:v1.1.1 && npm run test:v1.1.2 && npm run test:v1.1.3-history && npm run test:v1.1.4-map && npm run test:v1.1.4c-terrain && npm run test:v1.1.5-activity && npm run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.52.0",

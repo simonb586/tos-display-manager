@@ -10,9 +10,10 @@ assert.deepEqual(client.views.map(x=>x.id),['infrastructures','reports'],'EXO Cl
 assert.ok(!client.views.some(x=>x.id==='campaigns'),'Campagnes retirée sans code');
 assert.equal(resolveClientPortalViews([]).views.length,0,'aucune vue par défaut');
 assert.deepEqual(resolveClientPortalViews(['Vue future']).unknown,['Vue future']);
+assert.deepEqual(resolveClientPortalViews(['Répertoire des affiches','Centres d’information','C.I. avec enjeux','Liste des arrêts','Voitures / trains']).unknown,[]);
 assert.match(portal,/getCurrentUserVisibleViews/);
 assert.match(portal,/Aucune vue n’est actuellement autorisée/);
-assert.match(portal,/VIEW_NOT_IMPLEMENTED_FOR_CLIENT_PORTAL/);
+assert.ok(!portal.includes('VIEW_NOT_IMPLEMENTED_FOR_CLIENT_PORTAL'),'ancien marqueur supprimé du portail client');
 assert.ok(!portal.includes("const sections="),'ancien routage fixe supprimé');
 assert.match(service,/rpc\('current_user_visible_views_v136'\)/);
 for(const marker of ['auth.uid()','public.role_ui_permissions','visible_tables','role=public.current_app_role()','revoke all on function public.current_user_visible_views_v136()from public,anon'])assert.ok(sql.includes(marker),marker);

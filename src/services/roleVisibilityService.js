@@ -1,6 +1,6 @@
-import { supabase, supabaseConfigured } from '../lib/supabaseClient';
+import { supabase, supabaseConfigured } from '../lib/supabaseClient.js';
 
-const DEFAULTS = {
+export const DEFAULT_ROLE_VISIBILITY = {
   Administrateur: { visible_tables: ['*'], visible_columns: {} },
   Coordonnateur: {
     visible_tables: [
@@ -49,7 +49,7 @@ const DEFAULTS = {
 };
 
 export async function getRoleVisibility(role) {
-  const fallback = DEFAULTS[role] || { visible_tables: [], visible_columns: {} };
+  const fallback = DEFAULT_ROLE_VISIBILITY[role] || { visible_tables: [], visible_columns: {} };
 
   if (!supabaseConfigured || !supabase) return fallback;
 
@@ -69,7 +69,7 @@ export async function getRoleVisibility(role) {
 
 export async function listRoleVisibility() {
   if (!supabaseConfigured || !supabase) {
-    return Object.entries(DEFAULTS).map(([role, value]) => ({ role, ...value }));
+    return Object.entries(DEFAULT_ROLE_VISIBILITY).map(([role, value]) => ({ role, ...value }));
   }
 
   const { data, error } = await supabase
