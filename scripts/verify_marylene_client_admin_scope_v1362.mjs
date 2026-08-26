@@ -1,0 +1,3 @@
+import assert from'node:assert/strict';import fs from'node:fs';const sql=fs.readFileSync('supabase/V1_3_6_2_EXO_DATA_OWNERSHIP_CLIENT_PORTAL_SCOPE_PREPARED.sql','utf8'),verifier=fs.readFileSync('supabase/VERIFIER_V1_3_6_2_EXO_DATA_OWNERSHIP_CLIENT_PORTAL_SCOPE_READ_ONLY.sql','utf8'),service=fs.readFileSync('src/services/clientAccessAdminService.js','utf8');
+for(const marker of['admin_preview_client_portal_context_v1362','role_ui_permissions','target_session_created','auth_uid_changed','ownership_counts'])assert.ok(sql.includes(marker),marker);
+assert.match(verifier,/maryleneblanchette/i);assert.match(service,/admin_preview_client_portal_context_v1362/);assert.doesNotMatch(service,/signInWithPassword|service_role/);console.log('V1.3.6.2 Marylene scope PASS.');

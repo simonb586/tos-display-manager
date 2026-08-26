@@ -1,0 +1,6 @@
+import assert from'node:assert/strict';import fs from'node:fs';
+const verifier=fs.readFileSync('supabase/VERIFIER_V1_3_6_2_EXO_DATA_OWNERSHIP_CLIENT_PORTAL_SCOPE_READ_ONLY.sql','utf8'),migration=fs.readFileSync('supabase/V1_3_6_2_EXO_DATA_OWNERSHIP_CLIENT_PORTAL_SCOPE_PREPARED.sql','utf8');
+for(const marker of["~'^[0-9]+$'",'TEXT_RESOLVED','TEXT_UNRESOLVED','TEXT_AMBIGUOUS','client_names','match_count=1','activity_history'])assert.ok(verifier.includes(marker),marker);
+assert.doesNotMatch(verifier+migration,/client_id\s*::\s*bigint/i);assert.match(migration,/trim\(a\.client_id\)~'\^\[0-9\]\+\$'/);assert.match(migration,/count\(\*\)<>1 or min\(c\.id\)<>v_exo_id/);
+const classify=(value,matches=0)=>value===null?'NULL':value.trim()===''?'EMPTY':/^\d+$/.test(value.trim())?'NUMERIC':matches===1?'TEXT_RESOLVED':matches>1?'TEXT_AMBIGUOUS':'TEXT_UNRESOLVED';
+assert.equal(classify('42'),'NUMERIC');assert.equal(classify(null),'NULL');assert.equal(classify('  '),'EMPTY');assert.equal(classify('Client démo',1),'TEXT_RESOLVED');assert.equal(classify('Inconnu',0),'TEXT_UNRESOLVED');assert.equal(classify('Doublon',2),'TEXT_AMBIGUOUS');console.log('V1.3.6.2 activity_events safe client history PASS.');

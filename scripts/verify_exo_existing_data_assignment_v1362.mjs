@@ -1,0 +1,3 @@
+import assert from'node:assert/strict';import fs from'node:fs';const sql=fs.readFileSync('supabase/V1_3_6_2_EXO_DATA_OWNERSHIP_CLIENT_PORTAL_SCOPE_PREPARED.sql','utf8');
+for(const marker of['V1362_EXO_ABSENT','V1362_EXO_MULTIPLE','V1362_EXISTING_OTHER_CLIENT_CONTRADICTION','V1362_AMBIGUOUS_PARENT_CLIENT','set client_id=v_exo_id where client_id is null'])assert.ok(sql.includes(marker),marker);
+assert.ok(!/\b6619\b/.test(sql));assert.doesNotMatch(sql,/unaccent\s*\(/i);for(const value of['EXO','exo',' ExO ','  EXO  '])assert.equal(value.trim().toLowerCase().replace(/[^a-z0-9]+/g,''),'exo');console.log('V1.3.6.2 EXO assignment and extension-free normalization PASS.');

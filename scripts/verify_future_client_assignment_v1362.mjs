@@ -1,0 +1,3 @@
+import assert from'node:assert/strict';import fs from'node:fs';const sql=fs.readFileSync('supabase/V1_3_6_2_EXO_DATA_OWNERSHIP_CLIENT_PORTAL_SCOPE_PREPARED.sql','utf8'),ui=fs.readFileSync('src/components/CampaignsPanel.jsx','utf8'),service=fs.readFileSync('src/services/campaignService.js','utf8');
+for(const marker of['require_direct_client_v1362','inherit_campaign_client_v1362','inherit_edt_client_v1362','CAMPAIGN_CLIENT_REQUIRED','EDT_CLIENT_REQUIRED'])assert.ok(sql.includes(marker),marker);
+assert.match(ui,/Client \*/);assert.match(ui,/select required/);assert.match(service,/client_id: Number\(campaign\.client_id\)/);assert.match(service,/Client obligatoire/);console.log('V1.3.6.2 future assignment PASS.');

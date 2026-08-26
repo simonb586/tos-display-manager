@@ -1,0 +1,2 @@
+import assert from'node:assert/strict';import fs from'node:fs';const sql=fs.readFileSync('supabase/V1_3_6_2_EXO_DATA_OWNERSHIP_CLIENT_PORTAL_SCOPE_PREPARED.sql','utf8');
+for(const marker of['admin_transfer_data_client_v1362','TRANSFER_CONFIRMATION_REQUIRED','TRANSFER_DEPENDENCY_CONFLICT','client_campaign_access','DATA_TRANSFERRED_CLIENT','old_client_id','new_client_id','ADMIN_REQUIRED','auth.uid()','security definer',"set search_path=''",'from public,anon'])assert.ok(sql.toLowerCase().includes(marker.toLowerCase()),marker);console.log('V1.3.6.2 transfer PASS.');

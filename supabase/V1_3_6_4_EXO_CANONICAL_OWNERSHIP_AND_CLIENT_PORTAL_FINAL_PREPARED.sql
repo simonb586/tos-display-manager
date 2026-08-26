@@ -1,0 +1,45 @@
+-- PREPARED V1.3.6.4 - appliquer une seule fois apres verifier read-only.
+begin;
+do $$ declare v_exo bigint:=2;
+begin
+ if not exists(select 1 from public.clients where id=v_exo and regexp_replace(translate(lower(trim(nom_client)),'àáâäãåçèéêëìíîïñòóôöõùúûüýÿ','aaaaaaceeeeiiiinooooouuuuyy'),'[^a-z0-9]+','','g')='exomaryleneblanchette') then raise exception 'V1364_CANONICAL_EXO_ID2_MISMATCH';end if;
+ if not exists(select 1 from public.utilisateurs where id=25 and client_id=v_exo and role='Client-Admin' and statut='Actif' and auth_user_id is not null) then raise exception 'V1364_MARYLENE_IDENTITY_MISMATCH';end if;
+ if exists(select 1 from public.campagnes_maitres where client_id is not null and client_id<>v_exo) or exists(select 1 from public.communications_finales where client_id is not null and client_id<>v_exo) or exists(select 1 from public.requetes_clients where client_id is not null and client_id<>v_exo) then raise exception 'V1364_OTHER_CLIENT_CONTRADICTION';end if;
+ if exists(select 1 from public.activity_events a where nullif(trim(a.client_id),'') is not null and regexp_replace(translate(lower(trim(a.client_id)),'àáâäãåçèéêëìíîïñòóôöõùúûüýÿ','aaaaaaceeeeiiiinooooouuuuyy'),'[^a-z0-9]+','','g') not in('1','2','clientdemo')) then raise exception 'V1364_HISTORY_UNRESOLVED';end if;
+ alter table public.infrastructures add column if not exists client_id bigint references public.clients(id) on delete restrict;
+ alter table public.campagnes_supports add column if not exists client_id bigint references public.clients(id) on delete restrict;
+ alter table public.campagne_visuels_formats add column if not exists client_id bigint references public.clients(id) on delete restrict;
+ alter table public.support_photos add column if not exists client_id bigint references public.clients(id) on delete restrict;
+ alter table public.suivi_des_edt add column if not exists client_id bigint references public.clients(id) on delete restrict;
+ alter table public.edt_phases add column if not exists client_id bigint references public.clients(id) on delete restrict;
+ alter table public.enjeux_terrain add column if not exists client_id bigint references public.clients(id) on delete restrict;
+ alter table public.bons_de_travail add column if not exists client_id bigint references public.clients(id) on delete restrict;
+ update public.clients set nom_client='EXO' where id=v_exo;
+ update public.clients set statut='Désactivé' where id=1 and statut='Actif';
+ update public.campagnes_maitres set client_id=v_exo where client_id is null;
+ update public.communications_finales set client_id=v_exo where client_id is null;
+ update public.requetes_clients set client_id=v_exo where client_id is null;
+ update public.infrastructures set client_id=v_exo where client_id is null;
+ update public.campagnes_supports set client_id=v_exo where client_id is null;
+ update public.campagne_visuels_formats set client_id=v_exo where client_id is null;
+ update public.support_photos set client_id=v_exo where client_id is null;
+ update public.suivi_des_edt set client_id=v_exo where client_id is null;
+ update public.edt_phases set client_id=v_exo where client_id is null;
+ update public.enjeux_terrain set client_id=v_exo where client_id is null;
+ update public.bons_de_travail set client_id=v_exo where client_id is null;
+ update public.activity_events set metadata=coalesce(metadata,'{}'::jsonb)||jsonb_build_object('legacy_client_id',client_id),client_id=v_exo::text where nullif(trim(client_id),'') is null or regexp_replace(translate(lower(trim(client_id)),'àáâäãåçèéêëìíîïñòóôöõùúûüýÿ','aaaaaaceeeeiiiinooooouuuuyy'),'[^a-z0-9]+','','g') in('1','clientdemo');
+end$$;
+
+create or replace function public.require_direct_client_v1364()returns trigger language plpgsql set search_path='' as $$begin if new.client_id is null then raise exception 'CLIENT_REQUIRED' using errcode='23502';end if;return new;end$$;
+create or replace function public.inherit_campaign_client_v1364()returns trigger language plpgsql set search_path='' as $$declare v bigint;begin select client_id into v from public.campagnes_maitres where id=new.campagne_id;if v is null then raise exception 'CAMPAIGN_CLIENT_REQUIRED';end if;if new.client_id is not null and new.client_id<>v then raise exception 'CROSS_CLIENT_ASSIGNMENT_DENIED';end if;new.client_id:=v;return new;end$$;
+create or replace function public.inherit_edt_client_v1364()returns trigger language plpgsql set search_path='' as $$declare v bigint;begin select client_id into v from public.suivi_des_edt where id=new.edt_id;if v is null then raise exception 'EDT_CLIENT_REQUIRED';end if;if new.client_id is not null and new.client_id<>v then raise exception 'CROSS_CLIENT_ASSIGNMENT_DENIED';end if;new.client_id:=v;return new;end$$;
+drop trigger if exists campagnes_require_client_v1364 on public.campagnes_maitres;create trigger campagnes_require_client_v1364 before insert or update of client_id on public.campagnes_maitres for each row execute function public.require_direct_client_v1364();
+drop trigger if exists infrastructures_require_client_v1364 on public.infrastructures;create trigger infrastructures_require_client_v1364 before insert or update of client_id on public.infrastructures for each row execute function public.require_direct_client_v1364();
+drop trigger if exists campagnes_supports_inherit_client_v1364 on public.campagnes_supports;create trigger campagnes_supports_inherit_client_v1364 before insert or update of campagne_id,client_id on public.campagnes_supports for each row execute function public.inherit_campaign_client_v1364();
+drop trigger if exists visuels_inherit_client_v1364 on public.campagne_visuels_formats;create trigger visuels_inherit_client_v1364 before insert or update of campagne_id,client_id on public.campagne_visuels_formats for each row execute function public.inherit_campaign_client_v1364();
+drop trigger if exists photos_inherit_client_v1364 on public.support_photos;create trigger photos_inherit_client_v1364 before insert or update of campagne_id,client_id on public.support_photos for each row when(new.campagne_id is not null) execute function public.inherit_campaign_client_v1364();
+drop trigger if exists edt_inherit_client_v1364 on public.suivi_des_edt;create trigger edt_inherit_client_v1364 before insert or update of campagne_id,client_id on public.suivi_des_edt for each row when(new.campagne_id is not null) execute function public.inherit_campaign_client_v1364();
+drop trigger if exists phases_inherit_client_v1364 on public.edt_phases;create trigger phases_inherit_client_v1364 before insert or update of edt_id,client_id on public.edt_phases for each row execute function public.inherit_edt_client_v1364();
+create index if not exists infrastructures_client_support_v1364_idx on public.infrastructures(client_id,support_id);
+create index if not exists photos_client_campaign_v1364_idx on public.support_photos(client_id,campagne_id,prise_le desc);
+commit;

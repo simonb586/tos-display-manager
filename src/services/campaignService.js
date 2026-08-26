@@ -15,6 +15,13 @@ export async function listMasterCampaigns(publishedOnly = false, businessContext
   return data || [];
 }
 
+export async function listAssignableClients() {
+  ensureSupabase();
+  const { data, error } = await supabase.from('clients').select('id,nom_client,statut').eq('statut', 'Actif').order('nom_client');
+  if (error) throw error;
+  return data || [];
+}
+
 export async function saveMasterCampaign(campaign) {
   ensureSupabase();
   const payload = {
@@ -30,9 +37,11 @@ export async function saveMasterCampaign(campaign) {
     publiee_terrain: Boolean(campaign.publiee_terrain),
     instructions_terrain: campaign.instructions_terrain?.trim() || null,
     business_context: normalizeBusinessContext(campaign.business_context || BUSINESS_CONTEXT.MARKETING),
+    client_id: Number(campaign.client_id) || null,
     updated_at: new Date().toISOString()
   };
   if (!payload.nom_campagne) throw new Error('Le nom de campagne est obligatoire.');
+  if (!payload.client_id) throw new Error('Client obligatoire : choisissez le client propriétaire.');
   const query = campaign.id
     ? supabase.from('campagnes_maitres').update(payload).eq('id', campaign.id)
     : supabase.from('campagnes_maitres').insert(payload);
