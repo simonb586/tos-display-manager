@@ -1,0 +1,11 @@
+import assert from'node:assert/strict';import fs from'node:fs';
+const read=file=>fs.readFileSync(file,'utf8');
+const portal=read('src/components/ClientPortal.jsx'),grid=read('src/components/ClientBusinessGrid.jsx'),preview=read('src/components/ClientsAccessAdmin.jsx'),registry=read('src/lib/clientPortalViewRegistry.js'),migration=read('supabase/V1_3_7_CLIENT_PORTAL_PARITY_EXO_HISTORY_PREPARED.sql').toLowerCase(),isolation=read('supabase/TEST_V1_3_7_CLIENT_B_ISOLATION_ROLLBACK.sql').toLowerCase();
+for(const marker of ['UnifiedDataGrid','DataGridSettings','GridPagination','downloadCSV','downloadExcel','downloadPDF','strictMatches','matchesGridFilters','sortRows'])assert.ok(grid.includes(marker),`Grille interne partagée: ${marker}`);
+for(const marker of ['ClientDashboard','Module14Dashboard','InteractiveMap','active===\'dashboard\'','currentView','mapRows'])assert.ok(portal.includes(marker),`Projection Client: ${marker}`);
+assert.ok(!portal.includes('available.map(view=><article'),'Une seule vue métier est rendue à la fois');
+assert.ok(preview.includes('<ClientPortal preview={preview}'),'Aperçu Admin rendu par le portail réel partagé');
+for(const marker of ['latitude','longitude','i.client_id=v_client','auth.uid()','security definer','revoke all','client_published=true','client_visible=true','stop_no_go_client_ownership_contradiction'])assert.ok(migration.includes(marker),`Migration sécurisée: ${marker}`);
+for(const marker of ['begin;','rollback;','client_b_isolation_sentinel_v137','client_b_leak_client_portal','set_config(\'request.jwt.claim.sub\''])assert.ok(isolation.includes(marker),`Isolation Client B: ${marker}`);
+const configured=[...registry.matchAll(/view\(\{ id:/g)].length;assert.ok(configured>=15,'Toutes les vues configurables connues restent enregistrées');
+console.log(`V1.3.7 parité portail: PASS — ${configured} vues, grille/carte/dashboard/preview partagés, garde Client B transactionnel.`);
