@@ -9,6 +9,7 @@ const hardening=read('supabase/migrations/20260901191556_automation_security_har
 const service=read('src/services/automationService.js');
 const ui=read('src/components/AutomationAssistant.jsx');
 const catalog=read('src/config/automationCatalog.js');
+const styles=read('src/features/v13/automation-assistant.css');
 let checks=0;
 const ok=(condition,message)=>{assert.ok(condition,message);checks+=1;};
 
@@ -41,6 +42,10 @@ const executionLogProjection=service.match(/from\('relation_execution_logs'\)[\s
 ok(executionLogProjection.split(',').includes('rule_id'),'contrat journaux: relation_execution_logs.rule_id canonique');
 ok(!executionLogProjection.split(',').includes('relation_rule_id'),'contrat journaux: relation_rule_id interdit');
 ok(!ui.includes('tdm-disabled-view-templates'),'aucun statut de vue dans localStorage');
+for(const token of ['automation-config-table','automation-engine-table','automation-views-table','automation-name-cell','automation-actions-cell','automation-mode-cell'])
+  ok(ui.includes(token),`grille UI: ${token}`);
+for(const token of ['table-layout:fixed','height:72px','vertical-align:middle','position:sticky','right:0','flex-wrap:nowrap','-webkit-line-clamp:2','overflow:auto'])
+  ok(styles.includes(token),`alignement UI: ${token}`);
 ok(catalog.includes("['paused', 'En pause']"),'statut en pause canonique');
 ok(hardening.includes('drop policy if exists relation_test_logs_authenticated_read'),'journal de test réservé aux administrateurs');
 ok(hardening.includes("alter function public.approve_automation_definition_v0131(uuid) set search_path=''"),'ancienne approbation durcie');

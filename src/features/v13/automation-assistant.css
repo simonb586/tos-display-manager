@@ -5,3 +5,41 @@
 .advanced-categories button{border:1px solid #cbd5e1;border-radius:999px;padding:8px 12px;background:#fff;color:#475569;font-weight:800}.advanced-categories button.active{border-color:#7c3aed;background:#ede9fe;color:#5b21b6}
 .template-protection-note{margin:0;padding:9px 11px;border-radius:9px;background:#f8fafc;color:#475569;font-size:12px}
 .automation-status.paused{background:#fef3c7;color:#92400e}.automation-engine-table{min-width:1750px}.automation-engine-table td:first-child{min-width:240px}.automation-engine-table td:last-child{min-width:300px}.automation-result{display:inline-flex;border-radius:999px;padding:5px 8px;background:#e2e8f0;color:#334155;font-size:11px;font-weight:900}.automation-result.Succès{background:#dcfce7;color:#166534}.automation-result.Échec,.automation-result.Bloquée{background:#fee2e2;color:#991b1b}.automation-result.Ignorée{background:#fef3c7;color:#92400e}.automation-card-actions button:disabled{cursor:not-allowed;opacity:.45}
+
+/* Grilles compactes et stables du centre Automatisations. */
+.automation-table-wrap{position:relative;max-width:100%;overflow:auto;overscroll-behavior-inline:contain}
+.automation-config-table{table-layout:fixed;width:max-content;border-collapse:separate;border-spacing:0}
+.automation-config-table th,.automation-config-table td{box-sizing:border-box;height:72px;padding:10px 12px;vertical-align:middle;white-space:normal;line-height:1.3}
+.automation-config-table th{position:sticky;top:0;z-index:3;height:48px;background:#f1f5f9;border-bottom:1px solid #cbd5e1;color:#334155;font-size:12px;font-weight:800}
+.automation-config-table tbody tr:hover td{background:#fafaff}
+.automation-name-cell{display:flex!important;min-width:0!important;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px}
+.automation-name-cell>strong{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.automation-description,.automation-protection-label{display:-webkit-box;max-width:100%;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;color:#64748b;font-size:11px;line-height:1.25}
+.automation-protection-label{color:#7c3aed;-webkit-line-clamp:1;line-clamp:1}
+.automation-status,.automation-result,.tos-template-badge{box-sizing:border-box;min-height:24px;padding:4px 8px;align-items:center;justify-content:center;border-radius:999px;font-size:11px;line-height:1;font-weight:900;white-space:nowrap}
+.automation-actions-cell{position:sticky;right:0;z-index:2;background:#fff;box-shadow:-8px 0 12px -12px rgba(15,23,42,.55)}
+.automation-config-table th:last-child{right:0;z-index:4;box-shadow:-8px 0 12px -12px rgba(15,23,42,.55)}
+.automation-card-actions{flex-wrap:nowrap;align-items:center;white-space:nowrap}
+.automation-card-actions button{flex:0 0 auto;min-height:32px;padding:6px 8px;white-space:nowrap}
+.automation-card-actions button svg{width:15px;height:15px}
+.automation-mode-cell{text-align:center}
+.automation-engine-table{min-width:2020px}
+.automation-engine-table th:nth-child(1),.automation-engine-table td:nth-child(1){width:250px}
+.automation-engine-table th:nth-child(2),.automation-engine-table td:nth-child(2){width:120px}
+.automation-engine-table th:nth-child(3),.automation-engine-table td:nth-child(3){width:125px}
+.automation-engine-table th:nth-child(4),.automation-engine-table td:nth-child(4){width:145px}
+.automation-engine-table th:nth-child(5),.automation-engine-table td:nth-child(5){width:190px}
+.automation-engine-table th:nth-child(6),.automation-engine-table td:nth-child(6){width:135px}
+.automation-engine-table th:nth-child(7),.automation-engine-table td:nth-child(7){width:180px}
+.automation-engine-table th:nth-child(8),.automation-engine-table td:nth-child(8){width:165px}
+.automation-engine-table th:nth-child(9),.automation-engine-table td:nth-child(9){width:135px}
+.automation-engine-table th:nth-child(10),.automation-engine-table td:nth-child(10){width:575px}
+.automation-views-table{min-width:1500px}
+.automation-views-table th:nth-child(1),.automation-views-table td:nth-child(1){width:270px}
+.automation-views-table th:nth-child(2),.automation-views-table td:nth-child(2){width:205px}
+.automation-views-table th:nth-child(3),.automation-views-table td:nth-child(3){width:210px}
+.automation-views-table th:nth-child(4),.automation-views-table td:nth-child(4){width:105px;text-align:center}
+.automation-views-table th:nth-child(5),.automation-views-table td:nth-child(5){width:140px;text-align:center}
+.automation-views-table th:nth-child(6),.automation-views-table td:nth-child(6){width:115px}
+.automation-views-table th:nth-child(7),.automation-views-table td:nth-child(7){width:455px}
+@media(max-width:1100px){.automation-page{padding:16px}.automation-config-table th,.automation-config-table td{padding:9px 10px}.automation-table-wrap{border-radius:12px}}
