@@ -24,7 +24,7 @@ export async function listAutomationEngineState() {
     supabase.from('automation_bindings').select('*').order('id'),
     supabase.from('automation_resource_states').select('*').order('display_name'),
     supabase.from('relation_execution_logs')
-      .select('id,automation_definition_id,relation_rule_id,trigger_type,source_table,source_id,target_table,status,message,started_at,finished_at,error_message,correlation_id,execution_depth,created_at')
+      .select('id,automation_definition_id,rule_id,trigger_type,source_table,source_id,target_table,status,message,started_at,finished_at,error_message,correlation_id,execution_depth,created_at')
       .not('automation_definition_id', 'is', null).order('created_at', { ascending: false }).limit(100)
   ]);
   const error = bindingsResult.error || resourcesResult.error || logsResult.error;

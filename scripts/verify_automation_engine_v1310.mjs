@@ -37,6 +37,9 @@ for(const token of ['listAutomationEngineState','setAutomationStatus','setAutoma
   ok(service.includes(token),`service: ${token}`);
 for(const token of ['Statut modèle','Statut relation','État destination','Dernière exécution','Dernier résultat','Tester','Mettre en pause'])
   ok(ui.includes(token),`UI: ${token}`);
+const executionLogProjection=service.match(/from\('relation_execution_logs'\)[\s\S]*?\.select\('([^']+)'\)/)?.[1] || '';
+ok(executionLogProjection.split(',').includes('rule_id'),'contrat journaux: relation_execution_logs.rule_id canonique');
+ok(!executionLogProjection.split(',').includes('relation_rule_id'),'contrat journaux: relation_rule_id interdit');
 ok(!ui.includes('tdm-disabled-view-templates'),'aucun statut de vue dans localStorage');
 ok(catalog.includes("['paused', 'En pause']"),'statut en pause canonique');
 ok(hardening.includes('drop policy if exists relation_test_logs_authenticated_read'),'journal de test réservé aux administrateurs');

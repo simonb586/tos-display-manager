@@ -71,7 +71,7 @@ async function loadTableUncached(tableName, fallbackData = []) {
 export async function loadManyTables(tableConfig) {
   const entries = await Promise.all(
     Object.entries(tableConfig).map(async ([label, cfg]) => {
-      const result = await loadTable(cfg.table, cfg.fallback);
+      const result = cfg.loader ? await cfg.loader() : await loadTable(cfg.table, cfg.fallback);
       return [label, { ...cfg, ...result }];
     })
   );

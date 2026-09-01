@@ -50,6 +50,7 @@ import GridPagination from './components/GridPagination';
 import { defaultSortColumnForTable } from './lib/gridPresentation';
 import { defaultSortForColumn } from './lib/gridSorting';
 import { clearTableCache, loadManyTables, loadTable } from './services/dataService';
+import { loadInternalIssues } from './services/internalIssuesService';
 import { loadTerrainSyncStatus } from './services/terrainSyncStatus';
 
 import SupportPhotoGallery from './components/SupportPhotoGallery';
@@ -103,7 +104,7 @@ const tableConfig = {
   Infrastructures: { table: 'infrastructures', fallback: () => import('./data/infrastructures.json').then(module => module.default), idField: 'support_id', labelField: 'emplacement_visibilite' },
   'Répertoire des affiches': { table: 'repertoire_des_affiches', fallback: () => import('./data/repertoire_des_affiches.json').then(module => module.default) },
   'Communications opérationnelles': { table: 'communications_operationnelles', fallback: () => import('./data/communications_operationnelles.json').then(module => module.default) },
-  'Enjeux des cadres et supports': { table: 'enjeux_terrain', fallback: () => import('./data/enjeux_des_cadres_et_supports.json').then(module => module.default) },
+  'Enjeux des cadres et supports': { table: 'enjeux_des_cadres_et_supports', loader: loadInternalIssues, cacheTables: ['enjeux_des_cadres_et_supports','enjeux_terrain'], readOnly: true, fallback: () => import('./data/enjeux_des_cadres_et_supports.json').then(module => module.default) },
   "Centres d’information": { table: 'centres_dinformation', fallback: () => import('./data/centres_dinformation.json').then(module => module.default) },
   'C.I. avec enjeux': { table: 'ci_avec_enjeux', fallback: () => import('./data/c_i_avec_enjeux.json').then(module => module.default) },
   'Liste des arrêts': { table: 'liste_des_arrets', fallback: () => import('./data/liste_des_arrets.json').then(module => module.default), idField: 'no_arret', labelField: 'emplacement_visibilite' },
@@ -326,7 +327,7 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   const shown = sorted.slice((currentPage-1)*pageSize,currentPage*pageSize);
   const selectedFiltered = sorted.filter((row,index)=>selectedRows.has(rowToken(row,index)));
   const hasMapColumn = name === 'Infrastructures';
-  const canEdit = role === 'Administrateur';
+  const canEdit = role === 'Administrateur' && !config.readOnly;
   const exportLabels = Object.fromEntries(cols.map(column=>[column,columnLabel(name,column)]));
   const exportOptions = {moduleName:name,labels:exportLabels,filters:{recherche:query,...Object.fromEntries(Object.entries(filters).map(([key,value])=>[key,value.join(' | ')]))},sortState};
   const activeFilterCount = Object.values(filters).filter(value => value?.length).length;
@@ -575,7 +576,7 @@ function App() {
     if (!session) return null;
     try {
       const selectedConfig = Object.fromEntries(labels.filter(label => tableConfig[label]).map(label => [label, tableConfig[label]]));
-      if (force) clearTableCache(Object.values(selectedConfig).map(config => config.table));
+      if (force) clearTableCache(Object.values(selectedConfig).flatMap(config => config.cacheTables || [config.table]));
       const ds = await loadManyTables(selectedConfig);
       setDataStore(current => ({ ...(current || {}), ...ds }));
       return ds;
@@ -614,6 +615,8 @@ function App() {
       .channel(`tos-terrain-live-sync-${session.user.id}`)
       .on('postgres_changes',{event:'*',schema:'public',table:'infrastructures'},refresh)
       .on('postgres_changes',{event:'*',schema:'public',table:'support_photos'},refresh)
+      .on('postgres_changes',{event:'*',schema:'public',table:'enjeux_des_cadres_et_supports'},refresh)
+      .on('postgres_changes',{event:'*',schema:'public',table:'enjeux_terrain'},refresh)
       .subscribe();
     return () => {window.removeEventListener('tos-terrain-data-updated',refresh);supabase.removeChannel(channel);};
   }, [session?.user?.id, dataStore]);
@@ -802,7 +805,7 @@ function App() {
 
   let content;
   if (active === 'Tableau de bord') content = ['Administrateur','Coordonnateur'].includes(role)?<Module14Dashboard dataStore={dataStore} onNavigate={setActive} terrainSyncStatus={terrainSyncStatus} role={role} permission={rolePermission}/>:<Dashboard setActive={setActive} dataStore={dataStore}/>;
-  else if (active === 'Exports') { const extra=['Administrateur','Coordonnateur'].includes(role)?[{id:'campagnes_maitres',label:'Campagnes'},{id:'campagne_visuels_formats',label:'Visuels'},{id:'edt_phases',label:'Phases EDT'},{id:'activity_events',label:'Historique'}]:[]; const domains=[...visibleManifestTables.map(label=>({id:tableConfig[label]?.table||label,label})),...extra]; content=<ExportsCenter domains={[...new Map(domains.map(domain=>[domain.id,domain])).values()]} loadRows={async domain=>{const config=tableConfig[domain.label];return(await loadTable(domain.id,config?.fallback||[])).rows}}/>; }
+  else if (active === 'Exports') { const extra=['Administrateur','Coordonnateur'].includes(role)?[{id:'campagnes_maitres',label:'Campagnes'},{id:'campagne_visuels_formats',label:'Visuels'},{id:'edt_phases',label:'Phases EDT'},{id:'activity_events',label:'Historique'}]:[]; const domains=[...visibleManifestTables.map(label=>({id:tableConfig[label]?.table||label,label})),...extra]; content=<ExportsCenter domains={[...new Map(domains.map(domain=>[domain.id,domain])).values()]} loadRows={async domain=>{const config=tableConfig[domain.label];return(config?.loader?await config.loader():await loadTable(domain.id,config?.fallback||[])).rows}}/>; }
   else if (active === 'Centre de commandement') content = <OperationalCommandCenter dataStore={dataStore} onNavigate={setActive}/>;
   else if (active === 'Connexion') content = <LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>;
   else if (active === 'Administration') content = <AdminPanel role={role} currentRole={role} session={session}/>;
