@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle, Bot, CheckCircle2, Copy, Edit3, Eye, FileClock, Filter,
-  Link2, LoaderCircle, Plus, Power, Save, Search, Settings2, ShieldCheck,
+  Link2, LoaderCircle, PauseCircle, Play, Plus, Power, Save, Search, Settings2, ShieldCheck,
   Trash2, X
 } from 'lucide-react';
 import RelationsStudio from './RelationsStudio';
@@ -9,7 +9,9 @@ import TerrainSyncDiagnostics from './TerrainSyncDiagnostics';
 import ValidationCenter from './ValidationCenter';
 import {
   approveAutomationDefinition, deactivateAutomationDefinition, deleteAutomationDefinition,
-  duplicateAutomationDefinition, listAutomationDefinitions, saveAutomationDefinition
+  duplicateAutomationDefinition, listAutomationDefinitions, listAutomationEngineState,
+  saveAutomationDefinition, setAutomationBindingStatus, setAutomationResourceStatus,
+  setAutomationStatus, testAutomationDefinition
 } from '../services/automationService';
 import {
   deleteCrossModuleView, listCrossModuleViews, saveCrossModuleView, setCrossModuleViewStatus
@@ -88,24 +90,40 @@ function AutomationForm({ initial, onCancel, onSaved }) {
   </form>;
 }
 
-function AutomationsTab({ rows, busy, reload }) {
+function AutomationsTab({ rows, engine, busy, reload }) {
   const [query,setQuery]=useState(''); const [status,setStatus]=useState('all');
   const [editing,setEditing]=useState(null); const [preview,setPreview]=useState(null);
   const [message,setMessage]=useState(''); const [history,setHistory]=useState(null);
-  const allRows=useMemo(()=>(rows||[]).map(item=>({...item,isSystemTemplate:item.definition?.system_template===true})),[rows]);
+  const bindings=engine?.bindings||[];const resources=engine?.resources||[];const logs=engine?.logs||[];
+  const allRows=useMemo(()=>(rows||[]).map(item=>{
+    const binding=bindings.find(value=>value.automation_definition_id===item.id);
+    const resource=binding&&resources.find(value=>value.resource_type==='module'&&value.resource_key===binding.target_resource_key&&!value.client_id);
+    const lastExecution=logs.find(value=>value.automation_definition_id===item.id);
+    return {...item,isSystemTemplate:item.definition?.system_template===true,binding,resource,lastExecution};
+  }),[rows,bindings,resources,logs]);
   const filtered=allRows.filter(item=>(status==='all'||item.status===status)&&`${item.name} ${item.description||item.definition?.description||''}`.toLowerCase().includes(query.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name,'fr-CA',{numeric:true,sensitivity:'base'}));
 
   async function action(type,item) {
+    try {
     if (item.isSystemTemplate) {
       if (type==='duplicate') setEditing({...structuredClone(item),id:undefined,isSystemTemplate:false,name:`${item.name} — copie`,status:'draft'});
-      if (type==='deactivate-template') await deactivateAutomationDefinition(item.id);
+      if (type==='deactivate-template') await setAutomationStatus(item.id,'inactive');
       if (type==='activate-template') await approveAutomationDefinition(item.id);
-      if (['deactivate-template','activate-template'].includes(type)) { await reload(); setMessage('État canonique mis à jour.'); }
+      if (type==='pause-template') await setAutomationStatus(item.id,'paused');
+      if (type==='binding-active') await setAutomationBindingStatus(item.binding.id,'active');
+      if (type==='binding-paused') await setAutomationBindingStatus(item.binding.id,'paused');
+      if (type==='binding-inactive') await setAutomationBindingStatus(item.binding.id,'inactive');
+      if (type==='resource-active') await setAutomationResourceStatus(item.resource.id,'active');
+      if (type==='resource-inactive') await setAutomationResourceStatus(item.resource.id,'inactive');
+      if (type==='test') {
+        const result=await testAutomationDefinition(item.id,{source:'automation-ui-v1310'});
+        setMessage(`Simulation terminée : ${result.bindings?.length||0} relation(s), aucun effet métier permanent.`);
+      }
+      if (!['duplicate'].includes(type)) { await reload(); if(type!=='test')setMessage('État persistant mis à jour.'); }
       return;
     }
     if (type==='delete'&&!window.confirm('Voulez-vous supprimer cette configuration?\n\nCette action retirera la configuration, mais ne supprimera pas les données déjà enregistrées dans les autres modules.')) return;
     if (type==='approve'&&!window.confirm(`Activer « ${item.name} »?`)) return;
-    try {
       if(type==='duplicate') await duplicateAutomationDefinition(item);
       if(type==='approve') await approveAutomationDefinition(item.id);
       if(type==='deactivate') await deactivateAutomationDefinition(item.id);
@@ -120,15 +138,20 @@ function AutomationsTab({ rows, busy, reload }) {
       <label className="configuration-filter"><Filter size={16}/><select value={status} onChange={e=>setStatus(e.target.value)}><option value="all">Tous les états</option>{automationStatuses.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></label>
       <button onClick={()=>setEditing(emptyAutomation())}><Plus/> Nouvelle automatisation</button>
     </div>
-    <div className="automation-safety-note"><ShieldCheck/><div><strong>Configuration prête</strong><span>Les {allRows.filter(item=>item.isSystemTemplate&&item.status==='active').length} modèles TOS actifs proviennent de la configuration persistée. Aucun moteur d’exécution automatique n’est installé.</span></div></div>
+    <div className="automation-safety-note"><ShieldCheck/><div><strong>Moteur d’exécution</strong><span>{allRows.filter(item=>item.binding&&item.status==='active').length} modèles actifs sont reliés à un événement métier. Configuration active et exécution restent deux états distincts.</span></div></div>
     {message&&<div className="automation-message">{message}</div>}
     {editing?<AutomationForm initial={editing} onCancel={()=>setEditing(null)} onSaved={()=>{setEditing(null);reload();}}/>:
-      <div className="automation-grid">{filtered.map(item=><article className="automation-card" key={item.id}>
-        <div className="automation-card-head"><div><TemplateBadge visible={item.isSystemTemplate}/><h3>{item.name}</h3><p>{item.description||item.definition?.description||'Configuration métier'}</p></div><span className={`automation-status ${item.status}`}>{labelFor(automationStatuses,item.status)}</span></div>
-        <dl><div><dt>{UI_LABELS.trigger}</dt><dd>{(item.definition?.triggers||[]).map(v=>labelFor(automationTriggers,v)).join(', ')||'—'}</dd></div><div><dt>Modules concernés</dt><dd>{(item.definition?.targets||[]).map(v=>moduleForKey(v.module)?.[1]||'Module métier').join(', ')||'—'}</dd></div><div><dt>Priorité</dt><dd>{labelFor(automationPriorities,item.priority)}</dd></div><div><dt>Dernière modification</dt><dd>{new Date(item.updated_at).toLocaleDateString('fr-CA')}</dd></div></dl>
-        {item.isSystemTemplate&&<p className="template-protection-note">Ce modèle TOS est protégé. Vous pouvez le désactiver ou en créer une copie modifiable.</p>}
-        <div className="automation-card-actions"><button onClick={()=>setPreview(item)}><Eye/> Examiner</button>{!item.isSystemTemplate&&<button onClick={()=>setEditing(structuredClone(item))}><Edit3/> Modifier</button>}<button onClick={()=>action('duplicate',item)}><Copy/> Dupliquer</button>{item.isSystemTemplate?(item.status==='inactive'?<button onClick={()=>action('activate-template',item)}><CheckCircle2/> Réactiver</button>:<button onClick={()=>action('deactivate-template',item)}><Power/> Désactiver</button>):(item.status==='active'?<button onClick={()=>action('deactivate',item)}><Power/> Désactiver</button>:<button onClick={()=>action('approve',item)}><CheckCircle2/> Activer</button>)}{!item.isSystemTemplate&&<button onClick={()=>setHistory(item)}><FileClock/> Historique</button>}{!item.isSystemTemplate&&<button className="danger" onClick={()=>action('delete',item)}><Trash2/> Supprimer</button>}</div>
-      </article>)}</div>}
+      <div className="views-table-wrap"><table className="views-table automation-engine-table"><thead><tr><th>Nom</th><th>Statut modèle</th><th>Statut relation</th><th>Source</th><th>Destination</th><th>État destination</th><th>Déclencheur</th><th>Dernière exécution</th><th>Dernier résultat</th><th>Actions</th></tr></thead><tbody>{filtered.map(item=><tr key={item.id}>
+        <td><TemplateBadge visible={item.isSystemTemplate}/><strong>{item.name}</strong><small>{item.definition?.description||'Configuration métier'}</small>{item.isSystemTemplate&&<small>Ce modèle TOS est protégé.</small>}</td>
+        <td><span className={`automation-status ${item.status}`}>{labelFor(automationStatuses,item.status)}</span></td>
+        <td><span className={`automation-status ${item.binding?.status||'inactive'}`}>{item.binding?labelFor(automationStatuses,item.binding.status):'Non reliée'}</span></td>
+        <td>{item.binding?.source_table||'—'}</td><td>{item.resource?.display_name||item.binding?.target_resource_key||'—'}</td>
+        <td><span className={`automation-status ${item.resource?.status||'inactive'}`}>{item.resource?.status==='active'?'Active':'Désactivée'}</span></td>
+        <td>{item.binding?labelFor(automationTriggers,item.binding.trigger_type):(item.definition?.triggers||[]).map(v=>labelFor(automationTriggers,v)).join(', ')||'—'}</td>
+        <td>{item.lastExecution?new Date(item.lastExecution.created_at).toLocaleString('fr-CA'):'Jamais'}</td>
+        <td><span className={`automation-result ${item.lastExecution?.status||'none'}`}>{item.lastExecution?.status||'Aucun résultat'}</span></td>
+        <td><div className="automation-card-actions"><button onClick={()=>setPreview(item)}><Eye/> Examiner</button><button disabled={!item.binding} onClick={()=>action('test',item)}><Play/> Tester</button>{item.status==='active'?<><button onClick={()=>action('pause-template',item)}><PauseCircle/> Mettre en pause</button><button onClick={()=>action('deactivate-template',item)}><Power/> Désactiver</button></>:<button onClick={()=>action('activate-template',item)}><CheckCircle2/> Réactiver</button>}{item.binding&&<button onClick={()=>action(item.binding.status==='active'?'binding-paused':'binding-active',item)}>{item.binding.status==='active'?'Pause relation':'Réactiver relation'}</button>}{item.resource&&<button onClick={()=>action(item.resource.status==='active'?'resource-inactive':'resource-active',item)}>{item.resource.status==='active'?'Désactiver destination':'Réactiver destination'}</button>}</div></td>
+      </tr>)}</tbody></table></div>}
     {busy&&<div className="automation-loading"><LoaderCircle className="spin"/> Chargement…</div>}
     {preview&&<AutomationPreview item={preview} onClose={()=>setPreview(null)}/>}
     {history&&<div className="configuration-modal"><section><button className="automation-icon-button modal-close" onClick={()=>setHistory(null)}><X/></button><h2>Historique</h2><p><strong>{history.name}</strong></p><div className="history-entry"><FileClock/><span>Dernière modification</span><strong>{new Date(history.updated_at).toLocaleString('fr-CA')}</strong></div><p className="automation-muted">Les modifications détaillées demeurent disponibles dans le journal d’audit administratif.</p></section></div>}
@@ -167,13 +190,16 @@ function ViewForm({ initial, onCancel, onSaved }) {
   </form>;
 }
 
-function ViewsTab({ rows, busy, reload }) {
+function ViewsTab({ rows, resources, busy, reload }) {
   const [query,setQuery]=useState('');const[editing,setEditing]=useState(null);const[preview,setPreview]=useState(null);const[message,setMessage]=useState('');
-  const [disabledTemplates,setDisabledTemplates]=useState(()=>JSON.parse(localStorage.getItem('tdm-disabled-view-templates')||'[]'));
-  const allRows=useMemo(()=>mergeSystemTemplates(rows,TOS_VIEW_TEMPLATES).map(item=>item.isSystemTemplate&&disabledTemplates.includes(item.id)?{...item,status:'inactive'}:item),[rows,disabledTemplates]);
+  const viewStates=(resources||[]).filter(item=>item.resource_type==='view');
+  const allRows=useMemo(()=>mergeSystemTemplates(rows,TOS_VIEW_TEMPLATES).map(item=>{
+    const resource=item.isSystemTemplate&&viewStates.find(value=>value.resource_key===item.id);
+    return resource?{...item,status:resource.status,resource}:item;
+  }),[rows,viewStates]);
   const filtered=allRows.filter(item=>`${item.name} ${item.description}`.toLowerCase().includes(query.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name,'fr-CA',{numeric:true,sensitivity:'base'}));
   async function action(type,item){
-    if(item.isSystemTemplate){if(type==='duplicate')setEditing({...structuredClone(item),id:undefined,isSystemTemplate:false,name:`${item.name} — copie`,status:'draft'});if(type==='deactivate-template'||type==='activate-template'){const next=type==='deactivate-template'?[...new Set([...disabledTemplates,item.id])]:disabledTemplates.filter(id=>id!==item.id);setDisabledTemplates(next);localStorage.setItem('tdm-disabled-view-templates',JSON.stringify(next));setMessage(type==='deactivate-template'?'Modèle TOS désactivé pour cet espace.':'Modèle TOS réactivé en Brouillon.');}return;}
+    if(item.isSystemTemplate){if(type==='duplicate')setEditing({...structuredClone(item),id:undefined,isSystemTemplate:false,name:`${item.name} — copie`,status:'draft'});if(type==='deactivate-template'||type==='activate-template'){await setAutomationResourceStatus(item.resource.id,type==='deactivate-template'?'inactive':'active');await reload();setMessage(type==='deactivate-template'?'Vue TOS désactivée et persistée.':'Vue TOS réactivée et persistée.');}return;}
     if(type==='delete'&&!window.confirm('Voulez-vous supprimer cette configuration?\n\nCette action retirera la configuration, mais ne supprimera pas les données déjà enregistrées dans les autres modules.'))return;
     try{if(type==='duplicate')setEditing({...structuredClone(item),id:undefined,name:`${item.name} — copie`,status:'draft'});if(type==='active')await setCrossModuleViewStatus(item.id,'active');if(type==='inactive')await setCrossModuleViewStatus(item.id,'inactive');if(type==='delete')await deleteCrossModuleView(item.id);if(!['duplicate'].includes(type))await reload();}catch(error){setMessage(friendlyError(error));}
   }
@@ -195,9 +221,9 @@ function AdvancedSection({ role, onClose }) {
 
 export default function AutomationAssistant({ role }) {
   const [tab,setTab]=useState('automations');const[advanced,setAdvanced]=useState(false);
-  const [automations,setAutomations]=useState([]);const[views,setViews]=useState([]);const[busy,setBusy]=useState(true);const[message,setMessage]=useState('');
+  const [automations,setAutomations]=useState([]);const[views,setViews]=useState([]);const[engine,setEngine]=useState({bindings:[],resources:[],logs:[]});const[busy,setBusy]=useState(true);const[message,setMessage]=useState('');
   const isAdmin=role==='Administrateur';
-  async function reload(){setBusy(true);setMessage('');try{const[a,v]=await Promise.all([listAutomationDefinitions(),listCrossModuleViews()]);setAutomations(a);setViews(v);}catch(error){setMessage(friendlyError(error,'Le centre de configuration est momentanément indisponible.'));}finally{setBusy(false);}}
+  async function reload(){setBusy(true);setMessage('');try{const[a,v,e]=await Promise.all([listAutomationDefinitions(),listCrossModuleViews(),listAutomationEngineState()]);setAutomations(a);setViews(v);setEngine(e);}catch(error){setMessage(friendlyError(error,'Le centre de configuration est momentanément indisponible.'));}finally{setBusy(false);}}
   useEffect(()=>{if(isAdmin)reload();},[isAdmin]);
   if(!isAdmin)return <div className="automation-page"><div className="automation-message error">Accès réservé aux administrateurs.</div></div>;
   if(advanced)return <div className="automation-page"><AdvancedSection role={role} onClose={()=>setAdvanced(false)}/></div>;
@@ -205,6 +231,6 @@ export default function AutomationAssistant({ role }) {
     <header className="automation-hero"><div><span>Centre de configuration</span><h1><Bot/> Automatisations</h1><p>Configurez les comportements et les vues métier dans un espace clair et sécurisé.</p></div><button className="advanced-button" onClick={()=>setAdvanced(true)}><Settings2/> {UI_LABELS.advancedSection}</button></header>
     <nav className="configuration-tabs" aria-label="Sections de configuration"><button className={tab==='automations'?'active':''} onClick={()=>setTab('automations')}><Bot/> Automatisations</button><button className={tab==='views'?'active':''} onClick={()=>setTab('views')}><Link2/> Vues entre les tables</button></nav>
     {message&&<div className="automation-message error">{message}</div>}
-    {tab==='automations'?<AutomationsTab rows={automations} busy={busy} reload={reload}/>:<ViewsTab rows={views} busy={busy} reload={reload}/>}
+    {tab==='automations'?<AutomationsTab rows={automations} engine={engine} busy={busy} reload={reload}/>:<ViewsTab rows={views} resources={engine.resources} busy={busy} reload={reload}/>}
   </div>;
 }

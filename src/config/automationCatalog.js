@@ -105,6 +105,7 @@ export const automationStatuses = [
   ['draft', 'Brouillon'],
   ['pending_validation', 'À valider'],
   ['active', 'Active'],
+  ['paused', 'En pause'],
   ['inactive', 'Inactive']
 ];
 
