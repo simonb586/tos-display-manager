@@ -7,7 +7,7 @@ const css=fs.readFileSync('src/styles.css','utf8');
 for(const marker of ['GridPagination','Première page','Page précédente','Page suivante','Dernière page','Lignes par page','selectedRows','pageSize','pageCount'])assert.ok(`${main}\n${pagination}`.includes(marker),marker);
 assert.match(pagination,/\[25,\s*50,\s*100,\s*200\]/);
 assert.match(main,/sorted\.slice\(\(currentPage-1\)\*pageSize,currentPage\*pageSize\)/);
-assert.match(main,/CSV \{hasMapColumn\?'page visible'/);
+assert.match(main,/CSV r.sultats \(\{sorted\.length\}\)/);
 assert.match(main,/Excel sélection/);
 assert.match(main,/PDF ensemble filtré/);
 for(const metric of ['Supports actifs','Campagnes actives','Installations prévues','Inspections','Enjeux ouverts','Travaux urgents','Synchronisations Terrain','Photos manquantes'])assert.ok(main.includes(metric),metric);

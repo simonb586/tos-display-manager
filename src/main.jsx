@@ -34,6 +34,7 @@ import {
   strictMatches,
   downloadCSV,
   downloadExcel,
+  downloadExcelSelectionWithPhotos,
   downloadPDF,
   professionalExportName,
   normalize
@@ -48,7 +49,7 @@ import DataGridSettings, { useDataGridSettings } from './components/DataGridSett
 import GridPagination from './components/GridPagination';
 import { defaultSortColumnForTable } from './lib/gridPresentation';
 import { defaultSortForColumn } from './lib/gridSorting';
-import { clearTableCache, loadManyTables } from './services/dataService';
+import { clearTableCache, loadManyTables, loadTable } from './services/dataService';
 import { loadTerrainSyncStatus } from './services/terrainSyncStatus';
 
 import SupportPhotoGallery from './components/SupportPhotoGallery';
@@ -91,6 +92,7 @@ const FieldCatalogManager = lazy(() => import('./components/FieldCatalogManager'
 const Module14Dashboard = lazy(() => import('./components/Module14Dashboard'));
 const ClientPortal = lazy(() => import('./components/ClientPortal'));
 const SiteSupportAssignmentsView = lazy(() => import('./components/SiteSupportAssignmentsView'));
+const ExportsCenter = lazy(() => import('./components/ExportsCenter'));
 import { BUSINESS_CONTEXT } from './lib/businessContext';
 
 function ScreenFallback() {
@@ -101,7 +103,7 @@ const tableConfig = {
   Infrastructures: { table: 'infrastructures', fallback: () => import('./data/infrastructures.json').then(module => module.default), idField: 'support_id', labelField: 'emplacement_visibilite' },
   'Répertoire des affiches': { table: 'repertoire_des_affiches', fallback: () => import('./data/repertoire_des_affiches.json').then(module => module.default) },
   'Communications opérationnelles': { table: 'communications_operationnelles', fallback: () => import('./data/communications_operationnelles.json').then(module => module.default) },
-  'Enjeux des cadres et supports': { table: 'enjeux_des_cadres_et_supports', fallback: () => import('./data/enjeux_des_cadres_et_supports.json').then(module => module.default) },
+  'Enjeux des cadres et supports': { table: 'enjeux_terrain', fallback: () => import('./data/enjeux_des_cadres_et_supports.json').then(module => module.default) },
   "Centres d’information": { table: 'centres_dinformation', fallback: () => import('./data/centres_dinformation.json').then(module => module.default) },
   'C.I. avec enjeux': { table: 'ci_avec_enjeux', fallback: () => import('./data/c_i_avec_enjeux.json').then(module => module.default) },
   'Liste des arrêts': { table: 'liste_des_arrets', fallback: () => import('./data/liste_des_arrets.json').then(module => module.default), idField: 'no_arret', labelField: 'emplacement_visibilite' },
@@ -198,6 +200,18 @@ function renderTableCell(tableName, row, column) {
       : <span className="infrastructure-thumbnail-missing">Aucune photo</span>;
   }
 
+  if (tableName === 'Infrastructures' && column === 'visuel_en_expo') {
+    const visual = String(row.visuel_en_expo || row.visuel_campagne || '').trim();
+    const format = String(row.format_affichage || row.format_visuel || '').trim();
+    return visual ? `${visual}${format ? ` (${format})` : ''}` : '';
+  }
+
+  if (tableName === 'Infrastructures' && column === 'campagne_actuelle') {
+    const campaign = String(row.campagne_actuelle || row.campagne_selon_visuel || '').trim();
+    const visual = String(row.visuel_campagne || '').trim();
+    return [campaign, visual].filter(Boolean).join(' – ');
+  }
+
   return String(row[column] ?? '').slice(0, 160);
 }
 
@@ -260,7 +274,7 @@ function ExecutiveDashboard({setActive,dataStore,terrainSyncStatus,role,rolePerm
     plannedInstalls>0&&`${plannedInstalls} installation(s) planifiée(s)`
   ].filter(Boolean);
   return <div className="dashboard executive-dashboard">
-    <header className="executive-hero"><div className="hero-brand"><BrandLogo priority/><div><span className="eyebrow">Centre de pilotage</span><h1>Vue exécutive</h1><p>État opérationnel consolidé à partir des données disponibles.</p></div></div><div className="executive-status"><span className="status-dot"/> Données {dataStore?.__sync_error__?'partiellement disponibles':'synchronisées'}</div></header>
+    <header className="executive-hero"><div className="hero-brand"><BrandLogo priority/><div><h1>Tableau de bord</h1></div></div><div className="executive-status"><span className="status-dot"/> Données {dataStore?.__sync_error__?'partiellement disponibles':'synchronisées'}</div></header>
     <section className="executive-kpis" aria-label="Indicateurs clés">{metrics.map(([label,value,target,Icon])=><button key={label} className="executive-kpi" onClick={()=>setActive(target)}><span><Icon/>{label}</span><strong>{value==null?'Non disponible':typeof value==='number'?value.toLocaleString('fr-CA'):value}</strong><small>Ouvrir le module</small></button>)}</section>
     <section className="executive-layout">
       <RecentActivityWidget onNavigate={setActive} role={role} permission={rolePermission}/>
@@ -372,8 +386,9 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
     <header className="pageHead"><div><h1>{icons[name] || '📋'} {name}</h1><p>{filtered.length.toLocaleString('fr-CA')} résultat(s) sur {rows.length.toLocaleString('fr-CA')} ligne(s).</p></div><div className="actions">
       <DataGridSettings gridId={`table-${name}`} columns={permittedCols} labels={Object.fromEntries(permittedCols.map(column=>[column,columnLabel(name,column)]))} preferences={gridSettings.preferences} setPreferences={gridSettings.setPreferences} onReset={gridSettings.reset}/>
       {canEdit && !gridEditing && <button onClick={() => { setGridEditing(true); setMessage(''); }}><Edit3/> Modifier la grille</button>}
-      <button onClick={() => downloadCSV(professionalExportName(name,'csv'), hasMapColumn?shown:sortedComplete, cols.map(key=>({key,label:exportLabels[key]})))}><Download/> CSV {hasMapColumn?'page visible':'complet trié'}</button>
-      {hasMapColumn&&<button disabled={!selectedFiltered.length} onClick={() => downloadExcel(professionalExportName(name,'xlsx'), selectedFiltered, cols, {...exportOptions,exportType:'Sélection'})}><FileSpreadsheet/> Excel sélection ({selectedFiltered.length})</button>}
+      <button onClick={() => downloadCSV(professionalExportName(name,'csv'), sorted, cols.map(key=>({key,label:exportLabels[key]})))}><Download/> CSV résultats ({sorted.length})</button>
+      <button disabled={!selectedFiltered.length} onClick={() => downloadExcelSelectionWithPhotos(professionalExportName(name,'xlsx'), selectedFiltered, cols, {...exportOptions,exportType:'Sélection'})}><FileSpreadsheet/> Excel sélection ({selectedFiltered.length})</button>
+      <button onClick={() => downloadExcel(professionalExportName(name,'xlsx'), sorted, cols, {...exportOptions,exportType:'Résultats filtrés'})}><FileSpreadsheet/> Excel résultats ({sorted.length})</button>
       <button onClick={() => downloadPDF(professionalExportName(name,'pdf'), `${name} — résultats filtrés`, sorted, cols, exportOptions)}><FileText/> PDF ensemble filtré</button>
     </div></header>
 
@@ -386,12 +401,12 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
     {message && <div className="v07-message">{message}</div>}
 
     <div className="data-grid-toolbar"><div className="searchbar"><Search/><input aria-label={`Recherche globale — ${name}`} placeholder="Recherche exacte dans toutes les colonnes..." value={query} onChange={e => setQuery(e.target.value)}/></div>{activeFilterCount>0&&<><span className="grid-active-filter-count">Filtres actifs : {activeFilterCount}</span><button type="button" onClick={()=>setFilters({})}>Effacer tous les filtres</button></>}</div>
-    <div className="tableWrap professional-grid" data-grid-id={`table-${name}`}><table><thead><tr className="data-grid-header-row" data-grid-zone="headers">{hasMapColumn&&<th className="selection-column"><input type="checkbox" aria-label="Sélectionner la page" checked={shown.length>0&&shown.every((row,index)=>selectedRows.has(rowToken(row,(currentPage-1)*pageSize+index)))} onChange={event=>setSelectedRows(current=>{const next=new Set(current);shown.forEach((row,index)=>{const token=rowToken(row,(currentPage-1)*pageSize+index);event.target.checked?next.add(token):next.delete(token)});return next})}/></th>}{hasMapColumn && <th className="action-column">Carte</th>}{cols.map(c => <GridColumnHeader key={c} column={c} label={columnLabel(name,c)} rows={filtered} sortState={sortState} onSort={setSortState} onReset={()=>setSortState(null)}/>)}</tr><DataGridFilterRow columns={cols.map(c=>({key:c,label:columnLabel(name,c)}))} rows={rows} filters={filters} onFilter={(column,value)=>setFilters(current=>({...current,[column]:value}))} leadingCells={hasMapColumn?2:0}/></thead><tbody>{shown.map((r, i) => {
+    <div className="tableWrap professional-grid" data-grid-id={`table-${name}`}><table><thead><tr className="data-grid-header-row" data-grid-zone="headers"><th className="selection-column"><input type="checkbox" aria-label="Sélectionner la page" checked={shown.length>0&&shown.every((row,index)=>selectedRows.has(rowToken(row,(currentPage-1)*pageSize+index)))} onChange={event=>setSelectedRows(current=>{const next=new Set(current);shown.forEach((row,index)=>{const token=rowToken(row,(currentPage-1)*pageSize+index);event.target.checked?next.add(token):next.delete(token)});return next})}/></th>{hasMapColumn && <th className="action-column">Carte</th>}{cols.map(c => <GridColumnHeader key={c} column={c} label={columnLabel(name,c)} rows={filtered} sortState={sortState} onSort={setSortState} onReset={()=>setSortState(null)}/>)}</tr><DataGridFilterRow columns={cols.map(c=>({key:c,label:columnLabel(name,c)}))} rows={rows} filters={filters} onFilter={(column,value)=>setFilters(current=>({...current,[column]:value}))} leadingCells={hasMapColumn?2:1}/></thead><tbody>{shown.map((r, i) => {
       const token = rowToken(r, (currentPage-1)*pageSize+i);
       const supportId = r.support_id || r['Support ID'] || '';
       const mapUrl = infrastructureMapUrl(r);
       return <tr key={token} className={drafts[token] ? 'editing-row' : ''} onClick={() => !gridEditing && setSelected(r)}>
-        {hasMapColumn&&<td className="selection-column" onClick={event=>event.stopPropagation()}><input type="checkbox" aria-label={`Sélectionner ${supportId}`} checked={selectedRows.has(token)} onChange={()=>setSelectedRows(current=>{const next=new Set(current);next.has(token)?next.delete(token):next.add(token);return next})}/></td>}
+        <td className="selection-column" onClick={event=>event.stopPropagation()}><input type="checkbox" aria-label={`Sélectionner ${supportId||token}`} checked={selectedRows.has(token)} onChange={()=>setSelectedRows(current=>{const next=new Set(current);next.has(token)?next.delete(token):next.add(token);return next})}/></td>
         {hasMapColumn && <td>
           {mapUrl
             ? <button className="table-map-button" title={`Ouvrir ${supportId} sur la carte`} onClick={event => {
@@ -664,6 +679,7 @@ function App() {
 
   const items = [
     'Tableau de bord',
+    'Exports',
     ...(['Administrateur','Coordonnateur'].includes(role) ? ['Centre de commandement'] : []),
     ...(role === 'Administrateur' ? ['Gestionnaire des champs'] : []),
     ...adminItems,
@@ -775,6 +791,7 @@ function App() {
 
   let content;
   if (active === 'Tableau de bord') content = ['Administrateur','Coordonnateur'].includes(role)?<Module14Dashboard dataStore={dataStore} onNavigate={setActive} terrainSyncStatus={terrainSyncStatus} role={role} permission={rolePermission}/>:<Dashboard setActive={setActive} dataStore={dataStore}/>;
+  else if (active === 'Exports') { const extra=['Administrateur','Coordonnateur'].includes(role)?[{id:'campagnes_maitres',label:'Campagnes'},{id:'campagne_visuels_formats',label:'Visuels'},{id:'edt_phases',label:'Phases EDT'},{id:'activity_events',label:'Historique'}]:[]; const domains=[...visibleManifestTables.map(label=>({id:tableConfig[label]?.table||label,label})),...extra]; content=<ExportsCenter domains={[...new Map(domains.map(domain=>[domain.id,domain])).values()]} loadRows={async domain=>{const config=tableConfig[domain.label];return(await loadTable(domain.id,config?.fallback||[])).rows}}/>; }
   else if (active === 'Centre de commandement') content = <OperationalCommandCenter dataStore={dataStore} onNavigate={setActive}/>;
   else if (active === 'Connexion') content = <LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>;
   else if (active === 'Administration') content = <AdminPanel role={role} currentRole={role} session={session}/>;

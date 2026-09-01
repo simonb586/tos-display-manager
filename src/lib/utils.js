@@ -97,6 +97,60 @@ export async function downloadExcel(filename, rows, columns, options={}) {
   XLSX.writeFile(workbook,filename);
 }
 
+const activePhotoUrl = row => String(
+  row?.signed_thumbnail_url || row?.photo_miniature_url || row?.photo_principale_url ||
+  row?.signed_url || row?.photo_url || row?.url || ''
+).trim();
+
+async function loadWorkbookImage(workbook, url) {
+  if (!url) return null;
+  try {
+    const response = await fetch(url, { credentials:'omit' });
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    if (!blob.type.startsWith('image/')) return null;
+    const buffer = await blob.arrayBuffer();
+    const bitmap = await createImageBitmap(blob);
+    const extension = /png/i.test(blob.type) ? 'png' : 'jpeg';
+    return { id:workbook.addImage({ buffer, extension }), width:bitmap.width, height:bitmap.height };
+  } catch {
+    return null;
+  }
+}
+
+export async function downloadExcelSelectionWithPhotos(filename, rows, columns, options={}) {
+  const { default:ExcelJS } = await import('exceljs');
+  const safe = normalizeExportColumns(columns, options.labels);
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'TOS Display Manager';
+  workbook.created = new Date();
+  const worksheet = workbook.addWorksheet('Données', { views:[{ state:'frozen', ySplit:1 }] });
+  worksheet.columns = [...safe.map(column => ({ header:column.label, key:column.key, width:24 })), { header:'Photo active', key:'active_photo', width:20 }];
+  worksheet.getRow(1).height = 24;
+  worksheet.getRow(1).font = { bold:true, color:{ argb:'FFFFFFFF' } };
+  worksheet.getRow(1).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF4C1D95' } };
+  worksheet.autoFilter = { from:{ row:1, column:1 }, to:{ row:1, column:safe.length + 1 } };
+  rows.forEach(row => worksheet.addRow(Object.fromEntries(safe.map(column => [column.key, exportDisplayValue(row[column.key])]))));
+  for (let index=0; index<rows.length; index+=1) {
+    const image = await loadWorkbookImage(workbook, activePhotoUrl(rows[index]));
+    if (!image) continue;
+    const maxWidth=112, maxHeight=72, scale=Math.min(maxWidth/image.width,maxHeight/image.height,1);
+    worksheet.getRow(index+2).height = 58;
+    worksheet.addImage(image.id, { tl:{ col:safe.length + 0.08, row:index + 1.08 }, ext:{ width:image.width*scale, height:image.height*scale }, editAs:'oneCell' });
+  }
+  const info = workbook.addWorksheet('Informations sur l’export');
+  info.addRows([
+    ['Module', options.moduleName || 'Données'],
+    ['Type d’export', 'Sélection avec photos actives'],
+    ['Nombre de lignes', rows.length],
+    ['Date', new Date().toLocaleString('fr-CA')]
+  ]);
+  info.columns=[{width:28},{width:70}];
+  const buffer = await workbook.xlsx.writeBuffer();
+  const url=URL.createObjectURL(new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  const link=document.createElement('a');link.href=url;link.download=filename;link.click();URL.revokeObjectURL(url);
+}
+
 export async function createProfessionalPdf({ title, moduleName, rows, columns, labels={}, filters={} }) {
   const { jsPDF } = await import('jspdf');
   const safe=normalizeExportColumns(columns,labels);
