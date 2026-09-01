@@ -21,8 +21,9 @@ import { friendlyError } from '../config/businessLanguage';
 import SortableHeader from './SortableHeader';
 import useSortableRows from '../hooks/useSortableRows';
 import MassPhotoImporter from './MassPhotoImporter';
+import { filterSupportPhotos } from '../lib/supportNavigationContext';
 
-export default function PhotoInventoryCenter({ role }) {
+export default function PhotoInventoryCenter({ role, supportId = '', onClearSupportContext }) {
   const [tab, setTab] = useState('photos');
   const [photos, setPhotos] = useState([]);
   const [movements, setMovements] = useState([]);
@@ -38,6 +39,7 @@ export default function PhotoInventoryCenter({ role }) {
   });
 
   const canManage = ['Administrateur', 'Coordonnateur'].includes(role);
+  const visiblePhotos = filterSupportPhotos(photos, supportId);
 
   async function reload() {
     try {
@@ -125,6 +127,7 @@ export default function PhotoInventoryCenter({ role }) {
       </header>
 
       {message && <div className="v07-message">{message}</div>}
+      {supportId && <div className="v07-message">Support {supportId} uniquement. {onClearSupportContext && <button onClick={onClearSupportContext}>Retirer le filtre</button>}</div>}
 
       <div className="editor-tabs">
         <button className={tab === 'photos' ? 'active' : ''} onClick={() => setTab('photos')}>
@@ -138,7 +141,7 @@ export default function PhotoInventoryCenter({ role }) {
 
       {tab === 'mass-import' ? <MassPhotoImporter role={role}/> : tab === 'photos' ? (
         <div className="photo-review-grid">
-          {photos.map(photo => (
+          {visiblePhotos.map(photo => (
             <article key={photo.id}>
               <div className="photo-review-image">
                 {photo.signed_thumbnail_url
@@ -161,7 +164,7 @@ export default function PhotoInventoryCenter({ role }) {
               </div>
             </article>
           ))}
-          {!photos.length && <p>Aucune photo à afficher.</p>}
+          {!visiblePhotos.length && <p>{supportId?'Aucune photo pour ce support':'Aucune photo à afficher.'}</p>}
         </div>
       ) : (
         <div className="inventory-layout">

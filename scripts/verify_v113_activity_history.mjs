@@ -16,5 +16,5 @@ ok(source.dry.startsWith('begin read only;')&&source.dry.trim().endsWith('rollba
 for(const token of['GridPagination','Recherche globale','date_from','date_to','actor_email','module','campaign_id','edt_id','support_id','client_id','status'])ok(source.journal.includes(token),`Journal incomplet: ${token}`);
 for(const token of['En attente','Erreurs actives','Réussies aujourd’hui','Dernière synchronisation','Réessayer','Marquer résolue','GridPagination'])ok(source.terrain.includes(token),`Terrain incomplet: ${token}`);
 for(const token of['resolve_terrain_sync_v113','request_terrain_sync_retry_v113'])ok(source.service.includes(token),token);
-ok(source.main.includes("active === 'Journal des événements'")&&source.main.includes('<ActivityJournal role={role}/>'),'Route Journal non corrigée');
+ok(source.main.includes("active === 'Journal des événements'")&&/<ActivityJournal role=\{role\}[^>]*\/>/.test(source.main),'Route Journal non corrigée');
 console.log(`V1.1.3 historique : ${checks} contrôles réussis.`);

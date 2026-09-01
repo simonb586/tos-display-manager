@@ -22,9 +22,7 @@ import {
   catalogLabel, conditionOperators, emptyCrossModuleView, fieldsByModule, viewDestinations,
   viewLocations, viewModes, viewModules, viewStatuses
 } from '../config/crossModuleViewCatalog';
-import {
-  mergeSystemTemplates, TOS_AUTOMATION_TEMPLATES, TOS_VIEW_TEMPLATES
-} from '../config/tosConfigurationTemplates';
+import { mergeSystemTemplates, TOS_VIEW_TEMPLATES } from '../config/tosConfigurationTemplates';
 import { friendlyError, UI_LABELS } from '../config/businessLanguage';
 
 const toggle = (values, value) => values.includes(value)
@@ -94,18 +92,15 @@ function AutomationsTab({ rows, busy, reload }) {
   const [query,setQuery]=useState(''); const [status,setStatus]=useState('all');
   const [editing,setEditing]=useState(null); const [preview,setPreview]=useState(null);
   const [message,setMessage]=useState(''); const [history,setHistory]=useState(null);
-  const [disabledTemplates,setDisabledTemplates]=useState(()=>JSON.parse(localStorage.getItem('tdm-disabled-automation-templates')||'[]'));
-  const allRows=useMemo(()=>mergeSystemTemplates(rows,TOS_AUTOMATION_TEMPLATES).map(item=>item.isSystemTemplate&&disabledTemplates.includes(item.id)?{...item,status:'inactive'}:item),[rows,disabledTemplates]);
+  const allRows=useMemo(()=>(rows||[]).map(item=>({...item,isSystemTemplate:item.definition?.system_template===true})),[rows]);
   const filtered=allRows.filter(item=>(status==='all'||item.status===status)&&`${item.name} ${item.description||item.definition?.description||''}`.toLowerCase().includes(query.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name,'fr-CA',{numeric:true,sensitivity:'base'}));
 
   async function action(type,item) {
     if (item.isSystemTemplate) {
       if (type==='duplicate') setEditing({...structuredClone(item),id:undefined,isSystemTemplate:false,name:`${item.name} — copie`,status:'draft'});
-      if (type==='deactivate-template'||type==='activate-template') {
-        const next=type==='deactivate-template'?[...new Set([...disabledTemplates,item.id])]:disabledTemplates.filter(id=>id!==item.id);
-        setDisabledTemplates(next);localStorage.setItem('tdm-disabled-automation-templates',JSON.stringify(next));
-        setMessage(type==='deactivate-template'?'Modèle TOS désactivé pour cet espace.':'Modèle TOS réactivé en Brouillon.');
-      }
+      if (type==='deactivate-template') await deactivateAutomationDefinition(item.id);
+      if (type==='activate-template') await approveAutomationDefinition(item.id);
+      if (['deactivate-template','activate-template'].includes(type)) { await reload(); setMessage('État canonique mis à jour.'); }
       return;
     }
     if (type==='delete'&&!window.confirm('Voulez-vous supprimer cette configuration?\n\nCette action retirera la configuration, mais ne supprimera pas les données déjà enregistrées dans les autres modules.')) return;
@@ -125,7 +120,7 @@ function AutomationsTab({ rows, busy, reload }) {
       <label className="configuration-filter"><Filter size={16}/><select value={status} onChange={e=>setStatus(e.target.value)}><option value="all">Tous les états</option>{automationStatuses.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></label>
       <button onClick={()=>setEditing(emptyAutomation())}><Plus/> Nouvelle automatisation</button>
     </div>
-    <div className="automation-safety-note"><ShieldCheck/><div><strong>Activation contrôlée</strong><span>Les {TOS_AUTOMATION_TEMPLATES.length} modèles TOS sont fournis en Brouillon et ne sont jamais activés automatiquement.</span></div></div>
+    <div className="automation-safety-note"><ShieldCheck/><div><strong>Configuration prête</strong><span>Les {allRows.filter(item=>item.isSystemTemplate&&item.status==='active').length} modèles TOS actifs proviennent de la configuration persistée. Aucun moteur d’exécution automatique n’est installé.</span></div></div>
     {message&&<div className="automation-message">{message}</div>}
     {editing?<AutomationForm initial={editing} onCancel={()=>setEditing(null)} onSaved={()=>{setEditing(null);reload();}}/>:
       <div className="automation-grid">{filtered.map(item=><article className="automation-card" key={item.id}>

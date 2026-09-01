@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { TOS_AUTOMATION_TEMPLATES, TOS_VIEW_TEMPLATES, mergeSystemTemplates } from '../src/config/tosConfigurationTemplates.js';
+import { TOS_VIEW_TEMPLATES, mergeSystemTemplates } from '../src/config/tosConfigurationTemplates.js';
 import { APP_TITLE, businessFieldLabel, friendlyError, UI_LABELS } from '../src/config/businessLanguage.js';
 
 assert.equal(APP_TITLE, 'TOS Display Manager');
@@ -8,11 +8,8 @@ assert.equal(UI_LABELS.sourceModule, 'Les données proviennent de');
 assert.equal(UI_LABELS.destinationModule, 'Afficher les données dans');
 assert.equal(businessFieldLabel('support_id'), 'Numéro du support');
 assert.equal(businessFieldLabel('completed_at'), 'Date de fin');
-assert.equal(TOS_AUTOMATION_TEMPLATES.length, 15);
 assert.equal(TOS_VIEW_TEMPLATES.length, 10);
-assert.ok(TOS_AUTOMATION_TEMPLATES.every(item => item.status === 'draft' && item.isSystemTemplate));
 assert.ok(TOS_VIEW_TEMPLATES.every(item => item.status === 'draft' && item.isSystemTemplate));
-assert.equal(new Set(TOS_AUTOMATION_TEMPLATES.map(item => item.id)).size, 15);
 assert.equal(new Set(TOS_VIEW_TEMPLATES.map(item => item.id)).size, 10);
 
 const once = mergeSystemTemplates([], TOS_VIEW_TEMPLATES);

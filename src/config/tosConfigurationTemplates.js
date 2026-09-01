@@ -1,41 +1,4 @@
 const draft = Object.freeze({ status: 'draft', priority: 'normal', isSystemTemplate: true });
-
-const automation = (key, name, description, trigger, modules, actions, conditions = []) => ({
-  ...draft,
-  id: `tos-automation-${key}`,
-  name,
-  description,
-  definition: {
-    kind: 'automation',
-    triggers: [trigger],
-    locations: ['admin_portal'],
-    targets: modules.map(module => ({ module, fields: [] })),
-    actions,
-    conditions,
-    afterActions: ['show_confirmation', 'append_history'],
-    notifications: []
-  },
-  updated_at: '2026-07-23T00:00:00.000Z'
-});
-
-export const TOS_AUTOMATION_TEMPLATES = Object.freeze([
-  automation('visual-install', 'Installation d’un visuel', 'Prépare les étapes de suivi après une installation terrain.', 'installation_completed', ['infrastructures', 'campaign_history'], ['Mettre à jour le visuel actif', 'Ajouter l’intervention à l’historique'], ['active_support']),
-  automation('visual-removal', 'Retrait d’un visuel', 'Prépare la mise à jour du support après le retrait d’un visuel.', 'data_removed', ['infrastructures', 'campaign_history'], ['Archiver le visuel précédent', 'Mettre à jour la fiche du support']),
-  automation('inspection', 'Inspection', 'Centralise les suites à donner après une inspection.', 'inspection_completed', ['inspections', 'infrastructures'], ['Consigner le résultat', 'Planifier la prochaine inspection']),
-  automation('issue', 'Déclaration d’un enjeu', 'Prépare le suivi et les avis associés à un nouvel enjeu.', 'issue_reported', ['issues', 'notifications'], ['Créer le suivi', 'Aviser les responsables']),
-  automation('edt-create', 'Création d’EDT', 'Prépare le suivi d’un nouvel EDT.', 'edt_started', ['edt'], ['Initialiser le suivi']),
-  automation('edt-update', 'Modification d’un EDT', 'Harmonise les informations liées lorsqu’un EDT change.', 'data_updated', ['edt', 'work_orders'], ['Mettre à jour les éléments concernés']),
-  automation('workorder-complete', 'Bon de travail terminé', 'Prépare la clôture et la traçabilité du bon de travail.', 'data_updated', ['work_orders', 'campaign_history'], ['Consigner la date de fin', 'Ajouter au suivi']),
-  automation('workorder-reopen', 'Réouverture d’un BT', 'Prépare la reprise d’un bon de travail.', 'data_updated', ['work_orders'], ['Réactiver le suivi']),
-  automation('campaign-new', 'Nouvelle campagne', 'Prépare les activités associées à une nouvelle campagne.', 'campaign_selected', ['campaigns', 'visuals'], ['Préparer les visuels']),
-  automation('campaign-change', 'Changement de campagne', 'Prépare le remplacement coordonné d’une campagne.', 'campaign_selected', ['campaigns', 'infrastructures'], ['Actualiser les supports concernés']),
-  automation('photo-upload', 'Téléversement d’une photo', 'Prépare le classement d’une nouvelle photo.', 'photo_taken', ['photos'], ['Classer la photo', 'Actualiser la miniature']),
-  automation('photo-delete', 'Suppression d’une photo', 'Prépare la traçabilité après une suppression autorisée.', 'data_removed', ['photos'], ['Actualiser la galerie', 'Consigner l’action']),
-  automation('client-request', 'Nouvelle requête client', 'Prépare le traitement d’une nouvelle demande client.', 'data_updated', ['work_orders', 'notifications'], ['Créer le suivi', 'Aviser le coordonnateur']),
-  automation('low-inventory', 'Inventaire faible', 'Prépare un avis lorsque le seuil minimal est atteint.', 'data_updated', ['poster_inventory', 'notifications'], ['Créer un avis'], ['non_empty_value']),
-  automation('next-edt', 'Mise à jour du prochain EDT', 'Actualise l’information opérationnelle du prochain EDT.', 'data_updated', ['edt', 'infrastructures'], ['Actualiser le prochain EDT'])
-]);
-
 const field = (key, label, width = 180) => ({
   key,
   label,
@@ -76,8 +39,9 @@ export const TOS_VIEW_TEMPLATES = Object.freeze([
 
 export function mergeSystemTemplates(rows, templates) {
   const existingNames = new Set((rows || []).map(item => String(item.name || '').trim().toLocaleLowerCase('fr-CA')));
+  const templateNames = new Set(templates.map(item=>item.name.toLocaleLowerCase('fr-CA')));
   return [
     ...templates.filter(item => !existingNames.has(item.name.toLocaleLowerCase('fr-CA'))),
-    ...(rows || [])
+    ...(rows || []).map(item=>templateNames.has(String(item.name||'').trim().toLocaleLowerCase('fr-CA'))?{...item,isSystemTemplate:true}:item)
   ];
 }

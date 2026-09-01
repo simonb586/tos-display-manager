@@ -4,8 +4,9 @@ import GridPagination from'./GridPagination';
 import{listActivityEvents}from'../services/activityLogService';
 import{formatActivityDate}from'../lib/recentActivity';
 
-export default function ActivityJournal({role}){
-  const[rows,setRows]=useState([]),[total,setTotal]=useState(0),[page,setPage]=useState(1),[pageSize,setPageSize]=useState(50),[query,setQuery]=useState(''),[filters,setFilters]=useState({}),[selected,setSelected]=useState(null),[message,setMessage]=useState('');
+export default function ActivityJournal({role,supportId=''}){
+  const[rows,setRows]=useState([]),[total,setTotal]=useState(0),[page,setPage]=useState(1),[pageSize,setPageSize]=useState(50),[query,setQuery]=useState(''),[filters,setFilters]=useState(()=>supportId?{support_id:String(supportId)}:{}),[selected,setSelected]=useState(null),[message,setMessage]=useState('');
+  useEffect(()=>{setPage(1);setFilters(current=>supportId?{...current,support_id:String(supportId)}:current)},[supportId]);
   const allowed=['Administrateur','Coordonnateur'].includes(role);
   async function reload(){try{const result=await listActivityEvents({page,pageSize,query,filters});setRows(result.rows);setTotal(result.total);setMessage('')}catch(error){setMessage(error.message)}}
   useEffect(()=>{if(allowed)reload()},[allowed,page,pageSize,query,JSON.stringify(filters)]);

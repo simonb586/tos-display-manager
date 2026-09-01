@@ -27,6 +27,12 @@ export async function listClientPortalSection(section, { page = 1, pageSize = 25
   if (section === 'photos') result.rows = await getSignedPhotoUrls(result.rows || [], { purpose:'preview' });
   return result;
 }
+export async function listClientPortalSupportContext(section,supportId){
+  if(!['photos','edt','history'].includes(section))throw new Error('Contexte support non autorisé pour cette section.');
+  const result=await rpc('client_portal_support_context_v139',{p_section:section,p_support_id:String(supportId)});
+  if(section==='photos')result.rows=await getSignedPhotoUrls(result.rows||[],{purpose:'preview'});
+  return result;
+}
 export async function listAllClientPortalSection(section,{filters={}}={}){const pageSize=clampSize(section,100),first=await listClientPortalSection(section,{page:1,pageSize,filters}),rows=[...(first.rows||[])];const pages=Math.ceil((first.total||0)/(first.page_size||pageSize));for(let page=2;page<=pages;page+=1)rows.push(...((await listClientPortalSection(section,{page,pageSize,filters})).rows||[]));return rows;}
 export async function inviteClientMember({email,name}){
   const normalizedEmail=String(email||'').trim().toLowerCase();

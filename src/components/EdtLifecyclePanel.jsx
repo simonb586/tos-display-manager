@@ -18,10 +18,6 @@ export default function EdtLifecyclePanel({edt,data,canManage,busy,run,loading=f
 
   function phaseAction(phase,action){
     let comment='';let photoException='';
-    if(action==='fermer'){
-      comment=window.prompt('Commentaire de fermeture ou anomalies documentées :','')||'';
-      photoException=window.prompt('Exception photo (laisser vide si les photos requises sont présentes) :','')||'';
-    }
     if(action==='rouvrir'){
       comment=window.prompt('Motif obligatoire de réouverture :','')||'';
       if(!comment.trim())return;

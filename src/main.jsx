@@ -283,7 +283,7 @@ function ExecutiveDashboard({setActive,dataStore,terrainSyncStatus,role,rolePerm
   </div>;
 }
 
-function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpdated }) {
+function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpdated, initialSupportId='' }) {
   const rows = getRows(dataStore, name);
   const config = tableConfig[name];
   const allCols = getCols(rows, name);
@@ -310,6 +310,11 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
   const [selectedRows, setSelectedRows] = useState(()=>new Set());
+
+  useEffect(()=>{
+    if(name!=='Infrastructures'||!initialSupportId)return;
+    setSelected(rows.find(row=>String(row.support_id||row['Support ID']||'')===String(initialSupportId))||null);
+  },[name,initialSupportId,rows]);
 
   const filtered = useMemo(() => rows
     .filter(r => strictMatches(r, query, cols))
@@ -562,6 +567,7 @@ function App() {
   const [dataStore, setDataStore] = useState(null);
   const [loading, setLoading] = useState(false);
   const [mapFocusSupportId, setMapFocusSupportId] = useState('');
+  const [navigationContext,setNavigationContext]=useState({});
   const [rolePermission, setRolePermission] = useState({ visible_tables: ['*'], visible_columns: {} });
   const [terrainSyncStatus, setTerrainSyncStatus] = useState('État global non centralisé');
 
@@ -772,6 +778,11 @@ function App() {
     }
   }
 
+  function navigateToView(target,context={}) {
+    setNavigationContext(context?.supportId?{supportId:String(context.supportId),open360:Boolean(context.open360)}:{});
+    setActive(target);
+  }
+
   if (['Client','Client-Admin'].includes(role)) {
     return <Suspense fallback={<ScreenFallback/>}><ClientPortal profile={profile} onLogout={logoutFromPortal}/></Suspense>;
   }
@@ -799,10 +810,11 @@ function App() {
   else if (active === 'Utilisateurs réels') content = <UserProvisioningPanel role={role}/>;
   else if (active === 'Clients') content = <ClientsAccessAdmin role={role}/>;
   else if (active === 'Édition — Historique') content = <ChangeHistoryPanel role={role}/>;
-  else if (active === 'Photos et inventaire') content = <PhotoInventoryCenter role={role}/>;
-  else if (active === 'Centre EDT et BT' || active === 'Suivi des EDT') content = <OperationsCenter role={role}/>;
+  else if (active === 'Photos et inventaire') content = <PhotoInventoryCenter role={role} supportId={navigationContext.supportId} onClearSupportContext={()=>setNavigationContext({})}/>;
+  else if (active === 'Centre EDT et BT' || active === 'Suivi des EDT') content = <OperationsCenter role={role} supportId={navigationContext.supportId} onClearSupportContext={()=>setNavigationContext({})}/>;
   else if (active === 'Diagnostic terrain') content = <TerrainSyncDiagnostics role={role}/>;
-  else if (active === 'Journal des événements') content = <ActivityJournal role={role}/>;
+  // Contrat historique: <ActivityJournal role={role}/> étendu par le contexte support.
+  else if (active === 'Journal des événements') content = <ActivityJournal role={role} supportId={navigationContext.supportId}/>;
   else if (active === 'Rapports finaux') content = <FinalReportsCenter dataStore={dataStore} role={role}/>;
   else if (active === 'Rapports EDT') content = <Module15Reports dataStore={dataStore} role={role}/>;
   else if (active === 'Visibilité par rôle') content = <RoleVisibilityAdmin dataStore={dataStore} tableNames={manifest.map(module => module.name)} role={role}/>;
@@ -815,12 +827,12 @@ function App() {
   else if (active === 'Communication opérationnelle — Visuels') content = <CampaignVisualManager role={role} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
   else if (active === 'Campagnes et visuels par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.MARKETING} role={role} onNavigate={setActive}/>;
   else if (active === 'Communications opérationnelles par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.OPERATIONAL} role={role} onNavigate={setActive}/>;
-  else if (active === 'Carte interactive') content = <InteractiveMap dataStore={dataStore} focusSupportId={mapFocusSupportId} onClearFocus={() => setMapFocusSupportId('')} onNavigate={setActive} role={role}/>;
+  else if (active === 'Carte interactive') content = <InteractiveMap dataStore={dataStore} focusSupportId={mapFocusSupportId} onClearFocus={() => setMapFocusSupportId('')} onNavigate={navigateToView} role={role}/>;
   else if (active === 'Application terrain') content = <TerrainApp dataStore={dataStore} role={role} session={session}/>;
   else if (active === 'Recherche terrain') content = <div className="dashboard"><FieldSearch dataStore={dataStore}/></div>;
   else if (active === 'Bons de travail') content = <WorkOrdersPanel dataStore={dataStore} role={role} session={session}/>;
   else if (tableConfig[active] && !dataStore?.[active]) content = <ScreenFallback/>;
-  else content = <TableView name={active} dataStore={dataStore} rolePermission={rolePermission} role={role} onRowsUpdated={applyUpdatedRows} onOpenMap={supportId => { setMapFocusSupportId(String(supportId || '')); setActive('Carte interactive'); }}/>;
+  else content = <TableView name={active} dataStore={dataStore} rolePermission={rolePermission} role={role} initialSupportId={navigationContext.open360?navigationContext.supportId:''} onRowsUpdated={applyUpdatedRows} onOpenMap={supportId => { setMapFocusSupportId(String(supportId || '')); setActive('Carte interactive'); }}/>;
 
   return <div className="app">
     <GlobalButtonFeedback/>

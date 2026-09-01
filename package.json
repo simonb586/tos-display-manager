@@ -63,6 +63,7 @@
     "test:client-portal-rpc-v1364": "node ./scripts/verify_client_portal_rpc_completion_v1364.mjs",
     "test:client-portal-parity-v137": "node ./scripts/verify_client_portal_parity_v137.mjs",
     "test:exports-v138": "node ./scripts/verify_exports_photos_xlsx_v138.mjs",
+    "test:ux-map-v139": "node ./scripts/verify_ux_automation_map_v139.mjs",
     "test:terrain-issue-client-v138": "node ./scripts/verify_terrain_issue_client_derivation_v138.mjs",
     "test:v1.1.5-activity": "node ./scripts/verify_recent_activity_v115.mjs",
     "test:module14": "node ./scripts/verify_module_14_v120.mjs",

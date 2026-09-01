@@ -11,10 +11,11 @@ const INTERNAL_COLUMNS=new Set(['id','client_id','organization_id','campaign_id'
 const LABELS={nom_campagne:'Campagne / communication',business_context:'Contexte',date_debut:'Début',date_fin:'Fin',statut:'Statut',site:'Site',support_id:'Support',type_support:'Type',type_site:'Type de site',emplacement_visibilite:'Emplacement / visibilité',visual:'Visuel',numero_edt:'EDT',no_edt:'EDT',objet:'Rapport',sent_at:'Publié le',type_enjeu:'Enjeu',description:'Description',occurred_at:'Date',action:'Activité',nom:'Nom',courriel:'Courriel',role:'Rôle'};
 const value=v=>v==null||v===''?'—':String(v);
 
-export default function ClientBusinessGrid({view,result,onLoad,onLoadAll,onOpenMap,readOnly=true}){
+export default function ClientBusinessGrid({view,result,onLoad,onLoadAll,onOpenMap,readOnly=true,initialQuery=''}){
  const rows=result?.rows||[],allColumns=useMemo(()=>[...new Set(rows.flatMap(Object.keys))].filter(key=>!INTERNAL_COLUMNS.has(key)),[rows]);
  const settings=useDataGridSettings(`client-${view.id}`,allColumns),columns=settings.columns;
- const[query,setQuery]=useState(''),[filters,setFilters]=useState({}),[sortState,setSortState]=useState(null),[exporting,setExporting]=useState(''),[selected,setSelected]=useState(()=>new Set());
+ const[query,setQuery]=useState(initialQuery),[filters,setFilters]=useState({}),[sortState,setSortState]=useState(null),[exporting,setExporting]=useState(''),[selected,setSelected]=useState(()=>new Set());
+ useEffect(()=>setQuery(initialQuery),[initialQuery]);
  const localRows=useMemo(()=>sortRows(rows.filter(row=>strictMatches(row,query,columns)).filter(row=>matchesGridFilters(row,filters)),sortState),[rows,query,columns,filters,sortState]);
  const activeFilterCount=Object.values(filters).filter(item=>item?.length).length;
  useEffect(()=>{const timer=setTimeout(()=>onLoad?.(1,result?.page_size||25,{search:query}),250);return()=>clearTimeout(timer)},[query]);

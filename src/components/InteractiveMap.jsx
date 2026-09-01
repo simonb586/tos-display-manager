@@ -428,10 +428,10 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
             </a>
 
             <div className="map-detail-actions">
-              <button onClick={() => onNavigate?.('Infrastructures')}>Ouvrir / Fiche 360</button>
-              {role === 'Administrateur' && <button onClick={() => onNavigate?.('Photos et inventaire')}>Photos</button>}
-              {['Administrateur','Coordonnateur'].includes(role) && <button onClick={() => onNavigate?.('Centre EDT et BT')}>EDT / Travaux</button>}
-              {['Administrateur','Coordonnateur'].includes(role) && <button onClick={() => onNavigate?.('Journal des événements')}>Historique</button>}
+              <button onClick={() => onNavigate?.('Infrastructures',{supportId:selected.supportId,open360:true})}>Ouvrir / Fiche 360</button>
+              {['Administrateur','Coordonnateur','Client','Client-Admin'].includes(role) && <button onClick={() => onNavigate?.('Photos et inventaire',{supportId:selected.supportId})}>Photos</button>}
+              {['Administrateur','Coordonnateur','Client','Client-Admin'].includes(role) && <button onClick={() => onNavigate?.('Centre EDT et BT',{supportId:selected.supportId})}>EDT / Travaux</button>}
+              {['Administrateur','Coordonnateur','Client','Client-Admin'].includes(role) && <button onClick={() => onNavigate?.('Journal des événements',{supportId:selected.supportId})}>Historique</button>}
             </div>
 
             {focusSupportId && (

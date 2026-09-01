@@ -16,6 +16,7 @@ import EdtEnterprisePanel from './EdtEnterprisePanel';
 import EdtLifecyclePanel from './EdtLifecyclePanel';
 import SortableHeader from './SortableHeader';
 import useSortableRows from '../hooks/useSortableRows';
+import { filterSupportOperations } from '../lib/supportNavigationContext';
 import { friendlyError } from '../config/businessLanguage';
 import {
   assignUser,
@@ -78,7 +79,7 @@ const emptyWorkOrder = {
   progression: 0
 };
 
-export default function OperationsCenter({ role }) {
+export default function OperationsCenter({ role, supportId = '', onClearSupportContext }) {
   const [tab, setTab] = useState('edt');
   const [data, setData] = useState({
     edts: [],
@@ -124,6 +125,8 @@ export default function OperationsCenter({ role }) {
   const canManage = ['Administrateur', 'Coordonnateur'].includes(role);
   const canDeleteEdt = role === 'Administrateur';
   const selectedEdt = data.edts.find(item => String(item.id) === String(selectedEdtId)) || null;
+  const contextual=useMemo(()=>filterSupportOperations(data,supportId),[data,supportId]);
+  const {edts:visibleEdts,workOrders:visibleWorkOrders,requests:visibleRequests,history:visibleHistory}=contextual;
 
   async function reload() {
     try {
@@ -135,6 +138,11 @@ export default function OperationsCenter({ role }) {
   }
 
   useEffect(() => { reload(); }, []);
+
+  useEffect(() => {
+    if (!supportId) return;
+    setSelectedEdtId(current => visibleEdts.some(row => String(row.id) === String(current)) ? current : String(visibleEdts[0]?.id || ''));
+  }, [supportId, visibleEdts]);
 
   useEffect(() => {
     const requestId = ++selectionRequest.current;
@@ -272,6 +280,7 @@ export default function OperationsCenter({ role }) {
       </header>
 
       {message && <div className="v07-message">{message}</div>}
+      {supportId && <div className="v07-message">Support {supportId} uniquement. {onClearSupportContext && <button onClick={onClearSupportContext}>Retirer le filtre</button>}</div>}
 
       <div className="operations-kpis">
         <Kpi icon={<Layers3/>} label="EDT actifs" value={stats.activeEdts}/>
@@ -315,7 +324,7 @@ export default function OperationsCenter({ role }) {
           <section className="v07-card operations-wide">
             <h2>EDT et progression</h2>
             <div className="edt-list">
-              {data.edts.map(edt => {
+              {visibleEdts.map(edt => {
                 const progress = computeEdtProgress(edt, data.workOrders, data.phases);
                 return <article key={edt.id} className={String(selectedEdtId) === String(edt.id) ? 'selected' : ''}>
                   <button className="edt-select" onClick={() => setSelectedEdtId(String(edt.id))}>
@@ -331,6 +340,7 @@ export default function OperationsCenter({ role }) {
                   </div>}
                 </article>;
               })}
+              {!visibleEdts.length && <p className="executive-empty">Aucun EDT pour ce support</p>}
             </div>
           </section>
 
@@ -425,7 +435,7 @@ export default function OperationsCenter({ role }) {
           <section className="v07-card operations-wide">
             <h2>Bons de travail</h2>
             <div className="bt-grid">
-              {data.workOrders.map(order => (
+              {visibleWorkOrders.map(order => (
                 <article key={order.id} id={`bt-${order.id}`}>
                   <div><strong>{order.no_bt || `BT-${order.id}`}</strong><span>{order.statut}</span></div>
                   <p>{order.description || order.type_bt}</p>
@@ -437,6 +447,7 @@ export default function OperationsCenter({ role }) {
                   </div>}
                 </article>
               ))}
+              {!visibleWorkOrders.length && <p className="executive-empty">Aucun bon de travail pour ce support</p>}
             </div>
           </section>
         </div>
@@ -459,7 +470,7 @@ export default function OperationsCenter({ role }) {
           <section className="v07-card operations-wide">
             <h2>Requêtes reçues</h2>
             <div className="request-list">
-              {data.requests.map(request => (
+              {visibleRequests.map(request => (
                 <article key={request.id}>
                   <div><strong>REQ-{request.id} — {request.client || 'Client'}</strong><span>{request.statut}</span></div>
                   <p>{request.description}</p>
@@ -483,7 +494,7 @@ export default function OperationsCenter({ role }) {
             <SortableHeader label="Utilisateur" column="user_email" rows={data.history} sortState={historySort} onSort={setHistorySort} onReset={()=>setHistorySort(null)}/>
             <SortableHeader label="Détails" column="details" rows={data.history} sortState={historySort} onSort={setHistorySort} onReset={()=>setHistorySort(null)}/>
           </tr></thead><tbody>
-            {sortedHistory.map(item => <tr key={item.id}><td>{new Date(item.created_at).toLocaleString('fr-CA')}</td><td>{item.entity_type}</td><td>{item.entity_reference}</td><td>{item.action}</td><td>{item.user_email || '—'}</td><td>{item.details || '—'}</td></tr>)}
+            {(supportId?visibleHistory:sortedHistory).map(item => <tr key={item.id}><td>{new Date(item.created_at).toLocaleString('fr-CA')}</td><td>{item.entity_type}</td><td>{item.entity_reference}</td><td>{item.action}</td><td>{item.user_email || '—'}</td><td>{item.details || '—'}</td></tr>)}
           </tbody></table></div>
         </section>
       )}
