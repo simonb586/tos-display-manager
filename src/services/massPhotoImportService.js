@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabaseClient';
 import { prepareAndUploadPhoto, insertPhotoWithRollback } from './photoWorkflowService.js';
 import { clampImportOptions, manifestItem, prepareImportItem, readExifDate, sha256File } from '../lib/massPhotoImport.js';
+import { uploadUnmatchedPhoto } from './photoReviewService.js';
 
 const DB_NAME='tos-mass-photo-import', STORE='manifests';
 export const saveImportManifest = manifest => new Promise((resolve,reject)=>{const request=indexedDB.open(DB_NAME,1);request.onupgradeneeded=()=>request.result.createObjectStore(STORE,{keyPath:'id'});request.onerror=()=>reject(request.error);request.onsuccess=()=>{const tx=request.result.transaction(STORE,'readwrite');tx.objectStore(STORE).put({...manifest,items:manifest.items.map(manifestItem),updatedAt:new Date().toISOString()});tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)}});
@@ -21,6 +22,7 @@ export async function analyzePhotoItem(item, context={}) {
 }
 
 export async function uploadPhotoItem(item, context={}) {
+  if(!item.supportId){const row=await uploadUnmatchedPhoto(item,context);return{...item,status:'completed',reviewStatus:'unmatched',storagePath:row.storage_path,resultId:row.id,error:'',file:null}}
   const uploaded=await prepareAndUploadPhoto(item.file,{...context,supportId:item.supportId,capturedAt:item.capturedAt,explicitType:item.explicitType,
     type:item.type,sequence:item.sequence,campaignId:item.campaignId,edtId:item.edtId,metadata:{sha256:item.hash}},'support-photos');
   const row=await insertPhotoWithRollback(uploaded,{...context,supportId:item.supportId,capturedAt:item.capturedAt,campaignId:item.campaignId,edtId:item.edtId,

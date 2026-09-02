@@ -74,6 +74,7 @@
     "test:private-photos": "node ./scripts/verify_private_photo_access_v120.mjs",
     "test:v1.2.1-consolidation": "node ./scripts/verify_business_views_consolidation_v121.mjs",
     "test:v1.2.1-mass-photos": "node ./scripts/verify_mass_photo_import_v121.mjs",
+    "test:photo-review-queue": "node ./scripts/verify_photo_review_queue.mjs",
     "test:v1.2.2": "node ./scripts/verify_business_views_v122.mjs",
     "test:v1.2.3": "node ./scripts/verify_grid_layout_v123.mjs",
     "test:v1.2.4": "node ./scripts/verify_grid_headers_sorting_assignments_v124.mjs",

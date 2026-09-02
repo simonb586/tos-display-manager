@@ -21,6 +21,7 @@ import { friendlyError } from '../config/businessLanguage';
 import SortableHeader from './SortableHeader';
 import useSortableRows from '../hooks/useSortableRows';
 import MassPhotoImporter from './MassPhotoImporter';
+import PhotoReviewQueue from './PhotoReviewQueue';
 import { filterSupportPhotos } from '../lib/supportNavigationContext';
 
 export default function PhotoInventoryCenter({ role, supportId = '', onClearSupportContext }) {
@@ -137,9 +138,10 @@ export default function PhotoInventoryCenter({ role, supportId = '', onClearSupp
           <Package size={17}/> Inventaire
         </button>
         {canManage && <button className={tab === 'mass-import' ? 'active' : ''} onClick={() => setTab('mass-import')}><UploadCloud size={17}/> Import massif de photos</button>}
+        {canManage && <button className={tab === 'review' ? 'active' : ''} onClick={() => setTab('review')}><CheckCircle2 size={17}/> Photos à valider</button>}
       </div>
 
-      {tab === 'mass-import' ? <MassPhotoImporter role={role}/> : tab === 'photos' ? (
+      {tab === 'mass-import' ? <MassPhotoImporter role={role}/> : tab === 'review' ? <PhotoReviewQueue/> : tab === 'photos' ? (
         <div className="photo-review-grid">
           {visiblePhotos.map(photo => (
             <article key={photo.id}>

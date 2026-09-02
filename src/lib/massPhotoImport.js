@@ -1,6 +1,8 @@
 import { classifyPhotoContext, generatePhotoIdentity, resolvePhotoAssociations } from './photoWorkflow.js';
 
 export const MASS_PHOTO_STATES = Object.freeze(['queued','validating','ready','requires_review','uploading','processing','completed','failed','skipped','duplicate','cancelled']);
+export const PHOTO_REVIEW_STATUSES = Object.freeze(['auto_matched','needs_review','unmatched','manually_validated','ignored','error']);
+export const PHOTO_MATCH_THRESHOLDS = Object.freeze({automatic:95,review:70});
 export const DEFAULT_MASS_PHOTO_OPTIONS = Object.freeze({ concurrency: 6, batchSize: 100 });
 export const TERMINAL_PHOTO_STATES = new Set(['completed','failed','skipped','duplicate','cancelled']);
 
@@ -13,8 +15,17 @@ export const createImportId = () => globalThis.crypto?.randomUUID?.() || `photos
 export const createImportItem = (file, index, defaults = {}) => ({
   id: createImportId(), file, originalFilename: file.name, size: file.size, lastModified: file.lastModified,
   mimeType: file.type, supportId: defaults.supportId || '', capturedAt: defaults.capturedAt || new Date(file.lastModified || Date.now()).toISOString(),
-  explicitType: defaults.explicitType || '', campaignId:null, edtId:null, selected:false, capturedAtSource:'file', status: 'queued', error: '', hash: '', storagePath: '', resultId: null, sequence: index + 1
+  explicitType: defaults.explicitType || '', campaignId:null, edtId:null, selected:false, capturedAtSource:'file', status: 'queued', reviewStatus:null, ocrText:'', ocrConfidence:null, suggestions:[], error: '', hash: '', storagePath: '', resultId: null, sequence: index + 1
 });
+
+export const normalizeSupportCandidate=value=>String(value||'').toUpperCase().replace(/[IL|]/g,'1').replace(/[^A-Z0-9]/g,'');
+export function supportSimilarity(raw, supportId) {
+  const a=normalizeSupportCandidate(raw),b=normalizeSupportCandidate(supportId);if(!a||!b)return 0;
+  const row=Array.from({length:b.length+1},(_,i)=>i);for(let i=1;i<=a.length;i++){let prior=row[0];row[0]=i;for(let j=1;j<=b.length;j++){const old=row[j];row[j]=Math.min(row[j]+1,row[j-1]+1,prior+(a[i-1]===b[j-1]?0:1));prior=old}}
+  return Math.max(0,Math.round((1-row[b.length]/Math.max(a.length,b.length))*100));
+}
+export function suggestSupports(raw, infrastructures=[], limit=3) {return infrastructures.map(row=>({...row,confidence:supportSimilarity(raw,row.support_id)})).filter(row=>row.confidence>0).sort((a,b)=>b.confidence-a.confidence||String(a.support_id).localeCompare(String(b.support_id))).slice(0,limit)}
+export function classifyMatch(confidence, unique=true) {const score=Number(confidence)||0;return score>=PHOTO_MATCH_THRESHOLDS.automatic&&unique?'auto_matched':score>=PHOTO_MATCH_THRESHOLDS.review?'needs_review':'unmatched'}
 
 export const virtualWindow = (total, scrollTop=0, {rowHeight=44, viewportHeight=440, overscan=5}={}) => {
   const start=Math.max(0,Math.floor(scrollTop/rowHeight)-overscan), visible=Math.ceil(viewportHeight/rowHeight)+overscan*2;
@@ -55,17 +66,18 @@ export async function sha256File(file) {
 
 export function prepareImportItem(item, context = {}) {
   const association = resolvePhotoAssociations({ ...context, supportId:item.supportId, type:item.explicitType || 'inspection' });
-  if (!association.ok) return { ...item, status:'requires_review', error:association.reason };
+  if (!association.ok && association.reason==='SUPPORT_REQUIRED') return { ...item, status:'ready', reviewStatus:'unmatched', error:association.reason };
+  if (!association.ok) return { ...item, status:'requires_review', reviewStatus:'needs_review', error:association.reason };
   const classification = classifyPhotoContext({ ...context, explicitType:item.explicitType || undefined });
   const identity = generatePhotoIdentity({ supportId:item.supportId, capturedAt:item.capturedAt, type:item.explicitType || classification.type,
     campaignCode:association.campaign?.code_campagne || association.campaign?.id || 'NONE', edt:association.edt?.numero_edt || association.edt?.id || 'NONE',
     sequence:item.sequence, originalFilename:item.originalFilename, mimeType:item.mimeType });
-  return { ...item, status:'ready', error:'', classification, campaignId:association.campaign?.id || null, edtId:association.edt?.id || null, ...identity };
+  return { ...item, status:'ready', reviewStatus:'auto_matched', error:'', classification, campaignId:association.campaign?.id || null, edtId:association.edt?.id || null, ...identity };
 }
 
 export const manifestItem = item => ({ id:item.id, originalFilename:item.originalFilename, size:item.size, lastModified:item.lastModified,
   mimeType:item.mimeType, supportId:item.supportId, capturedAt:item.capturedAt, status:item.status, error:item.error, hash:item.hash,
-  storagePath:item.storagePath, resultId:item.resultId, normalizedFilename:item.normalizedFilename, campaignId:item.campaignId, edtId:item.edtId, capturedAtSource:item.capturedAtSource, classification:item.classification, sequence:item.sequence });
+  storagePath:item.storagePath, resultId:item.resultId, normalizedFilename:item.normalizedFilename, campaignId:item.campaignId, edtId:item.edtId, capturedAtSource:item.capturedAtSource, classification:item.classification, sequence:item.sequence,reviewStatus:item.reviewStatus,ocrText:item.ocrText,ocrConfidence:item.ocrConfidence,suggestions:item.suggestions });
 
 export function importReport(items=[], meta={}) {const summary=importSummary(items),completed=items.filter(i=>i.status==='completed');return{lot_id:meta.batchId,start:meta.startedAt||null,end:meta.endedAt||null,duration_ms:meta.startedAt&&meta.endedAt?new Date(meta.endedAt)-new Date(meta.startedAt):null,total_selected:items.length,total_analyzed:items.filter(i=>i.hash).length,total_imported:summary.completed,total_failed:summary.failed,total_duplicates:summary.duplicate,total_skipped:summary.skipped,total_requires_review:summary.requiresReview,automatic_inspections:items.filter(i=>i.classification?.reason==='no_active_business_context').length,campaigns_associated:new Set(items.map(i=>i.campaignId).filter(Boolean)).size,edt_associated:new Set(items.map(i=>i.edtId).filter(Boolean)).size,distinct_supports:new Set(items.map(i=>i.supportId).filter(Boolean)).size,total_uploaded_bytes:completed.reduce((n,i)=>n+(i.size||0),0),errors_by_category:Object.fromEntries([...new Set(items.filter(i=>i.error).map(i=>i.error))].map(error=>[error,items.filter(i=>i.error===error).length]))}}
 export const summaryCsv = report => Object.entries(report).map(([key,value])=>`"${key}","${String(typeof value==='object'?JSON.stringify(value):value??'').replaceAll('"','""')}"`).join('\r\n');
