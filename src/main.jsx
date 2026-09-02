@@ -284,16 +284,18 @@ function ExecutiveDashboard({setActive,dataStore,terrainSyncStatus,role,rolePerm
   </div>;
 }
 
-function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpdated, initialSupportId='' }) {
+function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpdated, initialSupportId='', initialGridContext=null }) {
   const rows = getRows(dataStore, name);
   const config = tableConfig[name];
   const allCols = getCols(rows, name);
   const permittedCols = columnsForTable(rolePermission, name, allCols);
   const gridSettings = useDataGridSettings(`table-${name}`, permittedCols);
   const cols = gridSettings.columns;
-  const [query, setQuery] = useState('');
-  const [filters, setFilters] = useState({});
+  const restoredContext = name === 'Infrastructures' && initialGridContext?.sourceView === 'infrastructures' ? initialGridContext : null;
+  const [query, setQuery] = useState(restoredContext?.search || '');
+  const [filters, setFilters] = useState(restoredContext?.filters || {});
   const [sortState, setSortState] = useState(() => {
+    if (restoredContext?.sort) return restoredContext.sort;
     try {
       const stored=JSON.parse(sessionStorage.getItem(`tdm-grid-sort:${name}`));
       if(stored)return stored;
@@ -308,9 +310,20 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   const [drafts, setDrafts] = useState({});
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(50);
+  const [page, setPage] = useState(restoredContext?.page || 1);
+  const [pageSize, setPageSize] = useState(restoredContext?.pageSize || 50);
   const [selectedRows, setSelectedRows] = useState(()=>new Set());
+
+  useEffect(() => {
+    if (!restoredContext?.visibleColumns) return;
+    gridSettings.setPreferences(restoredContext.visibleColumns);
+  }, []);
+
+  useEffect(() => {
+    if (!restoredContext || typeof restoredContext.scrollY !== 'number') return;
+    const timer = window.setTimeout(() => window.scrollTo({ top: restoredContext.scrollY, behavior: 'auto' }), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(()=>{
     if(name!=='Infrastructures'||!initialSupportId)return;
@@ -339,6 +352,23 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   }, [name, sortState]);
 
   useEffect(()=>setPage(1),[query,filters,sortState,pageSize,name]);
+  useEffect(()=>{
+    if (restoredContext?.page) setPage(restoredContext.page);
+  },[]);
+
+  function infrastructureNavigationContext(supportId) {
+    return {
+      sourceView: 'infrastructures',
+      page: currentPage,
+      pageSize,
+      filters,
+      search: query,
+      sort: sortState,
+      visibleColumns: gridSettings.preferences,
+      scrollY: window.scrollY,
+      supportId: String(supportId || '')
+    };
+  }
 
   function rowToken(row, index) {
     try {
@@ -417,7 +447,7 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
           {mapUrl
             ? <button className="table-map-button" title={`Ouvrir ${supportId} sur la carte`} onClick={event => {
                 event.stopPropagation();
-                onOpenMap?.(supportId);
+                onOpenMap?.(supportId, infrastructureNavigationContext(supportId));
               }}><MapPin size={16}/> Carte</button>
             : <span className="table-map-missing">GPS absent</span>}
         </td>}
@@ -663,6 +693,14 @@ function App() {
   }, [profile]);
 
   useEffect(() => {
+    const restoreInfrastructureHistory = () => {
+      if (active === 'Carte interactive' && navigationContext.sourceView === 'infrastructures') setActive('Infrastructures');
+    };
+    window.addEventListener('popstate', restoreInfrastructureHistory);
+    return () => window.removeEventListener('popstate', restoreInfrastructureHistory);
+  }, [active, navigationContext.sourceView]);
+
+  useEffect(() => {
     let cancelled = false;
 
     getRoleVisibility(role)
@@ -830,19 +868,19 @@ function App() {
   else if (active === 'Communication opérationnelle — Visuels') content = <CampaignVisualManager role={role} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
   else if (active === 'Campagnes et visuels par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.MARKETING} role={role} onNavigate={setActive}/>;
   else if (active === 'Communications opérationnelles par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.OPERATIONAL} role={role} onNavigate={setActive}/>;
-  else if (active === 'Carte interactive') content = <InteractiveMap dataStore={dataStore} focusSupportId={mapFocusSupportId} onClearFocus={() => setMapFocusSupportId('')} onNavigate={navigateToView} role={role}/>;
+  else if (active === 'Carte interactive') content = <InteractiveMap dataStore={dataStore} focusSupportId={mapFocusSupportId} onClearFocus={() => setMapFocusSupportId('')} onNavigate={navigateToView} onBackToInfrastructures={() => setActive('Infrastructures')} hasInfrastructureContext={navigationContext.sourceView==='infrastructures'} role={role}/>;
   else if (active === 'Application terrain') content = <TerrainApp dataStore={dataStore} role={role} session={session}/>;
   else if (active === 'Recherche terrain') content = <div className="dashboard"><FieldSearch dataStore={dataStore}/></div>;
   else if (active === 'Bons de travail') content = <WorkOrdersPanel dataStore={dataStore} role={role} session={session}/>;
   else if (tableConfig[active] && !dataStore?.[active]) content = <ScreenFallback/>;
-  else content = <TableView name={active} dataStore={dataStore} rolePermission={rolePermission} role={role} initialSupportId={navigationContext.open360?navigationContext.supportId:''} onRowsUpdated={applyUpdatedRows} onOpenMap={supportId => { setMapFocusSupportId(String(supportId || '')); setActive('Carte interactive'); }}/>;
+  else content = <TableView name={active} dataStore={dataStore} rolePermission={rolePermission} role={role} initialSupportId={navigationContext.open360?navigationContext.supportId:''} initialGridContext={active==='Infrastructures'?navigationContext:null} onRowsUpdated={applyUpdatedRows} onOpenMap={(supportId,context) => { setNavigationContext(context||{}); setMapFocusSupportId(String(supportId || '')); window.history.pushState({view:'map',sourceView:context?.sourceView||null},''); setActive('Carte interactive'); }}/>;
 
   return <div className="app">
     <GlobalButtonFeedback/>
     <aside>
       <div className="brand"><BrandLogo priority/><span>Display Manager</span></div>
       <span className="role-badge">{profile?.nom || session?.user?.email}<br/>{role}</span>
-      {items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => setActive(it)}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Édition — Historique' ? '🕘' : it === 'Photos et inventaire' ? '🖼️' : it === 'Centre EDT et BT' ? '🛠️' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Automatisations' ? '🤖' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}
+      {items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => { if (it === 'Carte interactive') { setNavigationContext({}); setMapFocusSupportId(''); } setActive(it); }}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Édition — Historique' ? '🕘' : it === 'Photos et inventaire' ? '🖼️' : it === 'Centre EDT et BT' ? '🛠️' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Automatisations' ? '🤖' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}
       <button className="sidebar-logout" onClick={logoutFromPortal}><LogOut size={17}/> Déconnexion</button>
     </aside>
     <main>{dataStore?.__sync_error__&&<div className="sync-error-banner"><strong>Données momentanément indisponibles</strong><span>La dernière mise à jour n’a pas pu être chargée.</span><button onClick={refreshDataStore}>Réessayer</button></div>}<Suspense fallback={<ScreenFallback/>}>{content}</Suspense></main>

@@ -11,6 +11,7 @@ import {
 } from 'react-leaflet';
 import {
   AlertTriangle,
+  ArrowLeft,
   Crosshair,
   ExternalLink,
   Filter,
@@ -110,7 +111,7 @@ const clusterIcon = count => L.divIcon({
   iconAnchor: [22, 22]
 });
 
-export default function InteractiveMap({ dataStore, focusSupportId = '', onClearFocus, onNavigate, role }) {
+export default function InteractiveMap({ dataStore, focusSupportId = '', onClearFocus, onNavigate, onBackToInfrastructures, hasInfrastructureContext = false, role }) {
   const infrastructures = dataStore?.Infrastructures?.rows || [];
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [bounds, setBounds] = useState(null);
@@ -195,6 +196,7 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
 
   return (
     <div className="map-page">
+      {onBackToInfrastructures && <button type="button" className="map-context-back" onClick={onBackToInfrastructures}><ArrowLeft size={18}/> {hasInfrastructureContext ? 'Retour aux infrastructures' : 'Infrastructures'}</button>}
       <header className="map-hero">
         <div>
           <h1><MapPin/> Carte interactive</h1>
