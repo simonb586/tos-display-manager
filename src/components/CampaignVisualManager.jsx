@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Archive, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { listMasterCampaigns } from '../services/campaignService';
 import { BUSINESS_CONTEXT, isBusinessContext } from '../lib/businessContext';
+import { clearFormDraft, readFormDraft, writeFormDraft } from '../lib/formDraft';
 import {
   deleteOrArchiveCampaignVisual,
   listEdtPhasesForCampaign,
@@ -23,13 +24,15 @@ const empty = {
 };
 
 export default function CampaignVisualManager({ role, businessContext = BUSINESS_CONTEXT.MARKETING }) {
+  const initialDraft = readFormDraft('visual', businessContext, { form: empty, formOpen: false });
   const [campaigns, setCampaigns] = useState([]);
   const [visuals, setVisuals] = useState([]);
-  const [form, setForm] = useState(empty);
-  const [formOpen, setFormOpen] = useState(false);
+  const [form, setForm] = useState(initialDraft.form);
+  const [formOpen, setFormOpen] = useState(Boolean(initialDraft.formOpen));
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const [edts, setEdts] = useState([]);
+  const [hydratedContext, setHydratedContext] = useState(businessContext);
 
   const canManage = ['Administrateur', 'Coordonnateur'].includes(role);
 
@@ -51,6 +54,20 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
   }, [businessContext]);
 
   useEffect(() => {
+    setHydratedContext(null);
+    const draft = readFormDraft('visual', businessContext, { form: empty, formOpen: false });
+    setForm(draft.form);
+    setFormOpen(Boolean(draft.formOpen));
+    setHydratedContext(businessContext);
+  }, [businessContext]);
+
+  useEffect(() => {
+    if (hydratedContext !== businessContext) return;
+    if (formOpen) writeFormDraft('visual', businessContext, { form, formOpen });
+    else clearFormDraft('visual', businessContext);
+  }, [businessContext, form, formOpen, hydratedContext]);
+
+  useEffect(() => {
     listEdtPhasesForCampaign(form.campagne_id).then(setEdts).catch(error => setMessage(error.message));
   }, [form.campagne_id]);
 
@@ -62,6 +79,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
     try {
       await saveCampaignVisual(form);
       setMessage(form.id ? 'Visuel modifié.' : 'Visuel enregistré.');
+      clearFormDraft('visual', businessContext);
       setForm(empty);
       setFormOpen(false);
       await reload();
@@ -111,6 +129,12 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
     });
     setFormOpen(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function discardDraft() {
+    clearFormDraft('visual', businessContext);
+    setForm(empty);
+    setFormOpen(false);
   }
 
   return (
@@ -224,16 +248,9 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
                   <Save/> {form.id ? 'Enregistrer les modifications' : 'Enregistrer'}
                 </button>
 
-                {form.id && (
-                  <button
-                    type="button"
-                    className="secondary"
-                    disabled={busy}
-                    onClick={() => { setForm(empty); setFormOpen(false); }}
-                  >
-                    <X/> Annuler
-                  </button>
-                )}
+                <button type="button" className="secondary" disabled={busy} onClick={discardDraft}>
+                  <X/> Annuler
+                </button>
               </div>
             </form>
           </section>

@@ -2,14 +2,18 @@ import React,{useEffect,useState}from'react';
 import{Eye,EyeOff,Megaphone,Pencil,Plus,Save,Trash2,X}from'lucide-react';
 import{deleteOrArchiveMasterCampaign,listAssignableClients,listMasterCampaigns,saveMasterCampaign}from'../services/campaignService';
 import{BUSINESS_CONTEXT,BUSINESS_CONTEXT_OPTIONS,businessContextLabel}from'../lib/businessContext';
+import{clearFormDraft,readFormDraft,writeFormDraft}from'../lib/formDraft';
 
 const blank=context=>({nom_campagne:'',code_campagne:'',client:'',client_id:'',type_campagne:'Installation',visuel_generique:'',no_edt:'',statut:'Brouillon',publiee_terrain:false,instructions_terrain:'',business_context:context});
 export default function CampaignsPanel({role,businessContext=BUSINESS_CONTEXT.MARKETING}){
- const[campaigns,setCampaigns]=useState([]),[clients,setClients]=useState([]),[form,setForm]=useState(()=>blank(businessContext)),[formOpen,setFormOpen]=useState(false),[message,setMessage]=useState(''),[busy,setBusy]=useState(false);
+ const initial=readFormDraft('campaign',businessContext,{form:blank(businessContext),formOpen:false});
+ const[campaigns,setCampaigns]=useState([]),[clients,setClients]=useState([]),[form,setForm]=useState(initial.form),[formOpen,setFormOpen]=useState(Boolean(initial.formOpen)),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[hydratedContext,setHydratedContext]=useState(businessContext);
  const canManage=['Administrateur','Coordonnateur'].includes(role);
  async function reload(){try{const[campaignRows,clientRows]=await Promise.all([listMasterCampaigns(false,businessContext),listAssignableClients()]);setCampaigns(campaignRows);setClients(clientRows);}catch(e){setMessage(e.message);}}
- useEffect(()=>{setForm(blank(businessContext));setFormOpen(false);reload();},[businessContext]);
- async function submit(e){e.preventDefault();if(busy)return;setBusy(true);try{const editing=Boolean(form.id);await saveMasterCampaign(form);setForm(blank(businessContext));setFormOpen(false);await reload();setMessage(editing?'Communication modifiée.':'Communication enregistrée.');}catch(e){setMessage(e.message);}finally{setBusy(false);}}
+ useEffect(()=>{setHydratedContext(null);const draft=readFormDraft('campaign',businessContext,{form:blank(businessContext),formOpen:false});setForm(draft.form);setFormOpen(Boolean(draft.formOpen));setHydratedContext(businessContext);reload();},[businessContext]);
+ useEffect(()=>{if(hydratedContext!==businessContext)return;if(formOpen)writeFormDraft('campaign',businessContext,{form,formOpen});else clearFormDraft('campaign',businessContext);},[businessContext,form,formOpen,hydratedContext]);
+ function discard(){clearFormDraft('campaign',businessContext);setForm(blank(businessContext));setFormOpen(false);}
+ async function submit(e){e.preventDefault();if(busy)return;setBusy(true);try{const editing=Boolean(form.id);await saveMasterCampaign(form);clearFormDraft('campaign',businessContext);setForm(blank(businessContext));setFormOpen(false);await reload();setMessage(editing?'Communication modifiée.':'Communication enregistrée.');}catch(e){setMessage(e.message);}finally{setBusy(false);}}
  function edit(c){setForm({...blank(businessContext),...c});setFormOpen(true);window.scrollTo({top:0,behavior:'smooth'});}
  async function remove(c){if(busy||!window.confirm(`Supprimer ou archiver « ${c.nom_campagne} »? Ses photos, rapports et historiques seront conservés.`))return;setBusy(true);try{const result=await deleteOrArchiveMasterCampaign(c.id);setMessage(result?.action==='archived'?'Les dépendances sont conservées et l’élément a été archivé.':'Élément supprimé.');await reload();}catch(e){setMessage(e.message);}finally{setBusy(false);}}
  const title=businessContextLabel(businessContext);

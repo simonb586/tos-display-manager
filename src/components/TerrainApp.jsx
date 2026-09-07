@@ -97,7 +97,7 @@ export default function TerrainApp({ dataStore, role, session }) {
       : []
   ), [query, rows, idField]);
 
-  async function loadVisuals(row) {
+  async function loadVisuals(row, phaseId = issuePhaseId) {
     const requestId = ++visualRequestRef.current;
     if (source !== 'Infrastructure') {
       setVisuals([]);
@@ -110,7 +110,7 @@ export default function TerrainApp({ dataStore, role, session }) {
     setMessageType('info');
 
     try {
-      const result = await diagnoseCompatibleVisualsForSupport(row);
+      const result = await diagnoseCompatibleVisualsForSupport(row, phaseId);
       if (requestId !== visualRequestRef.current) return;
       setVisuals(result.visuals);
       setVisualDiagnostic(result.diagnostic);
@@ -148,7 +148,7 @@ export default function TerrainApp({ dataStore, role, session }) {
     setMessageType('info');
     setIssueContexts([]);
     setIssuePhaseId('');
-    await Promise.all([loadVisuals(row), loadIssueContexts(row)]);
+    await loadIssueContexts(row);
   }
 
   async function loadIssueContexts(row) {
@@ -157,7 +157,10 @@ export default function TerrainApp({ dataStore, role, session }) {
     try {
       const contexts = await listTerrainIssueContexts(row.support_id);
       setIssueContexts(contexts);
-      setIssuePhaseId(contexts.length === 1 ? String(contexts[0].phase_id) : '');
+      const installations = contexts.filter(context => context.phase_type === 'installation');
+      const phaseId = installations.length === 1 ? String(installations[0].phase_id) : '';
+      setIssuePhaseId(phaseId);
+      if (phaseId) await loadVisuals(row, phaseId);
     } catch (error) {
       console.error('Contexte EDT/phase Terrain indisponible', error);
       setIssueContexts([]);
@@ -180,6 +183,12 @@ export default function TerrainApp({ dataStore, role, session }) {
     if (requiresVisual && !visualId) {
       setMessageType('error');
       setMessage('Sélectionne un visuel compatible pour une installation.');
+      return;
+    }
+
+    if (requiresVisual && !issuePhaseId) {
+      setMessageType('error');
+      setMessage('Sélectionne le contexte EDT et la phase d’installation.');
       return;
     }
 
@@ -213,6 +222,7 @@ export default function TerrainApp({ dataStore, role, session }) {
       try { if (source === 'Infrastructure' && action === 'installation') {
         const result = await finalizeTerrainInstallation({
           supportId: selected.support_id,
+          phaseId: issuePhaseId,
           visualId,
           fileName: uploaded.normalizedFilename,
           storagePath: uploaded.path,
@@ -358,6 +368,28 @@ export default function TerrainApp({ dataStore, role, session }) {
           {requiresVisual && selected && (
             <>
               <label>
+                Contexte EDT / phase d’installation
+                <select
+                  required
+                  disabled={issueContextsLoading}
+                  value={issuePhaseId}
+                  onChange={event => {
+                    const phaseId = event.target.value;
+                    setIssuePhaseId(phaseId);
+                    setVisualId('');
+                    setVisuals([]);
+                    if (phaseId) loadVisuals(selected, phaseId);
+                  }}
+                >
+                  <option value="">Sélectionner le contexte</option>
+                  {issueContexts.filter(context => context.phase_type === 'installation').map(context => (
+                    <option key={context.phase_id} value={context.phase_id}>
+                      {context.edt_number} — {context.phase_name || 'Installation'}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
                 Visuel compatible
                 <select
                   required
@@ -370,9 +402,7 @@ export default function TerrainApp({ dataStore, role, session }) {
                   </option>
                   {visuals.map(item => (
                     <option key={item.id} value={item.id}>
-                      {item.nom_visuel}
-                      {item.phase ? ` — ${item.phase}` : ''}
-                      {` — ${item.format_support}`}
+                      {item.nom_visuel} — {item.campagne?.nom_campagne} — {item.format_support} — {item.business_context === 'operational_communication' ? 'Communication opérationnelle' : 'Marketing'}{item.is_out_of_frame ? ' — Hors-Cadre' : ''}
                     </option>
                   ))}
                 </select>
@@ -415,6 +445,7 @@ export default function TerrainApp({ dataStore, role, session }) {
             <div className="terrain-campaign-summary">
               <b>{visual.nom_visuel}</b>
               <span>Campagne : {visual.campagne?.nom_campagne}</span>
+              <span>Contexte : {visual.business_context === 'operational_communication' ? 'Communication opérationnelle' : 'Marketing'}</span>
               <span>Phase : {visual.phase || '—'}</span>
               <span>EDT : {visual.campagne?.no_edt || '—'}</span>
             </div>

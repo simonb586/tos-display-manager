@@ -1,11 +1,8 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
 import {
-  normalizeCampaignStatus,
   normalizeDisplayFormat,
   supportDisplayFormat
 } from '../lib/displayFormat';
-import { isVisualFormatCompatible } from '../lib/visualCompatibility';
-import { BUSINESS_CONTEXT } from '../lib/businessContext';
 
 export { normalizeDisplayFormat, supportDisplayFormat } from '../lib/displayFormat';
 
@@ -17,7 +14,7 @@ function ready() {
   }
 }
 
-export async function diagnoseCompatibleVisualsForSupport(support) {
+export async function diagnoseCompatibleVisualsForSupport(support, phaseId) {
   ready();
 
   const supportFormat = supportDisplayFormat(support);
@@ -35,35 +32,23 @@ export async function diagnoseCompatibleVisualsForSupport(support) {
     reason: ''
   };
 
-  if (!supportFormatKey) {
-    return {
-      visuals: [],
-      diagnostic: {
-        ...baseDiagnostic,
-        reason: 'Le support ne possède aucun format exploitable.'
-      }
-    };
+  if (!phaseId) {
+    return { visuals: [], diagnostic: { ...baseDiagnostic, reason: 'Sélectionne d’abord la phase d’installation.' } };
   }
 
-  const { data, error } = await supabase
-    .from('campagne_visuels_formats')
-    .select('*, campagne:campagne_id(*)')
-    .eq('actif', true)
-    .order('phase')
-    .order('nom_visuel');
+  const { data, error } = await supabase.rpc('lister_visuels_installation_terrain_v1331', {
+    p_support_id: String(support?.support_id || ''),
+    p_edt_phase_id: Number(phaseId)
+  });
 
   if (error) {
     throw new Error(`Lecture des visuels impossible : ${error.message || error}`);
   }
 
-  const activeVisuals = data || [];
-  const sameFormat = activeVisuals.filter(visual => isVisualFormatCompatible(visual, support));
-  const published = sameFormat.filter(
-    visual => visual.campagne?.publiee_terrain === true && (visual.campagne?.business_context || BUSINESS_CONTEXT.MARKETING) === BUSINESS_CONTEXT.MARKETING
-  );
-  const activeCampaigns = published.filter(
-    visual => normalizeCampaignStatus(visual.campagne?.statut) === 'active'
-  );
+  const activeCampaigns = Array.isArray(data) ? data : [];
+  const activeVisuals = activeCampaigns;
+  const sameFormat = activeCampaigns;
+  const published = activeCampaigns;
   const availableFormats = [...new Set(
     activeVisuals
       .map(visual => String(visual.format_support || '').trim())
@@ -96,8 +81,8 @@ export async function diagnoseCompatibleVisualsForSupport(support) {
   };
 }
 
-export async function listCompatibleVisualsForSupport(support) {
-  const result = await diagnoseCompatibleVisualsForSupport(support);
+export async function listCompatibleVisualsForSupport(support, phaseId) {
+  const result = await diagnoseCompatibleVisualsForSupport(support, phaseId);
   return result.visuals;
 }
 
