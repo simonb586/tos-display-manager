@@ -44,6 +44,7 @@
     "test:terrain-rpc-security-v1342": "node ./scripts/verify_terrain_rpc_security_v1342.mjs",
     "test:terrain-issue-context-v1342": "node ./scripts/verify_terrain_issue_context_v1342.mjs",
     "test:terrain-many-to-many-v1331": "node ./scripts/verify_terrain_many_to_many_v1331.mjs",
+    "test:terrain-visual-priority-v1332": "node ./scripts/verify_terrain_visual_priority_v1332.mjs",
     "test:workspace": "node ./scripts/verify_workspace_policy.mjs && node ./scripts/verify_workspace_path_contract.mjs",
     "test:clients-v135": "node ./scripts/verify_clients_access_admin_v135.mjs",
     "test:client-role-views-v136": "node ./scripts/verify_client_role_views_v136.mjs",
