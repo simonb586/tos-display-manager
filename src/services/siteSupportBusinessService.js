@@ -58,10 +58,10 @@ export function canonicalAssignmentRows(assignments,campaigns,infrastructures,vi
   });
 }
 
-async function loadRows(context,signal){
+async function loadRows(context,signal,infrastructureRows){
   const [historical,assignments,campaigns,infrastructures,visuals]=await Promise.all([
     fetchAll(tableFor(context),'*',signal),fetchAll('campagnes_supports','*',signal),fetchAll('campagnes_maitres','*',signal),
-    fetchAll('infrastructures','id,support_id,site,emplacement_visibilite',signal),
+    infrastructureRows ?? fetchAll('infrastructures','id,support_id,site,emplacement_visibilite',signal),
     fetchAll('campagne_visuels_formats','id,campagne_id,nom_visuel',signal)
   ]);
   const current=canonicalAssignmentRows(assignments,campaigns,infrastructures,visuals).filter(row=>row.business_context===context);
@@ -101,7 +101,7 @@ export async function getAssignmentsBySiteAndSupport({context=BUSINESS_CONTEXT.M
 export const getMarketingAssignmentsBySiteAndSupport=options=>getAssignmentsBySiteAndSupport({...options,context:BUSINESS_CONTEXT.MARKETING});
 export const getOperationalCommunicationAssignmentsBySiteAndSupport=options=>getAssignmentsBySiteAndSupport({...options,context:BUSINESS_CONTEXT.OPERATIONAL});
 
-export async function getAllAssignmentsBySiteAndSupport({context=BUSINESS_CONTEXT.MARKETING,search='',filters={},sortState=null}={}){
+export async function getAllAssignmentsBySiteAndSupport({context=BUSINESS_CONTEXT.MARKETING,search='',filters={},sortState=null,infrastructureRows}={}){
   if(!supabaseConfigured||!supabase)return[];
-  return prepareRows(await loadRows(context),context,search,filters,sortState);
+  return prepareRows(await loadRows(context,undefined,infrastructureRows),context,search,filters,sortState);
 }

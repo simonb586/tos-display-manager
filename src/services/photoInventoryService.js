@@ -1,6 +1,13 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
 import { getSignedPhotoUrls } from './photoAccessService';
 
+export async function countSupportPhotos() {
+  if (!supabaseConfigured || !supabase) throw new Error('Service photo indisponible.');
+  const { count, error } = await supabase.from('support_photos').select('id', { count:'exact', head:true }).is('deleted_at',null);
+  if (error) throw error;
+  return count;
+}
+
 export async function listSupportPhotosForValidation() {
   if (!supabaseConfigured || !supabase) return [];
   const { data, error } = await supabase

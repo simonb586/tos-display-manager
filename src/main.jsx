@@ -124,7 +124,7 @@ const tableConfig = {
 
 const STARTUP_TABLES = [
   'Infrastructures', 'Liste des arrêts', 'Suivi des EDT',
-  'Bons de travail', 'Enjeux des cadres et supports', 'Photos'
+  'Bons de travail', 'Enjeux des cadres et supports', 'Photos', 'Clients'
 ];
 
 const icons = {
@@ -589,7 +589,9 @@ function App() {
     try {
       const selectedConfig = Object.fromEntries(labels.filter(label => tableConfig[label]).map(label => [label, tableConfig[label]]));
       if (force) clearTableCache(Object.values(selectedConfig).flatMap(config => config.cacheTables || [config.table]));
-      const ds = await loadManyTables(selectedConfig);
+      const ds = await loadManyTables(selectedConfig, { onTable: (label, value) => {
+        if (dataScope.current === scope) setDataStore(current => ({ ...(current || {}), [label]: value }));
+      } });
       if(dataScope.current !== scope) return null;
       setDataStore(current => ({ ...(current || {}), ...ds }));
       return ds;
@@ -607,8 +609,8 @@ function App() {
     clearSignedPhotoUrlCache();
     setDataStore(null);
     if (['Client','Client-Admin'].includes(profile.role)) { setDataStore(null); setLoading(false); return; }
-    setLoading(true);
-    refreshDataStore(STARTUP_TABLES).finally(() => setLoading(false));
+    setLoading(false);
+    refreshDataStore(STARTUP_TABLES);
   }, [session?.user?.id, profile?.id, profile?.role, profile?.client_id, profileLoading]);
 
   useEffect(() => {

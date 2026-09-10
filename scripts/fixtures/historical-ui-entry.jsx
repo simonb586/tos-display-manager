@@ -9,8 +9,9 @@ window.testApi=(file,name,args)=>{
  if(name==='marketingRows'||name==='uniqueMarketingAssignments')return (args[0]||[]).filter(r=>r.business_context==='marketing');
  if(name==='operationalRows'||name==='uniqueOperationalAssignments')return (args[0]||[]).filter(r=>r.business_context==='operational_communication');
  window.calls.push({name,args});
- if(name==='loadModule14Data')return Promise.resolve({campaigns:[marketing,operational],visuals:[],assignments:[],contextAvailable:true});
- if(name==='loadModule14OperationalKpis')return Promise.resolve(Object.fromEntries(['terrain','reports','reportsSent','reportsToSend','reportsErrors'].map((k,i)=>[k,{status:'available',value:i+2}])));
+ if(name==='countSupportPhotos')return Promise.resolve(12);
+ if(name==='loadModule14Data')return Promise.resolve({campaigns:[marketing,operational],visuals:[],assignments:[],contextAvailable:true,available:true});
+ if(name==='loadModule14OperationalKpis')return Promise.resolve({reportsCompleted:{status:'available',value:3},...Object.fromEntries(['terrain','reports','reportsSent','reportsToSend','reportsErrors'].map((k,i)=>[k,{status:'available',value:i+2}]))});
  if(name==='listRecentBusinessActivity')return Promise.resolve([]);
  if(name.includes('AssignmentsBySiteAndSupport')){const q=args[0]||{};return Promise.resolve({rows:[{...marketing,logical_key:'fixture-1',support_id:'EXO-2',no_edt:'EDT-1',campaign_id:1,visual_id:34}],total:60,page:q.page||1,pageSize:q.pageSize||25})}
  throw Error('Missing fixture '+file+':'+name);

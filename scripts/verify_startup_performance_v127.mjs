@@ -11,7 +11,7 @@ for (const component of ['InteractiveMap', 'TerrainApp', 'PhotoInventoryCenter',
 }
 assert.ok(!/^import .*['"](?:xlsx|jspdf)['"];?$/m.test(utils), 'Bibliothèque export chargée initialement');
 assert.ok(utils.includes("await import('xlsx')") && utils.includes("await import('jspdf')"), 'Exports dynamiques absents');
-assert.ok(main.includes('STARTUP_TABLES') && main.includes('loadManyTables(selectedConfig)'), 'Chargement initial ciblé absent');
+assert.ok(main.includes('STARTUP_TABLES') && /loadManyTables\(selectedConfig[,)]/.test(main), 'Chargement initial ciblé absent');
 assert.ok(dataService.includes('CACHE_TTL_MS') && dataService.includes('pendingLoads'), 'Cache court ou déduplication absent');
 const assets = fs.readdirSync('dist/assets').map(name => ({ name, size: fs.statSync(path.join('dist/assets', name)).size }));
 const initial = assets.filter(asset => /^index-[^.]+\.js$/.test(asset.name)).sort((a, b) => b.size - a.size)[0];

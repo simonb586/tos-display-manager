@@ -1,0 +1,19 @@
+﻿import React from 'react';import{createRoot}from'react-dom/client';import Dashboard from'../../src/components/Module14Dashboard';import Reports from'../../src/components/Module15Reports';import Portal from'../../src/components/ClientPortal';
+const root=createRoot(document.getElementById('root'));let key=0;
+const stores={Infrastructures:{rows:[{actif:true},{actif:false}]},Photos:{rows:[{}]},Clients:{rows:[{},{}]},'Suivi des EDT':{rows:[{statut:'Complété'},{statut:'En cours'}]},'Bons de travail':{rows:[]},'Enjeux des cadres et supports':{rows:[{statut:'Résolu'},{statut:'Ouvert'}]}};
+window.testApi=(file,name,args)=>{
+ window.calls.push({name,args});
+ if(['marketingRows','uniqueMarketingAssignments'].includes(name))return args[0].filter(r=>r.business_context==='marketing');
+ if(['operationalRows','uniqueOperationalAssignments'].includes(name))return args[0].filter(r=>r.business_context==='operational_communication');
+ if(name==='countSupportPhotos')return Promise.resolve(12);
+ if(name==='loadModule14Data')return Promise.resolve({campaigns:[{business_context:'marketing',statut:'Active'},{business_context:'operational_communication',statut:'Active'}],assignments:[],visuals:[],available:true});
+ if(name==='loadModule14OperationalKpis')return Promise.resolve(Object.fromEntries(['terrain','reports','reportsCompleted','reportsSent','reportsToSend','reportsErrors'].map((k,i)=>[k,{status:'available',value:i+2}])));
+ if(name==='listRecentBusinessActivity')return Promise.resolve([]);
+ if(name==='loadEdtReportTracking')return Promise.resolve({tracking:[{id:1,no_edt:'TEST-EDT',report:window.deleted?null:{id:'test-report',report_version:2,status:'ready',report_path:'TEST/file.pdf'},delivery_status:'Non envoyé'}]});
+ if(name==='deleteEdtReport')return new Promise((resolve,reject)=>{window.finishDelete=()=>{if(window.failDelete)reject(Error('refused'));else{window.deleted=true;resolve('test-report')}}});
+ if(name==='getClientPortalIdentity')return Promise.resolve({role:'Client',client_id:1});
+ if(name==='getCurrentUserVisibleViews')return Promise.resolve({visible_tables:['Photos','Infrastructures']});
+ if(name==='listClientPortalSection')return new Promise(resolve=>{window.sectionPending.push(()=>resolve({rows:[],total:12,page:1,page_size:1}))});
+ throw Error('Missing fixture '+name);
+};
+window.mount=(kind,role='Administrateur',partial=false)=>{window.calls=[];window.deleted=false;window.confirmed=false;window.confirmCalls=0;window.failDelete=false;window.sectionPending=[];window.confirm=()=>{window.confirmCalls++;return window.confirmed};root.render(kind==='dashboard'?<Dashboard key={++key} role={role} dataStore={partial?{}:stores} onNavigate={()=>{}}/>:kind==='portal'?<Portal key={++key} profile={{role:'Client'}}/>:<Reports key={++key} role={role} dataStore={{}}/>)};

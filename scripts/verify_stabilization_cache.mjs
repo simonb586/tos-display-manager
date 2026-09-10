@@ -12,3 +12,16 @@ const slow=table.loadTable('infrastructures',[],{force:true}),fast=table.loadTab
 let sign;const photo=await load('src/services/photoAccessService.js',{supabaseConfigured:true,storageLocationFromPhotoRecord:()=>({bucket:'support-photos',path:'fixture'}),supabase:{storage:{from(){return {createSignedUrl(){return new Promise(resolve=>{sign=resolve})}}}}}});
 const pending=photo.getSignedPhotoUrl({});photo.clearSignedPhotoUrlCache();sign({data:{signedUrl:'EXO-SIGNED-URL'},error:null});await assert.rejects(pending,/Session photo/);
 console.log('Table cache invalidation, competing refreshes and stale signed-photo rejection PASS.');
+let finishSlow;
+const progressive=[];
+const group=table.loadManyTables({
+ fast:{loader:async()=>({rows:[{id:1}],complete:true})},
+ slow:{loader:()=>new Promise(resolve=>{finishSlow=resolve})}
+},{onTable:(label,value)=>progressive.push({label,value})});
+await new Promise(resolve=>setTimeout(resolve,0));
+assert.deepEqual(progressive.map(row=>row.label),['fast'],'A slow table must not block available data');
+finishSlow({rows:[{id:2}],complete:true});
+const complete=await group;
+assert.equal(complete.slow.rows[0].id,2);
+assert.deepEqual(progressive.map(row=>row.label),['fast','slow']);
+console.log('Progressive table loading preserves complete results without blocking on the slowest table PASS.');

@@ -19,7 +19,7 @@ async function invokeInvitation(body){
   return data;
 }
 
-export async function listClientPortalSection(section, { page = 1, pageSize = 25, filters = {} } = {}) {
+export async function listClientPortalSection(section, { page = 1, pageSize = 25, filters = {}, resolvePhotos = true } = {}) {
   if (!ALLOWED_SECTIONS.has(section)) throw new Error('Section client non autorisée.');
   if(section==='reports')return rpc('module15_client_edt_reports_v130',{p_page:Math.max(1,Number(page)||1),p_page_size:clampSize(section,pageSize)});
   if(V1361_SECTIONS.has(section)||section==='supports')return rpc('client_portal_list_v1362',{p_section:section,p_page:Math.max(1,Number(page)||1),p_page_size:clampSize(section,pageSize),p_filters:filters});
@@ -28,7 +28,7 @@ export async function listClientPortalSection(section, { page = 1, pageSize = 25
   const result = section === 'photos'
     ? await rpc('client_portal_list_v1362', {p_section:section,p_page:Math.max(1,Number(page)||1),p_page_size:clampSize(section,pageSize),p_filters:filters})
     : await rpc('client_portal_list_v120', {p_section:section,p_page:Math.max(1,Number(page)||1),p_page_size:clampSize(section,pageSize),p_filters:filters});
-  if (section === 'photos') result.rows = await getSignedPhotoUrls(result.rows || [], { purpose:'preview' });
+  if (section === 'photos' && resolvePhotos) result.rows = await getSignedPhotoUrls(result.rows || [], { purpose:'preview' });
   return result;
 }
 export async function listClientPortalSupportContext(section,supportId){
