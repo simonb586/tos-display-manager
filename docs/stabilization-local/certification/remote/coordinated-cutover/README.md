@@ -1,5 +1,7 @@
 # Frontend compatible avec les photos privées
 
+État courant du 10 septembre 2026 : frontend déployé, bucket privé, **NO-GO** pour les anciennes URL encore servies par le CDN. Voir [le rapport de cutover](FINAL_REPORT.md). Les paragraphes ci-dessous décrivent les étapes de préparation ; ils ne constituent pas l'état courant du bucket.
+
 Le lecteur commun résout les anciennes URL Terrain et les chemins Storage en URL signées. Les grilles, galeries, cartes, fiches 360, aperçus de rapport, ZIP et Excel utilisent ce lecteur. Le PDF EDT intègre maintenant les images signées sélectionnées et refuse une génération dont une photo est inaccessible. Les caches sont invalidés au changement de session ou de client.
 
 Le lot comprend la stabilisation déjà validée des rafraîchissements, mutations, rôles, projections Client et Admin Preview, ainsi que les 16 migrations de sécurité déjà appliquées. Les handlers Edge restent préparés : ce commit ne les déploie pas. Les données et les fichiers de production ne sont pas inclus. Les fixtures navigateur sont des entrées de tests déterministes, sans compte ni fichier de production.
@@ -19,7 +21,7 @@ Le cutover n'est pas déclaré terminé par ce commit. Aucun changement de confi
 
 ## Correction trouvée pendant la validation publique
 
-Le premier déploiement a confirmé les 21 téléchargements signés Admin/Installateur, l'upload Installateur et la stabilité du portail Marylène. La vue Photos de ce dernier appelait cependant l'ancienne projection par campagne, contrairement à la projection par propriétaire déjà utilisée par l'aperçu et les fiches 360. Les 10 photos EXO visibles sans campagne étaient donc absentes du portail réel.
+Le premier déploiement a confirmé les 21 téléchargements signés Admin/Installateur, l'upload Installateur et la stabilité du portail Marylène. La vue Photos de ce dernier appelait cependant l'ancienne projection par campagne. La projection par propriétaire existait déjà dans `client_portal_list_v1362`, mais le portail et l'aperçu Admin nécessitaient chacun une correction de leur chemin de lecture. Les 10 photos EXO visibles sans campagne étaient absentes du portail réel et de l'aperçu.
 
 Le lecteur Photos appelle désormais la projection existante `client_portal_list_v1362`, avec résolution signée des références historiques. Les policies privées encore préparées autorisent ces mêmes photos sans campagne uniquement au client propriétaire ; une campagne présente garde ses exigences de publication et d'accès. Les photos masquées, supprimées et d'un autre client sont refusées. Validation ciblée : 30 cas navigateur photo et 180 cas de policies privées, check/build PASS. Le bucket reste public jusqu'à la réexécution des validations de production.
 

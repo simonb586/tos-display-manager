@@ -1,0 +1,107 @@
+{
+  "date": "2026-09-10T10:20:35.227Z",
+  "business": {
+    "cases": 118,
+    "result": "PASS",
+    "fixtures": "rolled back"
+  },
+  "rpc": {
+    "cases": 931,
+    "result": "PASS"
+  },
+  "tenantActual": {
+    "tables": 29,
+    "cases": 493,
+    "result": "PASS"
+  },
+  "tenantScope": {
+    "cases": 986,
+    "result": "PASS",
+    "batches": [
+      {
+        "offset": 0,
+        "count": 70,
+        "passed": 70
+      },
+      {
+        "offset": 70,
+        "count": 70,
+        "passed": 70
+      },
+      {
+        "offset": 140,
+        "count": 70,
+        "passed": 70
+      },
+      {
+        "offset": 210,
+        "count": 70,
+        "passed": 70
+      },
+      {
+        "offset": 280,
+        "count": 70,
+        "passed": 70
+      },
+      {
+        "offset": 350,
+        "count": 70,
+        "passed": 70
+      },
+      {
+        "offset": 420,
+        "count": 70,
+        "passed": 70
+      },
+      {
+        "offset": 490,
+        "count": 70,
+        "passed": 70
+      },
+      {
+        "offset": 560,
+        "count": 70,
+        "passed": 70
+      },
+      {
+        "offset": 630,
+        "count": 70,
+        "passed": 70
+      },
+      {
+        "offset": 700,
+        "count": 70,
+        "passed": 70
+      },
+      {
+        "offset": 770,
+        "count": 70,
+        "passed": 70
+      },
+      {
+        "offset": 840,
+        "count": 70,
+        "passed": 70
+      },
+      {
+        "offset": 910,
+        "count": 70,
+        "passed": 70
+      },
+      {
+        "offset": 980,
+        "count": 6,
+        "passed": 6
+      }
+    ],
+    "initialUnbatchedAttempt": "CONNECTOR_HTTP_504_NOT_COUNTED"
+  },
+  "anonymousTableScan": {
+    "tables": 56,
+    "rows": 0
+  },
+  "nullIdentityTableScan": {
+    "tables": 56,
+    "rows": 0
+  }
+}
