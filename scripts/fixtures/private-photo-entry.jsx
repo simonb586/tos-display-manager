@@ -6,11 +6,13 @@ import {prepareAndUploadPhoto,photoHistoryRow} from '../../src/services/photoWor
 import {downloadExcelSelectionWithPhotos} from '../../src/lib/utils';
 import ExportsCenter from '../../src/components/ExportsCenter';
 import {generateEdtReportPdf} from '../../src/services/finalReportService';
+import {listClientPortalSection} from '../../src/services/clientPortalService';
 const root=createRoot(document.getElementById('root'));let key=0;
 window.photoFixture={calls:[],deny:false,hold:false,pending:[],offset:0};
 const now=Date.now;Date.now=()=>now()+photoFixture.offset;
 window.access=access;window.uploadPhoto=prepareAndUploadPhoto;window.photoHistoryRow=photoHistoryRow;
 window.exportXlsx=downloadExcelSelectionWithPhotos;
+window.listClientPhotos=()=>listClientPortalSection('photos');
 window.generatePhotoPdf=async photo=>{
  const blob=await generateEdtReportPdf({title:'Rapport photo',edt:{no_edt:'TEST-PHOTO'},section_order:['photos'],photos:[{...photo,selected:true}]});
  return blob.text();

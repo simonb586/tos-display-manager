@@ -23,7 +23,11 @@ export async function listClientPortalSection(section, { page = 1, pageSize = 25
   if (!ALLOWED_SECTIONS.has(section)) throw new Error('Section client non autorisée.');
   if(section==='reports')return rpc('module15_client_edt_reports_v130',{p_page:Math.max(1,Number(page)||1),p_page_size:clampSize(section,pageSize)});
   if(V1361_SECTIONS.has(section)||section==='supports')return rpc('client_portal_list_v1362',{p_section:section,p_page:Math.max(1,Number(page)||1),p_page_size:clampSize(section,pageSize),p_filters:filters});
-  const result = await rpc('client_portal_list_v120', {p_section:section,p_page:Math.max(1,Number(page)||1),p_page_size:clampSize(section,pageSize),p_filters:filters});
+  // The ownership-based photo projection also includes visible infrastructure
+  // evidence without a campaign, matching the existing preview and 360 RPCs.
+  const result = section === 'photos'
+    ? await rpc('client_portal_list_v1362', {p_section:section,p_page:Math.max(1,Number(page)||1),p_page_size:clampSize(section,pageSize),p_filters:filters})
+    : await rpc('client_portal_list_v120', {p_section:section,p_page:Math.max(1,Number(page)||1),p_page_size:clampSize(section,pageSize),p_filters:filters});
   if (section === 'photos') result.rows = await getSignedPhotoUrls(result.rows || [], { purpose:'preview' });
   return result;
 }
