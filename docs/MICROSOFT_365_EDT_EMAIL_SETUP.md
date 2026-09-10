@@ -1,4 +1,14 @@
-# Microsoft 365 — envoi du rapport final EDT
+# Envoi du rapport final EDT — configuration actuelle et historique Microsoft 365
+
+Depuis le 10 septembre 2026, sur accord explicite, `send-edt-completion-email` utilise Resend avec `noreply@groupetos.com`, comme les invitations et `send-final-report`. La boîte Microsoft 365 `noreply` n'existe pas ; son envoi Graph a été refusé avant livraison. La configuration Graph ci-dessous est historique et ne doit plus être utilisée pour déployer ce worker.
+
+Configuration serveur actuelle : `RESEND_API_KEY`, `CLIENT_PORTAL_URL` et les identifiants Supabase existants. Le secret `EDT_EMAIL_WORKER_SECRET` reste réservé au traitement serveur. L'appel utilisateur exige une identité canonique et un EDT autorisé explicitement désigné. Aucun secret n'est exposé au frontend.
+
+L'envoi appelle `POST https://api.resend.com/emails` avec une clé d'idempotence propre à la demande et au rapport. Les retries réutilisent cette clé ; un renvoi explicite crée une demande distincte. Les PDF restent privés et le chemin est résolu depuis le rapport archivé. Voir [API d'envoi](https://resend.com/docs/api-reference/emails/send-email) et [idempotence Resend](https://resend.com/docs/dashboard/emails/idempotency-keys).
+
+Le lien exige également un compte Client ou Client-Admin actif, la vue Rapports autorisée, une campagne publiée et accessible ainsi qu'un EDT et un rapport visibles. Sans ces conditions, le PDF est joint dans la limite de 2 500 000 octets. Le lien ouvre la vue Rapports seulement si elle est déjà autorisée ; son bouton de téléchargement utilise la session courante et les règles Storage.
+
+## Configuration historique, remplacée
 
 Cette préparation n’envoie aucun courriel tant que la migration, la fonction, les secrets et le traitement planifié ne sont pas validés et déployés manuellement.
 

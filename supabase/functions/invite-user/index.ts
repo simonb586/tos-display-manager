@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { AuthorizationError, requireCanonicalUser, requireClientOwner, requireTargetScope } from '../_shared/canonicalUser.ts';
 
 const corsHeaders = {'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS'};
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...corsHeaders,'Content-Type':'application/json'}});
@@ -36,13 +37,11 @@ Deno.serve(async request=>{
     const admin=createClient(supabaseUrl,serverKey,{auth:{persistSession:false,autoRefreshToken:false}});
     const{data:authData,error:authError}=await caller.auth.getUser();
     if(authError||!authData.user)return json({error:'Session invalide.'},401);
-    const{data:callerProfile,error:callerError}=await admin.from('utilisateurs').select('id,role,statut,client_id,organisation,courriel').or(`auth_user_id.eq.${authData.user.id},courriel.eq.${authData.user.email}`).maybeSingle();
-    if(callerError)throw callerError;
-    if(!callerProfile||String(callerProfile.statut||'').toLowerCase()!=='actif')return json({error:'Profil actif requis.'},403);
+    const callerProfile=await requireCanonicalUser(admin,authData.user,['Administrateur','Client-Admin','Client']);
     const body=await request.json();
 
     if(body.action==='complete_client_activation'){
-      if(!['Client','Client-Admin'].includes(callerProfile.role)||!callerProfile.client_id)return json({error:'Profil client requis.'},403);
+      if(!['Client','Client-Admin'].includes(callerProfile.role)||!callerProfile.client_id||!authData.user.email_confirmed_at)return json({error:'Profil client activé requis.'},403);
       const{error}=await admin.from('client_member_invitations').update({status:'accepted'}).eq('client_id',callerProfile.client_id).eq('email',String(authData.user.email||'').toLowerCase()).eq('status','pending');
       if(error)throw error;
       return json({ok:true,status:'accepted'});
@@ -55,7 +54,7 @@ Deno.serve(async request=>{
     const nom=String(body.nom||'').trim();
     let role=String(body.role||'Installateur').trim();
     let organisation=String(body.organisation||'').trim();
-    let clientId=body.client_id?Number(body.client_id):null;
+    let clientId=body.client_id===null||body.client_id===undefined||body.client_id===''?null:Number(body.client_id);
     const redirectTo=`${publicSiteUrl()}/accept-invitation`;
     if(!email||!email.includes('@'))return json({error:'Courriel valide obligatoire.'},400);
 
@@ -77,7 +76,19 @@ Deno.serve(async request=>{
 
     const allowedRoles=['Administrateur','Coordonnateur','Installateur','Client-Admin','Client'];
     if(!allowedRoles.includes(role))return json({error:'Rôle invalide.'},400);
+    if(['Client','Client-Admin'].includes(role)&&clientId===null)return json({error:'Client propriétaire requis.'},400);
+    await requireClientOwner(admin,clientId);
+    requireTargetScope(callerProfile,clientId);
+    const {data:targetProfile,error:targetError}=await admin.from('utilisateurs').select('auth_user_id,client_id,role,premiere_connexion_le,invitation_statut').eq('courriel',email).maybeSingle();
+    if(targetError)throw targetError;
+    if(targetProfile){
+      requireTargetScope(callerProfile,targetProfile.client_id);
+      if(clientAdminOrigin&&targetProfile.role!=='Client')return json({error:'client_role_denied'},403);
+      if(targetProfile.client_id!==clientId)return json({error:'Une invitation ne peut pas transférer un compte.'},409);
+      if(targetProfile.premiere_connexion_le||String(targetProfile.invitation_statut||'').toLowerCase()==='compte activé')return json({error:'Ce compte est déjà activé.'},409);
+    }
     let authUser=await findUser(admin,email);
+    if(targetProfile?.auth_user_id&&authUser&&targetProfile.auth_user_id!==authUser.id)return json({error:'profile_identity_mismatch'},409);
     if(clientAdminOrigin&&authUser?.email_confirmed_at)return json({error:'Un compte existe déjà pour cette adresse.'},409);
     if(authUser?.email_confirmed_at)return json({error:'Ce compte est déjà activé. Utilisez la récupération de mot de passe.'},409);
     const result=await admin.auth.admin.inviteUserByEmail(email,{redirectTo,data:{nom,role,organisation,account_activated:false}});
@@ -89,5 +100,5 @@ Deno.serve(async request=>{
     const{data:profile,error:profileError}=await admin.from('utilisateurs').upsert({auth_user_id:authUser?.id||null,nom,courriel:email,role,organisation,statut:authUser?.banned_until?'Désactivé':'Actif',invitation_statut:lifecycle,invitation_envoyee_le:invitationSent?new Date().toISOString():null,client_id:clientId,updated_at:new Date().toISOString()},{onConflict:'courriel'}).select().single();
     if(profileError)return json({error:`Profil non enregistré : ${profileError.message}`},500);
     return json({ok:true,invitation_sent:invitationSent,redirect_to:redirectTo,profile,message:`Invitation envoyée vers ${redirectTo}`});
-  }catch(error){console.error(error);return json({error:error.message||String(error)},500);}
+  }catch(error){if(error instanceof AuthorizationError)return json({error:error.message},error.status);console.error(error);return json({error:error.message||String(error)},500);}
 });

@@ -265,7 +265,7 @@ export async function uploadFinalReport({ blob, context, edtId }) {
   const cleanEdt = String(context.edtNumber || edtId || 'rapport')
     .replace(/[^a-zA-Z0-9_-]/g, '_');
 
-  const path = `${cleanEdt}/${Date.now()}-rapport-final.pdf`;
+  const path = `${cleanEdt}/${crypto.randomUUID()}-rapport-final.pdf`;
 
   const { error: uploadError } = await supabase.storage
     .from('final-reports')
@@ -332,6 +332,7 @@ export async function closeEdtAndSendFinalReport({
   const reportPath = await uploadFinalReport({ blob: pdfBlob, context, edtId });
 
   const communication = await createCommunicationLog({
+    client_id: edt.client_id,
     edt_id: String(edtId || ''),
     numero_edt: context.edtNumber,
     campagne: context.campaignName,

@@ -1,4 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import {AuthorizationError} from '../_shared/canonicalUser.ts';
+import {requireReportActor, requireReportEdt, requireReportPath} from '../_shared/reportAuthorization.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,6 +19,7 @@ Deno.serve(async request => {
   if (request.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
+  if (request.method !== 'POST') return json({error: 'method_not_allowed'}, 405);
 
   try {
     const authHeader = request.headers.get('Authorization');
@@ -31,10 +34,6 @@ Deno.serve(async request => {
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     const sender = Deno.env.get('REPORT_FROM_EMAIL') || 'noreply@groupetos.com';
 
-    if (!resendApiKey) {
-      return json({ error: 'Le secret RESEND_API_KEY est absent.' }, 500);
-    }
-
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } }
     });
@@ -45,29 +44,29 @@ Deno.serve(async request => {
       return json({ error: 'Session invalide.' }, 401);
     }
 
-    const { data: profile } = await userClient
-      .from('utilisateurs')
-      .select('role, statut')
-      .eq('auth_user_id', userData.user.id)
-      .maybeSingle();
-
-    if (!profile || profile.statut !== 'Actif' || !['Administrateur', 'Coordonnateur'].includes(profile.role)) {
-      return json({ error: 'Accès refusé.' }, 403);
-    }
+    const admin = createClient(supabaseUrl, serviceRoleKey);
+    const actor = await requireReportActor(admin, userClient);
 
     const body = await request.json();
     const recipients = Array.isArray(body.recipients) ? body.recipients : [];
     const cc = Array.isArray(body.cc) ? body.cc : [];
 
-    if (!recipients.length || !body.reportPath) {
+    if (!recipients.length || !body.communicationId) {
       return json({ error: 'Destinataire ou rapport manquant.' }, 400);
     }
 
-    const admin = createClient(supabaseUrl, serviceRoleKey);
+    const {data: communication, error: communicationError} = await admin.from('communications_finales')
+      .select('id,edt_id,client_id,report_path,report_snapshot').eq('id', body.communicationId).maybeSingle();
+    if (communicationError || !communication) throw new AuthorizationError('report_not_found');
+    const edt = await requireReportEdt(admin, communication.edt_id, actor);
+    if (communication.client_id !== edt.client_id) throw new AuthorizationError('report_client_mismatch');
+    const reportPath = requireReportPath(communication, edt);
+    if (body.reportPath && body.reportPath !== reportPath) throw new AuthorizationError('report_path_mismatch');
+    if (!resendApiKey) return json({error: 'Le secret RESEND_API_KEY est absent.'}, 500);
 
-    const { data: report, error: reportError } = await admin.storage
+    const { data: report, error: reportError } = await userClient.storage
       .from('final-reports')
-      .download(body.reportPath);
+      .download(reportPath);
 
     if (reportError || !report) {
       return json({ error: 'Le PDF archivé est introuvable.' }, 404);
@@ -81,7 +80,7 @@ Deno.serve(async request => {
     }
 
     const base64 = btoa(binary);
-    const context = body.context || {};
+    const context = communication.report_snapshot || {};
 
     const html = `
       <div style="font-family:Arial,sans-serif;color:#0f172a;max-width:680px;margin:auto">
@@ -133,6 +132,7 @@ Deno.serve(async request => {
 
     return json(result);
   } catch (error) {
+    if (error instanceof AuthorizationError) return json({error: error.message}, 403);
     return json({ error: error.message || String(error) }, 500);
   }
 });

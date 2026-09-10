@@ -24,15 +24,15 @@ ok(/where not manual_resend/.test(sql), 'anti-doublon automatique');
 ok((sql.match(/revoke all on function public\./g) || []).length >= 6, 'fonctions scellées');
 
 for (const token of [
-  'MS_TENANT_ID', 'MS_CLIENT_ID', 'MS_CLIENT_SECRET', 'client_credentials',
-  'graph.microsoft.com/v1.0/users/', 'noreply@groupetos.com', 'requester_contact_id',
+  'RESEND_API_KEY', 'Idempotency-Key', 'resend_send_error', 'sendReport',
+  'https://api.resend.com/emails', 'noreply@groupetos.com', 'requester_contact_id',
   "from('edt_reports')", 'report_version', 'simpleEdtPdf', 'automatic_report_generation_failed',
   'invalid_recipient_email', 'MAX_ATTEMPTS=5', 'ATTACHMENT_LIMIT=2_500_000', 'toRecipients',
   'CLIENT_PORTAL_URL', "rpc('claim_edt_completion_email_v131'", 'invalid_report_bucket'
 ]) ok(edge.includes(token), token);
 ok(!edge.includes('VITE_MS_CLIENT_SECRET'), 'aucun secret frontend');
-ok(!edge.includes('RESEND_API_KEY'), 'Resend absent');
-ok(edge.includes('response.status!==202'), 'contrat Graph 202');
+ok(!edge.includes('graph.microsoft.com'), 'Graph remplacé par Resend sur accord utilisateur');
+ok(edge.includes('!response.ok||!result.id'), 'acceptation fournisseur avec identifiant obligatoire');
 
 for (const token of ['Requérant', 'Courriel du requérant', 'Statut d’envoi', 'Réessayer', 'Renvoyer', 'window.confirm']) ok(ui.includes(token), token);
 for (const token of ['requestEdtEmail', 'processEdtEmail', "from('email_outbox')", "from('email_delivery_log')", "from('edt_reports')"]) ok(service.includes(token), token);
@@ -57,4 +57,4 @@ const sent = [{version: 1, manual: false}, {version: 2, manual: true}];
 assert.deepEqual(sent.map(item => item.manual), [false, true]);
 checks += 1;
 
-console.log(`V1.3.1 EDT email: ${checks} contrôles réussis; Microsoft Graph simulé, aucun courriel envoyé.`);
+console.log(`V1.3.1 EDT email: ${checks} contrôles réussis; Resend simulé, aucun courriel envoyé.`);

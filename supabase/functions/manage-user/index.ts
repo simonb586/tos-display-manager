@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { AuthorizationError, requireCanonicalUser, requireClientOwner, requireTargetScope } from '../_shared/canonicalUser.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -84,26 +85,17 @@ Deno.serve(async request => {
       return json({ error: 'Session invalide.' }, 401);
     }
 
-    const { data: callerProfile } = await admin
-      .from('utilisateurs')
-      .select('role,statut')
-      .or(`auth_user_id.eq.${authData.user.id},courriel.eq.${authData.user.email}`)
-      .maybeSingle();
-
-    if (
-      callerProfile?.role !== 'Administrateur' ||
-      String(callerProfile?.statut || '').toLowerCase() !== 'actif'
-    ) {
-      return json({ error: 'Accès administrateur actif requis.' }, 403);
-    }
+    const callerProfile = await requireCanonicalUser(admin,authData.user,['Administrateur']);
 
     const body = await request.json();
     const action = String(body.action || '');
 
     if (action === 'list') {
+      let profilesQuery=admin.from('utilisateurs').select('*').order('nom');
+      if(callerProfile.client_id!==null)profilesQuery=profilesQuery.eq('client_id',callerProfile.client_id);
       const [authUsers, profilesResult] = await Promise.all([
         listAllAuthUsers(admin),
-        admin.from('utilisateurs').select('*').order('nom')
+        profilesQuery
       ]);
 
       if (profilesResult.error) throw profilesResult.error;
@@ -111,6 +103,7 @@ Deno.serve(async request => {
       const authByEmail = new Map(
         authUsers.map((user: any) => [String(user.email || '').toLowerCase(), user])
       );
+      const authById = new Map(authUsers.map((user:any)=>[user.id,user]));
 
       const profileByEmail = new Map(
         (profilesResult.data || []).map((profile: any) => [
@@ -120,13 +113,13 @@ Deno.serve(async request => {
       );
 
       const emails = new Set([
-        ...authByEmail.keys(),
+        ...(callerProfile.client_id===null?authByEmail.keys():[]),
         ...profileByEmail.keys()
       ]);
 
       const users = [...emails].map(email => {
-        const authUser: any = authByEmail.get(email);
         const profile: any = profileByEmail.get(email);
+        const authUser: any = profile ? authById.get(profile.auth_user_id) : authByEmail.get(email);
 
         let lifecycle = 'Invitation envoyée';
 
@@ -157,7 +150,7 @@ Deno.serve(async request => {
       return json({ users });
     }
 
-    const email = String(body.email || '').trim().toLowerCase();
+    let email = String(body.email || '').trim().toLowerCase();
     const userId = body.user_id || null;
 
     let authUser = null;
@@ -173,6 +166,17 @@ Deno.serve(async request => {
       );
     }
 
+    if(authUser&&email&&String(authUser.email||'').toLowerCase()!==email)return json({error:'profile_identity_mismatch'},409);
+    const targetEmail=email||String(authUser?.email||'').toLowerCase();
+    if(!targetEmail)return json({error:'Courriel absent.'},400);
+    email=targetEmail;
+    const {data:targetProfile,error:targetError}=await admin.from('utilisateurs').select('*').eq('courriel',targetEmail).maybeSingle();
+    if(targetError)throw targetError;
+    if(!targetProfile)return json({error:'Profil cible introuvable.'},404);
+    await requireClientOwner(admin,targetProfile.client_id);
+    requireTargetScope(callerProfile,targetProfile.client_id);
+    if(targetProfile.auth_user_id&&authUser&&targetProfile.auth_user_id!==authUser.id)return json({error:'profile_identity_mismatch'},409);
+
     if (action === 'resend_invite') {
       if (!email) return json({ error: 'Courriel absent.' }, 400);
 
@@ -183,7 +187,7 @@ Deno.serve(async request => {
       }
       const {data:inviteData,error:inviteError}=await admin.auth.admin.inviteUserByEmail(email,{
         redirectTo,
-        data:{nom:body.nom||'',role:body.role||'Installateur',organisation:body.organisation||'',account_activated:false}
+        data:{nom:targetProfile.nom||'',role:targetProfile.role,organisation:targetProfile.organisation||'',account_activated:false}
       });
       if(inviteError)throw inviteError;
       authUser=inviteData.user;
@@ -246,6 +250,8 @@ Deno.serve(async request => {
 
     if (action === 'update') {
       const patch = body.patch || {};
+      if(patch.role!==undefined&&!['Administrateur','Coordonnateur','Installateur','Client','Client-Admin'].includes(patch.role))return json({error:'Rôle invalide.'},400);
+      if(['Client','Client-Admin'].includes(patch.role)&&targetProfile.client_id===null)return json({error:'Client propriétaire requis.'},400);
 
       if (authUser) {
         const { error } = await admin.auth.admin.updateUserById(authUser.id, {
@@ -294,6 +300,7 @@ Deno.serve(async request => {
 
     return json({ error: 'Action inconnue.' }, 400);
   } catch (error) {
+    if(error instanceof AuthorizationError)return json({error:error.message},error.status);
     console.error(error);
     return json({ error: error.message || String(error) }, 500);
   }
