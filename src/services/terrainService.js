@@ -38,8 +38,7 @@ async function uploadTerrainPhotoLegacy(file, supportId, action = 'inspection') 
 
   if (uploadError) throw uploadError;
 
-  const { data } = supabase.storage.from('terrain-photos').getPublicUrl(path);
-  return { path, publicUrl: data?.publicUrl || '' };
+  return { path, storageReference:`terrain-photos/${path}` };
 }
 
 export async function uploadTerrainPhoto(file, supportId, action = 'inspection', context = {}) {
@@ -97,6 +96,7 @@ export async function registerTerrainSupportPhoto({
           ? 'Enjeu'
           : 'Photo',
     nom_fichier: fileName,
+    storage_bucket: 'terrain-photos',
     storage_path: storagePath,
     photo_url: photoUrl || null,
     thumbnail_url: photoUrl || null,
@@ -130,7 +130,7 @@ export async function saveInspection(payload, file = null) {
   const row = {
     ...payload,
     photo_path: photo?.path || null,
-    photo_url: photo?.publicUrl || null,
+    photo_url: photo?.storageReference || null,
     created_at: new Date().toISOString()
   };
 

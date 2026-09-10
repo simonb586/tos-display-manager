@@ -1,0 +1,1 @@
+import './certification-reports-entry.jsx';window.files=[];const url=URL.createObjectURL.bind(URL);URL.createObjectURL=b=>{files.push(b);return url(b)};HTMLAnchorElement.prototype.click=function(){};

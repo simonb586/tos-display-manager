@@ -1,3 +1,4 @@
+import {getSignedPhotoUrls} from './photoAccessService';
 import { supabase } from '../lib/supabaseClient';
 import { clientPortalAccessStatus } from '../lib/clientPortalAccessStatus';
 import { inviteRealUser } from './userProvisioningService';
@@ -20,7 +21,15 @@ export const unlinkUserFromClient = userId => rpc('admin_unlink_user_from_client
 export const transferUserClient = ({ userId, clientId, role }) => rpc('admin_transfer_user_client_v136', { p_user_id: +userId, p_client_id: +clientId, p_role: role });
 export const changeClientUserRole = ({ userId, role }) => rpc('admin_change_client_user_role_v136', { p_user_id: +userId, p_role: role });
 // V1.3.6.2 remplace admin_preview_client_portal_context_v1361 sans impersonation.
-export const getAdminClientPortalPreview = userId => rpc('admin_preview_client_portal_context_v1362', { p_target_user_id: +userId });
+export async function getAdminClientPortalPreview(userId) {
+  const preview = await rpc('admin_preview_client_portal_context_v1362', { p_target_user_id: +userId });
+  const target = preview.target_user || preview.user || preview;
+  const {data, error} = await supabase.from('role_ui_permissions').select('visible_columns').eq('role', target.role).maybeSingle();
+  if(error) throw error;
+  const sections={...preview.sections};
+  if(sections.photos)sections.photos={...sections.photos,rows:await getSignedPhotoUrls(sections.photos.rows||[])};
+  return {...preview, sections, visible_columns: data?.visible_columns || {}};
+}
 export const listClientOwnershipSummary = domain => rpc('client_ownership_summary_v1362', { p_domain: domain || null });
 export const transferDataClient = ({domain,entityId,clientId,confirmation}) => rpc('admin_transfer_data_client_v1362', {p_domain:domain,p_entity_id:String(entityId),p_new_client_id:+clientId,p_confirmation:Boolean(confirmation)});
 export const inviteClientUser = (client, form) => inviteRealUser({ nom: form.nom, courriel: form.courriel, role: form.role, organisation: client.nom_client, client_id: client.client_id });

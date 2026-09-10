@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import {businessCapabilities} from '../lib/businessCapabilities';
+import useRefreshRequest from '../hooks/useRefreshRequest';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarDays, CheckCircle2, ClipboardList, Clock3, Pencil, Plus, RefreshCw, Search, Trash2, UserRound } from 'lucide-react';
 import { createWorkOrder, deleteWorkOrder, listInstallers, listWorkOrders, updateWorkOrder } from '../services/workOrderService';
 
@@ -19,6 +21,8 @@ const statuses = ['À faire', 'En cours', 'En attente', 'Terminée', 'Annulée']
 const priorities = ['Basse', 'Normale', 'Haute', 'Urgente'];
 
 export default function WorkOrdersPanel({ dataStore, role, session }) {
+ const mutationActive=useRef(false);
+
   const [orders, setOrders] = useState([]);
   const [installers, setInstallers] = useState([]);
   const [form, setForm] = useState(emptyOrder);
@@ -28,20 +32,22 @@ export default function WorkOrdersPanel({ dataStore, role, session }) {
   const [message, setMessage] = useState('');
   const [state, setState] = useState('idle');
 
-  const canManage = ['Administrateur', 'Coordonnateur'].includes(role);
+  const canManage = businessCapabilities(role).manageWorkOrders;
 
-  async function reload() {
+  const refreshRequest=useRefreshRequest(role);
+async function reload() {
     setState('loading');
     setMessage('');
-    try {
-      const [workOrders, users] = await Promise.all([listWorkOrders(), listInstallers()]);
+    const request=refreshRequest.start();
+try {
+      const [workOrders, users] = await request.wait(Promise.all([listWorkOrders(), listInstallers()]));
       setOrders(workOrders);
       setInstallers(users);
       setState('done');
-    } catch (error) {
+    } catch (error) {if(!request.isCurrent())return;
       setState('error');
       setMessage(error.message || 'Erreur de chargement');
-    }
+    }finally{request.finish()}
   }
 
   useEffect(() => { reload(); }, []);
@@ -73,7 +79,8 @@ export default function WorkOrdersPanel({ dataStore, role, session }) {
 
   async function submit(e) {
     e.preventDefault();
-    if (!canManage) return;
+    if(mutationActive.current)return;mutationActive.current=true;
+    if (!canManage) {mutationActive.current=false;return;}
 
     setState('saving');
     setMessage('');
@@ -94,28 +101,37 @@ export default function WorkOrdersPanel({ dataStore, role, session }) {
 
       setForm(emptyOrder);
       await reload();
+      setMessage(form.id ? 'Bon de travail modifié.' : 'Bon de travail créé.');
     } catch (error) {
       setState('error');
       setMessage(error.message || 'Erreur d’enregistrement');
-    }
+    } finally {mutationActive.current=false;}
   }
 
   async function quickStatus(order, statut) {
+    if (!canManage || mutationActive.current) return;
+    mutationActive.current = true;
     try {
       await updateWorkOrder(order.id, { statut });
       await reload();
     } catch (error) {
       setMessage(error.message || 'Erreur de mise à jour');
+    } finally {
+      mutationActive.current = false;
     }
   }
 
   async function remove(order) {
+    if (!canManage || mutationActive.current) return;
     if (!window.confirm(`Supprimer ${order.no_bt || 'ce bon de travail'}?`)) return;
+    mutationActive.current = true;
     try {
       await deleteWorkOrder(order.id);
       await reload();
     } catch (error) {
       setMessage(error.message || 'Erreur de suppression');
+    } finally {
+      mutationActive.current = false;
     }
   }
 
@@ -126,7 +142,7 @@ export default function WorkOrdersPanel({ dataStore, role, session }) {
           <h1>Bons de travail</h1>
           <p>Création, assignation, priorités et suivi des interventions.</p>
         </div>
-        <button onClick={reload}><RefreshCw size={18} /> Actualiser</button>
+        <button aria-busy={refreshRequest.refreshing} data-refresh-control="WorkOrdersPanel" disabled={refreshRequest.refreshing} onClick={refreshRequest.onClick(reload)}><RefreshCw size={18} /> Actualiser</button>
       </header>
 
       <div className="workorders-stats">
@@ -167,7 +183,7 @@ export default function WorkOrdersPanel({ dataStore, role, session }) {
               <label>Client<input value={form.client} onChange={e => setForm({ ...form, client: e.target.value })} /></label>
               <label>Description<textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></label>
               <div className="workorders-actions">
-                <button type="submit">{form.id ? 'Enregistrer' : 'Créer le bon'}</button>
+                <button type="submit" disabled={state === 'saving'}>{form.id ? 'Enregistrer' : 'Créer le bon'}</button>
                 {form.id && <button type="button" className="secondary" onClick={() => setForm(emptyOrder)}>Annuler</button>}
               </div>
             </form>

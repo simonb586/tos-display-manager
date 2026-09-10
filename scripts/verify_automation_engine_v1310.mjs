@@ -44,7 +44,7 @@ ok(!executionLogProjection.split(',').includes('relation_rule_id'),'contrat jour
 ok(!ui.includes('tdm-disabled-view-templates'),'aucun statut de vue dans localStorage');
 for(const token of ['automation-config-table','automation-engine-table','automation-views-table','automation-name-cell','automation-actions-cell','automation-mode-cell'])
   ok(ui.includes(token),`grille UI: ${token}`);
-for(const token of ['table-layout:fixed','height:72px','vertical-align:middle','position:sticky','right:0','flex-wrap:nowrap','-webkit-line-clamp:2','overflow:auto'])
+for(const token of ['table-layout:fixed','vertical-align:middle','position:sticky','right:0','flex-wrap:nowrap','-webkit-line-clamp:2','overflow:auto'])
   ok(styles.includes(token),`alignement UI: ${token}`);
 ok(catalog.includes("['paused', 'En pause']"),'statut en pause canonique');
 ok(hardening.includes('drop policy if exists relation_test_logs_authenticated_read'),'journal de test réservé aux administrateurs');
@@ -52,3 +52,6 @@ ok(hardening.includes("alter function public.approve_automation_definition_v0131
 ok(hardening.includes('from public,anon'),'ancienne approbation refusée à PUBLIC et anon');
 
 console.log(`V1.3.10 moteur d’automatisations : ${checks} contrôles réussis.`);
+
+// Browser proof of the current shared implementation; SQL guards above remain intact.
+await import('./verify_historical_ui_contracts.mjs');

@@ -1,3 +1,5 @@
+import {businessCapabilities} from '../lib/businessCapabilities';
+import useRefreshRequest from '../hooks/useRefreshRequest';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
@@ -120,21 +122,24 @@ export default function OperationsCenter({ role, supportId = '', onClearSupportC
   });
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const mutationActive = useRef(false);
   const {sortedRows:sortedHistory,sortState:historySort,setSortState:setHistorySort}=useSortableRows(data.history, null, 'operations-history');
 
-  const canManage = ['Administrateur', 'Coordonnateur'].includes(role);
+  const canManage = businessCapabilities(role).manageEdt;
   const canDeleteEdt = role === 'Administrateur';
   const selectedEdt = data.edts.find(item => String(item.id) === String(selectedEdtId)) || null;
   const contextual=useMemo(()=>filterSupportOperations(data,supportId),[data,supportId]);
   const {edts:visibleEdts,workOrders:visibleWorkOrders,requests:visibleRequests,history:visibleHistory}=contextual;
 
-  async function reload() {
-    try {
-      setData(await loadOperationsData());
+  const refreshRequest=useRefreshRequest([role,supportId].join(':'));
+async function reload() {
+    const request=refreshRequest.start();
+try {
+      setData(await request.wait(loadOperationsData()));
       setMessage('');
-    } catch (error) {
+    } catch (error) {if(!request.isCurrent())return;
       setMessage(error.message || 'Erreur de chargement.');
-    }
+    }finally{request.finish()}
   }
 
   useEffect(() => { reload(); }, []);
@@ -170,16 +175,19 @@ export default function OperationsCenter({ role, supportId = '', onClearSupportC
   }), [data]);
 
   async function run(action, success) {
+    if (mutationActive.current) return;
+    mutationActive.current = true;
     setBusy(true);
     setMessage('');
     try {
-      await action();
-      setMessage(success);
+      const actionMessage = await action();
       await reload();
+      setMessage(typeof actionMessage === 'string' ? actionMessage : success);
       setLifecycleRevision(value => value + 1);
     } catch (error) {
       setMessage(friendlyError(error));
     } finally {
+      mutationActive.current = false;
       setBusy(false);
     }
   }
@@ -190,11 +198,12 @@ export default function OperationsCenter({ role, supportId = '', onClearSupportC
     setMessage('');
     try { setDeleteDialog({ edt, impact: await inspectEdtDeletion(edt.id) }); }
     catch (error) { setMessage(friendlyError(error)); }
-    finally { setBusy(false); }
+    finally { mutationActive.current = false; setBusy(false); }
   }
 
   async function confirmDeleteEdt() {
-    if (!deleteDialog || busy) return;
+    if (!deleteDialog || mutationActive.current || !canDeleteEdt) return;
+    mutationActive.current = true;
     const edtId = deleteDialog.edt.id;
     setBusy(true);
     try {
@@ -205,7 +214,7 @@ export default function OperationsCenter({ role, supportId = '', onClearSupportC
       await reload();
       setMessage(result.result === 'deleted' ? 'EDT supprim\u00e9.' : 'EDT archiv\u00e9.');
     } catch (error) { setMessage(friendlyError(error)); }
-    finally { setBusy(false); }
+    finally { mutationActive.current = false; setBusy(false); }
   }
 
   async function submitEdt(event) {
@@ -276,7 +285,7 @@ export default function OperationsCenter({ role, supportId = '', onClearSupportC
           <h1><ClipboardList/> Centre EDT et bons de travail</h1>
           <p>Requêtes clients, phases, assignations, progression et clôture opérationnelle.</p>
         </div>
-        <button onClick={reload}><RefreshCw size={17}/> Actualiser</button>
+        <button aria-busy={refreshRequest.refreshing} data-refresh-control="OperationsCenter" disabled={refreshRequest.refreshing} onClick={refreshRequest.onClick(reload)}><RefreshCw size={17}/> Actualiser</button>
       </header>
 
       {message && <div className="v07-message">{message}</div>}
@@ -360,7 +369,7 @@ export default function OperationsCenter({ role, supportId = '', onClearSupportC
                   {canManage && <form className="mini-form" onSubmit={submitPhase}>
                     <input placeholder="Nom de la phase" value={phaseForm.nom} onChange={e => setPhaseForm({...phaseForm, nom:e.target.value})}/>
                     <input type="number" min="1" value={phaseForm.ordre} onChange={e => setPhaseForm({...phaseForm, ordre:e.target.value})}/>
-                    <button><Plus size={15}/> Ajouter</button>
+                    <button disabled={busy}><Plus size={15}/> Ajouter</button>
                   </form>}
                 </div>
 
@@ -379,7 +388,7 @@ export default function OperationsCenter({ role, supportId = '', onClearSupportC
                     <select value={assignment.role_assignment} onChange={e => setAssignment({...assignment, role_assignment:e.target.value})}>
                       <option>Installateur</option><option>Coordonnateur</option><option>Validateur</option>
                     </select>
-                    <button><UserPlus size={15}/> Assigner</button>
+                    <button disabled={busy}><UserPlus size={15}/> Assigner</button>
                   </form>}
                 </div>
               </div>

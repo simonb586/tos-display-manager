@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import useRefreshRequest from '../hooks/useRefreshRequest';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Ban,
   KeyRound,
@@ -36,17 +37,19 @@ export default function UserProvisioningPanel({ role }) {
   const [message, setMessage] = useState('');
   const [busyAction, setBusyAction] = useState('');
 
+  const mutationActive = useRef(false);
   const isAdmin = role === 'Administrateur';
 
-  async function reload() {
+  const refreshRequest=useRefreshRequest(role);
+async function reload() {
     if (!isAdmin) return;
     setBusyAction('list');
-    try {
-      setUsers(await listManagedUsers());
-      setMessage('');
-    } catch (error) {
+    const request=refreshRequest.start();
+try {
+      setUsers(await request.wait(listManagedUsers()));
+    } catch (error) {if(!request.isCurrent())return;
       setMessage(error.message || 'Chargement impossible.');
-    } finally {
+    } finally {if(!request.isCurrent())return;request.finish();
       setBusyAction('');
     }
   }
@@ -68,6 +71,8 @@ export default function UserProvisioningPanel({ role }) {
 
   async function submit(event) {
     event.preventDefault();
+    if(mutationActive.current)return;
+    mutationActive.current=true;
     setBusyAction('invite');
     setMessage('');
 
@@ -79,12 +84,15 @@ export default function UserProvisioningPanel({ role }) {
     } catch (error) {
       setMessage(error.message || 'Invitation impossible.');
     } finally {
+      mutationActive.current=false;
       setBusyAction('');
     }
   }
 
   async function runAction(action, user, confirmation = '') {
+    if(mutationActive.current)return;
     if (confirmation && !window.confirm(confirmation)) return;
+    mutationActive.current=true;
 
     setBusyAction(`${action}:${user.courriel || user.email}`);
     setMessage('');
@@ -96,12 +104,15 @@ export default function UserProvisioningPanel({ role }) {
     } catch (error) {
       setMessage(error.message || 'Action impossible.');
     } finally {
+      mutationActive.current=false;
       setBusyAction('');
     }
   }
 
   async function saveEdit(event) {
     event.preventDefault();
+    if(mutationActive.current)return;
+    mutationActive.current=true;
     setBusyAction(`update:${editing.courriel}`);
 
     try {
@@ -117,6 +128,7 @@ export default function UserProvisioningPanel({ role }) {
     } catch (error) {
       setMessage(error.message || 'Modification impossible.');
     } finally {
+      mutationActive.current=false;
       setBusyAction('');
     }
   }
@@ -128,7 +140,7 @@ export default function UserProvisioningPanel({ role }) {
           <h1>Utilisateurs réels</h1>
           <p>Invitations de production, états réels et gestion complète des accès.</p>
         </div>
-        <button onClick={reload} disabled={Boolean(busyAction)}>
+        <button aria-busy={refreshRequest.refreshing} data-refresh-control="UserProvisioningPanel" onClick={refreshRequest.onClick(reload)} disabled={refreshRequest.refreshing||(Boolean(busyAction))}>
           {busyAction === 'list'
             ? <LoaderCircle className="spin" size={18}/>
             : <RefreshCw size={18}/>}
@@ -231,7 +243,7 @@ export default function UserProvisioningPanel({ role }) {
                   </div>
 
                   <div className="user-v2-actions user-v2-actions-visible">
-                    <button disabled={pending} onClick={() => setEditing(user)}>
+                    <button disabled={Boolean(busyAction)} onClick={() => setEditing(user)}>
                       <Pencil size={15}/> Modifier
                     </button>
 
@@ -294,7 +306,7 @@ export default function UserProvisioningPanel({ role }) {
       {editing && (
         <div className="user-edit-modal">
           <form onSubmit={saveEdit}>
-            <button type="button" className="user-edit-close" onClick={() => setEditing(null)}>
+            <button type="button" className="user-edit-close" aria-label="Fermer" disabled={busyAction.startsWith('update:')} onClick={() => setEditing(null)}>
               <X/>
             </button>
             <h2>Modifier l’utilisateur</h2>

@@ -31,7 +31,7 @@ try {
   }
   for (const label of ['Modifier', 'Supprimer']) assert.ok(campaignsSource.includes(label), `Action campagne ${label} absente`);
   for (const label of ['Modifier', 'Supprimer', 'Hors-Cadre']) assert.ok(visualsSource.includes(label), `Action visuel ${label} absente`);
-  assert.ok(campaignsSource.includes('if(busy)return') && visualsSource.includes('if (busy) return'), 'Double soumission non bloquée');
+  assert.ok(campaignsSource.includes('mutationActive.current') && visualsSource.includes('mutationActive.current'), 'Verrou synchrone de mutation absent');
   assert.ok(campaignsSource.includes('window.confirm') && visualsSource.includes('window.confirm'), 'Confirmation de suppression absente');
   assert.ok(campaignService.includes('delete_or_archive_master_campaign_v111'), 'Archivage campagne avec dépendances absent');
   assert.ok(visualService.includes('delete_or_archive_campaign_visual'), 'Archivage visuel avec dépendances absent');
@@ -45,3 +45,6 @@ try {
 } finally {
   await vite.close();
 }
+// The former busy-string assertion accepted real React double submissions.
+// Keep DOM evidence of one mutation for create/edit and error/retry.
+await import('./verify_remaining_form_contracts.mjs');

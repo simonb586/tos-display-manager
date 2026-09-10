@@ -1,3 +1,4 @@
+import useRefreshRequest from '../hooks/useRefreshRequest';
 import React, { useEffect, useState } from 'react';
 import { History, RefreshCw } from 'lucide-react';
 import { loadAdminChangeLog } from '../services/universalEditorService';
@@ -9,13 +10,15 @@ export default function ChangeHistoryPanel({ role }) {
   const [message, setMessage] = useState('');
   const { sortedRows, sortState, setSortState } = useSortableRows(rows, null, 'change-history');
 
-  async function reload() {
-    try {
-      setRows(await loadAdminChangeLog());
+  const refreshRequest=useRefreshRequest(role);
+async function reload() {
+    const request=refreshRequest.start();
+try {
+      setRows(await request.wait(loadAdminChangeLog()));
       setMessage('');
-    } catch (error) {
+    } catch (error) {if(!request.isCurrent())return;
       setMessage(error.message || 'Impossible de charger l’historique.');
-    }
+    }finally{request.finish()}
   }
 
   useEffect(() => {
@@ -33,7 +36,7 @@ export default function ChangeHistoryPanel({ role }) {
           <h1><History/> Historique des modifications</h1>
           <p>Anciennes et nouvelles valeurs enregistrées directement par le portail.</p>
         </div>
-        <button onClick={reload}><RefreshCw size={17}/> Actualiser</button>
+        <button aria-busy={refreshRequest.refreshing} data-refresh-control="ChangeHistoryPanel" disabled={refreshRequest.refreshing} onClick={refreshRequest.onClick(reload)}><RefreshCw size={17}/> Actualiser</button>
       </header>
 
       {message && <div className="v07-message">{message}</div>}

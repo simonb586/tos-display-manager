@@ -1,0 +1,48 @@
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import AdminPanel from '../../src/components/AdminPanel';
+import ChangeHistoryPanel from '../../src/components/ChangeHistoryPanel';
+import WorkOrdersPanel from '../../src/components/WorkOrdersPanel';
+import UserProvisioningPanel from '../../src/components/UserProvisioningPanel';
+import ClientsAccessAdmin from '../../src/components/ClientsAccessAdmin';
+import RoleVisibilityAdmin from '../../src/components/RoleVisibilityAdmin';
+import FinalReportsCenter from '../../src/components/FinalReportsCenter';
+import PhotoInventoryCenter from '../../src/components/PhotoInventoryCenter';
+import OperationsCenter from '../../src/components/OperationsCenter';
+import TerrainSyncDiagnostics from '../../src/components/TerrainSyncDiagnostics';
+import RelationsStudio from '../../src/components/RelationsStudio';
+import Module15Reports from '../../src/components/Module15Reports';
+import CampaignsPanel from '../../src/components/CampaignsPanel';
+const components={AdminPanel,ChangeHistoryPanel,WorkOrdersPanel,UserProvisioningPanel,ClientsAccessAdmin,RoleVisibilityAdmin,FinalReportsCenter,PhotoInventoryCenter,OperationsCenter,TerrainSyncDiagnostics,RelationsStudio,Module15Reports,CampaignsPanel};
+window.fixture={calls:[],delay:10,fail:false,version:'INITIAL'};
+const row=()=>({id:1,client_id:2,client_name:'EXO',nom_client:'EXO '+window.fixture.version,nom:'Fixture '+window.fixture.version,courriel:'fixture@example.test',role:'Installateur',statut:'Actif',statut_client:'Actif',support_id:'SUP-2',site:'EXO',no_bt:'BT-'+window.fixture.version,no_edt:'EDT-'+window.fixture.version,objet:window.fixture.version,operation:window.fixture.version,description:window.fixture.version,changed_at:'2026-09-08T12:00:00Z',field_name:'site',table_name:'infrastructures',new_value:window.fixture.version,nom_fichier:window.fixture.version+'.jpg',signed_thumbnail_url:'',quantity:1});
+const listNames=new Set(['listClients','listUsers','listManagedUsers','loadAdminChangeLog','listWorkOrders','listInstallers','listClientAccessOverview','listFinalCommunications','listSupportPhotosForValidation','listInventoryMovements']);
+window.testApi=(file,name,args)=>{
+ const f=window.fixture;const r=row(),version=f.version,fail=f.fail,delay=f.delay;
+ if(name==='formatTerrainSyncDate')return String(args[0]||'');
+ if(name==='computeEdtProgress')return 0;
+ if(name==='normalizeFinalReportContext')return {...args[0],recipients:[],cc:[]};
+ let result;
+ if(['inviteRealUser','manageUser','updateManagedUser','createClient','updateClient','changeClientUserRole','unlinkUserFromClient','inviteClientUser','linkUserToClient','transferUserClient','saveUser','saveClient','createWorkOrder','updateWorkOrder','saveMasterCampaign'].includes(name))result={message:'MUTATION_SUCCESS'};
+ else if(name==='listAssignableClients')result=[{id:2,nom_client:'EXO'}];
+ else if(name==='listMasterCampaigns')result=[{...r,nom_campagne:'Campaign Fixture',client_id:2,business_context:args[1],statut:'Brouillon'}];
+ else if(name==='getClientAccessDetail')result={members:[{...r,role:'Client'}],invitations:[],campaigns:[]};
+ else if(listNames.has(name))result=[r];
+ else if(name==='listClientOwnershipSummary')result=[];
+ else if(name==='listRoleVisibility')result=['Administrateur','Coordonnateur','Installateur','Client','Client-Admin'].map(role=>({role,visible_tables:['Infrastructures'],visible_columns:{Infrastructures:[version==='LATEST'?'support_id':'site']},description:version}));
+ else if(name==='loadOperationsData')result={edts:[{...r,statut:'Planifié'}],workOrders:[r],requests:[],phases:[],assignments:[],history:[],users:[],edtSupports:[],dashboard:[],campaigns:[],phaseReports:[]};
+ else if(name==='listTerrainDiagnostics')result={rows:[{...r,diagnostic_id:1,message:version,status:'success',source:'fixture',occurred_at:r.changed_at}],total:120,latestHiddenByFilters:false};
+ else if(name==='loadTerrainDiagnosticSummary')result={pending:1,errors:0,successToday:1,lastSync:r.changed_at};
+ else if(name==='loadCompleteRelationCatalog')result={schema:{infrastructures:['site','support_id']},fields:[{...r,field_label:version}],rules:[]};
+ else if(name==='loadEdtReportTracking')result={tracking:[{...r,client:'EXO',campaign_name:version,statut:'Terminé',report_status:'À créer',delivery_status:'Non envoyé',support_count:1,requester_name:'Fixture',requester_email:'fixture@example.test'}]};
+ else throw Error('Unconfigured service fixture: '+file+':'+name);
+ f.calls.push({file,name,args,version});
+ return new Promise((resolve,reject)=>{
+  const finish=()=>fail?reject(Error('REFRESH_FIXTURE_ERROR')):resolve(result);
+  if(f.holdMutations&&['saveUser','saveClient','createWorkOrder','updateWorkOrder','saveMasterCampaign','updateManagedUser'].includes(name)){
+   (f.pendingMutations ||= []).push(finish);
+  }else if(f.holdReads){(f.pendingReads ||= []).push(finish)}else setTimeout(finish,delay);
+ });
+};
+const root=createRoot(document.getElementById('root'));let mountId=0;
+window.mount=(name,role='Administrateur',businessContext='marketing')=>{const Component=components[name];window.fixture.calls=[];window.fixture.version='INITIAL';window.fixture.fail=false;window.fixture.delay=10;root.render(<Component key={++mountId} role={role} businessContext={businessContext} currentRole={role} dataStore={{Infrastructures:{rows:[row()]},'Suivi des EDT':{rows:[]}}} tableNames={['Infrastructures']} session={{user:{id:'fixture',email:'fixture@example.test'}}}/>)};

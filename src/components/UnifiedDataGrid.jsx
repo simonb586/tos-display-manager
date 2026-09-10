@@ -8,7 +8,7 @@ export default function UnifiedDataGrid({
   selection, leadingColumns = [], actions, className = '', emptyMessage = 'Aucun résultat.'
 }) {
   const selectable = Boolean(selection);
-  const allSelected = rows.length > 0 && rows.every((row, index) => selection.selected.has(rowKey(row, index)));
+  const allSelected = selectable && rows.length > 0 && rows.every((row, index) => selection.selected.has(rowKey(row, index)));
   const visibleColumns = columns.filter(column => column.visible !== false);
   const leadingCount = (selectable ? 1 : 0) + leadingColumns.length;
   return <div className={`tableWrap professional-grid unified-data-grid ${className}`} data-unified-grid={gridId}>

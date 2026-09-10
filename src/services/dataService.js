@@ -4,6 +4,7 @@ const PAGE_SIZE = 1000;
 const CACHE_TTL_MS = 30_000;
 const tableCache = new Map();
 const pendingLoads = new Map();
+let cacheGeneration = 0;
 
 async function fetchPage(tableName, from, to, attempt = 1) {
   const { data, error } = await supabase.from(tableName).select('*').range(from, to);
@@ -29,13 +30,16 @@ export async function loadTable(tableName, fallbackData = [], { force = false } 
   if (!force && cached && Date.now() - cached.loadedAt < CACHE_TTL_MS) return cached.value;
   if (!force && pendingLoads.has(tableName)) return pendingLoads.get(tableName);
   const request = loadTableUncached(tableName, fallbackData);
+  const generation = cacheGeneration;
   pendingLoads.set(tableName, request);
   try {
     const value = await request;
-    tableCache.set(tableName, { loadedAt: Date.now(), value });
+    if (generation === cacheGeneration && pendingLoads.get(tableName) === request) {
+      tableCache.set(tableName, { loadedAt: Date.now(), value });
+    }
     return value;
   } finally {
-    pendingLoads.delete(tableName);
+    if (pendingLoads.get(tableName) === request) pendingLoads.delete(tableName);
   }
 }
 
@@ -79,6 +83,7 @@ export async function loadManyTables(tableConfig) {
 }
 
 export function clearTableCache(tableNames = []) {
-  if (!tableNames.length) tableCache.clear();
-  else tableNames.forEach(tableName => tableCache.delete(tableName));
+  cacheGeneration += 1;
+  if (!tableNames.length) { tableCache.clear(); pendingLoads.clear(); }
+  else tableNames.forEach(tableName => { tableCache.delete(tableName); pendingLoads.delete(tableName); });
 }

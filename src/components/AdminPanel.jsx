@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import useRefreshRequest from '../hooks/useRefreshRequest';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Building2, Pencil, Plus, RefreshCw, Shield, UserCheck, UserX, Users } from 'lucide-react';
 import { listClients, listUsers, saveClient, saveUser, toggleUserStatus } from '../services/adminService';
 import SortableHeader from './SortableHeader';
@@ -9,6 +10,8 @@ const emptyUser = { nom: '', courriel: '', role: 'Client', organisation: '', sta
 const emptyClient = { nom_client: '', type_client: '', statut: 'Actif', notes: '' };
 
 export default function AdminPanel({ currentRole }) {
+ const mutationActive=useRef(false);
+
   const [tab, setTab] = useState('users');
   const [users, setUsers] = useState([]);
   const [clients, setClients] = useState([]);
@@ -19,18 +22,20 @@ export default function AdminPanel({ currentRole }) {
   const isAdmin = currentRole === 'Administrateur';
   const { sortedRows: sortedUsers, sortState: userSort, setSortState: setUserSort } = useSortableRows(users, null, 'admin-users');
 
-  async function reload() {
+  const refreshRequest=useRefreshRequest(currentRole);
+async function reload() {
     setStatus('loading');
     setMessage('');
-    try {
-      const [userRows, clientRows] = await Promise.all([listUsers(), listClients()]);
+    const request=refreshRequest.start();
+try {
+      const [userRows, clientRows] = await request.wait(Promise.all([listUsers(), listClients()]));
       setUsers(userRows);
       setClients(clientRows);
       setStatus('done');
-    } catch (error) {
+    } catch (error) {if(!request.isCurrent())return;
       setStatus('error');
       setMessage(error.message || 'Erreur de chargement');
-    }
+    }finally{request.finish()}
   }
 
   useEffect(() => { if (isAdmin) reload(); }, [isAdmin]);
@@ -44,6 +49,7 @@ export default function AdminPanel({ currentRole }) {
 
   async function submitUser(e) {
     e.preventDefault();
+    if(mutationActive.current)return;mutationActive.current=true;
     setStatus('saving');
     setMessage('');
     try {
@@ -54,11 +60,12 @@ export default function AdminPanel({ currentRole }) {
     } catch (error) {
       setStatus('error');
       setMessage(error.message || 'Erreur d’enregistrement');
-    }
+    } finally {mutationActive.current=false;}
   }
 
   async function submitClient(e) {
     e.preventDefault();
+    if(mutationActive.current)return;mutationActive.current=true;
     setStatus('saving');
     setMessage('');
     try {
@@ -69,15 +76,21 @@ export default function AdminPanel({ currentRole }) {
     } catch (error) {
       setStatus('error');
       setMessage(error.message || 'Erreur d’enregistrement');
-    }
+    } finally {mutationActive.current=false;}
   }
 
   async function changeStatus(user) {
+    if (!isAdmin || mutationActive.current) return;
+    mutationActive.current = true;
+    setStatus('saving');
     try {
       await toggleUserStatus(user);
       await reload();
     } catch (error) {
       setMessage(error.message || 'Erreur de mise à jour');
+    } finally {
+      mutationActive.current = false;
+      setStatus('idle');
     }
   }
 
@@ -89,7 +102,7 @@ export default function AdminPanel({ currentRole }) {
     <div className="admin-page">
       <header className="admin-hero">
         <div><h1>TOS Control Center</h1><p>Gestion interne des utilisateurs, des clients et des rôles.</p></div>
-        <button onClick={reload}><RefreshCw size={18} /> Actualiser</button>
+        <button aria-busy={refreshRequest.refreshing} data-refresh-control="AdminPanel" disabled={refreshRequest.refreshing} onClick={refreshRequest.onClick(reload)}><RefreshCw size={18} /> Actualiser</button>
       </header>
 
       <div className="admin-stats">
@@ -141,7 +154,7 @@ export default function AdminPanel({ currentRole }) {
                   <td>{user.nom}</td><td>{user.courriel}</td><td>{user.role}</td><td>{user.organisation}</td><td>{user.statut}</td>
                   <td className="row-actions">
                     <button onClick={() => setUserForm({ ...emptyUser, ...user, client_id: user.client_id || '' })}><Pencil size={16} /></button>
-                    <button onClick={() => changeStatus(user)}>{String(user.statut).toLowerCase() === 'actif' ? <UserX size={16} /> : <UserCheck size={16} />}</button>
+                    <button disabled={status === 'saving'} onClick={() => changeStatus(user)}>{String(user.statut).toLowerCase() === 'actif' ? <UserX size={16} /> : <UserCheck size={16} />}</button>
                   </td>
                 </tr>)}</tbody>
               </table>
@@ -158,7 +171,7 @@ export default function AdminPanel({ currentRole }) {
               <label>Statut<select value={clientForm.statut} onChange={e => setClientForm({ ...clientForm, statut: e.target.value })}><option>Actif</option><option>Inactif</option></select></label>
               <label>Notes<textarea value={clientForm.notes} onChange={e => setClientForm({ ...clientForm, notes: e.target.value })} /></label>
               <div className="admin-form-actions">
-                <button type="submit">{clientForm.id ? 'Enregistrer' : 'Créer le client'}</button>
+                <button type="submit" disabled={status === 'saving'}>{clientForm.id ? 'Enregistrer' : 'Créer le client'}</button>
                 {clientForm.id && <button type="button" className="secondary" onClick={() => setClientForm(emptyClient)}>Annuler</button>}
               </div>
             </form>

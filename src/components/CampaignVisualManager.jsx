@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Archive, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { listMasterCampaigns } from '../services/campaignService';
 import { BUSINESS_CONTEXT, isBusinessContext } from '../lib/businessContext';
@@ -31,6 +31,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
   const [formOpen, setFormOpen] = useState(Boolean(initialDraft.formOpen));
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const mutationActive = useRef(false);
   const [edts, setEdts] = useState([]);
   const [hydratedContext, setHydratedContext] = useState(businessContext);
 
@@ -73,7 +74,8 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
 
   async function submit(event) {
     event.preventDefault();
-    if (busy) return;
+    if (mutationActive.current) return;
+    mutationActive.current = true;
     setBusy(true);
 
     try {
@@ -86,15 +88,17 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
     } catch (error) {
       setMessage(error.message);
     } finally {
+      mutationActive.current = false;
       setBusy(false);
     }
   }
 
   async function removeVisual(visual) {
-    if (busy || !window.confirm(
+    if (mutationActive.current || !window.confirm(
       `Supprimer ou archiver le visuel « ${visual.nom_visuel} »? L’historique déjà utilisé sera protégé.`
     )) return;
 
+    mutationActive.current = true;
     setBusy(true);
 
     try {
@@ -109,6 +113,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
     } catch (error) {
       setMessage(error.message);
     } finally {
+      mutationActive.current = false;
       setBusy(false);
     }
   }

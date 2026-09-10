@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {businessColumns,businessColumnLabel} from '../src/lib/businessColumns.js';
+import {clientPortalColumnsForView} from '../src/lib/clientPortalViewRegistry.js';
+const rows=[{support_id:'EXO-2',site:'EXO',raw_data:{},created_at:'hidden',photo_miniature_url:'private'}];
+assert.deepEqual(businessColumns(rows,'Infrastructures'),['support_id','site']);
+assert.equal(businessColumnLabel('Infrastructures','support_id'),'Numéro du support');
+assert.equal(businessColumnLabel('Infrastructures','site'),'Site');
+assert.deepEqual(clientPortalColumnsForView({id:'infrastructures'},businessColumns(rows,'Infrastructures'),{Infrastructures:['support_id','site'],infrastructures:['site','not_a_column']}),['site']);
+assert.deepEqual(businessColumns([],'Infrastructures'),[]);
+for(const file of ['src/main.jsx','src/components/ClientBusinessGrid.jsx'])assert.ok(fs.readFileSync(file,'utf8').includes('businessColumnLabel'),'both surfaces must import the canonical formatter');
+console.log('Shared Infrastructure column schema, labels, hidden fields and alias permission intersection PASS');

@@ -190,6 +190,7 @@ export async function generateFinalReportPdf(context) {
 
 const reportValue=value=>String(value??'—');
 export async function generateEdtReportPdf(snapshot){
+  const {getSignedReportPhotoUrl}=await import('./photoAccessService');
   const{jsPDF}=await import('jspdf'),doc=new jsPDF({unit:'mm',format:'letter'}),pageWidth=216,pageHeight=279,margin=16;
   let y=18;
   const footer=()=>{const pages=doc.getNumberOfPages();for(let page=1;page<=pages;page++){doc.setPage(page);doc.setFontSize(8);doc.setTextColor(100);doc.text(`Rapport EDT ${reportValue(snapshot.edt.no_edt)} · ${page} / ${pages}`,margin,pageHeight-9);doc.text(`Généré le ${new Date().toLocaleDateString('fr-CA')}`,pageWidth-margin,pageHeight-9,{align:'right'})}};
@@ -205,7 +206,22 @@ export async function generateEdtReportPdf(snapshot){
       const widths=headers.length===5?[30,29,38,55,32]:[35,32,43,74];const drawHeader=()=>{next(9);doc.setFillColor(226,232,240);doc.rect(margin,y,pageWidth-margin*2,7,'F');doc.setFont('helvetica','bold');doc.setFontSize(7);let x=margin+1;headers.forEach((header,index)=>{doc.text(header,x,y+4.5);x+=widths[index]});y+=8};drawHeader();
       for(const support of snapshot.supports){next(support.comment?14:9);if(y<20)drawHeader();doc.setFont('helvetica','normal');doc.setFontSize(7);let x=margin+1;const cells=[support.site,support.support_id,support.infrastructure,support.location];if(secondary.has('installation_status'))cells.push(support.installation_status);cells.forEach((cell,index)=>{doc.text(doc.splitTextToSize(reportValue(cell),widths[index]-2).slice(0,2),x,y+4);x+=widths[index]});y+=support.comment?12:8;if(support.comment){doc.setFont('helvetica','italic');doc.text(doc.splitTextToSize(`Commentaire : ${support.comment}`,pageWidth-margin*2-4).slice(0,2),margin+2,y-5)}}
     }
-    if(section==='photos'){heading('Photos');const photos=(snapshot.photos||[]).filter(photo=>photo.selected);if(!photos.length)paragraph('Aucune photo sélectionnée pour ce rapport.');else for(const photo of photos){next(14);paragraph(`${photo.support_id} — ${photo.caption||'Photo d’installation'}`)}}
+    if(section==='photos'){
+      heading('Photos');
+      const photos=(snapshot.photos||[]).filter(photo=>photo.selected);
+      if(!photos.length)paragraph('Aucune photo sélectionnée pour ce rapport.');
+      for(const photo of photos){
+        const url=await getSignedReportPhotoUrl(photo),image=await imageToDataUrl(url);
+        if(!image)throw new Error(`Photo du support ${photo.support_id||''} inaccessible. Réessayez la génération du rapport.`);
+        const properties=doc.getImageProperties(image);
+        const scale=Math.min((pageWidth-margin*2)/properties.width,80/properties.height);
+        const width=properties.width*scale,height=properties.height*scale;
+        next(height+18);
+        doc.addImage(image,properties.fileType,margin,y,width,height,undefined,'FAST');
+        y+=height+5;
+        paragraph(`${photo.support_id} — ${photo.caption||'Photo d’installation'}`);
+      }
+    }
     if(section==='issues'){heading('Enjeux / écarts');const issues=(snapshot.issues||[]).filter(issue=>issue.selected);paragraph(issues.length?issues.map(issue=>issue.description||issue.enjeux||issue.type_enjeux||'Enjeu').join(' • '):'Aucun enjeu pertinent à afficher.')}
     if(section==='conclusion'){heading('Conclusion');paragraph(snapshot.conclusion||'—')}
   }

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle, Bot, CheckCircle2, Copy, Edit3, Eye, FileClock, Filter,
   Link2, LoaderCircle, MoreHorizontal, PauseCircle, Play, Plus, Power, Save, Search, Settings2, ShieldCheck,
@@ -66,6 +66,7 @@ function AutomationPreview({ item, onClose }) {
 }
 
 function AutomationForm({ initial, onCancel, onSaved }) {
+  const mutationActive = useRef(false);
   const [draft, setDraft] = useState(() => structuredClone(initial || emptyAutomation()));
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -74,14 +75,14 @@ function AutomationForm({ initial, onCancel, onSaved }) {
   const setTargets = keys => patchDefinition({targets:keys.map(module => ({module,fields:[]}))});
 
   async function submit(event) {
-    event.preventDefault(); setBusy(true); setMessage('');
+    event.preventDefault(); if (mutationActive.current) return; mutationActive.current = true; setBusy(true); setMessage('');
     try { await saveAutomationDefinition(draft); onSaved(); }
     catch (error) { setMessage(friendlyError(error, 'Impossible d’enregistrer cette automatisation.')); }
-    finally { setBusy(false); }
+    finally { mutationActive.current = false; setBusy(false); }
   }
 
   return <form className="automation-form" onSubmit={submit}>
-    <div className="automation-form-head"><div><h2>{draft.id ? 'Modifier l’automatisation' : 'Nouvelle automatisation'}</h2><p>L’activation demande toujours une confirmation distincte.</p></div><button type="button" className="automation-icon-button" onClick={onCancel}><X/></button></div>
+    <div className="automation-form-head"><div><h2>{draft.id ? 'Modifier l’automatisation' : 'Nouvelle automatisation'}</h2><p>L’activation demande toujours une confirmation distincte.</p></div><button type="button" className="automation-icon-button" disabled={busy} onClick={onCancel}><X/></button></div>
     <section><h3>Informations générales</h3><label>Nom<input required maxLength={120} value={draft.name} onChange={e=>setDraft({...draft,name:e.target.value})}/></label><label>Description<textarea value={draft.description || draft.definition?.description || ''} onChange={e=>{setDraft({...draft,description:e.target.value});patchDefinition({description:e.target.value});}}/></label></section>
     <section><h3>{UI_LABELS.trigger}</h3><CheckboxGroup catalog={automationTriggers} values={draft.definition?.triggers} onChange={triggers=>patchDefinition({triggers})}/></section>
     <section><h3>Modules concernés</h3><CheckboxGroup catalog={automationModules.map(([key,label])=>[key,label])} values={targetKeys} onChange={setTargets}/></section>
@@ -90,11 +91,12 @@ function AutomationForm({ initial, onCancel, onSaved }) {
     <section><h3>Notifications</h3><CheckboxGroup catalog={automationRecipients} values={draft.definition?.notifications} onChange={notifications=>patchDefinition({notifications})}/></section>
     <div className="automation-form-pair"><section><h3>État</h3><select value={draft.status} onChange={e=>setDraft({...draft,status:e.target.value})}>{automationStatuses.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select><small>Une demande d’activation reste à valider.</small></section><section><h3>Priorité</h3><select value={draft.priority} onChange={e=>setDraft({...draft,priority:e.target.value})}>{automationPriorities.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></section></div>
     {message&&<div className="automation-message error">{message}</div>}
-    <div className="automation-form-actions"><button disabled={busy}>{busy?<LoaderCircle className="spin"/>:<Save/>} Enregistrer le brouillon</button><button type="button" className="secondary" onClick={onCancel}>Annuler</button></div>
+    <div className="automation-form-actions"><button disabled={busy}>{busy?<LoaderCircle className="spin"/>:<Save/>} Enregistrer le brouillon</button><button type="button" className="secondary" disabled={busy} onClick={onCancel}>Annuler</button></div>
   </form>;
 }
 
 function AutomationsTab({ rows, engine, busy, reload }) {
+  const actionActive = useRef(false);
   const [query,setQuery]=useState(''); const [status,setStatus]=useState('all');
   const [editing,setEditing]=useState(null); const [preview,setPreview]=useState(null);
   const [message,setMessage]=useState(''); const [history,setHistory]=useState(null);
@@ -108,7 +110,14 @@ function AutomationsTab({ rows, engine, busy, reload }) {
   const filtered=allRows.filter(item=>(status==='all'||item.status===status)&&`${item.name} ${item.description||item.definition?.description||''}`.toLowerCase().includes(query.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name,'fr-CA',{numeric:true,sensitivity:'base'}));
 
   async function action(type,item) {
+    if(actionActive.current)return;
+    actionActive.current=true;
     try {
+    if(!item.isSystemTemplate){
+      if(type==='activate-template')type='approve';
+      if(type==='deactivate-template')type='deactivate';
+      if(type==='pause-template')type='pause';
+    }
     if (item.isSystemTemplate) {
       if (type==='duplicate') setEditing({...structuredClone(item),id:undefined,isSystemTemplate:false,name:`${item.name} — copie`,status:'draft'});
       if (type==='deactivate-template') await setAutomationStatus(item.id,'inactive');
@@ -131,9 +140,10 @@ function AutomationsTab({ rows, engine, busy, reload }) {
       if(type==='duplicate') await duplicateAutomationDefinition(item);
       if(type==='approve') await approveAutomationDefinition(item.id);
       if(type==='deactivate') await deactivateAutomationDefinition(item.id);
+      if(type==='pause') await setAutomationStatus(item.id,'paused');
       if(type==='delete') await deleteAutomationDefinition(item.id);
       await reload(); setMessage('Action terminée avec succès.');
-    } catch(error){setMessage(friendlyError(error));}
+    } catch(error){setMessage(friendlyError(error));}finally{actionActive.current=false;}
   }
 
   return <>
@@ -144,7 +154,7 @@ function AutomationsTab({ rows, engine, busy, reload }) {
     </div>
     <div className="automation-safety-note"><ShieldCheck/><div><strong>Moteur d’exécution</strong><span>{allRows.filter(item=>item.binding&&item.status==='active').length} modèles actifs sont reliés à un événement métier. Configuration active et exécution restent deux états distincts.</span></div></div>
     {message&&<div className="automation-message">{message}</div>}
-    {editing?<AutomationForm initial={editing} onCancel={()=>setEditing(null)} onSaved={()=>{setEditing(null);reload();}}/>:
+    {editing?<AutomationForm initial={editing} onCancel={()=>setEditing(null)} onSaved={()=>{setEditing(null);reload();setMessage("Brouillon enregistré.");}}/>:
       <div className="views-table-wrap automation-table-wrap"><table className="views-table automation-config-table automation-engine-table"><thead><tr><th>Nom</th><th>Statut modèle</th><th>Statut relation</th><th>Source</th><th>Destination</th><th>État destination</th><th>Déclencheur</th><th>Dernière exécution</th><th>Dernier résultat</th><th>Actions</th></tr></thead><tbody>{filtered.map(item=><tr key={item.id}>
         <td className="automation-name-cell"><TemplateBadge visible={item.isSystemTemplate}/><strong>{item.name}</strong><small className="automation-description">{item.definition?.description||'Configuration métier'}</small>{item.isSystemTemplate&&<small className="automation-protection-label">Ce modèle TOS est protégé.</small>}</td>
         <td><span className={`automation-status ${item.status}`}>{labelFor(automationStatuses,item.status)}</span></td>
@@ -154,7 +164,7 @@ function AutomationsTab({ rows, engine, busy, reload }) {
         <td>{item.binding?labelFor(automationTriggers,item.binding.trigger_type):(item.definition?.triggers||[]).map(v=>labelFor(automationTriggers,v)).join(', ')||'—'}</td>
         <td>{item.lastExecution?new Date(item.lastExecution.created_at).toLocaleString('fr-CA'):'Jamais'}</td>
         <td><span className={`automation-result ${item.lastExecution?.status||'none'}`}>{item.lastExecution?.status||'Aucun résultat'}</span></td>
-        <td className="automation-actions-cell"><CompactActions primary={<button onClick={()=>setPreview(item)}><Eye/> Examiner</button>}><button disabled={!item.binding} onClick={()=>action('test',item)}><Play/> Tester</button>{item.status==='active'?<><button onClick={()=>action('pause-template',item)}><PauseCircle/> Mettre en pause</button><button onClick={()=>action('deactivate-template',item)}><Power/> Désactiver</button></>:<button onClick={()=>action('activate-template',item)}><CheckCircle2/> Réactiver</button>}{item.binding&&<button onClick={()=>action(item.binding.status==='active'?'binding-paused':'binding-active',item)}>{item.binding.status==='active'?'Pause relation':'Réactiver relation'}</button>}{item.resource&&<button onClick={()=>action(item.resource.status==='active'?'resource-inactive':'resource-active',item)}>{item.resource.status==='active'?'Désactiver destination':'Réactiver destination'}</button>}</CompactActions></td>
+        <td className="automation-actions-cell"><CompactActions primary={<button onClick={()=>setPreview(item)}><Eye/> Examiner</button>}>{!item.isSystemTemplate&&<button onClick={()=>setEditing(structuredClone(item))}><Edit3/> Modifier</button>}<button disabled={!item.binding} onClick={()=>action('test',item)}><Play/> Tester</button>{item.status==='active'?<><button onClick={()=>action('pause-template',item)}><PauseCircle/> Mettre en pause</button><button onClick={()=>action('deactivate-template',item)}><Power/> Désactiver</button></>:<button onClick={()=>action('activate-template',item)}><CheckCircle2/> Réactiver</button>}{item.binding&&<button onClick={()=>action(item.binding.status==='active'?'binding-paused':'binding-active',item)}>{item.binding.status==='active'?'Pause relation':'Réactiver relation'}</button>}{item.resource&&<button onClick={()=>action(item.resource.status==='active'?'resource-inactive':'resource-active',item)}>{item.resource.status==='active'?'Désactiver destination':'Réactiver destination'}</button>}</CompactActions></td>
       </tr>)}</tbody></table></div>}
     {busy&&<div className="automation-loading"><LoaderCircle className="spin"/> Chargement…</div>}
     {preview&&<AutomationPreview item={preview} onClose={()=>setPreview(null)}/>}
@@ -167,6 +177,7 @@ function ViewPreview({ view, onClose }) {
 }
 
 function ViewForm({ initial, onCancel, onSaved }) {
+  const mutationActive = useRef(false);
   const [draft,setDraft]=useState(()=>structuredClone(initial||emptyCrossModuleView()));
   const [preview,setPreview]=useState(false); const [message,setMessage]=useState(''); const [busy,setBusy]=useState(false);
   const available=fieldsByModule[draft.source]||[];
@@ -178,10 +189,10 @@ function ViewForm({ initial, onCancel, onSaved }) {
   const move=(index,direction)=>{const next=[...draft.fields];const target=index+direction;if(target<0||target>=next.length)return;[next[index],next[target]]=[next[target],next[index]];setDraft({...draft,fields:next});};
   const addCondition=()=>setDraft({...draft,conditions:[...draft.conditions,{field:'status',operator:'equals',value:''}]});
   const patchCondition=(index,patch)=>setDraft({...draft,conditions:draft.conditions.map((condition,i)=>i===index?{...condition,...patch}:condition)});
-  async function submit(event){event.preventDefault();setBusy(true);setMessage('');try{await saveCrossModuleView(draft);onSaved();}catch(error){setMessage(friendlyError(error));}finally{setBusy(false);}}
+  async function submit(event){event.preventDefault();if(mutationActive.current)return;mutationActive.current=true;setBusy(true);setMessage('');try{await saveCrossModuleView(draft);onSaved();}catch(error){setMessage(friendlyError(error));}finally{mutationActive.current=false;setBusy(false);}}
 
   return <form className="automation-form view-form" onSubmit={submit}>
-    <div className="automation-form-head"><div><h2>{draft.id?'Modifier la vue':'Nouvelle vue entre les tables'}</h2><p>Choisissez les informations utiles et leur contexte d’affichage.</p></div><button type="button" className="automation-icon-button" onClick={onCancel}><X/></button></div>
+    <div className="automation-form-head"><div><h2>{draft.id?'Modifier la vue':'Nouvelle vue entre les tables'}</h2><p>Choisissez les informations utiles et leur contexte d’affichage.</p></div><button type="button" className="automation-icon-button" disabled={busy} onClick={onCancel}><X/></button></div>
     <section><h3>Informations générales</h3><div className="view-form-grid"><label>Nom<input required value={draft.name} onChange={e=>setDraft({...draft,name:e.target.value})}/></label><label>État<select value={draft.status} onChange={e=>setDraft({...draft,status:e.target.value})}>{viewStatuses.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></label><label className="span-two">Description<textarea value={draft.description} onChange={e=>setDraft({...draft,description:e.target.value})}/></label><label>Priorité d’affichage<input type="number" min="1" max="999" value={draft.priority==='normal'?100:draft.priority} onChange={e=>setDraft({...draft,priority:e.target.value})}/></label></div></section>
     <section><h3>Parcours des informations</h3><div className="view-form-grid"><label>{UI_LABELS.sourceModule}<select required value={draft.source} onChange={e=>setDraft({...draft,source:e.target.value,fields:[]})}><option value="">Choisir un module</option>{viewModules.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></label><label>{UI_LABELS.destinationModule}<select required value={draft.destination} onChange={e=>setDraft({...draft,destination:e.target.value})}><option value="">Choisir un emplacement</option>{viewDestinations.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></label></div></section>
     <section><h3>Champs à afficher</h3>{!draft.source?<p className="automation-muted">Choisissez d’abord la provenance des informations.</p>:<CheckboxGroup catalog={available} values={draft.fields.map(field=>field.key)} onChange={keys=>{const selected=new Set(draft.fields.map(field=>field.key));const changed=available.find(([key])=>selected.has(key)!==keys.includes(key));if(changed)selectField(...changed);}}/>}<div className="selected-fields">{draft.fields.map((field,index)=><article key={field.key}><div className="field-order"><button type="button" onClick={()=>move(index,-1)}>↑</button><button type="button" onClick={()=>move(index,1)}>↓</button></div><label>Titre affiché<input value={field.label} onChange={e=>patchField(field.key,{label:e.target.value})}/></label><label>Largeur<input type="number" min="80" max="600" value={field.width} onChange={e=>patchField(field.key,{width:Number(e.target.value)})}/></label><label>Format<select value={field.format} onChange={e=>patchField(field.key,{format:e.target.value})}><option value="standard">Standard</option><option value="date">Date</option><option value="number">Nombre</option><option value="image">Image</option><option value="status">État</option></select></label><label>Valeur vide<input value={field.emptyValue} onChange={e=>patchField(field.key,{emptyValue:e.target.value})}/></label><label className="inline-check"><input type="checkbox" checked={field.visible} onChange={e=>patchField(field.key,{visible:e.target.checked})}/> Visible</label><label className="inline-check"><input type="checkbox" checked={field.editable} onChange={e=>patchField(field.key,{editable:e.target.checked})}/> Modifiable</label><button type="button" className="danger icon-only" onClick={()=>selectField(field.key,field.label)}><Trash2 size={16}/></button></article>)}</div></section>
@@ -189,12 +200,13 @@ function ViewForm({ initial, onCancel, onSaved }) {
     <section><h3>Mode d’utilisation</h3><div className="mode-options">{viewModes.map(([value,label])=><label key={value}><input type="radio" name="mode" checked={draft.mode===value} onChange={()=>setDraft({...draft,mode:value})}/><span>{label}</span></label>)}</div></section>
     <section><div className="section-heading"><h3>Conditions d’affichage</h3><button type="button" className="secondary" onClick={addCondition}><Plus/> Ajouter une condition</button></div>{draft.conditions.length>1&&<select value={draft.conditionMode} onChange={e=>setDraft({...draft,conditionMode:e.target.value})}><option value="all">Toutes les conditions</option><option value="any">Au moins une condition</option></select>}<div className="conditions-builder">{draft.conditions.map((condition,index)=><div key={index}><select value={condition.field} onChange={e=>patchCondition(index,{field:e.target.value})}>{available.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select><select value={condition.operator} onChange={e=>patchCondition(index,{operator:e.target.value})}>{conditionOperators.map(([v,l])=><option key={v} value={v}>{l}</option>)}</select><input value={condition.value} disabled={['empty','not_empty'].includes(condition.operator)} onChange={e=>patchCondition(index,{value:e.target.value})}/><button type="button" className="danger icon-only" onClick={()=>setDraft({...draft,conditions:draft.conditions.filter((_,i)=>i!==index)})}><Trash2/></button></div>)}</div></section>
     {message&&<div className="automation-message error">{message}</div>}
-    <div className="automation-form-actions"><button type="button" className="secondary" onClick={()=>setPreview(true)}><Eye/> Prévisualiser</button><button disabled={busy}>{busy?<LoaderCircle className="spin"/>:<Save/>} Enregistrer le brouillon</button><button type="button" className="secondary" onClick={onCancel}>Annuler</button></div>
+    <div className="automation-form-actions"><button type="button" className="secondary" onClick={()=>setPreview(true)}><Eye/> Prévisualiser</button><button disabled={busy}>{busy?<LoaderCircle className="spin"/>:<Save/>} Enregistrer le brouillon</button><button type="button" className="secondary" disabled={busy} onClick={onCancel}>Annuler</button></div>
     {preview&&<ViewPreview view={draft} onClose={()=>setPreview(false)}/>}
   </form>;
 }
 
 function ViewsTab({ rows, resources, busy, reload }) {
+  const actionActive=useRef(false);
   const [query,setQuery]=useState('');const[editing,setEditing]=useState(null);const[preview,setPreview]=useState(null);const[message,setMessage]=useState('');
   const viewStates=(resources||[]).filter(item=>item.resource_type==='view');
   const allRows=useMemo(()=>mergeSystemTemplates(rows,TOS_VIEW_TEMPLATES).map(item=>{
@@ -203,15 +215,17 @@ function ViewsTab({ rows, resources, busy, reload }) {
   }),[rows,viewStates]);
   const filtered=allRows.filter(item=>`${item.name} ${item.description}`.toLowerCase().includes(query.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name,'fr-CA',{numeric:true,sensitivity:'base'}));
   async function action(type,item){
+    if(actionActive.current)return;actionActive.current=true;
+    try{
     if(item.isSystemTemplate){if(type==='duplicate')setEditing({...structuredClone(item),id:undefined,isSystemTemplate:false,name:`${item.name} — copie`,status:'draft'});if(type==='deactivate-template'||type==='activate-template'){await setAutomationResourceStatus(item.resource.id,type==='deactivate-template'?'inactive':'active');await reload();setMessage(type==='deactivate-template'?'Vue TOS désactivée et persistée.':'Vue TOS réactivée et persistée.');}return;}
     if(type==='delete'&&!window.confirm('Voulez-vous supprimer cette configuration?\n\nCette action retirera la configuration, mais ne supprimera pas les données déjà enregistrées dans les autres modules.'))return;
-    try{if(type==='duplicate')setEditing({...structuredClone(item),id:undefined,name:`${item.name} — copie`,status:'draft'});if(type==='active')await setCrossModuleViewStatus(item.id,'active');if(type==='inactive')await setCrossModuleViewStatus(item.id,'inactive');if(type==='delete')await deleteCrossModuleView(item.id);if(!['duplicate'].includes(type))await reload();}catch(error){setMessage(friendlyError(error));}
+    if(type==='duplicate')setEditing({...structuredClone(item),id:undefined,name:`${item.name} — copie`,status:'draft'});if(type==='active')await setCrossModuleViewStatus(item.id,'active');if(type==='inactive')await setCrossModuleViewStatus(item.id,'inactive');if(type==='delete')await deleteCrossModuleView(item.id);if(!['duplicate'].includes(type))await reload();}catch(error){setMessage(friendlyError(error));}finally{actionActive.current=false;}
   }
   return <>
     <div className="automation-toolbar"><div className="configuration-search"><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Rechercher une vue"/></div><button onClick={()=>setEditing(emptyCrossModuleView())}><Plus/> Nouvelle vue</button></div>
     <div className="automation-safety-note"><ShieldCheck/><div><strong>Modèles sans risque</strong><span>Les {TOS_VIEW_TEMPLATES.length} vues TOS restent en Brouillon jusqu’à une activation explicite.</span></div></div>
     {message&&<div className="automation-message error">{message}</div>}
-    {editing?<ViewForm initial={editing} onCancel={()=>setEditing(null)} onSaved={()=>{setEditing(null);reload();}}/>:<div className="views-table-wrap automation-table-wrap"><table className="views-table automation-config-table automation-views-table"><thead><tr><th>Nom de la vue</th><th>{UI_LABELS.sourceModule}</th><th>{UI_LABELS.destinationModule}</th><th>Champs visibles</th><th>Mode</th><th>État</th><th>Actions</th></tr></thead><tbody>{filtered.map(item=><tr key={item.id}><td className="automation-name-cell"><TemplateBadge visible={item.isSystemTemplate}/><strong>{item.name}</strong><small className="automation-description">{item.description}</small>{item.isSystemTemplate&&<small className="automation-protection-label">Modèle protégé : désactivez-le ou créez une copie modifiable.</small>}</td><td>{catalogLabel(viewModules,item.source)}</td><td>{catalogLabel(viewDestinations,item.destination)}</td><td>{item.fields.length}</td><td className="automation-mode-cell">{catalogLabel(viewModes,item.mode)}</td><td><span className={`automation-status ${item.status}`}>{catalogLabel(viewStatuses,item.status)}</span></td><td className="automation-actions-cell"><CompactActions primary={<button onClick={()=>setPreview(item)}><Eye/> Examiner</button>}>{!item.isSystemTemplate&&<button onClick={()=>setEditing(structuredClone(item))}><Edit3/> Modifier</button>}<button onClick={()=>action('duplicate',item)}><Copy/> Dupliquer</button>{item.isSystemTemplate?(item.status==='inactive'?<button onClick={()=>action('activate-template',item)}><CheckCircle2/> Réactiver</button>:<button onClick={()=>action('deactivate-template',item)}><Power/> Désactiver</button>):(item.status==='active'?<button onClick={()=>action('inactive',item)}><Power/> Désactiver</button>:<button onClick={()=>action('active',item)}><CheckCircle2/> Activer</button>)}{!item.isSystemTemplate&&<button className="danger" onClick={()=>action('delete',item)}><Trash2/> Supprimer</button>}</CompactActions></td></tr>)}</tbody></table></div>}
+    {editing?<ViewForm initial={editing} onCancel={()=>setEditing(null)} onSaved={()=>{setEditing(null);reload();setMessage("Brouillon enregistré.");}}/>:<div className="views-table-wrap automation-table-wrap"><table className="views-table automation-config-table automation-views-table"><thead><tr><th>Nom de la vue</th><th>{UI_LABELS.sourceModule}</th><th>{UI_LABELS.destinationModule}</th><th>Champs visibles</th><th>Mode</th><th>État</th><th>Actions</th></tr></thead><tbody>{filtered.map(item=><tr key={item.id}><td className="automation-name-cell"><TemplateBadge visible={item.isSystemTemplate}/><strong>{item.name}</strong><small className="automation-description">{item.description}</small>{item.isSystemTemplate&&<small className="automation-protection-label">Modèle protégé : désactivez-le ou créez une copie modifiable.</small>}</td><td>{catalogLabel(viewModules,item.source)}</td><td>{catalogLabel(viewDestinations,item.destination)}</td><td>{item.fields.length}</td><td className="automation-mode-cell">{catalogLabel(viewModes,item.mode)}</td><td><span className={`automation-status ${item.status}`}>{catalogLabel(viewStatuses,item.status)}</span></td><td className="automation-actions-cell"><CompactActions primary={<button onClick={()=>setPreview(item)}><Eye/> Examiner</button>}>{!item.isSystemTemplate&&<button onClick={()=>setEditing(structuredClone(item))}><Edit3/> Modifier</button>}<button onClick={()=>action('duplicate',item)}><Copy/> Dupliquer</button>{item.isSystemTemplate?(item.status==='inactive'?<button onClick={()=>action('activate-template',item)}><CheckCircle2/> Réactiver</button>:<button onClick={()=>action('deactivate-template',item)}><Power/> Désactiver</button>):(item.status==='active'?<button onClick={()=>action('inactive',item)}><Power/> Désactiver</button>:<button onClick={()=>action('active',item)}><CheckCircle2/> Activer</button>)}{!item.isSystemTemplate&&<button className="danger" onClick={()=>action('delete',item)}><Trash2/> Supprimer</button>}</CompactActions></td></tr>)}</tbody></table></div>}
     {busy&&<div className="automation-loading"><LoaderCircle className="spin"/> Chargement…</div>}
     {preview&&<ViewPreview view={preview} onClose={()=>setPreview(null)}/>}
   </>;

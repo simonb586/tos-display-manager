@@ -1,0 +1,9 @@
+docs/**
+scripts/**
+supabase/**
+src/src/**
+src/scripts/**
+.env*
+*.log
+*.bak
+.cache/**

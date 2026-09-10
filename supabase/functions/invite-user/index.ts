@@ -79,20 +79,12 @@ Deno.serve(async request=>{
     if(!allowedRoles.includes(role))return json({error:'Rôle invalide.'},400);
     let authUser=await findUser(admin,email);
     if(clientAdminOrigin&&authUser?.email_confirmed_at)return json({error:'Un compte existe déjà pour cette adresse.'},409);
-    let invitationSent=false;
-    if(!authUser){
-      const result=await admin.auth.admin.inviteUserByEmail(email,{redirectTo,data:{nom,role,organisation,account_activated:false}});
-      if(result.error){
-        authUser=await findUser(admin,email);
-        if(!authUser||authUser.email_confirmed_at)return json({error:`Invitation impossible : ${result.error.message}`,redirect_to:redirectTo},409);
-      }else authUser=result.data.user;
-      invitationSent=true;
-    }
-    if(authUser&&!authUser.email_confirmed_at&&!invitationSent){
-      const{error}=await admin.auth.resend({type:'invite',email,options:{emailRedirectTo:redirectTo}});
-      if(error)return json({error:`Invitation impossible : ${error.message}`},400);
-      invitationSent=true;
-    }
+    if(authUser?.email_confirmed_at)return json({error:'Ce compte est déjà activé. Utilisez la récupération de mot de passe.'},409);
+    const result=await admin.auth.admin.inviteUserByEmail(email,{redirectTo,data:{nom,role,organisation,account_activated:false}});
+    if(result.error)return json({error:`Invitation impossible : ${result.error.message}`},400);
+    authUser=result.data.user;
+    if(!authUser)return json({error:'Invitation non confirmée par Auth.'},502);
+    const invitationSent=true;
     const lifecycle=authUser?.email_confirmed_at?'Actif':'Invitation envoyée';
     const{data:profile,error:profileError}=await admin.from('utilisateurs').upsert({auth_user_id:authUser?.id||null,nom,courriel:email,role,organisation,statut:authUser?.banned_until?'Désactivé':'Actif',invitation_statut:lifecycle,invitation_envoyee_le:invitationSent?new Date().toISOString():null,client_id:clientId,updated_at:new Date().toISOString()},{onConflict:'courriel'}).select().single();
     if(profileError)return json({error:`Profil non enregistré : ${profileError.message}`},500);

@@ -1,0 +1,33 @@
+import './refresh-entry.jsx';
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import CampaignVisualManager from '../../src/components/CampaignVisualManager';
+import AutomationAssistant from '../../src/components/AutomationAssistant';
+import {emptyAutomation} from '../../src/config/automationCatalog';
+import {emptyCrossModuleView} from '../../src/config/crossModuleViewCatalog';
+const originalApi=window.testApi, originalMount=window.mount;
+const mutations=['createEdt','updateEdt','createPhase','assignUser','createWorkOrderV11','createClientRequest','assignSupportsToEdt','createInventoryMovement','saveCampaignVisual','saveAutomationDefinition','saveCrossModuleView','saveRelationRule'];
+window.testApi=(file,name,args)=>{
+ if(name==='parseSupportIds')return [...new Set(String(args[0]).split(/[\s,;]+/).filter(Boolean))];
+ let result;
+ if(mutations.includes(name))result={id:1,supports_affectes:1};
+ else if(name==='listCampaignVisuals')result=[{id:1,campagne_id:1,nom_visuel:'Visual Fixture',campagne:{business_context:window.businessContext||'marketing'}}];
+ else if(name==='listEdtPhasesForCampaign')result=[];
+ else if(name==='listAutomationDefinitions')result=[{...emptyAutomation(),id:'auto-local-1',name:'Local automation'}];
+ else if(name==='listCrossModuleViews')result=[{...emptyCrossModuleView(),id:'view-local-1',name:'Local view',source:'infrastructures',destination:'support360'}];
+ else if(name==='listAutomationEngineState')result={bindings:[],resources:[],logs:[]};
+ else if(name==='loadEdtLifecycleData')result={edt:{id:1,no_edt:'EDT-INITIAL'},phases:[],phaseReports:[],history:[],edtSupports:[],workOrders:[]};
+ else if(name==='loadOperationsData')return originalApi(file,name,args).then(data=>({...data,campaigns:[{id:1,nom_campagne:'Campaign Fixture'}],users:[{id:4,courriel:'installer@example.test',nom:'Installer fixture',statut:'Actif'}]}));
+ else return originalApi(file,name,args);
+ const f=window.fixture,fail=f.fail&&mutations.includes(name),delay=f.delay;
+ f.calls.push({file,name,args});return new Promise((resolve,reject)=>setTimeout(()=>fail?reject(Error('REFRESH_FIXTURE_ERROR')):resolve(result),delay));
+};
+const extraHost=document.createElement('div');document.body.append(extraHost);const extraRoot=createRoot(extraHost);let id=0;
+window.mount=(name,role='Administrateur',businessContext='marketing')=>{window.businessContext=businessContext;
+ extraRoot.render(null);
+ if(['CampaignVisualManager','AutomationAssistant'].includes(name)){
+  originalMount('ChangeHistoryPanel',role);
+  const Component=name==='CampaignVisualManager'?CampaignVisualManager:AutomationAssistant;
+  extraRoot.render(<Component key={++id} role={role} businessContext={businessContext}/>);
+ }else originalMount(name,role,businessContext);
+};

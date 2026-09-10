@@ -58,6 +58,8 @@ Deno.serve(async request => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  if (request.method !== 'POST') return json({error:'Méthode non autorisée.'},405);
+
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization) return json({ error: 'Session absente.' }, 401);
@@ -177,47 +179,24 @@ Deno.serve(async request => {
       const redirectTo = `${publicSiteUrl()}/accept-invitation`;
 
       if (authUser?.email_confirmed_at) {
-        const { error } = await admin.auth.resetPasswordForEmail(email, {
-          redirectTo: `${publicSiteUrl()}/update-password`
-        });
-        if (error) throw error;
-
-        return json({
-          message: 'Le compte était déjà confirmé; un lien de réinitialisation a été envoyé.'
-        });
+        return json({error:'Ce compte est déjà activé. Utilisez la récupération de mot de passe.'},409);
       }
+      const {data:inviteData,error:inviteError}=await admin.auth.admin.inviteUserByEmail(email,{
+        redirectTo,
+        data:{nom:body.nom||'',role:body.role||'Installateur',organisation:body.organisation||'',account_activated:false}
+      });
+      if(inviteError)throw inviteError;
+      authUser=inviteData.user;
+      if(!authUser)return json({error:'Invitation non confirmée par Auth.'},502);
 
-      if (!authUser) {
-        const { data, error } = await admin.auth.admin.inviteUserByEmail(
-          email,
-          {
-            redirectTo,
-            data: {
-              nom: body.nom || '',
-              role: body.role || 'Installateur',
-              organisation: body.organisation || '',
-              account_activated: false
-            }
-          }
-        );
-        if (error) throw error;
-        authUser = data.user;
-      } else {
-        const { error } = await admin.auth.resend({
-          type: 'invite',
-          email,
-          options: { emailRedirectTo: redirectTo }
-        });
-        if (error) throw error;
-      }
-
-      await admin
+      const {error:profileError}=await admin
         .from('utilisateurs')
         .update({
           invitation_statut: 'Invitation envoyée',
           invitation_envoyee_le: new Date().toISOString()
         })
         .eq('courriel', email);
+      if(profileError)throw profileError;
 
       return json({ message: `Invitation renvoyée vers ${redirectTo}` });
     }

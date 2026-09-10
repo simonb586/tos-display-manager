@@ -226,7 +226,7 @@ export default function TerrainApp({ dataStore, role, session }) {
           visualId,
           fileName: uploaded.normalizedFilename,
           storagePath: uploaded.path,
-          photoUrl: uploaded.publicUrl,
+          photoUrl: uploaded.storageReference,
           userEmail: session?.user?.email || '',
           comments
         });
@@ -246,7 +246,7 @@ export default function TerrainApp({ dataStore, role, session }) {
           comments,
           fileName: uploaded.normalizedFilename,
           storagePath: uploaded.path,
-          photoUrl: uploaded.publicUrl,
+          photoUrl: uploaded.storageReference,
           userEmail: session?.user?.email || ''
         });
 

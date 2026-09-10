@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import useRefreshRequest from '../hooks/useRefreshRequest';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Eye, RefreshCw, Save, ShieldCheck } from 'lucide-react';
 import {
   listRoleVisibility,
@@ -13,16 +14,20 @@ export default function RoleVisibilityAdmin({ dataStore, tableNames, role }) {
   const [selectedRole, setSelectedRole] = useState('Administrateur');
   const [selectedTable, setSelectedTable] = useState(tableNames[0] || '');
   const [message, setMessage] = useState('');
+  const mutationActive = useRef(false);
+  const [saving, setSaving] = useState(false);
 
   const allowed = role === 'Administrateur';
 
-  async function reload() {
-    try {
-      setPermissions(await listRoleVisibility());
+  const refreshRequest=useRefreshRequest(role);
+async function reload() {
+    const request=refreshRequest.start();
+try {
+      setPermissions(await request.wait(listRoleVisibility()));
       setMessage('');
-    } catch (error) {
+    } catch (error) {if(!request.isCurrent())return;
       setMessage(error.message || 'Erreur de chargement.');
-    }
+    }finally{request.finish()}
   }
 
   useEffect(() => {
@@ -99,6 +104,9 @@ export default function RoleVisibilityAdmin({ dataStore, tableNames, role }) {
   }
 
   async function save() {
+    if (!allowed || mutationActive.current) return;
+    mutationActive.current = true;
+    setSaving(true);
     try {
       const invalid = CLIENT_PORTAL_ROLES.includes(current.role)
         ? (current.visible_tables || []).filter(item => item !== '*' && !isClientPortalViewSupported(item))
@@ -112,6 +120,9 @@ export default function RoleVisibilityAdmin({ dataStore, tableNames, role }) {
       setMessage(`Visibilité enregistrée pour le rôle ${saved.role}.`);
     } catch (error) {
       setMessage(error.message || 'Erreur d’enregistrement.');
+    } finally {
+      mutationActive.current = false;
+      setSaving(false);
     }
   }
 
@@ -133,7 +144,7 @@ export default function RoleVisibilityAdmin({ dataStore, tableNames, role }) {
           <h1><ShieldCheck/> Visibilité par rôle</h1>
           <p>Définis les tables et les colonnes visibles selon le type d’utilisateur.</p>
         </div>
-        <button onClick={reload}><RefreshCw size={18}/> Actualiser</button>
+        <button aria-busy={refreshRequest.refreshing} data-refresh-control="RoleVisibilityAdmin" disabled={refreshRequest.refreshing} onClick={refreshRequest.onClick(reload)}><RefreshCw size={18}/> Actualiser</button>
       </header>
 
       {message && <div className="v07-message">{message}</div>}
@@ -166,7 +177,7 @@ export default function RoleVisibilityAdmin({ dataStore, tableNames, role }) {
             <small>L’administrateur conserve toujours l’accès complet.</small>
           )}
 
-          <button className="v07-primary" onClick={save}>
+          <button className="v07-primary" disabled={saving} onClick={save}>
             <Save size={18}/> Enregistrer
           </button>
         </section>

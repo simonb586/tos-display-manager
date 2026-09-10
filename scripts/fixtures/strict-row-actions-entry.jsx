@@ -1,0 +1,1 @@
+import './remaining-form-entry.jsx';const api=window.testApi;window.testApi=(file,name,args)=>{if(['deleteSupportPhoto','closeEdt','updateWorkOrderV11'].includes(name)){fixture.calls.push({name,args});const fail=fixture.fail;return new Promise((resolve,reject)=>setTimeout(()=>fail?reject(Error('ROW_ERROR')):resolve({ok:true}),120))}return api(file,name,args)};

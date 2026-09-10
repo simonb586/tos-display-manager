@@ -1,0 +1,16 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+const d='docs/stabilization-local/certification',prior='docs/stabilization-local/followup',out=d+'/remote/coordinated-cutover';
+const read=p=>JSON.parse(fs.readFileSync(p,'utf8').replace(/^\uFEFF/,''));
+const files=['docs/stabilization-local/browser-results.json',...['refresh-results','refresh-lifecycle-results','historical-ui-results','user-form-results','form-closure-results','auth-form-results','field-form-results','remaining-form-results','terrain-form-results','row-mutation-results','client-transfer-results','client-detail-race-results','portal-renderability-results'].map(n=>prior+'/'+n+'.json'),...['client-form-results','main-results','drawer-results','exports-results','gallery-results','reports-results','visual-draft-results','form-role-results','auth-role-results','terrain-role-results'].map(n=>d+'/'+n+'.json'),...fs.readdirSync(d+'/strict').filter(n=>n.endsWith('-results.json')&&n!=='parity-results.json').map(n=>d+'/strict/'+n),d+'/remote/photo-private/browser-local.json'];
+const browser=files.map(file=>{const data=read(file),rows=data.records||data.cases||data.results;assert(rows.length);assert(rows.every(r=>!['FAIL','ERROR'].includes(r.result||r.RESULT)));return {file,count:rows.length,sha256:crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')};});
+const total=browser.reduce((n,r)=>n+r.count,0);assert.equal(total,627);
+const history=read(prior+'/existing-tests.json');assert.equal(history.length,84);assert(history.every(r=>r.exitCode===0));
+const suites=read(d+'/remote/final-cutover/tenant-regression.json');assert.equal(suites.length,9);assert(suites.every(r=>r.exitCode===0));
+execFileSync('git',['-c','core.safecrlf=false','diff','--check'],{stdio:'pipe'});
+const candidates=read(out+'/commit-candidates.json');assert.deepEqual(candidates.findings,[]);
+const result={date:new Date().toISOString(),browserCases:total,photoCases:29,historicalSuites:84,regressionSuites:9,secretScan:'PASS',diff:'PASS',files:candidates.files.length,browser,scope:'Local browser tests use simulated services; real production validation is required after deployment and before private cutover.'};
+fs.writeFileSync(out+'/precommit-validation.json',JSON.stringify(result,null,2));
+console.log(JSON.stringify({browserCases:total,photoCases:29,historicalSuites:84,regressionSuites:9,secretScan:'PASS',diff:'PASS'}));

@@ -1,3 +1,4 @@
+import { storageReferenceFromPhotoRecord } from '../lib/photoDeletion';
 import JSZip from 'jszip';
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
 import { friendlyError } from '../config/businessLanguage';
@@ -131,7 +132,7 @@ async function verifyPhotoDeletion(photo, storageLocation) {
 }
 
 async function setInfrastructurePrimary(supportId, photo) {
-  const stableReference = photo?.storage_path ? `${photo.storage_bucket || 'support-photos'}/${normalizeStoragePath(photo.storage_path)}` : null;
+  const stableReference = storageReferenceFromPhotoRecord(photo);
   const { error } = await supabase.from('infrastructures').update({
     photo_principale_url: stableReference,
     photo_miniature_url: stableReference,
@@ -146,9 +147,7 @@ async function replaceInfrastructurePhotoReferences(deletedPhoto, replacement) {
     deletedPhoto.storage_path ? `${deletedPhoto.storage_bucket || 'support-photos'}/${normalizeStoragePath(deletedPhoto.storage_path)}` : null
   ].filter(Boolean);
   if (!deletedReferences.length) return;
-  const replacementReference = replacement?.storage_path
-    ? `${replacement.storage_bucket || 'support-photos'}/${normalizeStoragePath(replacement.storage_path)}`
-    : null;
+  const replacementReference = storageReferenceFromPhotoRecord(replacement);
   const values = {
     photo_principale_url: replacementReference,
     photo_miniature_url: replacementReference,

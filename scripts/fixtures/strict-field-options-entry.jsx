@@ -1,0 +1,1 @@
+import './field-form-entry.jsx';const api=window.testApi;window.testApi=(file,name,args)=>window.stale?Promise.reject(Object.assign(Error('STALE'),{code:'stale_draft'})):api(file,name,args);

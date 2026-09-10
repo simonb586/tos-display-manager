@@ -1,4 +1,8 @@
-import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import PhotoImage from './components/PhotoImage';
+import {businessColumns as getCols,businessColumnLabel as columnLabel} from './lib/businessColumns';
+import {knownBusinessRoute} from './lib/businessViewRegistry';
+import React, { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { clearSignedPhotoUrlCache } from './services/photoAccessService';
 import { createRoot } from 'react-dom/client';
 import {
   Search, Download, FileSpreadsheet, FileText, ShieldCheck, BarChart3,
@@ -132,59 +136,16 @@ const icons = {
 };
 const roles = ['Administrateur', 'Coordonnateur', 'Installateur', 'Client-Admin', 'Client'];
 
-const INFRASTRUCTURE_LABELS = {
-  support_id: 'Numéro du support',
-  type_support: 'Type de support',
-  format_affichage: 'Formats d’affichage',
-  medium_recommande: 'Médium recommandé',
-  emplacement_visibilite: 'Emplacement / visibilité',
-  site: 'Site',
-  type_site: 'Type de site',
-  ligne_distribution: 'Ligne de distribution',
-  type_ligne_distribution: 'Type de ligne de distribution',
-  enjeux: 'Enjeux',
-  type_enjeux: 'Type d’enjeux',
-  actif: 'Actif',
-  campagne_selon_visuel: 'Campagne selon le visuel',
-  visuel_en_expo: 'Visuel en exposition',
-  commentaires: 'Commentaires',
-  campagne_actuelle: 'Nom de la campagne actuelle',
-  visuel_campagne: 'Visuel de la campagne',
-  visuel_actuel_cadre: 'Visuel actuel du cadre',
-  date_derniere_manipulation: 'Date de la dernière manipulation',
-  edt_associe: 'EDT associé',
-  campagne_precedente: 'Campagne précédente',
-  visuel_precedent: 'Visuel précédent',
-  edt_precedent_associe: 'EDT précédent associé',
-  coordonnees_gps: 'Coordonnées GPS',
-  latitude: 'Latitude',
-  longitude: 'Longitude',
-  prochain_edt_cible: 'Prochain EDT ciblé',
-  lien_carte_interactive: 'Lien vers la carte interactive'
-};
 
-const ALWAYS_HIDDEN_COLUMNS = {
-  Infrastructures: ['format_visuel', 'photo_miniature_url', 'photo_principale_url']
-};
+
+
 
 const getRows = (dataStore, name) =>
   dataStore?.[name]?.rows || [];
 
-const getCols = (rows, name) => {
-  if (!rows?.length) return [];
-  const hidden = new Set([
-    'raw_data',
-    'created_at',
-    'updated_at',
-    ...(ALWAYS_HIDDEN_COLUMNS[name] || [])
-  ]);
-  return Object.keys(rows[0]).filter(column => !hidden.has(column));
-};
 
-const columnLabel = (tableName, column) =>
-  tableName === 'Infrastructures'
-    ? (INFRASTRUCTURE_LABELS[column] || column)
-    : column;
+
+
 
 const thumbnailForInfrastructure = row =>
   row.photo_miniature_url ||
@@ -197,7 +158,7 @@ function renderTableCell(tableName, row, column) {
   if (tableName === 'Infrastructures' && column === 'visuel_actuel_cadre') {
     const url = thumbnailForInfrastructure(row);
     return url
-      ? <img className="infrastructure-thumbnail" src={url} alt={`Photo du support ${row.support_id || ''}`}/>
+      ? <PhotoImage className="infrastructure-thumbnail" photo={url} alt={`Photo du support ${row.support_id || ''}`}/>
       : <span className="infrastructure-thumbnail-missing">Aucune photo</span>;
   }
 
@@ -309,6 +270,18 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   const [gridEditing, setGridEditing] = useState(false);
   const [drafts, setDrafts] = useState({});
   const [saving, setSaving] = useState(false);
+  const gridSaveActive = useRef(false);
+  const gridExportActive = useRef(false);
+  const [exporting, setExporting] = useState(false);
+  async function runGridExport(action) {
+    if (gridExportActive.current) return;
+    gridExportActive.current = true;
+    setExporting(true);
+    setMessage('');
+    try { await action(); }
+    catch (error) { setMessage(friendlyError(error, 'Export impossible. Réessayez.')); }
+    finally { gridExportActive.current = false; setExporting(false); }
+  }
   const [message, setMessage] = useState('');
   const [page, setPage] = useState(restoredContext?.page || 1);
   const [pageSize, setPageSize] = useState(restoredContext?.pageSize || 50);
@@ -394,6 +367,7 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
   }
 
   async function saveGrid() {
+    if (!canEdit || gridSaveActive.current) return;
     const entries = Object.values(drafts);
     if (!entries.length) {
       setGridEditing(false);
@@ -401,7 +375,7 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
     }
 
     if (!window.confirm(`Enregistrer ${entries.length} ligne(s) modifiée(s) dans ${name}?`)) return;
-
+    gridSaveActive.current = true;
     setSaving(true);
     setMessage('');
 
@@ -414,6 +388,7 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
     } catch (error) {
       setMessage(friendlyError(error, 'Impossible d’enregistrer ces modifications.'));
     } finally {
+      gridSaveActive.current = false;
       setSaving(false);
     }
   }
@@ -422,15 +397,15 @@ function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpd
     <header className="pageHead"><div><h1>{icons[name] || '📋'} {name}</h1><p>{filtered.length.toLocaleString('fr-CA')} résultat(s) sur {rows.length.toLocaleString('fr-CA')} ligne(s).</p></div><div className="actions">
       <DataGridSettings gridId={`table-${name}`} columns={permittedCols} labels={Object.fromEntries(permittedCols.map(column=>[column,columnLabel(name,column)]))} preferences={gridSettings.preferences} setPreferences={gridSettings.setPreferences} onReset={gridSettings.reset}/>
       {canEdit && !gridEditing && <button onClick={() => { setGridEditing(true); setMessage(''); }}><Edit3/> Modifier la grille</button>}
-      <button onClick={() => downloadCSV(professionalExportName(name,'csv'), sorted, cols.map(key=>({key,label:exportLabels[key]})))}><Download/> CSV résultats ({sorted.length})</button>
-      <button disabled={!selectedFiltered.length} onClick={() => downloadExcelSelectionWithPhotos(professionalExportName(name,'xlsx'), selectedFiltered, cols, {...exportOptions,exportType:'Sélection'})}><FileSpreadsheet/> Excel sélection ({selectedFiltered.length})</button>
-      <button onClick={() => downloadExcel(professionalExportName(name,'xlsx'), sorted, cols, {...exportOptions,exportType:'Résultats filtrés'})}><FileSpreadsheet/> Excel résultats ({sorted.length})</button>
-      <button onClick={() => downloadPDF(professionalExportName(name,'pdf'), `${name} — résultats filtrés`, sorted, cols, exportOptions)}><FileText/> PDF ensemble filtré</button>
+      <button disabled={exporting} onClick={() => runGridExport(() => downloadCSV(professionalExportName(name,'csv'), sorted, cols.map(key=>({key,label:exportLabels[key]}))))}><Download/> CSV résultats ({sorted.length})</button>
+      <button disabled={exporting || !selectedFiltered.length} onClick={() => runGridExport(() => downloadExcelSelectionWithPhotos(professionalExportName(name,'xlsx'), selectedFiltered, cols, {...exportOptions,exportType:'Sélection'}))}><FileSpreadsheet/> Excel sélection ({selectedFiltered.length})</button>
+      <button disabled={exporting} onClick={() => runGridExport(() => downloadExcel(professionalExportName(name,'xlsx'), sorted, cols, {...exportOptions,exportType:'Résultats filtrés'}))}><FileSpreadsheet/> Excel résultats ({sorted.length})</button>
+      <button disabled={exporting} onClick={() => runGridExport(() => downloadPDF(professionalExportName(name,'pdf'), `${name} — résultats filtrés`, sorted, cols, exportOptions))}><FileText/> PDF ensemble filtré</button>
     </div></header>
 
     {gridEditing && <div className="grid-edit-toolbar">
       <button className="grid-edit-primary" disabled={saving} onClick={saveGrid}><Save size={17}/> {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}</button>
-      <button className="grid-edit-secondary" onClick={() => { setDrafts({}); setGridEditing(false); }}><X size={17}/> Annuler</button>
+      <button className="grid-edit-secondary" disabled={saving} onClick={() => { if (gridSaveActive.current) return; setDrafts({}); setGridEditing(false); }}><X size={17}/> Annuler</button>
       <span className="grid-edit-note">{Object.keys(drafts).length} ligne(s) modifiée(s). Clique directement dans les cellules.</span>
     </div>}
 
@@ -476,13 +451,15 @@ function Detail({ name, row, role, config, onSaved, onClose, onOpenMap }) {
   const [rules, setRules] = useState({});
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
-  const canEdit = role === 'Administrateur';
+  const detailSaveActive = useRef(false);
+  const canEdit = role === 'Administrateur' && !config.readOnly;
 
   useEffect(() => {
     loadAutomaticFieldRules(config.table).then(setRules);
   }, [config.table]);
 
   async function save() {
+    if (!canEdit || detailSaveActive.current) return;
     const changes = Object.fromEntries(
       cols
         .filter(column => draft[column] !== row[column])
@@ -495,7 +472,7 @@ function Detail({ name, row, role, config, onSaved, onClose, onOpenMap }) {
     }
 
     if (!window.confirm(`Enregistrer les modifications de cette fiche ${name}?`)) return;
-
+    detailSaveActive.current = true;
     setSaving(true);
     try {
       const updated = await updateUniversalRow({ config, originalRow: row, changes });
@@ -506,18 +483,19 @@ function Detail({ name, row, role, config, onSaved, onClose, onOpenMap }) {
     } catch (error) {
       setMessage(friendlyError(error, 'Impossible d’enregistrer cette fiche.'));
     } finally {
+      detailSaveActive.current = false;
       setSaving(false);
     }
   }
 
-  return <div className="drawer"><div className="drawerPanel"><button className="close" onClick={onClose}>×</button><h2>Fiche 360° — {name}</h2>{support && <div className="support">Identifiant : <b>{support}</b></div>}
+  return <div className="drawer"><div className="drawerPanel"><button className="close" disabled={saving} onClick={() => { if (!detailSaveActive.current) onClose(); }}>×</button><h2>Fiche 360° — {name}</h2>{support && <div className="support">Identifiant : <b>{support}</b></div>}
 
     {canEdit && <div className="detail-edit-actions">
       {!editing
         ? <button className="grid-edit-primary" onClick={() => { setDraft(row); setEditing(true); setMessage(''); }}><Edit3 size={17}/> Modifier la fiche</button>
         : <>
             <button className="grid-edit-primary" disabled={saving} onClick={save}><Save size={17}/> Enregistrer</button>
-            <button className="grid-edit-secondary" onClick={() => { setDraft(row); setEditing(false); }}><X size={17}/> Annuler</button>
+            <button className="grid-edit-secondary" disabled={saving} onClick={() => { if (detailSaveActive.current) return; setDraft(row); setEditing(false); }}><X size={17}/> Annuler</button>
           </>}
     </div>}
 
@@ -528,7 +506,7 @@ function Detail({ name, row, role, config, onSaved, onClose, onOpenMap }) {
       if (!editing && name === 'Infrastructures' && c === 'visuel_actuel_cadre') {
         const url = thumbnailForInfrastructure(row);
         return <div key={c} className="detail-photo-card"><label>{columnLabel(name, c)}</label>{url
-          ? <img src={url} alt={`Photo du support ${support}`}/>
+          ? <PhotoImage photo={url} alt={`Photo du support ${support}`}/>
           : <p>Aucune photo associée.</p>}</div>;
       }
 
@@ -601,16 +579,22 @@ function App() {
   const [navigationContext,setNavigationContext]=useState({});
   const [rolePermission, setRolePermission] = useState({ visible_tables: ['*'], visible_columns: {} });
   const [terrainSyncStatus, setTerrainSyncStatus] = useState('État global non centralisé');
+  const dataScope = useRef('');
+  const currentDataScope = [session?.user?.id,profile?.id,profile?.role,profile?.client_id].join(':');
+  dataScope.current = currentDataScope;
 
   async function refreshDataStore(labels = STARTUP_TABLES, { force = false } = {}) {
-    if (!session) return null;
+    if (!session || !profile || ['Client','Client-Admin'].includes(profile.role)) return null;
+    const scope = currentDataScope;
     try {
       const selectedConfig = Object.fromEntries(labels.filter(label => tableConfig[label]).map(label => [label, tableConfig[label]]));
       if (force) clearTableCache(Object.values(selectedConfig).flatMap(config => config.cacheTables || [config.table]));
       const ds = await loadManyTables(selectedConfig);
+      if(dataScope.current !== scope) return null;
       setDataStore(current => ({ ...(current || {}), ...ds }));
       return ds;
     } catch (error) {
+      if(dataScope.current !== scope) return null;
       console.error('Rafraîchissement Supabase impossible', error);
       setDataStore(current => ({...current,__sync_error__:{rows:[],source:'error',error,complete:false}}));
       return null;
@@ -619,13 +603,16 @@ function App() {
 
   useEffect(() => {
     if (!session || profileLoading || !profile) return;
+    clearTableCache();
+    clearSignedPhotoUrlCache();
+    setDataStore(null);
     if (['Client','Client-Admin'].includes(profile.role)) { setDataStore(null); setLoading(false); return; }
     setLoading(true);
     refreshDataStore(STARTUP_TABLES).finally(() => setLoading(false));
-  }, [session?.user?.id, profile?.id, profileLoading]);
+  }, [session?.user?.id, profile?.id, profile?.role, profile?.client_id, profileLoading]);
 
   useEffect(() => {
-    if (!session || !profile || !tableConfig[active] || dataStore?.[active]) return;
+    if (!session || !profile || ['Client','Client-Admin'].includes(profile.role) || !tableConfig[active] || dataStore?.[active]) return;
     refreshDataStore([active]);
   }, [active, session?.user?.id, profile?.id, dataStore?.[active]]);
 
@@ -659,6 +646,10 @@ function App() {
 
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
     const { data: listener } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+      dataScope.current = '';
+      clearTableCache();
+      clearSignedPhotoUrlCache();
+      if(['SIGNED_IN','SIGNED_OUT','USER_UPDATED'].includes(_event)) setDataStore(null);
       setSession(currentSession);
       if (!currentSession) setProfile(null);
     });
@@ -734,7 +725,7 @@ function App() {
     'Application terrain',
     'Recherche terrain',
     ...visibleManifestTables
-  ];
+  ].map(knownBusinessRoute);
 
   function applyUpdatedRows(tableLabel, updatedRows) {
     setDataStore(current => {

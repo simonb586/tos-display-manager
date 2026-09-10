@@ -1,0 +1,1 @@
+import './refresh-entry.jsx';const api=window.testApi;window.memberRole='Client';window.testApi=(file,name,args)=>{if(name==='getClientAccessDetail')return api(file,name,args).then(data=>({...data,members:data.members.map(m=>({...m,role:memberRole}))}));return api(file,name,args)};

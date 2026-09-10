@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import PhotoImage from './PhotoImage';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CheckSquare, Download, Image, Square, Star, Trash2, X } from 'lucide-react';
 import {
   deleteSupportPhoto, deleteSupportPhotos, downloadPhoto, downloadPhotosZip, downloadPhotoHistoryCsv,
@@ -6,20 +7,21 @@ import {
 } from '../services/photoLibraryService';
 import { friendlyError } from '../config/businessLanguage';
 
-export default function SupportPhotoGallery({ supportId, canDelete=false, canManage=false }) {
+export default function SupportPhotoGallery({ supportId, canDelete=false, canManage=false, scopedPhotos=null }) {
   const [photos,setPhotos]=useState([]);
   const [selected,setSelected]=useState(null);
   const [checked,setChecked]=useState({});
   const [message,setMessage]=useState('');
   const [busy,setBusy]=useState(false);
+  const actionActive=useRef(false);
   const [filter,setFilter]=useState({type:'',status:'',campaign:'',edt:'',source:'',text:''});
 
   const refresh=useCallback(async()=>{
     if(!supportId)return;
     setMessage('');
-    try{setPhotos(await listSupportPhotos(supportId));}
+    try{setPhotos(scopedPhotos !== null ? scopedPhotos.filter(photo=>String(photo.support_id)===String(supportId)) : await listSupportPhotos(supportId));}
     catch(error){setMessage(friendlyError(error,'Impossible de charger les photos.'));}
-  },[supportId]);
+  },[supportId,scopedPhotos]);
 
   useEffect(()=>{refresh();},[refresh]);
 
@@ -41,16 +43,20 @@ export default function SupportPhotoGallery({ supportId, canDelete=false, canMan
   const sources=[...new Set(photos.map(p=>String(p.source||'')).filter(Boolean))];
 
   async function run(label,action){
+    if(actionActive.current)return;
+    actionActive.current=true;
     setBusy(true);setMessage('');
     try{const result=await action();const removed=Array.isArray(result)?result.filter(item=>item.ok).map(item=>String(item.id)):result?.verified?[String(result.id)]:[];if(removed.length)setPhotos(current=>current.filter(photo=>!removed.includes(String(photo.id))));await refresh();setChecked({});setSelected(null);setMessage(label);}
     catch(error){setMessage(error.message||'Opération impossible.');}
-    finally{setBusy(false);}
+    finally{actionActive.current=false;setBusy(false);}
   }
   const removeOne=photo=>{
+    if(!canDelete||actionActive.current)return;
     if(!window.confirm(`Supprimer définitivement la photo « ${photo.nom_fichier||photo.id} » ?`))return;
     run('Photo supprimée avec succès.',()=>deleteSupportPhoto(photo));
   };
   const removeSelected=()=>{
+    if(!canDelete||actionActive.current)return;
     if(!selectedPhotos.length)return;
     if(!window.confirm(`Supprimer définitivement ${selectedPhotos.length} photo(s) ?`))return;
     run(`${selectedPhotos.length} photo(s) supprimée(s).`,()=>deleteSupportPhotos(selectedPhotos));
@@ -84,7 +90,7 @@ export default function SupportPhotoGallery({ supportId, canDelete=false, canMan
         </button>
         {photo.est_principale&&<span className="primary-badge"><Star size={13}/> Principale</span>}
         <button className="support-gallery-open" type="button" onClick={()=>setSelected(photo)}>
-          {photo.signed_thumbnail_url?<img loading="lazy" src={photo.signed_thumbnail_url} alt={photo.nom_fichier||'Photo du support'}/>:<span>Aperçu indisponible</span>}
+          {<PhotoImage loading="lazy" photo={photo} alt={photo.nom_fichier||'Photo du support'}/>}
           <span>{photo.prise_le?new Date(photo.prise_le).toLocaleDateString('fr-CA'):'Date inconnue'}</span>
           <small>{photo.type_photo||'Photo'} · {photo.statut_validation||'Non validée'}</small>
         </button>
@@ -99,7 +105,7 @@ export default function SupportPhotoGallery({ supportId, canDelete=false, canMan
 
     {selected&&<div className="photo-lightbox" role="dialog" aria-modal="true">
       <button type="button" className="close" onClick={()=>setSelected(null)} aria-label="Fermer"><X/></button>
-      {selected.signed_url?<img src={selected.signed_url} alt={selected.nom_fichier||'Photo du support'}/>:<p>{selected.photo_access_error||'Photo inaccessible.'}</p>}
+      {<PhotoImage photo={selected} alt={selected.nom_fichier||'Photo du support'}/>}
       <div className="photo-lightbox-info">
         <strong>{selected.nom_fichier||'Photo'}</strong>
         <span>{selected.prise_le?new Date(selected.prise_le).toLocaleString('fr-CA'):'Date inconnue'}</span>

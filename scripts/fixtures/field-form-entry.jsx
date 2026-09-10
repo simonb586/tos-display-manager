@@ -1,0 +1,15 @@
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import General from '../../src/components/field-catalog/FieldCatalogGeneralTab';
+import Display from '../../src/components/field-catalog/FieldCatalogDisplayTab';
+import Validation from '../../src/components/field-catalog/FieldCatalogValidationTab';
+import Permission from '../../src/components/field-catalog/FieldCatalogPermissionTab';
+import Terrain from '../../src/components/field-catalog/FieldCatalogTerrainTab';
+import ImportExport from '../../src/components/field-catalog/FieldCatalogImportExportTab';
+import Relations from '../../src/components/field-catalog/FieldCatalogRelationsCalculationsTab';
+const components={General,Display,Validation,Permission,Terrain,ImportExport,Relations};
+const field={id:'field-local-1',fieldId:'infrastructures.notes',tableName:'infrastructures',technicalName:'notes',label:'Notes',field_type:'short_text',updated_at:'2026-09-08T00:00:00Z',configurationStatus:'draft',physical:{dataType:'text',udtName:'text',nullable:true},system:false,is_virtual:false};
+window.fieldFixture={calls:[],fail:false,saved:0};
+window.testApi=async(file,name,args)=>{const f=window.fieldFixture;const fail=f.fail;f.calls.push({file,name,args});await new Promise(r=>setTimeout(r,100));if(fail)throw Error('FIELD_FIXTURE_ERROR');return {changed:true,updatedAt:'2026-09-08T01:00:00Z'}};
+const root=createRoot(document.getElementById('root'));let key=0;
+window.mount=name=>{const Component=components[name];window.fieldFixture={calls:[],fail:false,saved:0};root.render(<Component key={++key} field={field} role="Administrateur" catalogFields={[field]} onSaved={async()=>{window.fieldFixture.saved++}}/>)};

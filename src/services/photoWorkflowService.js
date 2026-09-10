@@ -22,11 +22,7 @@ export async function prepareAndUploadPhoto(file, context, bucket='support-photo
   } while(await pathExists(bucket,identity.storagePath));
   const {error}=await supabase.storage.from(bucket).upload(identity.storagePath,file,{cacheControl:'3600',upsert:false});
   if(error)throw error;
-  if (bucket !== 'support-photos') {
-    const { data } = supabase.storage.from(bucket).getPublicUrl(identity.storagePath);
-    return {...identity,bucket,publicUrl:data?.publicUrl||'',classification};
-  }
-  return {...identity,bucket,classification};
+  return {...identity,bucket,storageReference:`${bucket}/${identity.storagePath}`,classification};
 }
 
 export async function rollbackUploadedPhoto(uploaded) {

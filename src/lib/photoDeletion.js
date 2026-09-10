@@ -5,7 +5,8 @@ export function normalizeStoragePath(value) {
 }
 
 export function storageLocationFromPhotoRecord(photo, fallbackBucket='support-photos') {
-  const url = String(photo?.photo_url || photo?.thumbnail_url || '').trim();
+  fallbackBucket = photo?.storage_bucket || fallbackBucket;
+  const url = String(photo?.photo_url || photo?.thumbnail_url || photo?.photo_principale_url || photo?.photo_miniature_url || photo?.storage_path || '').trim();
   const match = url.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/([^/?#]+)\/([^?#]+)/i);
   if (match) {
     let bucket = match[1];
@@ -19,7 +20,13 @@ export function storageLocationFromPhotoRecord(photo, fallbackBucket='support-ph
     return { bucket, path:normalizeStoragePath(path), source:'url' };
   }
 
-  let path = normalizeStoragePath(photo?.storage_path);
+  const durableUrl = url.match(/^(support-photos|terrain-photos)\/(.+)$/i);
+  if (durableUrl) return { bucket:durableUrl[1].toLowerCase(), path:normalizeStoragePath(durableUrl[2]), source:'fallback' };
+  const reference = String(photo?.storage_path || url).trim();
+  const canonical = reference.match(/^(support-photos|terrain-photos)\/(.+)$/i);
+  if (canonical) return { bucket:canonical[1].toLowerCase(), path:normalizeStoragePath(canonical[2]), source:'fallback' };
+  if (/^[a-z]+:/i.test(reference)) return { bucket:'', path:'', source:'missing' };
+  let path = normalizeStoragePath(reference);
   if (!path) return { bucket:'', path:'', source:'missing' };
   const prefixed = path.match(/^([^/]+)\/(.+)$/);
   if (prefixed && prefixed[1].toLowerCase() === String(fallbackBucket).toLowerCase()) {
@@ -30,4 +37,9 @@ export function storageLocationFromPhotoRecord(photo, fallbackBucket='support-ph
 
 export function storagePathFromPhotoRecord(photo) {
   return storageLocationFromPhotoRecord(photo).path;
+}
+
+export function storageReferenceFromPhotoRecord(photo) {
+  const {bucket,path} = storageLocationFromPhotoRecord(photo);
+  return bucket && path ? `${bucket}/${path}` : null;
 }

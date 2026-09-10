@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Save, ShieldAlert, Undo2 } from 'lucide-react';
 import {
   FIELD_CATALOG_FUNCTIONAL_TYPES,
@@ -17,6 +17,7 @@ export default function FieldCatalogGeneralTab({ field, role, onSaved, onDirtyCh
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
+  const mutationActive = useRef(false);
   const dirty = fieldDraftChanged(initial, draft);
   const protectedField = isProtectedCatalogField(field);
 
@@ -55,6 +56,7 @@ export default function FieldCatalogGeneralTab({ field, role, onSaved, onDirtyCh
 
   async function save(event) {
     event.preventDefault();
+    if (mutationActive.current) return;
     const validation = validateFieldGeneralDraft(field, draft, role);
     setErrors(validation.errors);
     if (!validation.valid) {
@@ -62,6 +64,7 @@ export default function FieldCatalogGeneralTab({ field, role, onSaved, onDirtyCh
       setMessage(Object.values(validation.errors)[0]);
       return;
     }
+    mutationActive.current = true;
     setStatus('saving');
     setMessage('');
     try {
@@ -73,6 +76,8 @@ export default function FieldCatalogGeneralTab({ field, role, onSaved, onDirtyCh
       setStatus('error');
       setErrors(error.validationErrors || {});
       setMessage(error.message || 'Le brouillon n’a pas pu être enregistré.');
+    } finally {
+      mutationActive.current = false;
     }
   }
 

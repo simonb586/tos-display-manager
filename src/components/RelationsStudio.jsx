@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import useRefreshRequest from '../hooks/useRefreshRequest';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckCircle2,
   ChevronRight,
@@ -49,6 +50,7 @@ export default function RelationsStudio({ role }) {
   const [newRule, setNewRule] = useState(emptyRule);
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState('idle');
+  const mutationActive = useRef(false);
   const isAdmin = role === 'Administrateur';
 
   const tableNames = useMemo(
@@ -91,12 +93,14 @@ export default function RelationsStudio({ role }) {
     });
   }, [tableNames, schema, search]);
 
-  async function reload({ preserveSelection = true } = {}) {
+  const refreshRequest=useRefreshRequest(role);
+async function reload({ preserveSelection = true } = {}) {
     setStatus('loading');
     setMessage('');
 
-    try {
-      const catalog = await loadCompleteRelationCatalog();
+    const request=refreshRequest.start();
+try {
+      const catalog = await request.wait(loadCompleteRelationCatalog());
       setSchema(catalog.schema);
       setFields(catalog.fields);
       setRules(catalog.rules);
@@ -119,10 +123,10 @@ export default function RelationsStudio({ role }) {
         source_field: nextField
       }));
       setStatus('done');
-    } catch (error) {
+    } catch (error) {if(!request.isCurrent())return;
       setStatus('error');
       setMessage(error.message || 'Erreur de chargement.');
-    }
+    }finally{request.finish()}
   }
 
   useEffect(() => {
@@ -155,6 +159,8 @@ export default function RelationsStudio({ role }) {
   }
 
   async function runAction(action, successMessage) {
+    if (mutationActive.current) return false;
+    mutationActive.current = true;
     setStatus('saving');
     setMessage('');
 
@@ -163,9 +169,13 @@ export default function RelationsStudio({ role }) {
       await reload();
       setMessage(successMessage);
       setStatus('done');
+      return true;
     } catch (error) {
       setStatus('error');
       setMessage(error.message || 'Une erreur est survenue.');
+      return false;
+    } finally {
+      mutationActive.current = false;
     }
   }
 
@@ -214,11 +224,12 @@ export default function RelationsStudio({ role }) {
       return;
     }
 
-    await runAction(
+    const saved = await runAction(
       () => saveRelationRule(newRule),
       'Nouvelle relation enregistrée.'
     );
 
+    if (!saved) return;
     setNewRule(current => ({
       ...emptyRule,
       source_table: current.source_table,
@@ -286,7 +297,7 @@ export default function RelationsStudio({ role }) {
           <button disabled={busy} onClick={installTriggers}>
             <Workflow size={18}/> Installer les propagations
           </button>
-          <button disabled={busy} onClick={() => reload()}>
+          <button aria-busy={refreshRequest.refreshing} data-refresh-control="RelationsStudio" disabled={refreshRequest.refreshing||(busy)} onClick={refreshRequest.onClick(() => reload())}>
             <RefreshCw className={status === 'loading' ? 'spin' : ''} size={18}/>
             Actualiser
           </button>

@@ -1,4 +1,5 @@
-import React,{useEffect,useState}from'react';
+import {businessCapabilities} from '../lib/businessCapabilities';
+import React,{useEffect,useRef,useState}from'react';
 import{Eye,EyeOff,Megaphone,Pencil,Plus,Save,Trash2,X}from'lucide-react';
 import{deleteOrArchiveMasterCampaign,listAssignableClients,listMasterCampaigns,saveMasterCampaign}from'../services/campaignService';
 import{BUSINESS_CONTEXT,BUSINESS_CONTEXT_OPTIONS,businessContextLabel}from'../lib/businessContext';
@@ -6,16 +7,19 @@ import{clearFormDraft,readFormDraft,writeFormDraft}from'../lib/formDraft';
 
 const blank=context=>({nom_campagne:'',code_campagne:'',client:'',client_id:'',type_campagne:'Installation',visuel_generique:'',no_edt:'',statut:'Brouillon',publiee_terrain:false,instructions_terrain:'',business_context:context});
 export default function CampaignsPanel({role,businessContext=BUSINESS_CONTEXT.MARKETING}){
+ const mutationActive=useRef(false);
+
  const initial=readFormDraft('campaign',businessContext,{form:blank(businessContext),formOpen:false});
  const[campaigns,setCampaigns]=useState([]),[clients,setClients]=useState([]),[form,setForm]=useState(initial.form),[formOpen,setFormOpen]=useState(Boolean(initial.formOpen)),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[hydratedContext,setHydratedContext]=useState(businessContext);
- const canManage=['Administrateur','Coordonnateur'].includes(role);
+ const canManage=businessCapabilities(role).manageCampaigns;
  async function reload(){try{const[campaignRows,clientRows]=await Promise.all([listMasterCampaigns(false,businessContext),listAssignableClients()]);setCampaigns(campaignRows);setClients(clientRows);}catch(e){setMessage(e.message);}}
  useEffect(()=>{setHydratedContext(null);const draft=readFormDraft('campaign',businessContext,{form:blank(businessContext),formOpen:false});setForm(draft.form);setFormOpen(Boolean(draft.formOpen));setHydratedContext(businessContext);reload();},[businessContext]);
  useEffect(()=>{if(hydratedContext!==businessContext)return;if(formOpen)writeFormDraft('campaign',businessContext,{form,formOpen});else clearFormDraft('campaign',businessContext);},[businessContext,form,formOpen,hydratedContext]);
  function discard(){clearFormDraft('campaign',businessContext);setForm(blank(businessContext));setFormOpen(false);}
- async function submit(e){e.preventDefault();if(busy)return;setBusy(true);try{const editing=Boolean(form.id);await saveMasterCampaign(form);clearFormDraft('campaign',businessContext);setForm(blank(businessContext));setFormOpen(false);await reload();setMessage(editing?'Communication modifiée.':'Communication enregistrée.');}catch(e){setMessage(e.message);}finally{setBusy(false);}}
+ async function submit(e){e.preventDefault();
+    if(mutationActive.current)return;mutationActive.current=true;setBusy(true);try{const editing=Boolean(form.id);await saveMasterCampaign(form);clearFormDraft('campaign',businessContext);setForm(blank(businessContext));setFormOpen(false);await reload();setMessage(editing?'Communication modifiée.':'Communication enregistrée.');}catch(e){setMessage(e.message);}finally{mutationActive.current=false;setBusy(false);}}
  function edit(c){setForm({...blank(businessContext),...c});setFormOpen(true);window.scrollTo({top:0,behavior:'smooth'});}
- async function remove(c){if(busy||!window.confirm(`Supprimer ou archiver « ${c.nom_campagne} »? Ses photos, rapports et historiques seront conservés.`))return;setBusy(true);try{const result=await deleteOrArchiveMasterCampaign(c.id);setMessage(result?.action==='archived'?'Les dépendances sont conservées et l’élément a été archivé.':'Élément supprimé.');await reload();}catch(e){setMessage(e.message);}finally{setBusy(false);}}
+ async function remove(c){if(mutationActive.current||!window.confirm(`Supprimer ou archiver « ${c.nom_campagne} »? Ses photos, rapports et historiques seront conservés.`))return;mutationActive.current=true;setBusy(true);try{const result=await deleteOrArchiveMasterCampaign(c.id);setMessage(result?.action==='archived'?'Les dépendances sont conservées et l’élément a été archivé.':'Élément supprimé.');await reload();}catch(e){setMessage(e.message);}finally{mutationActive.current=false;setBusy(false);}}
  const title=businessContextLabel(businessContext);
  const createLabel=businessContext===BUSINESS_CONTEXT.MARKETING?'Créer une campagne':'Créer une communication';
  return <div className="campaigns-page"><header className="campaigns-hero"><div><h1>{businessContext===BUSINESS_CONTEXT.MARKETING?'Campagnes maîtres':'Communications opérationnelles'}</h1><p>Une seule source de vérité, classée par le champ « Est lié à ».</p></div>{canManage&&<button className="business-primary-action" type="button" onClick={()=>{setForm(blank(businessContext));setFormOpen(true)}}><Plus/> {createLabel}</button>}</header>{message&&<div className="relations-message" aria-live="polite">{message}</div>}<div className={formOpen?'campaigns-layout':'campaigns-layout campaigns-list-only'}>

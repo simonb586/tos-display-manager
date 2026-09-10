@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import useRefreshRequest from '../hooks/useRefreshRequest';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckCircle2,
   Download,
@@ -46,6 +47,7 @@ export default function FinalReportsCenter({ dataStore, role }) {
   const [cc, setCc] = useState('');
   const [communications, setCommunications] = useState([]);
   const [busy, setBusy] = useState(false);
+  const sendActive = useRef(false);
   const [message, setMessage] = useState('');
 
   const selectedEdt = useMemo(
@@ -111,12 +113,14 @@ export default function FinalReportsCenter({ dataStore, role }) {
     setCc(context.cc.join('; '));
   }, [context]);
 
-  async function reloadCommunications() {
-    try {
-      setCommunications(await listFinalCommunications());
-    } catch (error) {
+  const refreshRequest=useRefreshRequest(role);
+async function reloadCommunications() {
+    const request=refreshRequest.start();
+try {
+      setCommunications(await request.wait(listFinalCommunications()));
+    } catch (error) {if(!request.isCurrent())return;
       setMessage(error.message || 'Impossible de charger le journal.');
-    }
+    }finally{request.finish()}
   }
 
   useEffect(() => {
@@ -139,7 +143,8 @@ export default function FinalReportsCenter({ dataStore, role }) {
   }
 
   async function closeAndSend() {
-    if (!selectedEdt) return;
+    if (!selectedEdt || !canSend || sendActive.current) return;
+    sendActive.current = true;
     setBusy(true);
     setMessage('');
 
@@ -159,11 +164,14 @@ export default function FinalReportsCenter({ dataStore, role }) {
     } catch (error) {
       setMessage(`Échec : ${error.message || error}`);
     } finally {
+      sendActive.current = false;
       setBusy(false);
     }
   }
 
   async function resend(communication) {
+    if (!canSend || sendActive.current) return;
+    sendActive.current = true;
     setBusy(true);
     try {
       await resendFinalCommunication(communication);
@@ -172,6 +180,7 @@ export default function FinalReportsCenter({ dataStore, role }) {
     } catch (error) {
       setMessage(`Échec du renvoi : ${error.message || error}`);
     } finally {
+      sendActive.current = false;
       setBusy(false);
     }
   }
@@ -185,7 +194,7 @@ export default function FinalReportsCenter({ dataStore, role }) {
           <h1><Mail/> Rapports finaux d’installation</h1>
           <p>Clôture un EDT, génère le PDF officiel et l’envoie depuis noreply@groupetos.com.</p>
         </div>
-        <button onClick={reloadCommunications}><RefreshCw size={17}/> Actualiser</button>
+        <button aria-busy={refreshRequest.refreshing} data-refresh-control="FinalReportsCenter" disabled={refreshRequest.refreshing} onClick={refreshRequest.onClick(reloadCommunications)}><RefreshCw size={17}/> Actualiser</button>
       </header>
 
       {message && <div className="v07-message">{message}</div>}

@@ -1,3 +1,4 @@
+import {businessCapabilities} from '../src/lib/businessCapabilities.js';
 import assert from'node:assert/strict';import fs from'node:fs';
 import{createReportDraft,duplicateLogicalRows,parseRecipients,uniqueReportSupports,validateReportIntegrity}from'../src/lib/module15ReportModel.js';
 const read=path=>fs.readFileSync(path,'utf8'),ui=read('src/components/Module15Reports.jsx'),service=read('src/services/reportDataService.js'),pdf=read('src/services/finalReportService.js'),sql=read('supabase/V1_3_2_MODULE_15_REPORT_EDITOR_PREPARED.sql'),edge=read('supabase/functions/send-edt-completion-email/index.ts');
@@ -9,5 +10,5 @@ for(const marker of["from('edt_supports')","from('infrastructures')","from('supp
 for(const marker of['generateEdtReportPdf','snapshot.section_order','snapshot.supports','Aucune photo sélectionnée','doc.addPage()'])assert.ok(pdf.includes(marker),marker);
 for(const marker of['content_snapshot jsonb','support_count integer','recipient_emails text[]','report_missing_edt_supports','jsonb_array_length','save_edt_report_draft_v132','finalize_edt_report_v132','request_edt_report_email_v132','security definer'])assert.ok(sql.includes(marker),marker);
 assert.ok(!/\b(drop table|truncate|delete from)\b/i.test(sql),'migration additive uniquement');assert.ok(edge.includes('job.report_id')&&edge.includes('job.recipient_emails')&&edge.includes('recipients.map(address'));
-assert.ok(!ui.includes('Supprimer'),'Historique non destructible');assert.ok(ui.includes("['Administrateur','Coordonnateur'].includes(role)"),'Permissions de gestion');assert.ok(ui.includes('loading="lazy"'),'Photos lazy');
+assert.ok(!ui.includes('Supprimer'),'Historique non destructible');assert.ok(ui.includes('businessCapabilities(role).manageReports'),'Canonical management capability');for(const role of ['Administrateur','Coordonnateur','Installateur','Client','Client-Admin'])assert.equal(businessCapabilities(role).manageReports,['Administrateur','Coordonnateur'].includes(role),'Management permission '+role);assert.ok(ui.includes('loading="lazy"'),'Photos lazy');
 console.log('Module 15 V1.3.2 : création, édition, preview/PDF communs, 1/25/500 supports, versions, photos, email multiple, permissions et historique validés sans réseau.');

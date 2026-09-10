@@ -19,7 +19,7 @@ const view = definition => Object.freeze({
   aliases: [],
   ...definition,
   key: definition.key || definition.id,
-  component: definition.component || 'ClientPortalDataTable'
+  component: definition.component || 'ClientBusinessGrid'
 });
 
 // Registre technique uniquement : les permissions viennent exclusivement de role_ui_permissions.
@@ -34,7 +34,7 @@ export const CLIENT_PORTAL_VIEW_REGISTRY = Object.freeze([
   view({ id: 'campaigns', label: 'Campagnes', icon: Image, section: 'campaigns', dataSource: 'client_portal_list_v120:campaigns', permissionKeys: ['Campagnes', 'Campagnes et visuels', 'Campagnes maitres', 'Campagnes maîtres'] }),
   view({ id: 'reports', label: 'Rapports', icon: FileText, section: 'reports', dataSource: 'module15_client_edt_reports_v130', permissionKeys: ['Rapports', 'Rapports finaux', 'Rapports EDT'] }),
   view({ id: 'communications', label: 'Communications opérationnelles', icon: ShieldCheck, section: 'communications', dataSource: 'client_portal_list_v120:communications', permissionKeys: ['Communications operationnelles', 'Communications opérationnelles'] }),
-  view({ id: 'photos', label: 'Photos', icon: Camera, section: 'photos', component: 'PhotoGallery', dataSource: 'client_portal_list_v120:photos', permissionKeys: ['Photos'] }),
+  view({ id: 'photos', label: 'Photos', icon: Camera, section: 'photos', component: 'ClientBusinessGrid', dataSource: 'client_portal_list_v120:photos', permissionKeys: ['Photos'] }),
   view({ id: 'edt', label: 'EDT / Progression', icon: CalendarClock, section: 'edt', dataSource: 'client_portal_list_v120:edt', permissionKeys: ['Suivi des EDT'] }),
   view({ id: 'issues', label: 'Enjeux', icon: ShieldCheck, section: 'issues', dataSource: 'client_portal_list_v120:issues', permissionKeys: ['Enjeux des cadres et supports'] }),
   view({ id: 'history', label: 'Historique', icon: History, section: 'history', dataSource: 'client_portal_list_v120:history', permissionKeys: ['Historique des campagnes'] }),
@@ -85,3 +85,17 @@ export function resolveClientPortalViews(visibleTables = []) {
 }
 
 export const isAllowedClientPortalView = (views, id) => views.some(item => item.id === id);
+
+// Empty column lists mean "all", as in RoleVisibilityAdmin. Alias restrictions
+// referring to the same canonical view are intersected, never broadened.
+export function clientPortalColumnsForView(view, columns, permissions = {}) {
+  const restrictions = Object.entries(permissions)
+    .filter(([key, value]) => resolveClientPortalView(key)?.id === view.id && Array.isArray(value) && value.length)
+    .map(([, value]) => value);
+  return columns.filter(column => restrictions.every(allowed => allowed.includes(column)));
+}
+
+export function projectClientExportRows(view, rows, permissions = {}) {
+  const columns = clientPortalColumnsForView(view, [...new Set(rows.flatMap(Object.keys))], permissions);
+  return rows.map(row => Object.fromEntries(columns.filter(key => Object.hasOwn(row, key)).map(key => [key, row[key]])));
+}

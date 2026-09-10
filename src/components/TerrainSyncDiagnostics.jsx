@@ -1,3 +1,4 @@
+import useRefreshRequest from '../hooks/useRefreshRequest';
 import React, { useEffect, useState } from 'react';
 import { RefreshCw, SearchCheck } from 'lucide-react';
 import GridPagination from './GridPagination';
@@ -24,20 +25,22 @@ export default function TerrainSyncDiagnostics({ role }) {
   const [latestHidden, setLatestHidden] = useState(false);
   const canView = ['Administrateur', 'Coordonnateur'].includes(role);
 
-  async function reload() {
-    try {
-      const [list, stats] = await Promise.all([
+  const refreshRequest=useRefreshRequest([role,page,pageSize,view].join(':'));
+async function reload() {
+    const request=refreshRequest.start();
+try {
+      const [list, stats] = await request.wait(Promise.all([
         listTerrainDiagnostics({ page, pageSize, view }),
         loadTerrainDiagnosticSummary()
-      ]);
+      ]));
       setRows(list.rows);
       setTotal(list.total);
       setSummary(stats);
       setLatestHidden(list.latestHiddenByFilters);
       setMessage('');
-    } catch (error) {
+    } catch (error) {if(!request.isCurrent())return;
       setMessage(error.message);
-    }
+    }finally{request.finish()}
   }
 
   useEffect(() => {
@@ -69,7 +72,7 @@ export default function TerrainSyncDiagnostics({ role }) {
   }
 
   return <div className="operations-page terrain-sync-history">
-    <header className="operations-hero"><div><h1><SearchCheck/> Synchronisation Terrain</h1><p>Historique complet des diagnostics centralisés.</p></div><button onClick={reload}><RefreshCw/> Actualiser</button></header>
+    <header className="operations-hero"><div><h1><SearchCheck/> Synchronisation Terrain</h1><p>Historique complet des diagnostics centralisés.</p></div><button aria-busy={refreshRequest.refreshing} data-refresh-control="TerrainSyncDiagnostics" disabled={refreshRequest.refreshing} onClick={refreshRequest.onClick(reload)}><RefreshCw/> Actualiser</button></header>
     {message && <div className="v07-message">{message}</div>}
     <section className="terrain-sync-summary"><article><span>En attente</span><strong>{summary.pending}</strong></article><article><span>Erreurs actives</span><strong>{summary.errors}</strong></article><article><span>Réussies aujourd’hui</span><strong>{summary.successToday}</strong></article><article><span>Dernière synchronisation</span><strong>{formatTerrainSyncDate(summary.lastSync)}</strong></article></section>
     <nav className="advanced-categories"><button className={view === 'history' ? 'active' : ''} onClick={() => { setPage(1); setView('history'); }}>Historique</button><button className={view === 'errors' ? 'active' : ''} onClick={() => { setPage(1); setView('errors'); }}>Erreurs actives</button></nav>

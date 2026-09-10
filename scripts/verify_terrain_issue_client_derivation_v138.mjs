@@ -19,5 +19,8 @@ for(const marker of [
 
 assert.doesNotMatch(migration,/new\.client_id\s*:=\s*2\b/i);
 assert.doesNotMatch(migration,/update\s+public\.enjeux_terrain\s+set\s+client_id/i);
-assert.match(main,/'Enjeux des cadres et supports': \{ table: 'enjeux_terrain'/);
-console.log('V1.3.8 Terrain enjeux : dérivation serveur, contradiction, sécurité et source canonique PASS.');
+assert.match(main,/'Enjeux des cadres et supports': \{ table: 'enjeux_des_cadres_et_supports', loader: loadInternalIssues/);
+// The canonical view now merges history and Terrain. Execute its production
+// normalization/merge contracts instead of requiring a Terrain-only table.
+await import('./verify_internal_issues_restoration_v1310.mjs');
+console.log('V1.3.8 Terrain enjeux : dérivation statique et fusion locale Historique/Terrain PASS.');

@@ -2,13 +2,32 @@ import assert from'node:assert/strict';
 import fs from'node:fs';
 import ExcelJS from'exceljs';
 import JSZip from'jszip';
+import {parse} from '@babel/parser';
+import {projectClientExportRows} from '../src/lib/clientPortalViewRegistry.js';
 
 const main=fs.readFileSync('src/main.jsx','utf8');
 const client=fs.readFileSync('src/components/ClientPortal.jsx','utf8');
 const center=fs.readFileSync('src/components/ExportsCenter.jsx','utf8');
 const utils=fs.readFileSync('src/lib/utils.js','utf8');
 for(const marker of ["'Exports'",'ExportsCenter','loadTable(domain.id'])assert.ok(main.includes(marker),marker);
-for(const marker of ["active==='exports'",'listAllClientPortalSection(domain.section)','Aucun export autorisé'])assert.ok(client.includes(marker),marker);
+for(const marker of ["active==='exports'",'loadRows={domain=>exportDomainRows(domain)}','Aucun export autorisé'])assert.ok(client.includes(marker),marker);
+// Execute the production export callback: full section reads must retain filters
+// and column restrictions; preview must never fall back to a live section read.
+let exportExpression;
+function visit(node){
+ if(!node||typeof node!=='object')return;
+ if(node.type==='VariableDeclarator'&&node.id?.name==='exportDomainRows')exportExpression=node.init;
+ for(const value of Object.values(node))if(Array.isArray(value))value.forEach(visit);else if(value?.type)visit(value);
+}
+visit(parse(client,{sourceType:'module',plugins:['jsx']}));
+assert.ok(exportExpression,'production export callback exists');
+const makeExport=new Function('projectClientExportRows','previewMode','previewSections','listAllClientPortalSection','permission',`return (${client.slice(exportExpression.start,exportExpression.end)})`);
+const domain={id:'infrastructures',section:'supports'},filters={search:'EXO'},calls=[];
+const load=async(...args)=>{calls.push(args);return [{support_id:'EXO-2',site:'EXO',secret:'private'}]};
+const permission={visible_columns:{Infrastructures:['support_id']}};
+assert.deepEqual(await makeExport(projectClientExportRows,false,{},load,permission)(domain,filters),[{support_id:'EXO-2'}]);
+assert.deepEqual(calls,[['supports',{filters}]]);
+assert.deepEqual(await makeExport(projectClientExportRows,true,{supports:{rows:[{support_id:'B-9',secret:'private'}]}},()=>{throw Error('Preview attempted live read')},permission)(domain),[{support_id:'B-9'}]);
 for(const marker of ['getSignedDownloadUrl','Télécharger le ZIP autorisé','compressionOptions','activeOnly'])assert.ok(`${center}\n${client}`.includes(marker),marker);
 for(const marker of ['downloadExcelSelectionWithPhotos','workbook.addImage','createImageBitmap','Photo active','worksheet.addImage'])assert.ok(utils.includes(marker),marker);
 assert.match(main,/downloadExcelSelectionWithPhotos\([^\n]+selectedFiltered/);

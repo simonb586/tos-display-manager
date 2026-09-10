@@ -1,0 +1,422 @@
+[
+  {
+    "name": "test:bloc13.1a",
+    "exitCode": 0,
+    "output": "Phase 13.1-A1 : 31 contrôles du catalogue universel réussis.\n"
+  },
+  {
+    "name": "test:bloc13.1a2",
+    "exitCode": 0,
+    "output": "Phase 13.1-A2 : 30 contrôles du Gestionnaire des champs réussis.\n"
+  },
+  {
+    "name": "test:bloc13.1a30",
+    "exitCode": 0,
+    "output": "Phase 13.1-A3.0 : 42 contrôles de consolidation structurelle réussis.\n"
+  },
+  {
+    "name": "test:bloc13.1a3",
+    "exitCode": 0,
+    "output": "Phase 13.1-A3 : 58 contrôles de configuration générale en brouillon réussis.\n"
+  },
+  {
+    "name": "test:bloc13.1a32",
+    "exitCode": 0,
+    "output": "Phase 13.1-A3.2 : contrats versionnés, purs et sans consommateur validés.\n"
+  },
+  {
+    "name": "test:bloc13.1a42",
+    "exitCode": 0,
+    "output": "Phase 13.1-A4.2 : stockage brouillon, protections et non-consommation validés.\n"
+  },
+  {
+    "name": "test:bloc13.1a43i",
+    "exitCode": 0,
+    "output": "Phase 13.1-A4.3-I : interface Affichage, accessibilité et isolation validées.\n"
+  },
+  {
+    "name": "test:bloc13.1a44",
+    "exitCode": 0,
+    "output": "Phase 13.1-A4.4 : validation locale, accessibilité et non-consommation vérifiées.\n"
+  },
+  {
+    "name": "test:bloc13.1a45",
+    "exitCode": 0,
+    "output": "Phase 13.1-A4.5 : prévisualisation administrative simulée et isolée validée.\n"
+  },
+  {
+    "name": "test:bloc13.1a5",
+    "exitCode": 0,
+    "output": "Phase 13.1-A5 : ValidationConfig 1.0.0, sécurité, UI et isolation validées.\n"
+  },
+  {
+    "name": "test:bloc13.1a6",
+    "exitCode": 0,
+    "output": "Phase 13.1-A6 : 74 contrôles des permissions déclaratives réussis.\n"
+  },
+  {
+    "name": "test:bloc13.1a7",
+    "exitCode": 0,
+    "output": "Phase 13.1-A7 : 90 contrôles TerrainConfig déclaratifs réussis.\n"
+  },
+  {
+    "name": "test:bloc13.1a8",
+    "exitCode": 0,
+    "output": "Phase 13.1-A8 : 66 contrôles ImportExportConfig déclaratifs réussis.\n"
+  },
+  {
+    "name": "test:bloc13.1a9",
+    "exitCode": 0,
+    "output": "Phase 13.1-A9 : 56 contrôles Relations/Calculs déclaratifs réussis.\n"
+  },
+  {
+    "name": "test:bloc13.1a10",
+    "exitCode": 0,
+    "output": "Phase 13.1-A10 : 45 contrôles d’activation théorique réussis.\n"
+  },
+  {
+    "name": "test:bloc13.1.1",
+    "exitCode": 0,
+    "output": "Bloc 13.1.1 : 139 contrôles de consolidation réussis. NO-GO A9 documenté.\n"
+  },
+  {
+    "name": "test:bloc13.1.1c1",
+    "exitCode": 0,
+    "output": "Bloc 13.1.1-C1 : 50 contrôles statiques du correctif audit réussis.\n"
+  },
+  {
+    "name": "test:preproduction-v13.1",
+    "exitCode": 0,
+    "output": "Préproduction 13.1: 10 fichiers, ordre et garde-fous conformes.\n"
+  },
+  {
+    "name": "test:deployment-v1",
+    "exitCode": 0,
+    "output": "Déploiement V1: 10 fichiers, stratégie A, ordre et garde-fous conformes.\n"
+  },
+  {
+    "name": "test:bloc13.2",
+    "exitCode": 0,
+    "output": "Bloc 13.2 : 27 contrôles réussis.\n"
+  },
+  {
+    "name": "test:bloc13.3",
+    "exitCode": 0,
+    "output": "Bloc 13.3 — Lots A-E : 34 contrôles réussis.\nSuppression photo multi-buckets : 12 contrôles réussis.\n"
+  },
+  {
+    "name": "test:photo-p0",
+    "exitCode": 0,
+    "output": "Bloc 13.2-P0 : normalisation, associations, historique, rollback, visuel et suppression validés.\n"
+  },
+  {
+    "name": "test:bloc13.2-lot1",
+    "exitCode": 0,
+    "output": "Bloc 13.2 Lot 1 : shell, dashboard réel, responsive et pagination Infrastructure validés.\n"
+  },
+  {
+    "name": "test:bloc13.2-lot2",
+    "exitCode": 0,
+    "output": "Bloc 13.2 Lot 2 : centre de commandement, vues spécialisées, alertes et activité validés.\n"
+  },
+  {
+    "name": "test:bloc13.2-lot3",
+    "exitCode": 0,
+    "output": "Bloc 13.2 Lot 3 : logo officiel, chargement différé, responsive, focus et mouvement réduit validés.\n"
+  },
+  {
+    "name": "test:edt-p1",
+    "exitCode": 0,
+    "output": "Bloc 13.2-P1 : cycle EDT, dates, fermetures, rapports, historique, permissions et conservation validés.\n"
+  },
+  {
+    "name": "test:v1.1.1",
+    "exitCode": 0,
+    "output": "V1.1.1 : 300 contrôles réussis.\n"
+  },
+  {
+    "name": "test:v1.1.2",
+    "exitCode": 0,
+    "output": "V1.1.2 : 84 contrôles de production réussis.\n"
+  },
+  {
+    "name": "test:v1.1.3-history",
+    "exitCode": 0,
+    "output": "V1.1.3 historique : 47 contrôles réussis.\n"
+  },
+  {
+    "name": "test:v1.1.4-map",
+    "exitCode": 0,
+    "output": "Carte interactive V1.1.4 : 51 contrôles réussis.\n"
+  },
+  {
+    "name": "test:v1.1.4c-terrain",
+    "exitCode": 0,
+    "output": "V1.1.4C cohérence Terrain : 44 contrôles réussis.\n"
+  },
+  {
+    "name": "test:terrain-issue-p0",
+    "exitCode": 0,
+    "output": "P0 Terrain enjeux : 21 contrôles réussis.\n"
+  },
+  {
+    "name": "test:terrain-p0-regression",
+    "exitCode": 0,
+    "output": "Régression Terrain P0 : 14 invariants réussis.\n"
+  },
+  {
+    "name": "test:terrain-rpc-security-v1342",
+    "exitCode": 0,
+    "output": "V1.3.4.2 sécurité RPC Terrain : 17 contrôles réussis.\n"
+  },
+  {
+    "name": "test:terrain-issue-context-v1342",
+    "exitCode": 0,
+    "output": "V1.3.4.2 contexte enjeu : 14 scénarios et contrôles réussis.\n"
+  },
+  {
+    "name": "test:terrain-many-to-many-v1331",
+    "exitCode": 0,
+    "output": "V1.3.3.1 Terrain many-to-many, visuels et brouillons : PASS.\n"
+  },
+  {
+    "name": "test:terrain-visual-priority-v1332",
+    "exitCode": 0,
+    "output": "V1.3.3.2 admissibilité visuelle non exclusive : 7 scénarios PASS.\n"
+  },
+  {
+    "name": "test:workspace",
+    "exitCode": 0,
+    "output": "Politique workspace : stable officiel exact; parent, C:\\dev et autres copies interdits hors CI/Vercel.\nContrat workspace : stable PASS; parent FAIL; C:\\dev FAIL; autre copie FAIL; CI/Vercel PASS.\n"
+  },
+  {
+    "name": "test:clients-v135",
+    "exitCode": 0,
+    "output": "Clients V1.3.5: UI, statuts, permissions, batch et Module 17 validés.\n"
+  },
+  {
+    "name": "test:client-role-views-v136",
+    "exitCode": 0,
+    "output": "V1.3.6 vues par rôle : EXO, navigation dynamique, retrait sans code, état vide et vue inconnue validés.\n"
+  },
+  {
+    "name": "test:client-user-linking-v136",
+    "exitCode": 0,
+    "output": "V1.3.6 rattachement : N utilisateurs/client, rôles Client et Client-Admin, transfert, détachement, invitations et audit validés.\n"
+  },
+  {
+    "name": "test:client-portal-view-coverage-v1361",
+    "exitCode": 0,
+    "output": "V1.3.6.1 couverture portail Client OK: 16 vues configurables, 2 rôles client, 15 vues supportées, 3 vues explicitement bloquées.\n"
+  },
+  {
+    "name": "test:client-portal-admin-preview-v1361",
+    "exitCode": 0,
+    "output": "V1.3.6.1 aperçu admin: bouton, bannière, diagnostic et RPC de preview sans impersonation Auth validés.\n"
+  },
+  {
+    "name": "test:client-portal-data-scope-v1361",
+    "exitCode": 0,
+    "output": "V1.3.6.1 périmètre données Client: client réel, campagnes, supports et infrastructures restent dérivés côté serveur.\n"
+  },
+  {
+    "name": "test:client-data-ownership-v1362",
+    "exitCode": 0,
+    "output": "V1.3.6.2 ownership PASS.\n"
+  },
+  {
+    "name": "test:exo-assignment-v1362",
+    "exitCode": 0,
+    "output": "V1.3.6.2 EXO assignment and extension-free normalization PASS.\n"
+  },
+  {
+    "name": "test:marylene-scope-v1362",
+    "exitCode": 0,
+    "output": "V1.3.6.2 Marylene scope PASS.\n"
+  },
+  {
+    "name": "test:future-client-assignment-v1362",
+    "exitCode": 0,
+    "output": "V1.3.6.2 future assignment PASS.\n"
+  },
+  {
+    "name": "test:client-transfer-v1362",
+    "exitCode": 0,
+    "output": "V1.3.6.2 transfer PASS.\n"
+  },
+  {
+    "name": "test:activity-events-history-v1362",
+    "exitCode": 0,
+    "output": "V1.3.6.2 activity_events safe client history PASS.\n"
+  },
+  {
+    "name": "test:exo-id2-v1364",
+    "exitCode": 0,
+    "output": "V1.3.6.4 EXO canonical ID 2 PASS.\n"
+  },
+  {
+    "name": "test:client-demo-legacy-v1364",
+    "exitCode": 0,
+    "output": "V1.3.6.4 Client demo legacy PASS.\n"
+  },
+  {
+    "name": "test:infrastructure-aggregates-v1364",
+    "exitCode": 0,
+    "output": "V1.3.6.4 infrastructure NULL aggregates PASS.\n"
+  },
+  {
+    "name": "test:marylene-real-scope-v1364",
+    "exitCode": 0,
+    "output": "V1.3.6.4 Marylene real scope readiness PASS.\n"
+  },
+  {
+    "name": "test:client-portal-rpc-v1364",
+    "exitCode": 0,
+    "output": "V1.3.6.4 RPC completion and frontend contract PASS.\n"
+  },
+  {
+    "name": "test:client-portal-parity-v137",
+    "exitCode": 0,
+    "output": "V1.3.7 parité portail: PASS — 15 vues, grille/carte/dashboard/preview partagés, garde Client B transactionnel.\n"
+  },
+  {
+    "name": "test:exports-v138",
+    "exitCode": 0,
+    "output": "Exports V1.3.8 : section interne/client, ZIP sécurisé et miniatures XLSX réelles PASS.\n"
+  },
+  {
+    "name": "test:ux-map-v139",
+    "exitCode": 0,
+    "output": "v1.3.9 UX EDT, automatisations et navigation contextuelle: PASS\n"
+  },
+  {
+    "name": "test:infrastructure-context-return",
+    "exitCode": 0,
+    "output": "Retour contextuel Infrastructures et grille Automatisations: PASS\n"
+  },
+  {
+    "name": "test:automation-engine-v1310",
+    "exitCode": 1,
+    "output": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: alignement UI: height:72px\r\n    at ok (file:///C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/scripts/verify_automation_engine_v1310.mjs:14:39)\r\n    at file:///C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/scripts/verify_automation_engine_v1310.mjs:48:3\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\r\n  generatedMessage: false,\r\n  code: 'ERR_ASSERTION',\r\n  actual: false,\r\n  expected: true,\r\n  operator: '==',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.18.0\r\n"
+  },
+  {
+    "name": "test:issues-restoration-v1310",
+    "exitCode": 0,
+    "output": "Restauration Enjeux : 104 historiques, statuts 36/68, fusion Terrain et déduplication stricte PASS.\n"
+  },
+  {
+    "name": "test:terrain-issue-client-v138",
+    "exitCode": 1,
+    "output": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: The input did not match the regular expression /'Enjeux des cadres et supports': \\{ table: 'enjeux_terrain'/. Input:\r\n\r\n\"import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';\\n\" +\r\n  \"import { createRoot } from 'react-dom/client';\\r\\n\" +\r\n  'import {\\r\\n' +\r\n  '  Search, Download, FileSpreadsheet, FileText, ShieldCheck, BarChart3,\\r\\n' +\r\n  '  ClipboardList, Bell, Lock, LogOut, MapPin, Edit3, Save, X, History\\r\\n' +\r\n  '  , ChevronRight, AlertTriangle, Camera, CalendarClock\\r\\n' +\r\n  \"} from 'lucide-react';\\r\\n\" +\r\n  \"import './styles.css';\\r\\n\" +\r\n  \"import './features/admin/bloc4-admin.css';\\r\\n\" +\r\n  \"import './features/terrain/bloc5-terrain.css';\\r\\n\" +\r\n  \"import './features/workorders/bloc6-workorders.css';\\r\\n\" +\r\n  \"import './features/v07/bloc-7-3.css';\\r\\n\" +\r\n  \"import './features/v07/bloc-7-4.css';\\r\\n\" +\r\n  \"import 'leaflet/dist/leaflet.css';\\r\\n\" +\r\n  \"import './features/v08/bloc-8-map.css';\\r\\n\" +\r\n  \"import './features/v08/bloc-8-role-visibility.css';\\r\\n\" +\r\n  \"import './features/v09/bloc-9-reports.css';\\r\\n\" +\r\n  \"import './features/v10/bloc-10-editor.css';\\r\\n\" +\r\n  \"import './features/v11/bloc-11-operations.css';\\r\\n\" +\r\n  \"import './features/v11/correctifs-urgence.css';\\r\\n\" +\r\n  \"import './features/v12/bloc-12.css';\\r\\n\" +\r\n  \"import './features/v12/account-activation.css';\\r\\n\" +\r\n  \"import './features/v12/installer-terrain-shell.css';\\r\\n\" +\r\n  \"import './features/v13/automation-assistant.css';\\r\\n\" +\r\n  \"import './features/v13/grid-sorting.css';\\r\\n\" +\r\n  \"import './features/v13/recent-activity.css';\\r\\n\" +\r\n  \"import './features/v13/field-catalog.css';\\r\\n\" +\r\n  \"import './features/v14/module-14.css';\\r\\n\" +\r\n  \"import './features/v15/module-15.css';\\r\\n\" +\r\n  \"import './features/v17/client-portal.css';\\r\\n\" +\r\n  '\\r\\n' +\r\n  \"import manifest from './data/manifest.json';\\r\\n\" +\r\n  'import {\\r\\n' +\r\n  '  strictMatches,\\r\\n' +\r\n  '  downloadCSV,\\r\\n' +\r\n  '  downloadExcel,\\n' +\r\n  '  downloadExcelSelectionWithPhotos,\\n' +\r\n  '  downloadPDF,\\r\\n' +\r\n  '  professionalExportName,\\r\\n' +\r\n  '  normalize\\r\\n' +\r\n  \"} from './lib/utils';\\r\\n\" +\r\n  \"import { sortRows } from './lib/gridSorting';\\r\\n\" +\r\n  \"import { supabase, supabaseConfigured } from './lib/supabaseClient';\\r\\n\" +\r\n  \"import { businessFieldLabel, enforceApplicationTitle, friendlyError } from './config/businessLanguage';\\r\\n\" +\r\n  \"import GridColumnHeader from './components/GridColumnHeader';\\r\\n\" +\r\n  \"import DataGridFilterRow from './components/DataGridFilterRow';\\r\\n\" +\r\n  \"import { matchesGridFilters } from './components/DataGridColumnFilter';\\r\\n\" +\r\n  \"import DataGridSettings, { useDataGridSettings } from './components/DataGridSettings';\\r\\n\" +\r\n  \"import GridPagination from './components/GridPagination';\\r\\n\" +\r\n  \"import { defaultSortColumnForTable } from './lib/gridPresentation';\\r\\n\" +\r\n  \"import { defaultSortForColumn } from './lib/gridSorting';\\r\\n\" +\r\n  \"import { clearTableCache, loadManyTables, loadTable } from './services/dataService';\\n\" +\r\n  \"import { loadInternalIssues } from './services/internalIssuesService';\\n\" +\r\n  \"import { loadTerrainSyncStatus } from './services/terrainSyncStatus';\\r\\n\" +\r\n  '\\r\\n' +\r\n  \"import SupportPhotoGallery from './components/SupportPhotoGallery';\\r\\n\" +\r\n  \"import Support360Panel from './components/Support360Panel';\\r\\n\" +\r\n  \"import EditableField from './components/EditableField';\\r\\n\" +\r\n  \"import ChangeHistoryPanel from './components/ChangeHistoryPanel';\\r\\n\" +\r\n  \"import GlobalButtonFeedback from './components/GlobalButtonFeedback';\\r\\n\" +\r\n  \"import RecentActivityWidget from './components/RecentActivityWidget';\\r\\n\" +\r\n  \"import AccountActivation from './components/AccountActivation';\\r\\n\" +\r\n  \"import InvitationAcceptance from './components/InvitationAcceptance';\\r\\n\" +\r\n  \"import BrandLogo from './components/BrandLogo';\\r\\n\" +\r\n  \"import OperationalCommandCenter from './components/OperationalCommandCenter';\\r\\n\" +\r\n  \"import { infrastructureMapUrl } from './services/mapService';\\r\\n\" +\r\n  \"import { getCurrentProfile } from './services/authProfileService';\\r\\n\" +\r\n  \"import { getRoleVisibility, canSeeTable, columnsForTable } from './services/roleVisibilityService';\\r\\n\" +\r\n  \"import { updateUniversalRow, updateUniversalRows, loadAutomaticFieldRules, primaryKeyFor } from './services/universalEditorService';\\r\\n\" +\r\n  \"import { requiresAccountActivation } from './services/accountActivationService';\\r\\n\" +\r\n  '\\r\\n' +\r\n  \"const AdminPanel = lazy(() => import('./components/AdminPanel'));\\r\\n\" +\r\n  \"const TerrainApp = lazy(() => import('./components/TerrainApp'));\\r\\n\" +\r\n  \"const WorkOrdersPanel = lazy(() => import('./components/WorkOrdersPanel'));\\r\\n\" +\r\n  \"const CampaignsPanel = lazy(() => import('./components/CampaignsPanel'));\\r\\n\" +\r\n  \"const CampaignVisualManager = lazy(() => import('./components/CampaignVisualManager'));\\r\\n\" +\r\n  \"const ValidationCenter = lazy(() => import('./components/ValidationCenter'));\\r\\n\" +\r\n  \"const LegacyPhotoImporter = lazy(() => import('./components/LegacyPhotoImporter'));\\r\\n\" +\r\n  \"const ProductionLogin = lazy(() => import('./components/ProductionLogin'));\\r\\n\" +\r\n  \"const UserProvisioningPanel = lazy(() => import('./components/UserProvisioningPanel'));\\r\\n\" +\r\n  \"const ClientsAccessAdmin = lazy(() => import('./components/ClientsAccessAdmin'));\\r\\n\" +\r\n  \"const InteractiveMap = lazy(() => import('./components/InteractiveMap'));\\r\\n\" +\r\n  \"const RoleVisibilityAdmin = lazy(() => import('./components/RoleVisibilityAdmin'));\\r\\n\" +\r\n  \"const FinalReportsCenter = lazy(() => import('./components/FinalReportsCenter'));\\r\\n\" +\r\n  \"const Module15Reports = lazy(() => import('./components/Module15Reports'));\\r\\n\" +\r\n  \"const PhotoInventoryCenter = lazy(() => import('./components/PhotoInventoryCenter'));\\r\\n\" +\r\n  \"const OperationsCenter = lazy(() => import('./components/OperationsCenter'));\\r\\n\" +\r\n  \"const InstallerTerrainShell = lazy(() => import('./components/InstallerTerrainShell'));\\r\\n\" +\r\n  \"const TerrainSyncDiagnostics = lazy(() => import('./components/TerrainSyncDiagnostics'));\\r\\n\" +\r\n  \"const ActivityJournal = lazy(() => import('./components/ActivityJournal'));\\r\\n\" +\r\n  \"const AutomationAssistant = lazy(() => import('./components/AutomationAssistant'));\\r\\n\" +\r\n  \"const FieldCatalogManager = lazy(() => import('./components/FieldCatalogManager'));\\r\\n\" +\r\n  \"const Module14Dashboard = lazy(() => import('./components/Module14Dashboard'));\\r\\n\" +\r\n  \"const ClientPortal = lazy(() => import('./components/ClientPortal'));\\r\\n\" +\r\n  \"const SiteSupportAssignmentsView = lazy(() => import('./components/SiteSupportAssignmentsView'));\\n\" +\r\n  \"const ExportsCenter = lazy(() => import('./components/ExportsCenter'));\\n\" +\r\n  \"import { BUSINESS_CONTEXT } from './lib/businessContext';\\r\\n\" +\r\n  '\\r\\n' +\r\n  'function ScreenFallback() {\\r\\n' +\r\n  '  return <div className=\"screen-fallback\" role=\"status\" aria-live=\"polite\"><span aria-hidden=\"true\"/>Chargement du module…</div>;\\r\\n' +\r\n  '}\\r\\n' +\r\n  '\\r\\n' +\r\n  'const tableConfig = {\\r\\n' +\r\n  \"  Infrastructures: { table: 'infrastructures', fallback: () => import('./data/infrastructures.json').then(module => module.default), idField: 'support_id', labelField: 'emplacement_visibilite' },\\r\\n\" +\r\n  \"  'Répertoire des affiches': { table: 'repertoire_des_affiches', fallback: () => import('./data/repertoire_des_affiches.json').then(module => module.default) },\\r\\n\" +\r\n  \"  'Communications opérationnelles': { table: 'communications_operationnelles', fallback: () => import('./data/communications_operationnelles.json').then(module => module.default) },\\r\\n\" +\r\n  \"  'Enjeux des cadres et supports': { table: 'enjeux_des_cadres_et_supports', loader: loadInternalIssues, cacheTables: ['enjeux_des_cadres_et_supports','enjeux_terrain'], readOnly: true, fallback: () => import('./data/enjeux_des_cadres_et_supports.json').then(module => module.default) },\\n\" +\r\n  `  \"Centres d’information\": { table: 'centres_dinformation', fallback: () => import('./data/centres_dinformation.json').then(module => module.default) },\\r\\n` +\r\n  \"  'C.I. avec enjeux': { table: 'ci_avec_enjeux', fallback: () => import('./data/c_i_avec_enjeux.json').then(module => module.default) },\\r\\n\" +\r\n  \"  'Liste des arrêts': { table: 'liste_des_arrets', fallback: () => import('./data/liste_des_arrets.json').then(module => module.default), idField: 'no_arret', labelField: 'emplacement_visibilite' },\\r\\n\" +\r\n  \"  'Voitures / trains': { table: 'voitures_trains', fallback: () => import('./data/voitures_trains.json').then(module => module.default) },\\r\\n\" +\r\n  \"  Photos: { table: 'photos', fallback: () => import('./data/photos.json').then(module => module.default) },\\r\\n\" +\r\n  \"  'Bons de travail': { table: 'bons_de_travail', fallback: () => import('./data/bons_de_travail.json').then(module => module.default) },\\r\\n\" +\r\n  \"  'Historique des campagnes': { table: 'historique_des_campagnes', fallback: () => import('./data/historique_des_campagnes.json').then(module => module.default) },\\r\\n\" +\r\n  \"  'Suivi des EDT': { table: 'suivi_des_edt', fallback: () => import('./data/suivi_des_edt.json').then(module => module.default) },\\r\\n\" +\r\n  \"  Utilisateurs: { table: 'utilisateurs', fallback: () => import('./data/utilisateurs.json').then(module => module.default) },\\r\\n\" +\r\n  \"  Clients: { table: 'clients', fallback: () => import('./data/clients.json').then(module => module.default) },\\r\\n\" +\r\n  \"  'Journal des événements': { table: 'journal_des_evenements', fallback: () => import('./data/journal_des_evenements.json').then(module => module.default) }\\r\\n\" +\r\n  '};\\r\\n' +\r\n  '\\r\\n' +\r\n  'const STARTUP_TABLES = [\\r\\n' +\r\n  \"  'Infrastructures', 'Liste des arrêts', 'Suivi des EDT',\\r\\n\" +\r\n  \"  'Bons de travail', 'Enjeux des cadres et supports', 'Photos'\\r\\n\" +\r\n  '];\\r\\n' +\r\n  '\\r\\n' +\r\n  'const icons = {\\r\\n' +\r\n  \"  Infrastructures: '🏗️', 'Campagnes et visuels': '🎯', 'Répertoire des affiches': '📦',\\r\\n\" +\r\n  \"  Photos: '📷', 'Bons de travail': '🛠️', 'Suivi des EDT': '📋',\\r\\n\" +\r\n  \"  'Enjeux des cadres et supports': '⚠️', 'Liste des arrêts': '🚏',\\r\\n\" +\r\n  \"  'Voitures / trains': '🚍', Clients: '🏢', Utilisateurs: '👥',\\r\\n\" +\r\n  \"  'Journal des événements': '🧾'\\r\\n\" +\r\n  '};\\r\\n' +\r\n  \"const roles = ['Administrateur', 'Coordonnateur', 'Installateur', 'Client-Admin', 'Client'];\\r\\n\" +\r\n  '\\r\\n' +\r\n  'const INFRASTRUCTURE_LABELS = {\\r\\n' +\r\n  \"  support_id: 'Numéro du support',\\r\\n\" +\r\n  \"  type_support: 'Type de support',\\r\\n\" +\r\n  \"  format_affichage: 'Formats d’affichage',\\r\\n\" +\r\n  \"  medium_recommande: 'Médium recommandé',\\r\\n\" +\r\n  \"  emplacement_visibilite: 'Emplacement / visibilité',\\r\\n\" +\r\n  \"  site: 'Site',\\r\\n\" +\r\n  \"  type_site: 'Type de site',\\r\\n\" +\r\n  \"  ligne_distribution: 'Ligne de distribution',\\r\\n\" +\r\n  \"  type_ligne_distribution: 'Type de ligne de distribution',\\r\\n\" +\r\n  \"  enjeux: 'Enjeux',\\r\\n\" +\r\n  \"  type_enjeux: 'Type d’enjeux',\\r\\n\" +\r\n  \"  actif: 'Actif',\\r\\n\" +\r\n  \"  campagne_selon_visuel: 'Campagne selon le visuel',\\r\\n\" +\r\n  \"  visuel_en_expo: 'Visuel en exposition',\\r\\n\" +\r\n  \"  commentaires: 'Commentaires',\\r\\n\" +\r\n  \"  campagne_actuelle: 'Nom de la campagne actuelle',\\r\\n\" +\r\n  \"  visuel_campagne: 'Visuel de la campagne',\\r\\n\" +\r\n  \"  visuel_actuel_cadre: 'Visuel actuel du cadre',\\r\\n\" +\r\n  \"  date_derniere_manipulation: 'Date de la dernière manipulation',\\r\\n\" +\r\n  \"  edt_associe: 'EDT associé',\\r\\n\" +\r\n  \"  campagne_precedente: 'Campagne précédente',\\r\\n\" +\r\n  \"  visuel_precedent: 'Visuel précédent',\\r\\n\" +\r\n  \"  edt_precedent_associe: 'EDT précédent associé',\\r\\n\" +\r\n  \"  coordonnees_gps: 'Coordonnées GPS',\\r\\n\" +\r\n  \"  latitude: 'Latitude',\\r\\n\" +\r\n  \"  longitude: 'Longitude',\\r\\n\" +\r\n  '  prochai'... 43992 more characters\r\n\r\n    at file:///C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/scripts/verify_terrain_issue_client_derivation_v138.mjs:22:8\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\r\n  generatedMessage: true,\r\n  code: 'ERR_ASSERTION',\r\n  actual: \"import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';\\n\" +\r\n    \"import { createRoot } from 'react-dom/client';\\r\\n\" +\r\n    'import {\\r\\n' +\r\n    '  Search, Download, FileSpreadsheet, FileText, ShieldCheck, BarChart3,\\r\\n' +\r\n    '  ClipboardList, Bell, Lock, LogOut, MapPin, Edit3, Save, X, History\\r\\n' +\r\n    '  , ChevronRight, AlertTriangle, Camera, CalendarClock\\r\\n' +\r\n    \"} from 'lucide-react';\\r\\n\" +\r\n    \"import './styles.css';\\r\\n\" +\r\n    \"import './features/admin/bloc4-admin.css';\\r\\n\" +\r\n    \"import './features/terrain/bloc5-terrain.css';\\r\\n\" +\r\n    \"import './features/workorders/bloc6-workorders.css';\\r\\n\" +\r\n    \"import './features/v07/bloc-7-3.css';\\r\\n\" +\r\n    \"import './features/v07/bloc-7-4.css';\\r\\n\" +\r\n    \"import 'leaflet/dist/leaflet.css';\\r\\n\" +\r\n    \"import './features/v08/bloc-8-map.css';\\r\\n\" +\r\n    \"import './features/v08/bloc-8-role-visibility.css';\\r\\n\" +\r\n    \"import './features/v09/bloc-9-reports.css';\\r\\n\" +\r\n    \"import './features/v10/bloc-10-editor.css';\\r\\n\" +\r\n    \"import './features/v11/bloc-11-operations.css';\\r\\n\" +\r\n    \"import './features/v11/correctifs-urgence.css';\\r\\n\" +\r\n    \"import './features/v12/bloc-12.css';\\r\\n\" +\r\n    \"import './features/v12/account-activation.css';\\r\\n\" +\r\n    \"import './features/v12/installer-terrain-shell.css';\\r\\n\" +\r\n    \"import './features/v13/automation-assistant.css';\\r\\n\" +\r\n    \"import './features/v13/grid-sorting.css';\\r\\n\" +\r\n    \"import './features/v13/recent-activity.css';\\r\\n\" +\r\n    \"import './features/v13/field-catalog.css';\\r\\n\" +\r\n    \"import './features/v14/module-14.css';\\r\\n\" +\r\n    \"import './features/v15/module-15.css';\\r\\n\" +\r\n    \"import './features/v17/client-portal.css';\\r\\n\" +\r\n    '\\r\\n' +\r\n    \"import manifest from './data/manifest.json';\\r\\n\" +\r\n    'import {\\r\\n' +\r\n    '  strictMatches,\\r\\n' +\r\n    '  downloadCSV,\\r\\n' +\r\n    '  downloadExcel,\\n' +\r\n    '  downloadExcelSelectionWithPhotos,\\n' +\r\n    '  downloadPDF,\\r\\n' +\r\n    '  professionalExportName,\\r\\n' +\r\n    '  normalize\\r\\n' +\r\n    \"} from './lib/utils';\\r\\n\" +\r\n    \"import { sortRows } from './lib/gridSorting';\\r\\n\" +\r\n    \"import { supabase, supabaseConfigured } from './lib/supabaseClient';\\r\\n\" +\r\n    \"import { businessFieldLabel, enforceApplicationTitle, friendlyError } from './config/businessLanguage';\\r\\n\" +\r\n    \"import GridColumnHeader from './components/GridColumnHeader';\\r\\n\" +\r\n    \"import DataGridFilterRow from './components/DataGridFilterRow';\\r\\n\" +\r\n    \"import { matchesGridFilters } from './components/DataGridColumnFilter';\\r\\n\" +\r\n    \"import DataGridSettings, { useDataGridSettings } from './components/DataGridSettings';\\r\\n\" +\r\n    \"import GridPagination from './components/GridPagination';\\r\\n\" +\r\n    \"import { defaultSortColumnForTable } from './lib/gridPresentation';\\r\\n\" +\r\n    \"import { defaultSortForColumn } from './lib/gridSorting';\\r\\n\" +\r\n    \"import { clearTableCache, loadManyTables, loadTable } from './services/dataService';\\n\" +\r\n    \"import { loadInternalIssues } from './services/internalIssuesService';\\n\" +\r\n    \"import { loadTerrainSyncStatus } from './services/terrainSyncStatus';\\r\\n\" +\r\n    '\\r\\n' +\r\n    \"import SupportPhotoGallery from './components/SupportPhotoGallery';\\r\\n\" +\r\n    \"import Support360Panel from './components/Support360Panel';\\r\\n\" +\r\n    \"import EditableField from './components/EditableField';\\r\\n\" +\r\n    \"import ChangeHistoryPanel from './components/ChangeHistoryPanel';\\r\\n\" +\r\n    \"import GlobalButtonFeedback from './components/GlobalButtonFeedback';\\r\\n\" +\r\n    \"import RecentActivityWidget from './components/RecentActivityWidget';\\r\\n\" +\r\n    \"import AccountActivation from './components/AccountActivation';\\r\\n\" +\r\n    \"import InvitationAcceptance from './components/InvitationAcceptance';\\r\\n\" +\r\n    \"import BrandLogo from './components/BrandLogo';\\r\\n\" +\r\n    \"import OperationalCommandCenter from './components/OperationalCommandCenter';\\r\\n\" +\r\n    \"import { infrastructureMapUrl } from './services/mapService';\\r\\n\" +\r\n    \"import { getCurrentProfile } from './services/authProfileService';\\r\\n\" +\r\n    \"import { getRoleVisibility, canSeeTable, columnsForTable } from './services/roleVisibilityService';\\r\\n\" +\r\n    \"import { updateUniversalRow, updateUniversalRows, loadAutomaticFieldRules, primaryKeyFor } from './services/universalEditorService';\\r\\n\" +\r\n    \"import { requiresAccountActivation } from './services/accountActivationService';\\r\\n\" +\r\n    '\\r\\n' +\r\n    \"const AdminPanel = lazy(() => import('./components/AdminPanel'));\\r\\n\" +\r\n    \"const TerrainApp = lazy(() => import('./components/TerrainApp'));\\r\\n\" +\r\n    \"const WorkOrdersPanel = lazy(() => import('./components/WorkOrdersPanel'));\\r\\n\" +\r\n    \"const CampaignsPanel = lazy(() => import('./components/CampaignsPanel'));\\r\\n\" +\r\n    \"const CampaignVisualManager = lazy(() => import('./components/CampaignVisualManager'));\\r\\n\" +\r\n    \"const ValidationCenter = lazy(() => import('./components/ValidationCenter'));\\r\\n\" +\r\n    \"const LegacyPhotoImporter = lazy(() => import('./components/LegacyPhotoImporter'));\\r\\n\" +\r\n    \"const ProductionLogin = lazy(() => import('./components/ProductionLogin'));\\r\\n\" +\r\n    \"const UserProvisioningPanel = lazy(() => import('./components/UserProvisioningPanel'));\\r\\n\" +\r\n    \"const ClientsAccessAdmin = lazy(() => import('./components/ClientsAccessAdmin'));\\r\\n\" +\r\n    \"const InteractiveMap = lazy(() => import('./components/InteractiveMap'));\\r\\n\" +\r\n    \"const RoleVisibilityAdmin = lazy(() => import('./components/RoleVisibilityAdmin'));\\r\\n\" +\r\n    \"const FinalReportsCenter = lazy(() => import('./components/FinalReportsCenter'));\\r\\n\" +\r\n    \"const Module15Reports = lazy(() => import('./components/Module15Reports'));\\r\\n\" +\r\n    \"const PhotoInventoryCenter = lazy(() => import('./components/PhotoInventoryCenter'));\\r\\n\" +\r\n    \"const OperationsCenter = lazy(() => import('./components/OperationsCenter'));\\r\\n\" +\r\n    \"const InstallerTerrainShell = lazy(() => import('./components/InstallerTerrainShell'));\\r\\n\" +\r\n    \"const TerrainSyncDiagnostics = lazy(() => import('./components/TerrainSyncDiagnostics'));\\r\\n\" +\r\n    \"const ActivityJournal = lazy(() => import('./components/ActivityJournal'));\\r\\n\" +\r\n    \"const AutomationAssistant = lazy(() => import('./components/AutomationAssistant'));\\r\\n\" +\r\n    \"const FieldCatalogManager = lazy(() => import('./components/FieldCatalogManager'));\\r\\n\" +\r\n    \"const Module14Dashboard = lazy(() => import('./components/Module14Dashboard'));\\r\\n\" +\r\n    \"const ClientPortal = lazy(() => import('./components/ClientPortal'));\\r\\n\" +\r\n    \"const SiteSupportAssignmentsView = lazy(() => import('./components/SiteSupportAssignmentsView'));\\n\" +\r\n    \"const ExportsCenter = lazy(() => import('./components/ExportsCenter'));\\n\" +\r\n    \"import { BUSINESS_CONTEXT } from './lib/businessContext';\\r\\n\" +\r\n    '\\r\\n' +\r\n    'function ScreenFallback() {\\r\\n' +\r\n    '  return <div className=\"screen-fallback\" role=\"status\" aria-live=\"polite\"><span aria-hidden=\"true\"/>Chargement du module…</div>;\\r\\n' +\r\n    '}\\r\\n' +\r\n    '\\r\\n' +\r\n    'const tableConfig = {\\r\\n' +\r\n    \"  Infrastructures: { table: 'infrastructures', fallback: () => import('./data/infrastructures.json').then(module => module.default), idField: 'support_id', labelField: 'emplacement_visibilite' },\\r\\n\" +\r\n    \"  'Répertoire des affiches': { table: 'repertoire_des_affiches', fallback: () => import('./data/repertoire_des_affiches.json').then(module => module.default) },\\r\\n\" +\r\n    \"  'Communications opérationnelles': { table: 'communications_operationnelles', fallback: () => import('./data/communications_operationnelles.json').then(module => module.default) },\\r\\n\" +\r\n    \"  'Enjeux des cadres et supports': { table: 'enjeux_des_cadres_et_supports', loader: loadInternalIssues, cacheTables: ['enjeux_des_cadres_et_supports','enjeux_terrain'], readOnly: true, fallback: () => import('./data/enjeux_des_cadres_et_supports.json').then(module => module.default) },\\n\" +\r\n    `  \"Centres d’information\": { table: 'centres_dinformation', fallback: () => import('./data/centres_dinformation.json').then(module => module.default) },\\r\\n` +\r\n    \"  'C.I. avec enjeux': { table: 'ci_avec_enjeux', fallback: () => import('./data/c_i_avec_enjeux.json').then(module => module.default) },\\r\\n\" +\r\n    \"  'Liste des arrêts': { table: 'liste_des_arrets', fallback: () => import('./data/liste_des_arrets.json').then(module => module.default), idField: 'no_arret', labelField: 'emplacement_visibilite' },\\r\\n\" +\r\n    \"  'Voitures / trains': { table: 'voitures_trains', fallback: () => import('./data/voitures_trains.json').then(module => module.default) },\\r\\n\" +\r\n    \"  Photos: { table: 'photos', fallback: () => import('./data/photos.json').then(module => module.default) },\\r\\n\" +\r\n    \"  'Bons de travail': { table: 'bons_de_travail', fallback: () => import('./data/bons_de_travail.json').then(module => module.default) },\\r\\n\" +\r\n    \"  'Historique des campagnes': { table: 'historique_des_campagnes', fallback: () => import('./data/historique_des_campagnes.json').then(module => module.default) },\\r\\n\" +\r\n    \"  'Suivi des EDT': { table: 'suivi_des_edt', fallback: () => import('./data/suivi_des_edt.json').then(module => module.default) },\\r\\n\" +\r\n    \"  Utilisateurs: { table: 'utilisateurs', fallback: () => import('./data/utilisateurs.json').then(module => module.default) },\\r\\n\" +\r\n    \"  Clients: { table: 'clients', fallback: () => import('./data/clients.json').then(module => module.default) },\\r\\n\" +\r\n    \"  'Journal des événements': { table: 'journal_des_evenements', fallback: () => import('./data/journal_des_evenements.json').then(module => module.default) }\\r\\n\" +\r\n    '};\\r\\n' +\r\n    '\\r\\n' +\r\n    'const STARTUP_TABLES = [\\r\\n' +\r\n    \"  'Infrastructures', 'Liste des arrêts', 'Suivi des EDT',\\r\\n\" +\r\n    \"  'Bons de travail', 'Enjeux des cadres et supports', 'Photos'\\r\\n\" +\r\n    '];\\r\\n' +\r\n    '\\r\\n' +\r\n    'const icons = {\\r\\n' +\r\n    \"  Infrastructures: '🏗️', 'Campagnes et visuels': '🎯', 'Répertoire des affiches': '📦',\\r\\n\" +\r\n    \"  Photos: '📷', 'Bons de travail': '🛠️', 'Suivi des EDT': '📋',\\r\\n\" +\r\n    \"  'Enjeux des cadres et supports': '⚠️', 'Liste des arrêts': '🚏',\\r\\n\" +\r\n    \"  'Voitures / trains': '🚍', Clients: '🏢', Utilisateurs: '👥',\\r\\n\" +\r\n    \"  'Journal des événements': '🧾'\\r\\n\" +\r\n    '};\\r\\n' +\r\n    \"const roles = ['Administrateur', 'Coordonnateur', 'Installateur', 'Client-Admin', 'Client'];\\r\\n\" +\r\n    '\\r\\n' +\r\n    'const INFRASTRUCTURE_LABELS = {\\r\\n' +\r\n    \"  support_id: 'Numéro du support',\\r\\n\" +\r\n    \"  type_support: 'Type de support',\\r\\n\" +\r\n    \"  format_affichage: 'Formats d’affichage',\\r\\n\" +\r\n    \"  medium_recommande: 'Médium recommandé',\\r\\n\" +\r\n    \"  emplacement_visibilite: 'Emplacement / visibilité',\\r\\n\" +\r\n    \"  site: 'Site',\\r\\n\" +\r\n    \"  type_site: 'Type de site',\\r\\n\" +\r\n    \"  ligne_distribution: 'Ligne de distribution',\\r\\n\" +\r\n    \"  type_ligne_distribution: 'Type de ligne de distribution',\\r\\n\" +\r\n    \"  enjeux: 'Enjeux',\\r\\n\" +\r\n    \"  type_enjeux: 'Type d’enjeux',\\r\\n\" +\r\n    \"  actif: 'Actif',\\r\\n\" +\r\n    \"  campagne_selon_visuel: 'Campagne selon le visuel',\\r\\n\" +\r\n    \"  visuel_en_expo: 'Visuel en exposition',\\r\\n\" +\r\n    \"  commentaires: 'Commentaires',\\r\\n\" +\r\n    \"  campagne_actuelle: 'Nom de la campagne actuelle',\\r\\n\" +\r\n    \"  visuel_campagne: 'Visuel de la campagne',\\r\\n\" +\r\n    \"  visuel_actuel_cadre: 'Visuel actuel du cadre',\\r\\n\" +\r\n    \"  date_derniere_manipulation: 'Date de la dernière manipulation',\\r\\n\" +\r\n    \"  edt_associe: 'EDT associé',\\r\\n\" +\r\n    \"  campagne_precedente: 'Campagne précédente',\\r\\n\" +\r\n    \"  visuel_precedent: 'Visuel précédent',\\r\\n\" +\r\n    \"  edt_precedent_associe: 'EDT précédent associé',\\r\\n\" +\r\n    \"  coordonnees_gps: 'Coordonnées GPS',\\r\\n\" +\r\n    \"  latitude: 'Latitude',\\r\\n\" +\r\n    \"  longitude: 'Longitude',\\r\\n\" +\r\n    '  prochai'... 43992 more characters,\r\n  expected: /'Enjeux des cadres et supports': \\{ table: 'enjeux_terrain'/,\r\n  operator: 'match',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.18.0\r\n"
+  },
+  {
+    "name": "test:v1.1.5-activity",
+    "exitCode": 0,
+    "output": "Activité récente V1.1.5B : 47 contrôles réussis, rendu React vérifié.\n"
+  },
+  {
+    "name": "test:module14",
+    "exitCode": 1,
+    "output": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: Module 14\r\n    at file:///C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/scripts/verify_module_14_v120.mjs:15:147\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\r\n  generatedMessage: false,\r\n  code: 'ERR_ASSERTION',\r\n  actual: false,\r\n  expected: true,\r\n  operator: '==',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.18.0\r\n"
+  },
+  {
+    "name": "test:module17",
+    "exitCode": 0,
+    "output": "Module 17 V1.2.0 : isolation, permissions, projections uniques, pagination, photothèque et portail validés. duplicateLogicalRows = 0 après normalisation.\n"
+  },
+  {
+    "name": "test:private-photos",
+    "exitCode": 1,
+    "output": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: Affichage privé signé\r\n    at file:///C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/scripts/verify_private_photo_access_v120.mjs:11:49\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\r\n  generatedMessage: false,\r\n  code: 'ERR_ASSERTION',\r\n  actual: false,\r\n  expected: true,\r\n  operator: '==',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.18.0\r\n"
+  },
+  {
+    "name": "test:v1.2.1-consolidation",
+    "exitCode": 1,
+    "output": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: Support / Fiche 360\r\n    at file:///C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/scripts/verify_business_views_consolidation_v121.mjs:23:417\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\r\n  generatedMessage: false,\r\n  code: 'ERR_ASSERTION',\r\n  actual: false,\r\n  expected: true,\r\n  operator: '==',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.18.0\r\n"
+  },
+  {
+    "name": "test:v1.2.1-mass-photos",
+    "exitCode": 0,
+    "output": "V1.2.1 import massif: simulations 0/1/100/5 000/20 000, virtualisation, reprise et rapport réussis.\n"
+  },
+  {
+    "name": "test:photo-review-queue",
+    "exitCode": 0,
+    "output": "File visuelle photo: appariement exact/fuzzy, conservation non appariée, renommage canonique, collisions, audit et isolation serveur vérifiés.\n"
+  },
+  {
+    "name": "test:v1.2.2",
+    "exitCode": 1,
+    "output": "node:internal/modules/run_main:107\r\n    triggerUncaughtException(\r\n    ^\r\n\r\nAssertionError [ERR_ASSERTION]: GridColumnHeader\r\n    at file:///C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/scripts/verify_business_views_v122.mjs:12:279\r\n    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)\r\n    at async node:internal/modules/esm/loader:643:26\r\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\r\n  generatedMessage: false,\r\n  code: 'ERR_ASSERTION',\r\n  actual: false,\r\n  expected: true,\r\n  operator: '==',\r\n  diff: 'simple'\r\n}\r\n\r\nNode.js v24.18.0\r\n"
+  },
+  {
+    "name": "test:v1.2.3",
+    "exitCode": 0,
+    "output": "V1.2.3: moteur de largeurs, persistance, lisibilité, responsive et fonctions de grille validés.\n"
+  },
+  {
+    "name": "test:v1.2.4",
+    "exitCode": 0,
+    "output": "V1.2.4: en-têtes, tris typés, filtres/pagination/exports et affectations canoniques validés. duplicateLogicalRows = 0.\n"
+  },
+  {
+    "name": "test:v1.2.5",
+    "exitCode": 0,
+    "output": "V1.2.5: 100 cycles React par grille, préférences, clés, 10 000 lignes et race A/B validés.\n"
+  },
+  {
+    "name": "test:v1.2.6",
+    "exitCode": 0,
+    "output": "V1.2.6 renforcé: 17 grilles unifiées rendues, 5 sous-tables spécialisées justifiées; SSR Campagnes/Communications validé.\n"
+  },
+  {
+    "name": "test:v1.2.8-actions",
+    "exitCode": 0,
+    "output": "V1.2.8 actions: 100 boutons de barre rendus et 6 contrats d’action de ligne audités sur les grilles consolidées; permissions et destinations validées.\n"
+  },
+  {
+    "name": "test:v1.2.9-campaign-visuals",
+    "exitCode": 0,
+    "output": "P0 campagnes/visuels: rendu React, permissions, formulaires, actions, confirmations, archivage, Hors-Cadre et navigation validés.\n"
+  },
+  {
+    "name": "test:v1.3.0-module15",
+    "exitCode": 0,
+    "output": "Module 15 simplifié : une vue Rapports EDT, grille métier, PDF, envoi, relance et isolation validés.\n"
+  },
+  {
+    "name": "test:v1.3.0-module15-sql",
+    "exitCode": 0,
+    "output": "Module 15 SQL post-V1.3.0 : correctif de sécurité additif et vérificateur READ ONLY renforcé validés.\n"
+  },
+  {
+    "name": "test:v1.3.1-edt-email",
+    "exitCode": 0,
+    "output": "V1.3.1 EDT email: 67 contrôles réussis; Microsoft Graph simulé, aucun courriel envoyé.\n"
+  },
+  {
+    "name": "test:v1.3.1.1-edt-email-recovery",
+    "exitCode": 0,
+    "output": "V1.3.1.1 recovery: 40 contrôles statiques réussis; aucun SQL exécuté.\n"
+  },
+  {
+    "name": "test:v1.3.2-module15-editor",
+    "exitCode": 0,
+    "output": "Module 15 V1.3.2 : création, édition, preview/PDF communs, 1/25/500 supports, versions, photos, email multiple, permissions et historique validés sans réseau.\n"
+  },
+  {
+    "name": "test:v1.3.3-edt-visuals",
+    "exitCode": 0,
+    "output": "V1.3.3: 1/2 phases, retrait ultérieur, BT atomique, rapports par phase, visuels et sélection 100/500/5000 validés.\n"
+  },
+  {
+    "name": "test:v1.2.7-ux",
+    "exitCode": 0,
+    "output": "V1.2.7 UX: HTML métier rendu sans terminologie technique interdite; erreurs de chargement présentées en langage utilisateur.\n"
+  },
+  {
+    "name": "test:v1.2.7-performance",
+    "exitCode": 0,
+    "output": "V1.2.7 performance: chunk initial 606774 octets; carte, photos, Terrain, modules admin/client et exports lourds différés; cache/déduplication actifs.\n"
+  }
+]

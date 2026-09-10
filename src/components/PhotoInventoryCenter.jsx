@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import PhotoImage from './PhotoImage';
+import useRefreshRequest from '../hooks/useRefreshRequest';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   CheckCircle2,
   Image,
@@ -29,6 +31,8 @@ export default function PhotoInventoryCenter({ role, supportId = '', onClearSupp
   const [photos, setPhotos] = useState([]);
   const [movements, setMovements] = useState([]);
   const [message, setMessage] = useState('');
+  const movementActive = useRef(false);
+  const [savingMovement, setSavingMovement] = useState(false);
   const {sortedRows:sortedMovements,sortState:movementSort,setSortState:setMovementSort}=useSortableRows(movements, null, 'inventory-movements');
   const [movement, setMovement] = useState({
     item_reference: '',
@@ -42,18 +46,20 @@ export default function PhotoInventoryCenter({ role, supportId = '', onClearSupp
   const canManage = ['Administrateur', 'Coordonnateur'].includes(role);
   const visiblePhotos = filterSupportPhotos(photos, supportId);
 
-  async function reload() {
-    try {
-      const [nextPhotos, nextMovements] = await Promise.all([
+  const refreshRequest=useRefreshRequest([role,supportId].join(':'));
+async function reload() {
+    const request=refreshRequest.start();
+try {
+      const [nextPhotos, nextMovements] = await request.wait(Promise.all([
         listSupportPhotosForValidation(),
         listInventoryMovements()
-      ]);
+      ]));
       setPhotos(nextPhotos);
       setMovements(nextMovements);
       setMessage('');
-    } catch (error) {
+    } catch (error) {if(!request.isCurrent())return;
       setMessage(friendlyError(error, 'Impossible de charger les photos et l’inventaire.'));
-    }
+    }finally{request.finish()}
   }
 
   useEffect(() => { reload(); }, []);
@@ -72,12 +78,14 @@ export default function PhotoInventoryCenter({ role, supportId = '', onClearSupp
     }
   }
 
+  const photoDeleteActive = useRef(false);
   async function removePhoto(photo) {
-    if (!canManage) return;
+    if (!canManage || photoDeleteActive.current) return;
     const confirmed = window.confirm(
       `Supprimer définitivement la photo « ${photo.nom_fichier || photo.id} » ? Cette action est irréversible.`
     );
     if (!confirmed) return;
+    photoDeleteActive.current = true;
 
     try {
       await deleteSupportPhoto(photo);
@@ -85,7 +93,7 @@ export default function PhotoInventoryCenter({ role, supportId = '', onClearSupp
       await reload();
     } catch (error) {
       setMessage(friendlyError(error, 'Impossible de supprimer cette photo.'));
-    }
+    } finally { photoDeleteActive.current = false; }
   }
 
   async function setPrimary(photo) {
@@ -100,6 +108,9 @@ export default function PhotoInventoryCenter({ role, supportId = '', onClearSupp
 
   async function addMovement(event) {
     event.preventDefault();
+    if (!canManage || movementActive.current) return;
+    movementActive.current = true;
+    setSavingMovement(true);
     try {
       await createInventoryMovement(movement);
       setMovement({
@@ -110,10 +121,13 @@ export default function PhotoInventoryCenter({ role, supportId = '', onClearSupp
         support_id: '',
         notes: ''
       });
-      setMessage('Mouvement d’inventaire enregistré.');
       await reload();
+      setMessage('Mouvement d’inventaire enregistré.');
     } catch (error) {
       setMessage(error.message || 'Erreur d’inventaire.');
+    } finally {
+      movementActive.current = false;
+      setSavingMovement(false);
     }
   }
 
@@ -124,7 +138,7 @@ export default function PhotoInventoryCenter({ role, supportId = '', onClearSupp
           <h1><Image/> Photos et inventaire</h1>
           <p>Validation des preuves terrain, photo principale et mouvements d’affiches.</p>
         </div>
-        <button onClick={reload}><RefreshCw size={17}/> Actualiser</button>
+        <button aria-busy={refreshRequest.refreshing} data-refresh-control="PhotoInventoryCenter" disabled={refreshRequest.refreshing} onClick={refreshRequest.onClick(reload)}><RefreshCw size={17}/> Actualiser</button>
       </header>
 
       {message && <div className="v07-message">{message}</div>}
@@ -146,8 +160,8 @@ export default function PhotoInventoryCenter({ role, supportId = '', onClearSupp
           {visiblePhotos.map(photo => (
             <article key={photo.id}>
               <div className="photo-review-image">
-                {photo.signed_thumbnail_url
-                  ? <img loading="lazy" src={photo.signed_thumbnail_url} alt={photo.nom_fichier}/>
+                {(photo.storage_path||photo.photo_url||photo.thumbnail_url)
+                  ? <PhotoImage loading="lazy" photo={photo} alt={photo.nom_fichier}/>
                   : <span>Aperçu indisponible</span>}
               </div>
               <div className="photo-review-body">
@@ -196,7 +210,7 @@ export default function PhotoInventoryCenter({ role, supportId = '', onClearSupp
             <label>Notes
               <textarea value={movement.notes} onChange={e => setMovement({...movement, notes: e.target.value})}/>
             </label>
-            <button className="v07-primary" disabled={!canManage}>Enregistrer</button>
+            <button className="v07-primary" disabled={!canManage || savingMovement}>{savingMovement ? 'Enregistrement…' : 'Enregistrer'}</button>
           </form>
 
           <section className="v07-card">

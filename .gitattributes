@@ -1,0 +1,2 @@
+# Preserve the exact already-applied SQL, including its historical final blank line.
+supabase/migrations/20260909125721_canonical_authorization_four_rpcs.sql whitespace=-blank-at-eof

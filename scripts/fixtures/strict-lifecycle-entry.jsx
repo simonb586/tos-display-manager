@@ -1,0 +1,7 @@
+import React,{useState,useRef} from 'react';
+import {createRoot} from 'react-dom/client';
+import Panel from '../../src/components/EdtLifecyclePanel';
+window.fixture={calls:[],fail:false,prompt:''};window.prompt=()=>fixture.prompt;
+window.testApi=async(file,name,args)=>{fixture.calls.push({name,args});await new Promise(r=>fixture.hold?(fixture.pending||=[]).push(r):setTimeout(r,120));if(fixture.fail)throw Error('LIFECYCLE_ERROR');return {ok:true}};
+function Host({role,state}){const [busy,setBusy]=useState(false),[message,setMessage]=useState('');const active=useRef(false);async function run(action,text){if(active.current)return;active.current=true;setBusy(true);try{await action();setMessage(text)}catch(e){setMessage(e.message)}finally{active.current=false;setBusy(false)}}const phases=[{id:7,edt_id:1,phase_type:'installation',statut:state==='closed'?'fermee':'en_cours'},...(state==='missing'?[]:[{id:8,edt_id:1,phase_type:'retrait',statut:state==='closed'?'ferme':'en_cours'}])];return <><p role="status">{message}</p><Panel edt={{id:1,campagne_id:3,no_edt:'EDT-1'}} data={{phases,campaigns:[{id:3,nom_campagne:'Test',date_fin:'2026-10-01'}]}} canManage={['Administrateur','Coordonnateur'].includes(role)} busy={busy} run={run}/></>}
+const root=createRoot(document.getElementById('root'));let key=0;window.mount=(role,state)=>{window.fixture={calls:[],fail:false,prompt:''};root.render(<Host key={++key} role={role} state={state}/>)};

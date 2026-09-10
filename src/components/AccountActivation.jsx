@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { CheckCircle2, KeyRound, LoaderCircle, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { activationState, completeClientInvitationActivation } from '../services/accountActivationService';
@@ -19,6 +19,7 @@ function ActivationNotice({ title, children }) {
 }
 
 export default function AccountActivation({ session, profile, loading, onActivated }) {
+  const mutationActive=useRef(false);
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [busy, setBusy] = useState(false);
@@ -29,9 +30,10 @@ export default function AccountActivation({ session, profile, loading, onActivat
 
   async function activate(event) {
     event.preventDefault();
-    if (busy) return;
+    if (mutationActive.current) return;
     setMessage('');
     if (!valid) { setMessage('Le mot de passe ne respecte pas encore toutes les exigences ou sa confirmation diffère.'); return; }
+    mutationActive.current=true;
     setBusy(true);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -47,6 +49,7 @@ export default function AccountActivation({ session, profile, loading, onActivat
       await onActivated();
     } catch (error) {
       setMessage(error.message || 'Activation impossible. Demandez une nouvelle invitation.');
+      mutationActive.current=false;
       setBusy(false);
     }
   }

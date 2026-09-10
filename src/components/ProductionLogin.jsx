@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Lock, Mail, ShieldCheck } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { requestPasswordReset } from '../services/authProfileService';
@@ -6,6 +6,7 @@ import BrandLogo from './BrandLogo';
 import '../features/production/bloc-7-5-production.css';
 
 export default function ProductionLogin() {
+  const mutationActive=useRef(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -13,6 +14,7 @@ export default function ProductionLogin() {
 
   async function login(event) {
     event.preventDefault();
+    if(mutationActive.current)return;mutationActive.current=true;
     setBusy(true);
     setMessage('');
     try {
@@ -21,6 +23,7 @@ export default function ProductionLogin() {
     } catch (error) {
       setMessage(error.message || 'Connexion impossible.');
     } finally {
+      mutationActive.current=false;
       setBusy(false);
     }
   }
@@ -30,6 +33,7 @@ export default function ProductionLogin() {
       setMessage('Inscris d’abord ton adresse courriel.');
       return;
     }
+    if(mutationActive.current)return;mutationActive.current=true;
     setBusy(true);
     try {
       await requestPasswordReset(email);
@@ -37,6 +41,7 @@ export default function ProductionLogin() {
     } catch (error) {
       setMessage(error.message || 'Envoi impossible.');
     } finally {
+      mutationActive.current=false;
       setBusy(false);
     }
   }

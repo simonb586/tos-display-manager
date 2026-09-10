@@ -97,11 +97,6 @@ export async function downloadExcel(filename, rows, columns, options={}) {
   XLSX.writeFile(workbook,filename);
 }
 
-const activePhotoUrl = row => String(
-  row?.signed_thumbnail_url || row?.photo_miniature_url || row?.photo_principale_url ||
-  row?.signed_url || row?.photo_url || row?.url || ''
-).trim();
-
 async function loadWorkbookImage(workbook, url) {
   if (!url) return null;
   try {
@@ -119,6 +114,7 @@ async function loadWorkbookImage(workbook, url) {
 }
 
 export async function downloadExcelSelectionWithPhotos(filename, rows, columns, options={}) {
+  const { getSignedDownloadUrl } = await import('../services/photoAccessService');
   const { default:ExcelJS } = await import('exceljs');
   const safe = normalizeExportColumns(columns, options.labels);
   const workbook = new ExcelJS.Workbook();
@@ -132,7 +128,9 @@ export async function downloadExcelSelectionWithPhotos(filename, rows, columns, 
   worksheet.autoFilter = { from:{ row:1, column:1 }, to:{ row:1, column:safe.length + 1 } };
   rows.forEach(row => worksheet.addRow(Object.fromEntries(safe.map(column => [column.key, exportDisplayValue(row[column.key])]))));
   for (let index=0; index<rows.length; index+=1) {
-    const image = await loadWorkbookImage(workbook, activePhotoUrl(rows[index]));
+    let url = '';
+    try { url = await getSignedDownloadUrl(rows[index]); } catch { /* An inaccessible photo must never use its old public URL. */ }
+    const image = await loadWorkbookImage(workbook, url);
     if (!image) continue;
     const maxWidth=112, maxHeight=72, scale=Math.min(maxWidth/image.width,maxHeight/image.height,1);
     worksheet.getRow(index+2).height = 58;
