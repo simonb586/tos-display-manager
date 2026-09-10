@@ -610,16 +610,27 @@ function App() {
     setDataStore(null);
     if (['Client','Client-Admin'].includes(profile.role)) { setDataStore(null); setLoading(false); return; }
     setLoading(false);
-    refreshDataStore(STARTUP_TABLES);
+    if(profile.role==='Installateur')refreshDataStore(STARTUP_TABLES);
   }, [session?.user?.id, profile?.id, profile?.role, profile?.client_id, profileLoading]);
 
   useEffect(() => {
-    if (!session || !profile || ['Client','Client-Admin'].includes(profile.role) || !tableConfig[active] || dataStore?.[active]) return;
-    refreshDataStore([active]);
-  }, [active, session?.user?.id, profile?.id, dataStore?.[active]]);
+    if (!session || !profile || profileLoading || ['Client','Client-Admin'].includes(profile.role)) return;
+    const dependencies={
+      'Carte interactive':['Infrastructures'],
+      'Application terrain':['Infrastructures','Liste des arrêts'],
+      'Recherche terrain':['Infrastructures','Liste des arrêts'],
+      'Visibilité par rôle':STARTUP_TABLES,
+      'Import anciennes photos':['Infrastructures'],
+      'Rapports finaux':['Infrastructures','Suivi des EDT','Clients','Enjeux des cadres et supports','Campagnes et visuels'],
+      'Centre de commandement':STARTUP_TABLES
+    };
+    const required=tableConfig[active]?[active]:(dependencies[active]||[]);
+    const missing=required.filter(label=>!dataStore?.[label]);
+    if(missing.length)refreshDataStore(missing);
+  }, [active, session?.user?.id, profile?.id, profile?.role, profile?.client_id, profileLoading]);
 
   useEffect(() => {
-    if (!session || active !== 'Tableau de bord') return;
+    if (!session || active !== 'Tableau de bord' || profile?.role !== 'Installateur') return;
     loadTerrainSyncStatus().then(setTerrainSyncStatus);
   }, [session?.user?.id, active]);
 
@@ -669,7 +680,7 @@ function App() {
       setProfileLoading(true);
       try {
         const nextProfile = await getCurrentProfile(session);
-        if (!cancelled) setProfile(nextProfile);
+        if (!cancelled) { setProfile(nextProfile); if(nextProfile?.role)setRole(nextProfile.role); }
       } catch (error) {
         console.error('Profil applicatif introuvable', error);
         if (!cancelled) setProfile(null);
@@ -696,7 +707,8 @@ function App() {
   useEffect(() => {
     let cancelled = false;
 
-    getRoleVisibility(role)
+    if (!profile?.role) return;
+    getRoleVisibility(profile.role)
       .then(permission => {
         if (!cancelled) setRolePermission(permission);
       })
@@ -705,7 +717,7 @@ function App() {
       });
 
     return () => { cancelled = true; };
-  }, [role]);
+  }, [profile?.role]);
 
   const adminItems = role === 'Administrateur'
     ? ['Administration', 'Utilisateurs réels', 'Visibilité par rôle', 'Édition — Historique', 'Photos et inventaire', 'Centre EDT et BT', 'Rapports EDT', 'Automatisations', 'Campagnes maîtres', 'Campagne — Visuels et formats', 'Campagnes et visuels par site et supports', 'Communications opérationnelles', 'Communication opérationnelle — Visuels', 'Communications opérationnelles par site et supports']
@@ -835,7 +847,7 @@ function App() {
   }
 
   let content;
-  if (active === 'Tableau de bord') content = ['Administrateur','Coordonnateur'].includes(role)?<Module14Dashboard dataStore={dataStore} onNavigate={setActive} terrainSyncStatus={terrainSyncStatus} role={role} permission={rolePermission}/>:<Dashboard setActive={setActive} dataStore={dataStore}/>;
+  if (active === 'Tableau de bord') content = ['Administrateur','Coordonnateur'].includes(role)?<Module14Dashboard dataStore={dataStore} onNavigate={setActive} terrainSyncStatus={terrainSyncStatus} role={role} permission={rolePermission} scopeKey={currentDataScope}/>:<Dashboard setActive={setActive} dataStore={dataStore}/>;
   else if (active === 'Exports') { const extra=['Administrateur','Coordonnateur'].includes(role)?[{id:'campagnes_maitres',label:'Campagnes'},{id:'campagne_visuels_formats',label:'Visuels'},{id:'edt_phases',label:'Phases EDT'},{id:'activity_events',label:'Historique'}]:[]; const domains=[...visibleManifestTables.map(label=>({id:tableConfig[label]?.table||label,label})),...extra]; content=<ExportsCenter domains={[...new Map(domains.map(domain=>[domain.id,domain])).values()]} loadRows={async domain=>{const config=tableConfig[domain.label];return(config?.loader?await config.loader():await loadTable(domain.id,config?.fallback||[])).rows}}/>; }
   else if (active === 'Centre de commandement') content = <OperationalCommandCenter dataStore={dataStore} onNavigate={setActive}/>;
   else if (active === 'Connexion') content = <LoginView session={session} setSession={setSession} role={role} setRole={setRole}/>;

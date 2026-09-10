@@ -9,6 +9,7 @@ import assert from 'node:assert/strict';
 const out='docs/stabilization-local';fs.mkdirSync(out,{recursive:true});
 const baseline=process.argv.includes('--baseline');
 const mocks={
+ dashboardService:`export const DASHBOARD_TIMEOUT_MS=4500;export async function loadDashboardSummary(){const f=window.fixture;return {version:1,identity:{user_id:'fixture-'+f.client,role:f.role,client_id:f.client,client_name:f.client===2?'EXO':'Client B'},permission:{visible_tables:f.permissions},kpis:{},sections:Object.fromEntries(['supports','campaigns','photos'].map(section=>[section,{total:75}]))}}`,
  clientAccessService:`export async function getClientPortalIdentity(){const f=window.fixture;return {id:f.client,organization_id:f.client,client_id:f.client,role:f.role,client_name:f.client===2?'EXO':'Client B'}} export async function getCurrentUserVisibleViews(){return {visible_tables:window.fixture.permissions}}`,
  clientPortalService:`export async function listClientPortalSection(section,args={}){const f=window.fixture,client=f.client,fail=f.fail,delay=f.delay;f.calls.push({section,...args,client});await new Promise(r=>setTimeout(r,delay));if(fail)throw Error('Erreur réseau simulée');return {rows:[{id:client,support_id:'SUP-'+client,site:client===2?'EXO':'Client B',nom_campagne:section==='campaigns'?'Campagne fixture':undefined}],total:75,page:args.page||1,page_size:args.pageSize||25}} export async function listAllClientPortalSection(section,args){return (await listClientPortalSection(section,args)).rows} export const listClientPortalSupportContext=listClientPortalSection;export async function createMultiSupportClientRequest(){window.fixture.mutations++;if(window.fixture.fail)throw Error('fixture')}`,
  userProvisioningService:`export async function listManagedUsers(){return [{id:1,courriel:'test@example.test',nom:'Fixture',role:'Installateur',lifecycle_status:'Invitation envoyée'}]} export async function manageUser(){window.fixture.mutations++;await new Promise(r=>setTimeout(r,100));if(window.fixture.fail)throw Error('Erreur simulée');return {message:'Invitation renvoyée'}} export const inviteRealUser=manageUser;export const updateManagedUser=manageUser;`,
@@ -16,7 +17,7 @@ const mocks={
 };
 const bundle=await build({entryPoints:['scripts/stabilization-browser-entry.jsx'],bundle:true,write:false,loader:{'.css':'empty'},format:'iife',define:{'process.env.NODE_ENV':'"development"'},plugins:[{name:'offline-fixtures',setup(b){
  if(baseline)b.onLoad({filter:/[\\/](ClientPortal|ClientBusinessGrid|UnifiedDataGrid)\.jsx$/},a=>({contents:execFileSync('git',['show',`HEAD:${path.relative(process.cwd(),a.path).replaceAll('\\','/')}`],{encoding:'utf8'}),loader:'jsx'}));
- b.onResolve({filter:/\/(clientAccessService|clientPortalService|userProvisioningService|supabaseClient)(\.js)?$/},a=>({path:a.path.split('/').pop().replace(/\.js$/,''),namespace:'fixture'}));
+ b.onResolve({filter:/\/(dashboardService|clientAccessService|clientPortalService|userProvisioningService|supabaseClient)(\.js)?$/},a=>({path:a.path.split('/').pop().replace(/\.js$/,''),namespace:'fixture'}));
  b.onLoad({filter:/.*/,namespace:'fixture'},a=>({contents:mocks[a.path],loader:'js'}));
  // Map, 360 and export implementations are outside this targeted runtime suite.
  b.onResolve({filter:/\/(InteractiveMap|Support360Panel|ExportsCenter)$/},a=>({path:a.path,namespace:'stub'}));

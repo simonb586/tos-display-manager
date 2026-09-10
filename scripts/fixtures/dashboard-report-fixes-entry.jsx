@@ -1,3 +1,4 @@
+import {dashboardSummary} from './dashboard-summary';
 ﻿import React from 'react';import{createRoot}from'react-dom/client';import Dashboard from'../../src/components/Module14Dashboard';import Reports from'../../src/components/Module15Reports';import Portal from'../../src/components/ClientPortal';
 const root=createRoot(document.getElementById('root'));let key=0;
 const stores={Infrastructures:{rows:[{actif:true},{actif:false}]},Photos:{rows:[{}]},Clients:{rows:[{},{}]},'Suivi des EDT':{rows:[{statut:'Complété'},{statut:'En cours'}]},'Bons de travail':{rows:[]},'Enjeux des cadres et supports':{rows:[{statut:'Résolu'},{statut:'Ouvert'}]}};
@@ -5,6 +6,7 @@ window.testApi=(file,name,args)=>{
  window.calls.push({name,args});
  if(['marketingRows','uniqueMarketingAssignments'].includes(name))return args[0].filter(r=>r.business_context==='marketing');
  if(['operationalRows','uniqueOperationalAssignments'].includes(name))return args[0].filter(r=>r.business_context==='operational_communication');
+ if(name==='loadDashboardSummary')return window.dashboardHold?new Promise(resolve=>window.sectionPending.push(()=>resolve(window.dashboardResult||dashboardSummary))):Promise.resolve(window.dashboardResult||dashboardSummary);
  if(name==='countSupportPhotos')return Promise.resolve(12);
  if(name==='loadModule14Data')return Promise.resolve({campaigns:[{business_context:'marketing',statut:'Active'},{business_context:'operational_communication',statut:'Active'}],assignments:[],visuals:[],available:true});
  if(name==='loadModule14OperationalKpis')return Promise.resolve(Object.fromEntries(['terrain','reports','reportsCompleted','reportsSent','reportsToSend','reportsErrors'].map((k,i)=>[k,{status:'available',value:i+2}])));
@@ -16,4 +18,4 @@ window.testApi=(file,name,args)=>{
  if(name==='listClientPortalSection')return new Promise(resolve=>{window.sectionPending.push(()=>resolve({rows:[],total:12,page:1,page_size:1}))});
  throw Error('Missing fixture '+name);
 };
-window.mount=(kind,role='Administrateur',partial=false)=>{window.calls=[];window.deleted=false;window.confirmed=false;window.confirmCalls=0;window.failDelete=false;window.sectionPending=[];window.confirm=()=>{window.confirmCalls++;return window.confirmed};root.render(kind==='dashboard'?<Dashboard key={++key} role={role} dataStore={partial?{}:stores} onNavigate={()=>{}}/>:kind==='portal'?<Portal key={++key} profile={{role:'Client'}}/>:<Reports key={++key} role={role} dataStore={{}}/>)};
+window.mount=(kind,role='Administrateur',partial=false)=>{window.dashboardHold=partial||kind==='portal';window.dashboardResult=kind==='portal'?{...dashboardSummary,identity:{user_id:'test',role:'Client',client_id:1},permission:{visible_tables:['Photos','Infrastructures']},sections:{photos:{total:12},supports:{total:12}}}:null;window.calls=[];window.deleted=false;window.confirmed=false;window.confirmCalls=0;window.failDelete=false;window.sectionPending=[];window.confirm=()=>{window.confirmCalls++;return window.confirmed};root.render(kind==='dashboard'?<Dashboard key={++key} role={role} dataStore={partial?{}:stores} onNavigate={()=>{}}/>:kind==='portal'?<Portal key={++key} profile={{role:'Client'}}/>:<Reports key={++key} role={role} dataStore={{}}/>)};

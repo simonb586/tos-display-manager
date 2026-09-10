@@ -8,8 +8,8 @@ await offlineBrowser('scripts/fixtures/dashboard-report-fixes-entry.jsx',async b
  await click('Terrain');assert.equal(await value('Photos'),'12');passed++;
  await click('Clients');assert.equal(await value('Clients'),'2');passed++;
  await b.evaluate("mount('dashboard','Administrateur',true)");await b.waitFor("document.body.innerText.includes('Chargement')");assert.equal(await value('Infrastructures actives'),'Chargement…');passed++;
- await b.evaluate("mount('portal')");await b.waitFor('sectionPending.length===2');assert.ok(await b.evaluate('Boolean(document.querySelector(".client-dashboard"))'));assert.ok(await b.evaluate('sectionPending.length===2'));passed++;
- assert.ok((await b.evaluate("calls.filter(c=>c.name==='listClientPortalSection')")).every(c=>c.args[1].resolvePhotos===false&&c.args[1].pageSize===1));passed++;
+ await b.evaluate("mount('portal')");await b.waitFor('sectionPending.length===1');assert.ok(await b.evaluate('Boolean(document.querySelector(".client-portal"))'));assert.ok(await b.evaluate('sectionPending.length===1'));passed++;
+ assert.equal((await b.evaluate("calls.filter(c=>c.name==='listClientPortalSection')")).length,0);passed++;
  await b.evaluate('sectionPending.splice(0).forEach(r=>r())');await b.waitFor("document.querySelector('.executive-kpi strong').textContent==='12'");passed++;
  await b.evaluate("mount('reports')");await b.waitFor("document.body.innerText.includes('Supprimer')");await click('Supprimer');assert.equal(await b.evaluate("calls.filter(c=>c.name==='deleteEdtReport').length"),0);passed++;
  await b.evaluate('confirmed=true');await click('Supprimer');await b.evaluate("Array.from(document.querySelectorAll('button')).find(e=>e.textContent.includes('Suppression')).click()");assert.equal(await b.evaluate("calls.filter(c=>c.name==='deleteEdtReport').length"),1);passed++;

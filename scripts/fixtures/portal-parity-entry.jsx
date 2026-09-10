@@ -7,6 +7,7 @@ window.portalFixture={calls:[]};
 const result=(client,section)=>({rows:[{support_id:'SUP-'+client,site:client===2?'EXO':'Client B',nom_campagne:section==='campaigns'?'Campaign fixture':undefined}],total:1,page:1,page_size:25});
 window.testApi=(file,name,args)=>{
  const f=window.portalFixture;f.calls.push({file,name,args});
+ if(name==='loadDashboardSummary')return Promise.resolve({version:1,identity:{user_id:'test-'+f.client,client_id:f.client,role:f.role,client_name:f.client===2?'EXO':'Client B'},permission:{visible_tables:[f.view.label],visible_columns:{[f.view.label]:['support_id','site']}},sections:{[f.view.section]:{total:1}},kpis:{}});
  if(name==='getClientPortalIdentity')return Promise.resolve({id:f.client,client_id:f.client,role:f.role,client_name:f.client===2?'EXO':'Client B'});
  if(name==='getCurrentUserVisibleViews')return Promise.resolve({visible_tables:[f.view.label],visible_columns:{[f.view.label]:['support_id','site']}});
  if(name==='listClientPortalSection')return Promise.resolve(result(f.client,args[0]));

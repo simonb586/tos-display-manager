@@ -1,5 +1,7 @@
 # Tableau de bord et suppression de rapports EDT
 
+> La partie chargement et compteurs est remplacée par le [correctif P0](DASHBOARD_PERFORMANCE_P0.md). La suppression des rapports décrite ci-dessous reste en vigueur.
+
 Le portail interne affiche sa navigation après la vérification du compte. Les tables sont publiées progressivement dans l’interface ; les valeurs en attente sont signalées. Les infrastructures déjà chargées sont réutilisées par le tableau de bord. Le portail client charge seulement une ligne par section pour obtenir ses totaux, sans attendre les signatures des photos. Les totaux du sommaire restent distincts des pages et filtres des grilles.
 
 Les photos sont comptées dans support_photos (hors suppression logique), sous les droits de la session. Les campagnes et visuels proviennent de leurs catalogues complets. Les EDT complétés, fermés, annulés ou archivés sont exclus des actifs. Les clients sont chargés au démarrage. Les indicateurs de rapports distinguent les EDT complétés, les rapports disponibles et les envois de la version courante.

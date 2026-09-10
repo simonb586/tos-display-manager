@@ -1,3 +1,4 @@
+import useDashboardSummary from '../hooks/useDashboardSummary';
 import {clearSignedPhotoUrlCache} from '../services/photoAccessService';
 import {businessCapabilities} from '../lib/businessCapabilities';
 import Module14Dashboard from './Module14Dashboard';
@@ -11,7 +12,6 @@ import Support360Panel from'./Support360Panel';
 import BulkSupportSelector from'./BulkSupportSelector';
 import{selectedSiteCount}from'../lib/bulkSupportSelection';
 import{resolveClientPortalViews,isAllowedClientPortalView,projectClientExportRows}from'../lib/clientPortalViewRegistry';
-import{getClientPortalIdentity,getCurrentUserVisibleViews}from'../services/clientAccessService';
 import{createMultiSupportClientRequest,listAllClientPortalSection,listClientPortalSection,listClientPortalSupportContext}from'../services/clientPortalService';
 import{prepareMapInfrastructureRows}from'../services/mapService';
 
@@ -19,7 +19,7 @@ import{prepareMapInfrastructureRows}from'../services/mapService';
 
 function ClientRequestForm({supports,onCreated}){const lock=useRef(false);const[requestError,setRequestError]=useState('');const[selected,setSelected]=useState(new Set()),[form,setForm]=useState({type:'Installation',priority:'Normale',description:''}),[confirming,setConfirming]=useState(false),[busy,setBusy]=useState(false),sites=selectedSiteCount(supports,selected);async function submit(){if(lock.current)return;lock.current=true;setBusy(true);setRequestError('');try{await createMultiSupportClientRequest({type:form.type,priority:form.priority,description:form.description,supportIds:[...selected]});setSelected(new Set());setConfirming(false);onCreated('Requête créée et supports validés par le serveur.')}catch(e){console.error('Client request failed',e);setRequestError('La requête n’a pas été enregistrée. Réessayez.')}finally{lock.current=false;setBusy(false)}}return <div className="client-request-form">{requestError&&<div role="alert">{requestError}</div>}<label>Type<select value={form.type} onChange={e=>setForm({...form,type:e.target.value})}><option>Installation</option><option>Retrait</option><option>Inspection</option><option>Réparation</option></select></label><label>Priorité<select value={form.priority} onChange={e=>setForm({...form,priority:e.target.value})}><option>Basse</option><option>Normale</option><option>Haute</option><option>Urgente</option></select></label><label>Description<textarea value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/></label><BulkSupportSelector rows={supports} selected={selected} onChange={setSelected}/>{confirming?<section className="client-request-summary"><h2>Confirmer la requête</h2><strong>Supports : {selected.size}</strong><span>Sites : {sites}</span><button type="button" onClick={()=>setConfirming(false)}>Modifier la sélection</button><button type="button" disabled={busy} onClick={submit}>Soumettre la requête</button></section>:<button type="button" disabled={!selected.size} onClick={()=>setConfirming(true)}>Vérifier avant soumission</button>}</div>}
 
-function ClientDashboard({identity,views,sections,onNavigate}){return <Module14Dashboard role={identity?.role} onNavigate={onNavigate} clientProjection={{identity,views,sections}}/>}
+function ClientDashboard({identity,views,sections,onNavigate,summary}){return <Module14Dashboard role={identity?.role} onNavigate={onNavigate} clientProjection={{identity,views,sections,loading:summary?.loading,error:summary?.error,refresh:summary?.refresh,refreshing:summary?.refreshing}}/>}
 
 export default function ClientPortal(props){
  const target=props.preview?.target_user||props.preview?.user||props.preview||props.profile||{};
@@ -29,27 +29,22 @@ export default function ClientPortal(props){
 }
 function ClientPortalSession({profile={},onLogout,preview=null,onClose}){
  const previewMode=Boolean(preview),previewUser=preview?.target_user||preview?.user||preview,previewSections=useMemo(()=>preview?.sections||{},[preview]);
+ const dashboard=useDashboardSummary([profile.auth_user_id||profile.id,profile.role,profile.client_id].join(':'),!previewMode);
  const requestId=useRef(0);
  const[summaries,setSummaries]=useState(previewSections);
  const[refreshing,setRefreshing]=useState(false);
  useEffect(()=>()=>{requestId.current+=1},[]);
  const[active,setActive]=useState('dashboard'),[identity,setIdentity]=useState(previewUser||null),[permission,setPermission]=useState(preview?{visible_tables:preview.visible_tables||previewUser?.visible_tables||[],visible_columns:preview.visible_columns||previewUser?.visible_columns||{}}:null),[sections,setSections]=useState(previewSections),[result,setResult]=useState({rows:[],total:0,page:1,page_size:25}),[loading,setLoading]=useState(!preview),[error,setError]=useState(''),[menu,setMenu]=useState(false),[mapRows,setMapRows]=useState(null),[navigationContext,setNavigationContext]=useState({});
  const resolved=useMemo(()=>resolveClientPortalViews(permission?.visible_tables),[permission]),available=resolved.views,currentView=available.find(view=>view.id===active);
- useEffect(()=>{if(preview)return;let live=true;(async()=>{
-  setLoading(true);
-  try{
-   const[id,views]=await Promise.all([getClientPortalIdentity(),getCurrentUserVisibleViews()]);
-   if(!live)return;
-   setIdentity(id);setPermission(views);setLoading(false);
-   const allowed=resolveClientPortalViews(views.visible_tables).views;
-   if(new URLSearchParams(window.location.search).get('section')==='reports'&&allowed.some(view=>view.id==='reports'))setActive('reports');
-   await Promise.all(allowed.filter(view=>view.id!=='requests').map(async view=>{
-    try{const summary=await listClientPortalSection(view.section,{page:1,pageSize:1,resolvePhotos:false});if(live)setSummaries(current=>({...current,[view.section]:summary}))}
-    catch(e){if(live){setSummaries(current=>({...current,[view.section]:{error:true}}));setError(e.message||'Indicateur indisponible.')}}
-   }));
-  }catch(e){if(live)setError(e.message||'Portail client indisponible.')}
-  finally{if(live)setLoading(false)}
- })();return()=>{live=false}},[previewMode]);
+ useEffect(()=>{
+  if(previewMode)return;
+  setLoading(dashboard.loading);
+  if(!dashboard.value)return;
+  const {identity:id,permission:views,sections:totals}=dashboard.value;
+  setIdentity(id);setPermission(views);setSummaries(totals);
+  const allowed=resolveClientPortalViews(views.visible_tables).views;
+  if(new URLSearchParams(window.location.search).get('section')==='reports'&&allowed.some(view=>view.id==='reports'))setActive('reports');
+ },[previewMode,dashboard.value,dashboard.loading]);
  const load=useCallback(async(view,page=1,pageSize=25,filters={})=>{
   if(!view)return;
   const id=++requestId.current;
@@ -60,7 +55,7 @@ function ClientPortalSession({profile={},onLogout,preview=null,onClose}){
    else next=navigationContext.supportId&&['photos','edt','history'].includes(view.section)?await listClientPortalSupportContext(view.section,navigationContext.supportId):view.id==='requests'?{rows:await listAllClientPortalSection('supports'),page:1,page_size:25,total:0}:await listClientPortalSection(view.section,{page,pageSize,filters});
    if(id!==requestId.current)return;
    setResult(next);setSections(current=>({...current,[view.section]:next}));
-   if(!navigationContext.supportId&&!Object.keys(filters).length)setSummaries(current=>({...current,[view.section]:next}));
+
   }catch(e){if(id===requestId.current)setError(e.message||'Données client indisponibles.');}
   finally{if(id===requestId.current)setRefreshing(false);}
  },[previewMode,previewSections,navigationContext.supportId]);
@@ -73,6 +68,6 @@ function ClientPortalSession({profile={},onLogout,preview=null,onClose}){
  const supportScope=useMemo(()=>{const source=previewMode?previewSections:sections;const rows=section=>(source[section]?.rows||[]).filter(row=>String(row.support_id)===String(navigationContext.supportId));return {photos:rows('photos'),history:rows('history'),issues:rows('issues'),inspections:[],workOrders:rows('work_orders'),edtLinks:rows('edt'),logs:[]}},[previewMode,previewSections,sections,navigationContext.supportId]);
  const exportDomainRows=async(view,filters={})=>projectClientExportRows(view,previewMode?(previewSections[view.section]?.rows||[]):await listAllClientPortalSection(view.section,{filters}),permission?.visible_columns);
  const loadAll=filters=>exportDomainRows(currentView,filters);
- let content;if(active==='dashboard')content=<ClientDashboard identity={identity} views={available} sections={summaries} onNavigate={navigate}/>;else if(active==='support360')content=<Support360Panel key={navigationContext.supportId} supportId={navigationContext.supportId} role={identity?.role||profile.role} scopedData={supportScope}/>;else if(active==='exports'){const domains=available.filter(view=>!['requests','members'].includes(view.id)).map(view=>({id:view.id,label:view.label,section:view.section}));content=<ExportsCenter title="Exports" domains={domains} loadRows={domain=>exportDomainRows(domain)}/>;}else if(mapRows)content=<><button className="client-back" onClick={()=>setMapRows(null)}><ArrowLeft/> Tableau</button><p>{prepareMapInfrastructureRows(mapRows).points.length.toLocaleString('fr-CA')} infrastructure(s) cartographiable(s) sur {mapRows.length.toLocaleString('fr-CA')} autorisée(s).</p><InteractiveMap dataStore={{Infrastructures:{rows:mapRows}}} role={identity?.role||profile.role} onNavigate={navigateFromMap}/></>;else if(currentView?.id==='requests')content=businessCapabilities(identity?.role||profile.role).createClientRequest?<ClientRequestForm supports={result.rows||[]} onCreated={setError}/>:<div className="client-empty">Accès refusé.</div>;else if(currentView)content=<ClientBusinessGrid readOnly={businessCapabilities(identity?.role||profile.role).readOnly} columnPermissions={permission?.visible_columns} key={currentView.id} refreshing={refreshing} scopeKey={[identity?.client_id||identity?.organization_id,identity?.role].join(':')} view={currentView} result={result} initialQuery={navigationContext.supportId||''} onLoad={loadCurrent} onLoadAll={loadAll} onOpenMap={openMap}/>;else content=<div className="client-empty">Aucune vue n’est actuellement autorisée.</div>;
+ let content;if(active==='dashboard')content=<ClientDashboard identity={identity} views={available} sections={summaries} onNavigate={navigate} summary={previewMode?null:dashboard}/>;else if(active==='support360')content=<Support360Panel key={navigationContext.supportId} supportId={navigationContext.supportId} role={identity?.role||profile.role} scopedData={supportScope}/>;else if(active==='exports'){const domains=available.filter(view=>!['requests','members'].includes(view.id)).map(view=>({id:view.id,label:view.label,section:view.section}));content=<ExportsCenter title="Exports" domains={domains} loadRows={domain=>exportDomainRows(domain)}/>;}else if(mapRows)content=<><button className="client-back" onClick={()=>setMapRows(null)}><ArrowLeft/> Tableau</button><p>{prepareMapInfrastructureRows(mapRows).points.length.toLocaleString('fr-CA')} infrastructure(s) cartographiable(s) sur {mapRows.length.toLocaleString('fr-CA')} autorisée(s).</p><InteractiveMap dataStore={{Infrastructures:{rows:mapRows}}} role={identity?.role||profile.role} onNavigate={navigateFromMap}/></>;else if(currentView?.id==='requests')content=businessCapabilities(identity?.role||profile.role).createClientRequest?<ClientRequestForm supports={result.rows||[]} onCreated={setError}/>:<div className="client-empty">Accès refusé.</div>;else if(currentView)content=<ClientBusinessGrid readOnly={businessCapabilities(identity?.role||profile.role).readOnly} columnPermissions={permission?.visible_columns} key={currentView.id} refreshing={refreshing} scopeKey={[identity?.client_id||identity?.organization_id,identity?.role].join(':')} view={currentView} result={result} initialQuery={navigationContext.supportId||''} onLoad={loadCurrent} onLoadAll={loadAll} onOpenMap={openMap}/>;else content=<div className="client-empty">Aucune vue n’est actuellement autorisée.</div>;
  return <div className={`client-portal${previewMode?' client-preview-mode':''}`}>{previewMode&&<div className="ca-preview-banner"><strong>APERÇU ADMINISTRATEUR — Vue simulée pour {identity?.nom||identity?.name||identity?.courriel}</strong><span>L’Admin reste connecté comme Administrateur.</span><button onClick={onClose}>Quitter l’aperçu</button></div>}<header><div className="client-brand"><BrandLogo priority/><span>Display Manager</span></div><button className="client-menu-button" onClick={()=>setMenu(!menu)}>{menu?<X/>:<Menu/>}<span>Menu</span></button><div className="client-profile"><span>{identity?.name||identity?.nom||profile.nom||profile.courriel}</span><small>{identity?.role||profile.role}</small>{!previewMode&&<button onClick={onLogout}><LogOut/> Déconnexion</button>}</div></header><div className="client-body"><aside className={menu?'open':''}><button className={active==='dashboard'?'active':''} onClick={()=>navigate('dashboard')}><BarChart3/>Sommaire</button>{available.some(view=>!['requests','members'].includes(view.id))&&<button className={active==='exports'?'active':''} onClick={()=>navigate('exports')}><Download/>Exports</button>}{available.map(view=>{const Icon=view.icon;return <button key={view.id} className={active===view.id?'active':''} onClick={()=>navigate(view.id)}><Icon/>{view.label}</button>})}</aside><main>{!['dashboard','exports'].includes(active)&&<div className="client-title"><div><span>{identity?.client_name||'Mon organisation'}</span><h1>{currentView?.label}</h1></div><span>{result.total||0} résultat(s)</span></div>}{resolved.unknown.length>0&&<div className="client-notice" role="alert">Configuration portail invalide : vue non implémentée.</div>}{error&&<div className="client-notice" role="alert">{error}</div>}{loading?<div className="client-loading">Chargement sécurisé…</div>:content}</main></div></div>;
 }

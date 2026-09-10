@@ -1,3 +1,4 @@
+import {dashboardSummary} from './dashboard-summary';
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import Dashboard from '../../src/components/Module14Dashboard';
@@ -9,6 +10,7 @@ window.testApi=(file,name,args)=>{
  if(name==='marketingRows'||name==='uniqueMarketingAssignments')return (args[0]||[]).filter(r=>r.business_context==='marketing');
  if(name==='operationalRows'||name==='uniqueOperationalAssignments')return (args[0]||[]).filter(r=>r.business_context==='operational_communication');
  window.calls.push({name,args});
+ if(name==='loadDashboardSummary')return window.dashboardHold?new Promise(resolve=>window.sectionPending.push(()=>resolve(window.dashboardResult||dashboardSummary))):Promise.resolve(window.dashboardResult||dashboardSummary);
  if(name==='countSupportPhotos')return Promise.resolve(12);
  if(name==='loadModule14Data')return Promise.resolve({campaigns:[marketing,operational],visuals:[],assignments:[],contextAvailable:true,available:true});
  if(name==='loadModule14OperationalKpis')return Promise.resolve({reportsCompleted:{status:'available',value:3},...Object.fromEntries(['terrain','reports','reportsSent','reportsToSend','reportsErrors'].map((k,i)=>[k,{status:'available',value:i+2}]))});

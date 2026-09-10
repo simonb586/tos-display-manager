@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {offlineBrowser} from './lib/offlineBrowser.mjs';
+const records=[];
+await offlineBrowser('scripts/fixtures/dashboard-p0-entry.jsx',async b=>{
+ const state=value=>b.waitFor(`document.querySelector('[data-dashboard-state]')?.dataset.dashboardState===${JSON.stringify(value)}`);
+ const values=()=>b.evaluate("Array.from(document.querySelectorAll('.executive-kpi strong')).map(e=>e.textContent)");
+ const click=()=>b.evaluate("document.querySelector('[aria-label=\"Actualiser le tableau de bord\"]').click()");
+ await b.evaluate('mount()');await b.waitFor('pending.length===1');
+ assert((await values()).every(value=>value==='Chargement…'));records.push('No fake zero before response');
+ await b.evaluate('finish()');await state('ready');const initial=await values();assert(initial.includes('12'));
+ await b.sleep(400);assert.equal(await b.evaluate('calls.length'),1);assert.equal(await b.evaluate('secondary.length'),1);
+ records.push('Single aggregate RPC; secondary activity deferred; unopened modules untouched');
+ await b.evaluate("for(let i=0;i<15;i++)document.querySelector('[aria-label=\"Actualiser le tableau de bord\"]').click()");
+ await b.waitFor('pending.length===2');assert.deepEqual(await values(),initial);assert.equal(await b.evaluate('calls.length'),2);records.push('Rapid refresh deduplicated; values preserved');
+ await b.evaluate('fail(1)');await state('error');assert.deepEqual(await values(),initial);records.push('Refresh error retains last valid values');
+ await click();await b.waitFor('pending.length===3');await b.evaluate('finish(2,{...result,kpis:{...result.kpis,photos:13}})');await state('ready');assert((await values()).includes('13'));records.push('Retry recovers actual values');
+ await b.evaluate("mount('scope-A')");await b.waitFor('pending.length===4');await b.evaluate("mount('scope-B',false)");await b.waitFor('pending.length===5');assert((await values()).every(v=>v==='Chargement…'));
+ await b.evaluate('finish(4,{...result,kpis:{...result.kpis,photos:0}})');await state('ready');await b.evaluate('finish(3)');await b.sleep(100);assert.equal(await b.evaluate("document.querySelector('[data-kpi=photos] strong').textContent"),'0');records.push('Scope switch clears old values; stale response cannot win; real zero rendered');
+ await b.evaluate("mount('timeout')");await b.waitFor('pending.length===6');await state('error');assert.equal(await b.evaluate('pending[5].signal.aborted'),true);assert(!(await values()).includes('Chargement…'));records.push('Never-resolving request times out and aborts within 4.5 s');
+ await click();await b.waitFor('pending.length===7');await b.evaluate('finish(6,{...result,kpis:{photos:0}})');await state('error');records.push('Missing essential KPI rejected instead of silently hidden');
+ await b.evaluate('client(2)');await b.waitFor('pending.length===8');await b.evaluate('finish(7,clientResult(2,6619))');await state('ready');assert((await values()).includes('6 619')||(await values()).some(v=>v.replace(/\s/g,'')==='6619'));
+ await b.evaluate('client(1)');await b.waitFor('pending.length===9');assert(!(await values()).some(v=>v.replace(/\s/g,'')==='6619'));await b.evaluate('finish(8,clientResult(1,0))');await state('ready');assert((await values()).every(v=>v==='0'));records.push('Client B never renders previous EXO values');
+ const count=await b.evaluate('calls.length');await b.sleep(1000);assert.equal(await b.evaluate('calls.length'),count);assert((await b.evaluate('calls')).every(c=>c.name==='portal_dashboard_summary'&&c.args.length===0));records.push('No fetch loop or frontend client argument');
+ assert.deepEqual(b.exceptions,[]);assert.deepEqual(b.consoleErrors,[]);
+},{realServices:['dashboardService.js'],supabaseSource:'export const supabaseConfigured=true;export const supabase={rpc:(...args)=>window.rpc(...args)};'});
+const source=fs.readFileSync('src/components/Module14Dashboard.jsx','utf8');assert(!/loadModule14Data|countSupportPhotos|loadManyTables/.test(source));records.push('Dashboard source cannot download tables to count');
+fs.writeFileSync('docs/stabilization-local/certification/remote/dashboard-p0/browser-contract.json',JSON.stringify({at:new Date().toISOString(),records,result:'PASS'},null,2));console.log(records.length+' P0 dashboard browser contracts PASS');

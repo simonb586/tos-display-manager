@@ -10,7 +10,7 @@ await offlineBrowser('scripts/fixtures/portal-parity-entry.jsx',async({evaluate,
   await waitFor(view.id==='requests'?"Boolean(document.querySelector('.client-request-form'))":"Boolean(document.querySelector('.client-business-grid, .client-grid'))||Boolean(document.querySelector('table'))");
   assert.equal(await evaluate("document.querySelector('main').textContent.includes('SUP-'+portalFixture.client)"),true,'scoped row rendered');
   assert.equal(await evaluate(`document.querySelector('main').textContent.includes('SUP-${client===2?9:2}')`),false,'other fixture scope absent');
-  assert.equal(await evaluate("portalFixture.calls.every(c=>['getClientPortalIdentity','getCurrentUserVisibleViews','listClientPortalSection','listAllClientPortalSection'].includes(c.name))"),true,'no unscoped Admin reader');
+  assert.equal(await evaluate("portalFixture.calls.every(c=>['loadDashboardSummary','getClientPortalIdentity','getCurrentUserVisibleViews','listClientPortalSection','listAllClientPortalSection'].includes(c.name))"),true,'no unscoped Admin reader');
   if(preview)assert.equal(await evaluate('portalFixture.calls.length'),0,'preview uses scoped payload without client or admin fetching');
   records.push({viewId:view.id,role,client,preview,RESULT:'PASS_LOCAL_BROWSER',TESTS:'permission navigation|real portal render|scoped row|other client absent|no Admin loader'});
  }

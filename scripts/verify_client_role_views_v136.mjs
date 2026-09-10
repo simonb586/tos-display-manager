@@ -11,7 +11,7 @@ assert.ok(!client.views.some(x=>x.id==='campaigns'),'Campagnes retirée sans cod
 assert.equal(resolveClientPortalViews([]).views.length,0,'aucune vue par défaut');
 assert.deepEqual(resolveClientPortalViews(['Vue future']).unknown,['Vue future']);
 assert.deepEqual(resolveClientPortalViews(['Répertoire des affiches','Centres d’information','C.I. avec enjeux','Liste des arrêts','Voitures / trains']).unknown,[]);
-assert.match(portal,/getCurrentUserVisibleViews/);
+assert.match(portal,/useDashboardSummary/);assert.match(portal,/setPermission\(views\)/);assert.match(portal,/resolveClientPortalViews\(views.visible_tables\)/);
 assert.match(portal,/Aucune vue n’est actuellement autorisée/);
 assert.ok(!portal.includes('VIEW_NOT_IMPLEMENTED_FOR_CLIENT_PORTAL'),'ancien marqueur supprimé du portail client');
 assert.ok(!portal.includes("const sections="),'ancien routage fixe supprimé');

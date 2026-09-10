@@ -97,7 +97,8 @@
     "test:stabilization": "node ./scripts/verify_stabilization_guards.mjs && node ./scripts/verify_stabilization_edge.mjs && node ./scripts/verify_stabilization_cache.mjs && node ./scripts/verify_admin_view_registry.mjs && node ./scripts/verify_business_column_contracts.mjs",
     "test:stabilization-browser": "node ./scripts/verify_stabilization_browser.mjs",
     "test:user-form-contracts": "node ./scripts/verify_user_form_contracts.mjs",
-    "test:local-closure": "node ./scripts/verify_local_closure.mjs"
+    "test:local-closure": "node ./scripts/verify_local_closure.mjs",
+    "test:dashboard-p0": "node scripts/verify_dashboard_p0.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.52.0",
