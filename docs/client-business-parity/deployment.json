@@ -1,0 +1,22 @@
+{
+  "at": "2026-09-11T03:23:15.959Z",
+  "sourceCommit": "7fc1c8f",
+  "branch": "release/v1.3.3",
+  "deploymentId": "dpl_HQZeCgjCynyRf19myETnGW95Pa4D",
+  "url": "https://portail.groupetos.com",
+  "deploymentUrl": "https://tos-display-manager-q93ntcruc-tos3.vercel.app",
+  "state": "READY",
+  "migrations": [
+    "20260911024938",
+    "20260911025750",
+    "20260911030201",
+    "20260911030456",
+    "20260911030921"
+  ],
+  "checks": {
+    "fullCheck": "PASS",
+    "localSql": "PASS",
+    "browserFixtures": "PASS",
+    "productionBrowser": "RUNNING"
+  }
+}

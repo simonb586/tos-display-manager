@@ -1,0 +1,117 @@
+{
+  "at": "2026-09-11T03:25:21.252Z",
+  "status": "PASS",
+  "records": [
+    {
+      "profile": 25,
+      "role": "Client-Admin",
+      "previewTarget": null,
+      "previewTargets": [],
+      "rows": "1–50 sur 6 6190 sélectionnée(s)",
+      "map": "PASS",
+      "editVisibility": "PASS",
+      "views": [
+        {
+          "view": "Campagnes",
+          "status": "PASS"
+        },
+        {
+          "view": "Photos",
+          "status": "PASS"
+        },
+        {
+          "view": "Nouvelle requête",
+          "status": "PASS"
+        },
+        {
+          "view": "Historique",
+          "status": "PASS"
+        },
+        {
+          "view": "EDT / Progression",
+          "status": "PASS"
+        },
+        {
+          "view": "Enjeux",
+          "status": "PASS"
+        },
+        {
+          "view": "Communications opérationnelles",
+          "status": "PASS"
+        },
+        {
+          "view": "Répertoire des affiches",
+          "status": "PASS"
+        },
+        {
+          "view": "Centres d'information",
+          "status": "PASS"
+        },
+        {
+          "view": "C.I. avec enjeux",
+          "status": "PASS"
+        },
+        {
+          "view": "Liste des arrêts",
+          "status": "PASS"
+        },
+        {
+          "view": "Voitures / trains",
+          "status": "PASS"
+        }
+      ],
+      "returnToAdmin": null
+    },
+    {
+      "profile": 33,
+      "role": "Client",
+      "previewTarget": null,
+      "previewTargets": [],
+      "rows": "1–50 sur 6 6190 sélectionnée(s)",
+      "map": "PASS",
+      "editVisibility": "PASS",
+      "views": [
+        {
+          "view": "Campagnes",
+          "status": "PASS"
+        },
+        {
+          "view": "Photos",
+          "status": "PASS"
+        },
+        {
+          "view": "Nouvelle requête",
+          "status": "PASS"
+        }
+      ],
+      "returnToAdmin": null
+    },
+    {
+      "profile": 11,
+      "role": "Installateur",
+      "previewTarget": null,
+      "previewTargets": [],
+      "rows": "1–50 sur 6 6190 sélectionnée(s)",
+      "map": "PASS",
+      "editVisibility": "PASS",
+      "views": [],
+      "returnToAdmin": null
+    },
+    {
+      "profile": 3,
+      "role": "Administrateur",
+      "previewTarget": 25,
+      "previewTargets": [
+        25,
+        32,
+        11,
+        1
+      ],
+      "rows": "1–50 sur 6 6190 sélectionnée(s)",
+      "map": "PASS",
+      "editVisibility": "PASS",
+      "views": [],
+      "returnToAdmin": "PASS"
+    }
+  ]
+}

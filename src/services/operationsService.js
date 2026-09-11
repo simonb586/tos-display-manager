@@ -76,9 +76,11 @@ export async function convertPhaseToWorkOrder(phaseId) {
 
 export async function updateEdt(id, patch) {
   ensureSupabase();
+  // These two inputs create a removal phase; they are not EDT table columns.
+  const { creer_retrait, date_retrait_prevue, ...fields } = patch;
   const { data, error } = await supabase
     .from('suivi_des_edt')
-    .update({ ...patch, updated_at: new Date().toISOString() })
+    .update({ ...fields, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
     .single();

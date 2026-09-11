@@ -1,0 +1,86 @@
+{
+  "recordedAt": "2026-09-11T03:23:55.504Z",
+  "method": "Live SQL under authenticated Maryl?ne claims; all mutations followed by ROLLBACK",
+  "profile": 25,
+  "client": 2,
+  "views": [
+    {
+      "view": "Infrastructures",
+      "total": 6619,
+      "updateRows": 1,
+      "status": "PASS"
+    },
+    {
+      "view": "R?pertoire des affiches",
+      "total": 182,
+      "updateRows": 1,
+      "status": "PASS"
+    },
+    {
+      "view": "Centres d?information",
+      "total": 89,
+      "updateRows": 1,
+      "status": "PASS"
+    },
+    {
+      "view": "C.I. avec enjeux",
+      "total": 16,
+      "updateRows": 1,
+      "status": "PASS"
+    },
+    {
+      "view": "Liste des arr?ts",
+      "total": 4309,
+      "updateRows": 1,
+      "status": "PASS"
+    },
+    {
+      "view": "Voitures / trains",
+      "total": 224,
+      "updateRows": 1,
+      "status": "PASS"
+    },
+    {
+      "view": "Photos",
+      "total": 1,
+      "updateRows": 1,
+      "status": "PASS"
+    },
+    {
+      "view": "Historique des campagnes",
+      "total": 1,
+      "updateRows": 1,
+      "status": "PASS"
+    },
+    {
+      "view": "Suivi des EDT",
+      "total": 167,
+      "updateRows": 1,
+      "status": "PASS"
+    },
+    {
+      "view": "Campagnes ma?tres",
+      "total": 14,
+      "updateRows": 1,
+      "status": "PASS"
+    },
+    {
+      "view": "Communications op?rationnelles",
+      "total": 9,
+      "updateRows": 1,
+      "status": "PASS"
+    }
+  ],
+  "actualCommentEdit": "PASS_ROLLBACK",
+  "requestSubmit": {
+    "profiles": [
+      25,
+      33
+    ],
+    "status": "PASS_ROLLBACK"
+  },
+  "localCrossClientEdit": "REFUSED",
+  "localCrossClientRequest": "REFUSED",
+  "dataDeletion": false,
+  "fullEdtFormUpdate": "PASS_ROLLBACK"
+}

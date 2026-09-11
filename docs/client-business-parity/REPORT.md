@@ -67,8 +67,10 @@ Pour vérifier une personne : ouvrir **Voir en tant que** dans le menu Admin, ch
 - `npm run test:business-parity` : navigateur avec fixtures contrôlées ; colonnes identiques, grille et fiche, édition/enregistrement/rafraîchissement, double-clic, aller-retour carte avec page conservée, catégories et KPI, soumission des deux rôles.
 - `scripts/sql/verify_business_parity.sql` : PostgreSQL local, scénarios propres et interclient, propriétaire protégé, Client en lecture seule, requêtes des deux rôles, usurpation d’aperçu et écritures d’aperçu refusées. Chaque scénario est annulé.
 - PostgreSQL réel : modification temporaire d’un commentaire EXO avec le profil Marylène, UPDATE contrôlé sur onze vues, créations de requêtes par les profils 25 et 33, puis ROLLBACK. Aucun contenu de test métier n’est conservé.
+- Enregistrement EDT : les deux paramètres de création de retrait sont exclus du payload UPDATE, car ils ne sont pas des colonnes persistantes. Régression du service réel PASS, et UPDATE de tous les champs persistants sous l’identité Marylène PASS dans une transaction annulée.
 - [API réelle](live-api.json) : comparaison exacte identité/permissions/KPI/lignes entre session réelle et aperçu pour Client, Client-Admin, Client B et Installateur ; faux en-tête Admin et mutations refusés.
 - [Navigateur contrôlé](browser.json) et [application locale avec backend réel](application-local.json).
+- [Contrôles SQL réels](database-validation.json), [application de production](application-production.json) et [fichiers de la livraison](FILES.md).
 - Le harnais SQL local `verify_business_parity_local.mjs` réutilise les snapshots de schéma de certification déjà présents dans cet espace et un runtime PGlite local. Ces prérequis ne font pas partie de l’installation courante de l’application. Le scénario SQL est livré séparément.
 - Les harnais HTTP/navigateur distants utilisent `SUPABASE_ACCESS_TOKEN` ou l’adaptateur local déjà présent. Ils ouvrent des sessions de test sans envoyer de courriel, puis les ferment. `TDM_BROWSER_PATH` permet de préciser Chromium/Edge. Aucun jeton n’est enregistré dans les preuves.
 

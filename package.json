@@ -99,7 +99,7 @@
     "test:user-form-contracts": "node ./scripts/verify_user_form_contracts.mjs",
     "test:local-closure": "node ./scripts/verify_local_closure.mjs",
     "test:dashboard-p0": "node scripts/verify_dashboard_p0.mjs",
-    "test:business-parity": "node scripts/verify_user_view_preview_transport.mjs && node scripts/verify_business_parity_browser.mjs"
+    "test:business-parity": "node scripts/verify_user_view_preview_transport.mjs && node scripts/verify_business_parity_browser.mjs && node scripts/verify_edt_update_payload.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.52.0",

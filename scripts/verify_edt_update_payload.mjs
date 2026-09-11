@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {build} from 'esbuild';
+const columns=new Set(['id','nom','client_id','campagne_id','date_debut_prevue','description','updated_at']);
+let sent;
+globalThis.parityEdtClient={from(table){assert.equal(table,'suivi_des_edt');return {update(payload){sent=payload;return this},eq(key,id){assert.equal(key,'id');assert.equal(id,42);return this},select(){return this},async single(){const unknown=Object.keys(sent).filter(k=>!columns.has(k));return unknown.length?{error:{message:'Unknown columns: '+unknown.join(',')}}:{data:sent,error:null}}}}};
+const bundle=await build({stdin:{contents:"export {updateEdt} from './src/services/operationsService.js';",resolveDir:process.cwd()},bundle:true,write:false,format:'esm',platform:'node',plugins:[{name:'database-contract',setup(b){b.onResolve({filter:/\/supabaseClient(?:\.js)?$/},()=>({path:'database',namespace:'fixture'}));b.onLoad({filter:/.*/,namespace:'fixture'},()=>({contents:'export const supabaseConfigured=true;export const supabase=globalThis.parityEdtClient;'}));}}]});
+const {updateEdt}=await import('data:text/javascript;base64,'+Buffer.from(bundle.outputFiles[0].contents).toString('base64'));
+const result=await updateEdt(42,{id:42,nom:'EDT modifié',client_id:2,campagne_id:7,date_debut_prevue:'2026-09-11',description:'Validation',creer_retrait:false,date_retrait_prevue:''});
+assert.equal(result.nom,'EDT modifié');assert.equal(result.client_id,2);assert.equal(result.campagne_id,7);assert.equal(result.date_debut_prevue,'2026-09-11');assert.equal(Number.isNaN(Date.parse(result.updated_at)),false);
+delete globalThis.parityEdtClient;
+console.log('EDT edit uses persisted columns; removal-phase creation inputs excluded PASS');
