@@ -1,0 +1,61 @@
+{
+  "at": "2026-09-11T03:10:39.270Z",
+  "records": [
+    {
+      "role": "Client",
+      "preview": false,
+      "columns": "PASS",
+      "editButton": "PASS",
+      "mapRoundTrip": "PASS",
+      "pagePreserved": "PASS",
+      "detail": "PASS"
+    },
+    {
+      "role": "Client",
+      "preview": true,
+      "columns": "PASS",
+      "editButton": "PASS",
+      "mapRoundTrip": "PASS",
+      "pagePreserved": "PASS",
+      "detail": "PASS"
+    },
+    {
+      "editSaveRefresh": "PASS",
+      "doubleClickOneMutation": "PASS"
+    },
+    {
+      "role": "Client-Admin",
+      "preview": false,
+      "columns": "PASS",
+      "editButton": "PASS",
+      "mapRoundTrip": "PASS",
+      "pagePreserved": "PASS",
+      "detail": "PASS"
+    },
+    {
+      "role": "Client-Admin",
+      "preview": true,
+      "columns": "PASS",
+      "editButton": "PASS",
+      "mapRoundTrip": "PASS",
+      "pagePreserved": "PASS",
+      "detail": "PASS"
+    },
+    {
+      "role": "Client",
+      "requestSubmit": "PASS",
+      "doubleClickOneRequest": "PASS"
+    },
+    {
+      "role": "Client-Admin",
+      "requestSubmit": "PASS",
+      "doubleClickOneRequest": "PASS"
+    },
+    {
+      "dashboardCategories": "PASS",
+      "extraCategories": 0,
+      "labels": "PASS",
+      "kpis": "PASS"
+    }
+  ]
+}

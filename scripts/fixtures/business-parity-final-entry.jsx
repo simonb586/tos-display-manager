@@ -1,0 +1,34 @@
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import ClientPortal from '../../src/components/ClientPortal';
+import BusinessTable from '../../src/components/BusinessTable';
+import Dashboard from '../../src/components/Module14Dashboard';
+import {CLIENT_BUSINESS_ROUTES} from '../../src/lib/clientBusinessRoutes';
+const root=createRoot(document.getElementById('root'));let serial=0;
+window.confirm=()=>true;
+window.fixture={calls:[],role:'Client',client:2,view:'infrastructures'};
+const rows=()=>Array.from({length:120},(_,i)=>({id:i+1,client_id:fixture.client,support_id:`SUP-${fixture.client}-${i+1}`,site:i<70?'Nord':'Sud',commentaires:'Initial',latitude:45.5+i/10000,longitude:-73.5,...fixture.overrides?.[i+1]}));
+const permission=()=>({visible_tables:[fixture.view==='requests'?'Bons de travail':CLIENT_BUSINESS_ROUTES[fixture.view]||'Infrastructures'],visible_columns:{},capabilities:fixture.role==='Client-Admin'?{'*':{update:true}}:{}});
+const summary=()=>({version:1,identity:{user_id:'user-'+fixture.client,profile_id:fixture.client,client_id:fixture.client,role:fixture.role,client_name:fixture.client===2?'EXO':'Client B'},permission:permission(),kpis:{infrastructures_total:120,infrastructures_active:120,missing_photos:120},sections:{supports:{total:120}}});
+window.testApi=(file,name,args)=>{
+ fixture.calls.push({name,args});
+ if(name==='loadDashboardSummary'||name==='loadPreviewSummary')return Promise.resolve(summary());
+ if(name==='loadBusinessRows')return Promise.resolve({rows:rows(),total:120});
+ if(name==='listClientPortalSection')return Promise.resolve({rows:rows(),total:120,page:1,page_size:25});
+ if(name==='listAllClientPortalSection')return Promise.resolve(rows());
+ if(name==='createMultiSupportClientRequest')return new Promise(resolve=>setTimeout(()=>resolve({request_id:1,support_count:args[0].supportIds.length}),30));
+ if(name==='loadAutomaticFieldRules')return Promise.resolve({});
+ if(name==='primaryKeyFor')return {field:'id',value:args[1].id};
+ if(name==='inferInputType')return typeof args[0]==='number'?'number':'text';
+ if(name==='updateUniversalRow')return new Promise(resolve=>setTimeout(()=>{fixture.overrides={...fixture.overrides,[args[0].originalRow.id]:args[0].changes};resolve({...args[0].originalRow,...args[0].changes})},40));
+ if(name==='updateUniversalRows')return Promise.resolve(args[0].entries.map(e=>({...e.originalRow,...e.changes})));
+ if(name==='loadSupport360'||name==='loadBusinessContext')return Promise.resolve({photos:[],history:[],issues:[],inspections:[],workOrders:[],edtLinks:[],logs:[]});
+ if(name==='listSupportPhotos'||name==='listRecentBusinessActivity')return Promise.resolve([]);
+ throw Error('Unconfigured service '+name);
+};
+window.mount=(role='Client',client=2,view='infrastructures',preview=false)=>{
+ fixture={calls:[],role,client,view};
+ const profile={id:client,client_id:client,role,nom:role};
+ root.render(role==='Administrateur'&&!preview?<BusinessTable key={++serial} name={CLIENT_BUSINESS_ROUTES[view]} dataStore={{[CLIENT_BUSINESS_ROUTES[view]]:{rows:rows()}}} role={role} rolePermission={permission()} onRowsUpdated={()=>{}}/>:<ClientPortal key={++serial} profile={profile} preview={preview?{target_user:profile}:null} onClose={()=>{}}/>);
+};
+window.mountDashboard=(role='Administrateur')=>{fixture={calls:[],role,client:2,view:'infrastructures'};root.render(<Dashboard key={++serial} role={role} onNavigate={()=>{}} {...(role!=='Administrateur'?{clientProjection:{identity:summary().identity,views:[],kpis:summary().kpis}}:{})}/>);};

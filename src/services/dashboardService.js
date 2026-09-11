@@ -18,7 +18,8 @@ export function validateDashboardSummary(data) {
       .some(view => !Number.isSafeInteger(data.sections[view.section]?.total))) {
       throw new Error('Résumé client incomplet. Réessayez.');
     }
-  } else {
+  }
+  {
     const groups = [
       [['Infrastructures'], ['infrastructures_total', 'infrastructures_active', 'missing_photos']],
       [['Campagnes maîtres', 'Campagnes et visuels', 'Campagnes'], ['marketing_total', 'marketing_active', 'marketing_soon', 'marketing_places', 'marketing_visuals']],

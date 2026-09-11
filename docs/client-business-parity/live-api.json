@@ -1,0 +1,48 @@
+{
+  "at": "2026-09-11T03:02:39.772Z",
+  "status": "PASS",
+  "records": [
+    {
+      "profile": 25,
+      "role": "Client-Admin",
+      "client": 2,
+      "infra": 6619,
+      "identity": "PASS",
+      "kpis": "PASS",
+      "rows": "PASS",
+      "previewWrites": "REFUSED"
+    },
+    {
+      "profile": 32,
+      "role": "Client",
+      "client": 2,
+      "infra": 6619,
+      "identity": "PASS",
+      "kpis": "PASS",
+      "rows": "PASS",
+      "previewWrites": "REFUSED"
+    },
+    {
+      "profile": 37,
+      "role": "Client",
+      "client": 1,
+      "infra": 0,
+      "identity": "PASS",
+      "kpis": "PASS",
+      "rows": "PASS",
+      "previewWrites": "REFUSED"
+    },
+    {
+      "profile": 11,
+      "role": "Installateur",
+      "client": null,
+      "infra": 6619,
+      "identity": "PASS",
+      "kpis": "PASS",
+      "rows": "PASS",
+      "previewWrites": "REFUSED"
+    }
+  ],
+  "forgedPreview": "REFUSED",
+  "adminIdentityPreserved": true
+}

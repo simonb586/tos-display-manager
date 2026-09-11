@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const main = fs.readFileSync('src/main.jsx', 'utf8');
+const main = (fs.readFileSync('src/main.jsx', 'utf8')+'\n'+fs.readFileSync('src/components/BusinessTable.jsx','utf8')+'\n'+fs.readFileSync('src/lib/businessTableConfig.js','utf8'));
 const map = fs.readFileSync('src/components/InteractiveMap.jsx', 'utf8');
 const automation = fs.readFileSync('src/features/v13/automation-assistant.css', 'utf8');
 

@@ -15,4 +15,4 @@ window.finish=(index=0,value=window.result)=>window.pending[index].resolve({data
 window.fail=index=>window.pending[index].resolve({data:null,error:{message:'Unavailable'}});
 window.mount=(scope='admin',remount=true)=>{if(remount)serial++;root.render(<Dashboard key={serial} scopeKey={scope} role="Administrateur" onNavigate={()=>{}}/>)};
 window.client=clientId=>{root.render(<Portal key={++serial} profile={{id:clientId,role:'Client',client_id:clientId}}/>)};
-window.clientResult=(clientId,total)=>({...dashboardSummary,identity:{user_id:'client-'+clientId,role:'Client',client_id:clientId},permission:{visible_tables:['Infrastructures','Photos']},sections:{supports:{total},photos:{total}},kpis:{}});
+window.clientResult=(clientId,total)=>({...dashboardSummary,identity:{user_id:'client-'+clientId,role:'Client',client_id:clientId},permission:{visible_tables:['Infrastructures','Photos']},sections:{supports:{total},photos:{total}},kpis:{infrastructures_total:total,infrastructures_active:total,missing_photos:total,photos:total}});

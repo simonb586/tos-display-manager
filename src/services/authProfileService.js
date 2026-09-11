@@ -1,7 +1,9 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
+import {getUserViewPreview} from '../lib/userViewPreview';
 
 export async function getCurrentProfile(session) {
   if (!supabaseConfigured || !supabase || !session?.user) return null;
+  if(getUserViewPreview())return getUserViewPreview();
 
   const { data, error } = await supabase
     .from('utilisateurs')

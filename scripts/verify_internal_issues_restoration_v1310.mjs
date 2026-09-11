@@ -21,7 +21,7 @@ assert.equal(mergeInternalIssues(historical,terrain).length,112,'104 historiques
 assert.equal(mergeInternalIssues(historical,[terrain[0],terrain[0]]).filter(row=>row.source==='Terrain').length,1,'doublon métier strict non artificiel');
 assert.equal(normalizeTerrainIssue(terrain[0]).source,'Terrain','badge source Terrain');
 
-const main=fs.readFileSync('src/main.jsx','utf8');
+const main=(fs.readFileSync('src/main.jsx','utf8')+'\n'+fs.readFileSync('src/components/BusinessTable.jsx','utf8')+'\n'+fs.readFileSync('src/lib/businessTableConfig.js','utf8'));
 const service=fs.readFileSync('src/services/internalIssuesService.js','utf8');
 assert.match(main,/table: 'enjeux_des_cadres_et_supports', loader: loadInternalIssues/,'source historique principale et fusion logique');
 assert.match(main,/readOnly: true/,'grille logique protégée contre les écritures multi-tables');

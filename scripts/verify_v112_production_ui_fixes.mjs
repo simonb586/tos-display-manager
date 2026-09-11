@@ -6,7 +6,7 @@ import { transform } from 'esbuild';
 
 let checks = 0;
 const verify = (condition, message) => { assert.ok(condition, message); checks += 1; };
-const main = await readFile(new URL('../src/main.jsx', import.meta.url), 'utf8');
+const main = (await Promise.all(['../src/main.jsx','../src/components/BusinessTable.jsx','../src/lib/businessTableConfig.js'].map(path=>readFile(new URL(path,import.meta.url),'utf8')))).join('\n');
 const styles = await readFile(new URL('../src/styles.css', import.meta.url), 'utf8');
 const terrainStatus = await readFile(new URL('../src/services/terrainSyncStatus.js', import.meta.url), 'utf8');
 const paginationSource = await readFile(new URL('../src/components/GridPagination.jsx', import.meta.url), 'utf8');

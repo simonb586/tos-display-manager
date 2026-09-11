@@ -1,3 +1,6 @@
+import {getUserViewPreview,setUserViewPreview,userViewSession} from './lib/userViewPreview';
+import UserViewPreview from './components/UserViewPreview';
+import TableView, {Detail} from './components/BusinessTable';
 import PhotoImage from './components/PhotoImage';
 import {businessColumns as getCols,businessColumnLabel as columnLabel} from './lib/businessColumns';
 import {knownBusinessRoute} from './lib/businessViewRegistry';
@@ -104,23 +107,7 @@ function ScreenFallback() {
   return <div className="screen-fallback" role="status" aria-live="polite"><span aria-hidden="true"/>Chargement du module…</div>;
 }
 
-const tableConfig = {
-  Infrastructures: { table: 'infrastructures', fallback: () => import('./data/infrastructures.json').then(module => module.default), idField: 'support_id', labelField: 'emplacement_visibilite' },
-  'Répertoire des affiches': { table: 'repertoire_des_affiches', fallback: () => import('./data/repertoire_des_affiches.json').then(module => module.default) },
-  'Communications opérationnelles': { table: 'communications_operationnelles', fallback: () => import('./data/communications_operationnelles.json').then(module => module.default) },
-  'Enjeux des cadres et supports': { table: 'enjeux_des_cadres_et_supports', loader: loadInternalIssues, cacheTables: ['enjeux_des_cadres_et_supports','enjeux_terrain'], readOnly: true, fallback: () => import('./data/enjeux_des_cadres_et_supports.json').then(module => module.default) },
-  "Centres d’information": { table: 'centres_dinformation', fallback: () => import('./data/centres_dinformation.json').then(module => module.default) },
-  'C.I. avec enjeux': { table: 'ci_avec_enjeux', fallback: () => import('./data/c_i_avec_enjeux.json').then(module => module.default) },
-  'Liste des arrêts': { table: 'liste_des_arrets', fallback: () => import('./data/liste_des_arrets.json').then(module => module.default), idField: 'no_arret', labelField: 'emplacement_visibilite' },
-  'Voitures / trains': { table: 'voitures_trains', fallback: () => import('./data/voitures_trains.json').then(module => module.default) },
-  Photos: { table: 'photos', fallback: () => import('./data/photos.json').then(module => module.default) },
-  'Bons de travail': { table: 'bons_de_travail', fallback: () => import('./data/bons_de_travail.json').then(module => module.default) },
-  'Historique des campagnes': { table: 'historique_des_campagnes', fallback: () => import('./data/historique_des_campagnes.json').then(module => module.default) },
-  'Suivi des EDT': { table: 'suivi_des_edt', fallback: () => import('./data/suivi_des_edt.json').then(module => module.default) },
-  Utilisateurs: { table: 'utilisateurs', fallback: () => import('./data/utilisateurs.json').then(module => module.default) },
-  Clients: { table: 'clients', fallback: () => import('./data/clients.json').then(module => module.default) },
-  'Journal des événements': { table: 'journal_des_evenements', fallback: () => import('./data/journal_des_evenements.json').then(module => module.default) }
-};
+import {tableConfig} from './lib/businessTableConfig';
 
 const STARTUP_TABLES = [
   'Infrastructures', 'Liste des arrêts', 'Suivi des EDT',
@@ -245,286 +232,6 @@ function ExecutiveDashboard({setActive,dataStore,terrainSyncStatus,role,rolePerm
   </div>;
 }
 
-function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpdated, initialSupportId='', initialGridContext=null }) {
-  const rows = getRows(dataStore, name);
-  const config = tableConfig[name];
-  const allCols = getCols(rows, name);
-  const permittedCols = columnsForTable(rolePermission, name, allCols);
-  const gridSettings = useDataGridSettings(`table-${name}`, permittedCols);
-  const cols = gridSettings.columns;
-  const restoredContext = name === 'Infrastructures' && initialGridContext?.sourceView === 'infrastructures' ? initialGridContext : null;
-  const [query, setQuery] = useState(restoredContext?.search || '');
-  const [filters, setFilters] = useState(restoredContext?.filters || {});
-  const [sortState, setSortState] = useState(() => {
-    if (restoredContext?.sort) return restoredContext.sort;
-    try {
-      const stored=JSON.parse(sessionStorage.getItem(`tdm-grid-sort:${name}`));
-      if(stored)return stored;
-    } catch {
-      // Revenir au classement métier par défaut.
-    }
-    const column=defaultSortColumnForTable(name,cols);
-    return column?defaultSortForColumn(rows,column):null;
-  });
-  const [selected, setSelected] = useState(null);
-  const [gridEditing, setGridEditing] = useState(false);
-  const [drafts, setDrafts] = useState({});
-  const [saving, setSaving] = useState(false);
-  const gridSaveActive = useRef(false);
-  const gridExportActive = useRef(false);
-  const [exporting, setExporting] = useState(false);
-  async function runGridExport(action) {
-    if (gridExportActive.current) return;
-    gridExportActive.current = true;
-    setExporting(true);
-    setMessage('');
-    try { await action(); }
-    catch (error) { setMessage(friendlyError(error, 'Export impossible. Réessayez.')); }
-    finally { gridExportActive.current = false; setExporting(false); }
-  }
-  const [message, setMessage] = useState('');
-  const [page, setPage] = useState(restoredContext?.page || 1);
-  const [pageSize, setPageSize] = useState(restoredContext?.pageSize || 50);
-  const [selectedRows, setSelectedRows] = useState(()=>new Set());
-
-  useEffect(() => {
-    if (!restoredContext?.visibleColumns) return;
-    gridSettings.setPreferences(restoredContext.visibleColumns);
-  }, []);
-
-  useEffect(() => {
-    if (!restoredContext || typeof restoredContext.scrollY !== 'number') return;
-    const timer = window.setTimeout(() => window.scrollTo({ top: restoredContext.scrollY, behavior: 'auto' }), 0);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  useEffect(()=>{
-    if(name!=='Infrastructures'||!initialSupportId)return;
-    setSelected(rows.find(row=>String(row.support_id||row['Support ID']||'')===String(initialSupportId))||null);
-  },[name,initialSupportId,rows]);
-
-  const filtered = useMemo(() => rows
-    .filter(r => strictMatches(r, query, cols))
-    .filter(r => matchesGridFilters(r, filters)), [rows, query, filters, cols]);
-  const sorted = useMemo(() => sortRows(filtered, sortState), [filtered, sortState]);
-  const sortedComplete = useMemo(() => sortRows(rows, sortState), [rows, sortState]);
-  const pageCount = Math.max(1,Math.ceil(sorted.length/pageSize));
-  const currentPage = Math.min(page,pageCount);
-  const shown = sorted.slice((currentPage-1)*pageSize,currentPage*pageSize);
-  const selectedFiltered = sorted.filter((row,index)=>selectedRows.has(rowToken(row,index)));
-  const hasMapColumn = name === 'Infrastructures';
-  const canEdit = role === 'Administrateur' && !config.readOnly;
-  const exportLabels = Object.fromEntries(cols.map(column=>[column,columnLabel(name,column)]));
-  const exportOptions = {moduleName:name,labels:exportLabels,filters:{recherche:query,...Object.fromEntries(Object.entries(filters).map(([key,value])=>[key,value.join(' | ')]))},sortState};
-  const activeFilterCount = Object.values(filters).filter(value => value?.length).length;
-
-  useEffect(() => {
-    const key = `tdm-grid-sort:${name}`;
-    if (sortState) sessionStorage.setItem(key, JSON.stringify(sortState));
-    else sessionStorage.removeItem(key);
-  }, [name, sortState]);
-
-  useEffect(()=>setPage(1),[query,filters,sortState,pageSize,name]);
-  useEffect(()=>{
-    if (restoredContext?.page) setPage(restoredContext.page);
-  },[]);
-
-  function infrastructureNavigationContext(supportId) {
-    return {
-      sourceView: 'infrastructures',
-      page: currentPage,
-      pageSize,
-      filters,
-      search: query,
-      sort: sortState,
-      visibleColumns: gridSettings.preferences,
-      scrollY: window.scrollY,
-      supportId: String(supportId || '')
-    };
-  }
-
-  function rowToken(row, index) {
-    try {
-      const key = primaryKeyFor(config, row);
-      return `${key.field}:${key.value}`;
-    } catch {
-      return `row:${index}`;
-    }
-  }
-
-  function changeCell(row, index, column, value) {
-    const token = rowToken(row, index);
-    setDrafts(current => ({
-      ...current,
-      [token]: {
-        originalRow: row,
-        changes: {
-          ...(current[token]?.changes || {}),
-          [column]: value
-        }
-      }
-    }));
-  }
-
-  async function saveGrid() {
-    if (!canEdit || gridSaveActive.current) return;
-    const entries = Object.values(drafts);
-    if (!entries.length) {
-      setGridEditing(false);
-      return;
-    }
-
-    if (!window.confirm(`Enregistrer ${entries.length} ligne(s) modifiée(s) dans ${name}?`)) return;
-    gridSaveActive.current = true;
-    setSaving(true);
-    setMessage('');
-
-    try {
-      const updated = await updateUniversalRows({ config, entries });
-      onRowsUpdated(name, updated);
-      setDrafts({});
-      setGridEditing(false);
-      setMessage(`${updated.length} ligne(s) enregistrée(s).`);
-    } catch (error) {
-      setMessage(friendlyError(error, 'Impossible d’enregistrer ces modifications.'));
-    } finally {
-      gridSaveActive.current = false;
-      setSaving(false);
-    }
-  }
-
-  return <div className="tablePage">
-    <header className="pageHead"><div><h1>{icons[name] || '📋'} {name}</h1><p>{filtered.length.toLocaleString('fr-CA')} résultat(s) sur {rows.length.toLocaleString('fr-CA')} ligne(s).</p></div><div className="actions">
-      <DataGridSettings gridId={`table-${name}`} columns={permittedCols} labels={Object.fromEntries(permittedCols.map(column=>[column,columnLabel(name,column)]))} preferences={gridSettings.preferences} setPreferences={gridSettings.setPreferences} onReset={gridSettings.reset}/>
-      {canEdit && !gridEditing && <button onClick={() => { setGridEditing(true); setMessage(''); }}><Edit3/> Modifier la grille</button>}
-      <button disabled={exporting} onClick={() => runGridExport(() => downloadCSV(professionalExportName(name,'csv'), sorted, cols.map(key=>({key,label:exportLabels[key]}))))}><Download/> CSV résultats ({sorted.length})</button>
-      <button disabled={exporting || !selectedFiltered.length} onClick={() => runGridExport(() => downloadExcelSelectionWithPhotos(professionalExportName(name,'xlsx'), selectedFiltered, cols, {...exportOptions,exportType:'Sélection'}))}><FileSpreadsheet/> Excel sélection ({selectedFiltered.length})</button>
-      <button disabled={exporting} onClick={() => runGridExport(() => downloadExcel(professionalExportName(name,'xlsx'), sorted, cols, {...exportOptions,exportType:'Résultats filtrés'}))}><FileSpreadsheet/> Excel résultats ({sorted.length})</button>
-      <button disabled={exporting} onClick={() => runGridExport(() => downloadPDF(professionalExportName(name,'pdf'), `${name} — résultats filtrés`, sorted, cols, exportOptions))}><FileText/> PDF ensemble filtré</button>
-    </div></header>
-
-    {gridEditing && <div className="grid-edit-toolbar">
-      <button className="grid-edit-primary" disabled={saving} onClick={saveGrid}><Save size={17}/> {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}</button>
-      <button className="grid-edit-secondary" disabled={saving} onClick={() => { if (gridSaveActive.current) return; setDrafts({}); setGridEditing(false); }}><X size={17}/> Annuler</button>
-      <span className="grid-edit-note">{Object.keys(drafts).length} ligne(s) modifiée(s). Clique directement dans les cellules.</span>
-    </div>}
-
-    {message && <div className="v07-message">{message}</div>}
-
-    <div className="data-grid-toolbar"><div className="searchbar"><Search/><input aria-label={`Recherche globale — ${name}`} placeholder="Recherche exacte dans toutes les colonnes..." value={query} onChange={e => setQuery(e.target.value)}/></div>{activeFilterCount>0&&<><span className="grid-active-filter-count">Filtres actifs : {activeFilterCount}</span><button type="button" onClick={()=>setFilters({})}>Effacer tous les filtres</button></>}</div>
-    <div className="tableWrap professional-grid" data-grid-id={`table-${name}`}><table><thead><tr className="data-grid-header-row" data-grid-zone="headers"><th className="selection-column"><input type="checkbox" aria-label="Sélectionner la page" checked={shown.length>0&&shown.every((row,index)=>selectedRows.has(rowToken(row,(currentPage-1)*pageSize+index)))} onChange={event=>setSelectedRows(current=>{const next=new Set(current);shown.forEach((row,index)=>{const token=rowToken(row,(currentPage-1)*pageSize+index);event.target.checked?next.add(token):next.delete(token)});return next})}/></th>{hasMapColumn && <th className="action-column">Carte</th>}{cols.map(c => <GridColumnHeader key={c} column={c} label={columnLabel(name,c)} rows={filtered} sortState={sortState} onSort={setSortState} onReset={()=>setSortState(null)}/>)}</tr><DataGridFilterRow columns={cols.map(c=>({key:c,label:columnLabel(name,c)}))} rows={rows} filters={filters} onFilter={(column,value)=>setFilters(current=>({...current,[column]:value}))} leadingCells={hasMapColumn?2:1}/></thead><tbody>{shown.map((r, i) => {
-      const token = rowToken(r, (currentPage-1)*pageSize+i);
-      const supportId = r.support_id || r['Support ID'] || '';
-      const mapUrl = infrastructureMapUrl(r);
-      return <tr key={token} className={drafts[token] ? 'editing-row' : ''} onClick={() => !gridEditing && setSelected(r)}>
-        <td className="selection-column" onClick={event=>event.stopPropagation()}><input type="checkbox" aria-label={`Sélectionner ${supportId||token}`} checked={selectedRows.has(token)} onChange={()=>setSelectedRows(current=>{const next=new Set(current);next.has(token)?next.delete(token):next.add(token);return next})}/></td>
-        {hasMapColumn && <td>
-          {mapUrl
-            ? <button className="table-map-button" title={`Ouvrir ${supportId} sur la carte`} onClick={event => {
-                event.stopPropagation();
-                onOpenMap?.(supportId, infrastructureNavigationContext(supportId));
-              }}><MapPin size={16}/> Carte</button>
-            : <span className="table-map-missing">GPS absent</span>}
-        </td>}
-        {cols.map(c => {
-          const changed = Object.prototype.hasOwnProperty.call(drafts[token]?.changes || {}, c);
-          const value = changed ? drafts[token].changes[c] : r[c];
-          return <td key={c} className={gridEditing ? `grid-edit-cell ${changed ? 'changed' : ''}` : ''}>
-            {gridEditing
-              ? <EditableField column={c} value={value} compact onChange={next => changeCell(r, i, c, next)}/>
-              : renderTableCell(name, r, c)}
-          </td>;
-        })}
-      </tr>;
-    })}</tbody></table></div>
-    <GridPagination page={currentPage} pageCount={pageCount} pageSize={pageSize} total={sorted.length} selectedCount={hasMapColumn?selectedRows.size:0} onPage={setPage} onPageSize={setPageSize}/>
-    {selected && <Detail name={name} row={selected} role={role} config={config} onSaved={updated => { onRowsUpdated(name, [updated]); setSelected(updated); }} onClose={() => setSelected(null)} onOpenMap={onOpenMap}/>}
-  </div>;
-}
-
-function Detail({ name, row, role, config, onSaved, onClose, onOpenMap }) {
-  const cols = getCols([row], name);
-  const support = row.support_id || row.no_arret || row.related_support || row['Support ID'] || '';
-  const mapUrl = name === 'Infrastructures' ? infrastructureMapUrl(row) : '';
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(row);
-  const [rules, setRules] = useState({});
-  const [message, setMessage] = useState('');
-  const [saving, setSaving] = useState(false);
-  const detailSaveActive = useRef(false);
-  const canEdit = role === 'Administrateur' && !config.readOnly;
-
-  useEffect(() => {
-    loadAutomaticFieldRules(config.table).then(setRules);
-  }, [config.table]);
-
-  async function save() {
-    if (!canEdit || detailSaveActive.current) return;
-    const changes = Object.fromEntries(
-      cols
-        .filter(column => draft[column] !== row[column])
-        .map(column => [column, draft[column]])
-    );
-
-    if (!Object.keys(changes).length) {
-      setEditing(false);
-      return;
-    }
-
-    if (!window.confirm(`Enregistrer les modifications de cette fiche ${name}?`)) return;
-    detailSaveActive.current = true;
-    setSaving(true);
-    try {
-      const updated = await updateUniversalRow({ config, originalRow: row, changes });
-      setDraft(updated);
-      onSaved(updated);
-      setEditing(false);
-      setMessage('Fiche enregistrée.');
-    } catch (error) {
-      setMessage(friendlyError(error, 'Impossible d’enregistrer cette fiche.'));
-    } finally {
-      detailSaveActive.current = false;
-      setSaving(false);
-    }
-  }
-
-  return <div className="drawer"><div className="drawerPanel"><button className="close" disabled={saving} onClick={() => { if (!detailSaveActive.current) onClose(); }}>×</button><h2>Fiche 360° — {name}</h2>{support && <div className="support">Identifiant : <b>{support}</b></div>}
-
-    {canEdit && <div className="detail-edit-actions">
-      {!editing
-        ? <button className="grid-edit-primary" onClick={() => { setDraft(row); setEditing(true); setMessage(''); }}><Edit3 size={17}/> Modifier la fiche</button>
-        : <>
-            <button className="grid-edit-primary" disabled={saving} onClick={save}><Save size={17}/> Enregistrer</button>
-            <button className="grid-edit-secondary" disabled={saving} onClick={() => { if (detailSaveActive.current) return; setDraft(row); setEditing(false); }}><X size={17}/> Annuler</button>
-          </>}
-    </div>}
-
-    {message && <div className="v07-message">{message}</div>}
-    {mapUrl && <button className="detail-map-button" onClick={() => onOpenMap?.(support)}><MapPin size={17}/> Voir ce support sur la carte interactive</button>}
-
-    <div className="detailGrid">{cols.map(c => {
-      if (!editing && name === 'Infrastructures' && c === 'visuel_actuel_cadre') {
-        const url = thumbnailForInfrastructure(row);
-        return <div key={c} className="detail-photo-card"><label>{columnLabel(name, c)}</label>{url
-          ? <PhotoImage photo={url} alt={`Photo du support ${support}`}/>
-          : <p>Aucune photo associée.</p>}</div>;
-      }
-
-      const rule = rules[c];
-      return <div key={c}>
-        <label>{columnLabel(name, c)}</label>
-        {editing
-          ? <>
-              <EditableField column={c} value={draft[c]} onChange={value => setDraft(current => ({ ...current, [c]: value }))}/>
-              {rule && !rule.is_primary_source && <small className="automatic-field-warning">Champ alimenté automatiquement depuis {rule.source_table || 'une relation'}.{rule.source_field || ''}. Une propagation future pourrait remplacer la valeur.</small>}
-            </>
-          : <p>{String(row[c] ?? '—')}</p>}
-      </div>;
-    })}</div>
-    {name === 'Infrastructures' && support && <Support360Panel supportId={support} role={role}/>} 
-  </div></div>;
-}
-
 function FieldSearch({ dataStore }) {
   const [source, setSource] = useState('Infrastructures');
   const [id, setId] = useState('');
@@ -564,7 +271,13 @@ function ServiceConfigurationError() {
   );
 }
 
-function App() {
+function App(){
+ const [target,setTarget]=useState(getUserViewPreview);
+ useEffect(()=>{const change=()=>{clearTableCache();clearSignedPhotoUrlCache();setTarget(getUserViewPreview());};window.addEventListener('tos-user-view-preview',change);return()=>window.removeEventListener('tos-user-view-preview',change)},[]);
+ return <>{target&&<div className="ca-preview-banner"><strong>Voir en tant que : {target.nom} — {target.role}</strong><span>Consultation uniquement. Votre session Admin reste active.</span><button onClick={()=>setUserViewPreview(null)}>Revenir à ma vue Admin</button></div>}<ApplicationSession key={target?.id||'self'}/></>;
+}
+function ApplicationSession() {
+  const [userPreviewOpen,setUserPreviewOpen]=useState(false);
   enforceApplicationTitle();
   const isAcceptInvitationRoute = window.location.pathname.replace(/\/+$/, '') === '/accept-invitation';
   const isSetPasswordRoute = window.location.pathname.replace(/\/+$/, '') === '/set-password';
@@ -635,7 +348,7 @@ function App() {
   }, [session?.user?.id, active]);
 
   useEffect(() => {
-    if (!supabase || !session) return undefined;
+    if (!supabase || !session || getUserViewPreview()) return undefined;
     const refresh = () => refreshDataStore(
       Object.keys(dataStore || {}).filter(label => tableConfig[label]),
       { force: true }
@@ -657,13 +370,13 @@ function App() {
       return undefined;
     }
 
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    supabase.auth.getSession().then(({ data }) => setSession(userViewSession(data.session)));
     const { data: listener } = supabase.auth.onAuthStateChange((_event, currentSession) => {
       dataScope.current = '';
       clearTableCache();
       clearSignedPhotoUrlCache();
       if(['SIGNED_IN','SIGNED_OUT','USER_UPDATED'].includes(_event)) setDataStore(null);
-      setSession(currentSession);
+      setSession(userViewSession(currentSession));
       if (!currentSession) setProfile(null);
     });
     return () => listener?.subscription?.unsubscribe();
@@ -839,6 +552,7 @@ function App() {
       role={role}
       session={session}
       profile={profile}
+      permission={rolePermission}
       onLogout={() => {
         setSession(null);
         setProfile(null);
@@ -867,13 +581,13 @@ function App() {
   else if (active === 'Automatisations') content = <AutomationAssistant role={role}/>;
   else if (active === 'Validation système') content = <ValidationCenter role={role}/>;
   else if (active === 'Import anciennes photos') content = <LegacyPhotoImporter dataStore={dataStore} session={session}/>;
-  else if (active === 'Campagnes maîtres') content = <CampaignsPanel role={role} session={session} businessContext={BUSINESS_CONTEXT.MARKETING}/>;
+  else if (active === 'Campagnes maîtres') content = <CampaignsPanel scopeKey={[currentDataScope,Boolean(getUserViewPreview())].join(':')} role={role} session={session} businessContext={BUSINESS_CONTEXT.MARKETING}/>;
   else if (active === 'Campagne — Visuels et formats') content = <CampaignVisualManager role={role} businessContext={BUSINESS_CONTEXT.MARKETING}/>;
-  else if (active === 'Communications opérationnelles') content = <CampaignsPanel role={role} session={session} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
+  else if (active === 'Communications opérationnelles') content = <CampaignsPanel scopeKey={[currentDataScope,Boolean(getUserViewPreview())].join(':')} role={role} session={session} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
   else if (active === 'Communication opérationnelle — Visuels') content = <CampaignVisualManager role={role} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
   else if (active === 'Campagnes et visuels par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.MARKETING} role={role} onNavigate={setActive}/>;
   else if (active === 'Communications opérationnelles par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.OPERATIONAL} role={role} onNavigate={setActive}/>;
-  else if (active === 'Carte interactive') content = <InteractiveMap dataStore={dataStore} focusSupportId={mapFocusSupportId} onClearFocus={() => setMapFocusSupportId('')} onNavigate={navigateToView} onBackToInfrastructures={() => setActive('Infrastructures')} hasInfrastructureContext={navigationContext.sourceView==='infrastructures'} role={role}/>;
+  else if (active === 'Carte interactive') content = <InteractiveMap dataStore={navigationContext.mapRows?{Infrastructures:{rows:navigationContext.mapRows}}:dataStore} focusSupportId={mapFocusSupportId} onClearFocus={() => setMapFocusSupportId('')} onNavigate={navigateToView} onBackToInfrastructures={() => setActive('Infrastructures')} hasInfrastructureContext={navigationContext.sourceView==='infrastructures'} role={role}/>;
   else if (active === 'Application terrain') content = <TerrainApp dataStore={dataStore} role={role} session={session}/>;
   else if (active === 'Recherche terrain') content = <div className="dashboard"><FieldSearch dataStore={dataStore}/></div>;
   else if (active === 'Bons de travail') content = <WorkOrdersPanel dataStore={dataStore} role={role} session={session}/>;
@@ -881,11 +595,11 @@ function App() {
   else content = <TableView name={active} dataStore={dataStore} rolePermission={rolePermission} role={role} initialSupportId={navigationContext.open360?navigationContext.supportId:''} initialGridContext={active==='Infrastructures'?navigationContext:null} onRowsUpdated={applyUpdatedRows} onOpenMap={(supportId,context) => { setNavigationContext(context||{}); setMapFocusSupportId(String(supportId || '')); window.history.pushState({view:'map',sourceView:context?.sourceView||null},''); setActive('Carte interactive'); }}/>;
 
   return <div className="app">
-    <GlobalButtonFeedback/>
+    <GlobalButtonFeedback/>{userPreviewOpen&&<UserViewPreview onClose={()=>setUserPreviewOpen(false)}/>}
     <aside>
       <div className="brand"><BrandLogo priority/><span>Display Manager</span></div>
       <span className="role-badge">{profile?.nom || session?.user?.email}<br/>{role}</span>
-      {items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => { if (it === 'Carte interactive') { setNavigationContext({}); setMapFocusSupportId(''); } setActive(it); }}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Édition — Historique' ? '🕘' : it === 'Photos et inventaire' ? '🖼️' : it === 'Centre EDT et BT' ? '🛠️' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Automatisations' ? '🤖' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}
+      {role==='Administrateur'&&!getUserViewPreview()&&<button onClick={()=>setUserPreviewOpen(true)}>Voir en tant que</button>}{items.map(it => <button key={it} className={active === it ? 'active' : ''} onClick={() => { if (it === 'Carte interactive') { setNavigationContext({}); setMapFocusSupportId(''); } setActive(it); }}>{it === 'Tableau de bord' ? '📊' : it === 'Administration' ? '⚙️' : it === 'Utilisateurs réels' ? '👤' : it === 'Édition — Historique' ? '🕘' : it === 'Photos et inventaire' ? '🖼️' : it === 'Centre EDT et BT' ? '🛠️' : it === 'Rapports finaux' ? '📨' : it === 'Visibilité par rôle' ? '👁️' : it === 'Automatisations' ? '🤖' : it === 'Import anciennes photos' ? '📥' : it === 'Campagnes maîtres' ? '🎯' : it === 'Campagne — Visuels et formats' ? '🖼️' : it === 'Carte interactive' ? '🗺️' : it === 'Application terrain' ? '📱' : it === 'Recherche terrain' ? '🔎' : (icons[it] || '📋')} {it}</button>)}
       <button className="sidebar-logout" onClick={logoutFromPortal}><LogOut size={17}/> Déconnexion</button>
     </aside>
     <main>{dataStore?.__sync_error__&&<div className="sync-error-banner"><strong>Données momentanément indisponibles</strong><span>La dernière mise à jour n’a pas pu être chargée.</span><button onClick={refreshDataStore}>Réessayer</button></div>}<Suspense fallback={<ScreenFallback/>}>{content}</Suspense></main>

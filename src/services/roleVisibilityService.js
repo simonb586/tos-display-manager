@@ -1,4 +1,5 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient.js';
+import {resolveClientPortalView,clientPortalColumnsForView} from '../lib/clientPortalViewRegistry.js';
 
 export const DEFAULT_ROLE_VISIBILITY = {
   Administrateur: { visible_tables: ['*'], visible_columns: {} },
@@ -109,6 +110,8 @@ export function canSeeTable(permission, tableName) {
 }
 
 export function columnsForTable(permission, tableName, allColumns) {
+  const view=resolveClientPortalView(tableName);
+  if(view)return clientPortalColumnsForView(view,allColumns,permission?.visible_columns||{});
   const configured = permission?.visible_columns?.[tableName];
   if (!Array.isArray(configured) || !configured.length) return allColumns;
   return allColumns.filter(column => configured.includes(column));

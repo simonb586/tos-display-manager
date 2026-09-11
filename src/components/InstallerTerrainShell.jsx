@@ -9,16 +9,22 @@ import {
 import { supabase } from '../lib/supabaseClient';
 import TerrainApp from './TerrainApp';
 import BrandLogo from './BrandLogo';
+import BusinessTable from './BusinessTable';
+import InteractiveMap from './InteractiveMap';
+import {canSeeTable} from '../services/roleVisibilityService';
 
 export default function InstallerTerrainShell({
   dataStore,
   role,
   session,
   profile,
-  onLogout
+  onLogout,
+  permission
 }) {
   const [online, setOnline] = useState(navigator.onLine);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [view,setView]=useState('terrain');
+  const [mapRows,setMapRows]=useState(null);
 
   useEffect(() => {
     const goOnline = () => setOnline(true);
@@ -83,11 +89,13 @@ export default function InstallerTerrainShell({
           <span>Tu es connecté directement à ton espace terrain.</span>
         </div>
 
-        <TerrainApp
+        {canSeeTable(permission,'Infrastructures')&&<nav><button onClick={()=>setView('terrain')}>Terrain</button><button onClick={()=>setView('infrastructures')}>Infrastructures</button></nav>}
+        <div hidden={view!=='terrain'}><TerrainApp
           dataStore={dataStore}
           role={role}
           session={session}
-        />
+        /></div>
+        {view==='infrastructures'&&<><div hidden={mapRows!==null}><BusinessTable name="Infrastructures" dataStore={dataStore} role={role} rolePermission={permission} onOpenMap={(id,context)=>setMapRows(context?.mapRows||dataStore?.Infrastructures?.rows||[])}/></div>{mapRows!==null&&<><button onClick={()=>setMapRows(null)}>Tableau</button><InteractiveMap role={role} dataStore={{Infrastructures:{rows:mapRows}}}/></>}</>}
       </main>
     </div>
   );

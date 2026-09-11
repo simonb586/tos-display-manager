@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import {previewAwareFetch} from './userViewPreview.js';
 
 const runtimeEnv = import.meta.env || {};
 const supabaseUrl = runtimeEnv.VITE_SUPABASE_URL;
@@ -7,5 +8,5 @@ const supabaseKey = runtimeEnv.VITE_SUPABASE_PUBLISHABLE_KEY || runtimeEnv.VITE_
 export const supabaseConfigured = Boolean(supabaseUrl && supabaseKey);
 
 export const supabase = supabaseConfigured
-  ? createClient(supabaseUrl, supabaseKey)
+  ? createClient(supabaseUrl, supabaseKey,{global:{fetch:previewAwareFetch}})
   : null;

@@ -5,7 +5,7 @@ import { classifySupportCoordinates, clusterMapPoints, filterMapPoints, getSuppo
 let checks=0;
 const ok=(value,message)=>{assert.ok(value,message);checks+=1;};
 const component=fs.readFileSync('src/components/InteractiveMap.jsx','utf8');
-const main=fs.readFileSync('src/main.jsx','utf8');
+const main=(fs.readFileSync('src/main.jsx','utf8')+'\n'+fs.readFileSync('src/components/BusinessTable.jsx','utf8')+'\n'+fs.readFileSync('src/lib/businessTableConfig.js','utf8'));
 const css=fs.readFileSync('src/features/v08/bloc-8-map.css','utf8');
 
 ok(main.includes("active === 'Carte interactive'")&&main.includes('<InteractiveMap'),'Route carte absente');

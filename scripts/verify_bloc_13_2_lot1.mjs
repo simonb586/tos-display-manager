@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const main=fs.readFileSync('src/main.jsx','utf8');
+const main=(fs.readFileSync('src/main.jsx','utf8')+'\n'+fs.readFileSync('src/components/BusinessTable.jsx','utf8')+'\n'+fs.readFileSync('src/lib/businessTableConfig.js','utf8'));
 const pagination=fs.readFileSync('src/components/GridPagination.jsx','utf8');
 const css=fs.readFileSync('src/styles.css','utf8');
 for(const marker of ['GridPagination','Première page','Page précédente','Page suivante','Dernière page','Lignes par page','selectedRows','pageSize','pageCount'])assert.ok(`${main}\n${pagination}`.includes(marker),marker);

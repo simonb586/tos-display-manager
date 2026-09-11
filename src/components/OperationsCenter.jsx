@@ -1,4 +1,4 @@
-import {businessCapabilities} from '../lib/businessCapabilities';
+import {businessCapabilities,canEditBusinessView} from '../lib/businessCapabilities';
 import useRefreshRequest from '../hooks/useRefreshRequest';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -81,7 +81,7 @@ const emptyWorkOrder = {
   progression: 0
 };
 
-export default function OperationsCenter({ role, supportId = '', onClearSupportContext }) {
+export default function OperationsCenter({ role, supportId = '', onClearSupportContext,permission,previewTargetId=null }) {
   const [tab, setTab] = useState('edt');
   const [data, setData] = useState({
     edts: [],
@@ -126,6 +126,7 @@ export default function OperationsCenter({ role, supportId = '', onClearSupportC
   const {sortedRows:sortedHistory,sortState:historySort,setSortState:setHistorySort}=useSortableRows(data.history, null, 'operations-history');
 
   const canManage = businessCapabilities(role).manageEdt;
+  const canEdit = canManage || canEditBusinessView(role,permission,'Suivi des EDT');
   const canDeleteEdt = role === 'Administrateur';
   const selectedEdt = data.edts.find(item => String(item.id) === String(selectedEdtId)) || null;
   const contextual=useMemo(()=>filterSupportOperations(data,supportId),[data,supportId]);
@@ -135,7 +136,7 @@ export default function OperationsCenter({ role, supportId = '', onClearSupportC
 async function reload() {
     const request=refreshRequest.start();
 try {
-      setData(await request.wait(loadOperationsData()));
+      setData(await request.wait(loadOperationsData(previewTargetId)));
       setMessage('');
     } catch (error) {if(!request.isCurrent())return;
       setMessage(error.message || 'Erreur de chargement.');
@@ -155,7 +156,7 @@ try {
     setLifecycleError(null);
     if (!selectedEdtId) { setLifecycleLoading(false); return; }
     setLifecycleLoading(true);
-    loadEdtLifecycleData(selectedEdtId).then(detail => {
+    (previewTargetId?Promise.resolve({edt:data.edts.find(e=>String(e.id)===String(selectedEdtId)),phases:data.phases.filter(p=>String(p.edt_id)===String(selectedEdtId)),phaseReports:data.phaseReports.filter(p=>String(p.edt_id)===String(selectedEdtId)),history:data.history.filter(h=>h.entity_type==='edt_lifecycle'&&String(h.entity_id)===String(selectedEdtId))}):loadEdtLifecycleData(selectedEdtId)).then(detail => {
       if (requestId === selectionRequest.current) setLifecycleDetail(detail);
     }).catch(error => {
       console.error('Impossible de charger le cycle de vie EDT', { edtId: selectedEdtId, error });
@@ -175,7 +176,7 @@ try {
   }), [data]);
 
   async function run(action, success) {
-    if (mutationActive.current) return;
+    if (previewTargetId || mutationActive.current) return;
     mutationActive.current = true;
     setBusy(true);
     setMessage('');
@@ -307,12 +308,12 @@ try {
 
       {tab === 'edt' && (
         <div className="operations-layout">
-          {canManage && (
+          {(canManage || (canEdit && edtForm.id)) && (
             <form className="v07-card operations-form" onSubmit={submitEdt}>
               <h2><Plus/> {edtForm.id ? 'Modifier l’EDT' : 'Créer un EDT'}</h2>
               <label>No EDT<input value={edtForm.no_edt} onChange={e => setEdtForm({...edtForm, no_edt:e.target.value})}/></label>
               <label>Nom<input value={edtForm.nom} onChange={e => setEdtForm({...edtForm, nom:e.target.value})}/></label>
-              <label>Campagne<select required value={edtForm.campagne_id||''} onChange={e=>{const campaign=data.campaigns.find(item=>String(item.id)===e.target.value);setEdtForm({...edtForm,campagne_id:e.target.value,campagne:campaign?.nom_campagne||''})}}><option value="">Choisir une campagne</option>{data.campaigns.map(item=><option key={item.id} value={item.id}>{item.nom_campagne}</option>)}</select></label>
+              <label>Campagne<select disabled={!canManage} required value={edtForm.campagne_id||''} onChange={e=>{const campaign=data.campaigns.find(item=>String(item.id)===e.target.value);setEdtForm({...edtForm,campagne_id:e.target.value,campagne:campaign?.nom_campagne||''})}}><option value="">Choisir une campagne</option>{data.campaigns.map(item=><option key={item.id} value={item.id}>{item.nom_campagne}</option>)}</select></label>
               <label>Client<input value={edtForm.client} onChange={e => setEdtForm({...edtForm, client:e.target.value})}/></label>
               <label>Statut<select value={edtForm.statut} onChange={e => setEdtForm({...edtForm, statut:e.target.value})}>
                 {['Planifié','En préparation','En cours','En attente','Terminé','Annulé'].map(item => <option key={item}>{item}</option>)}
@@ -326,7 +327,7 @@ try {
               <label>Coordonnateur<input value={edtForm.coordonnateur} onChange={e => setEdtForm({...edtForm, coordonnateur:e.target.value})}/></label>
               <label>Supports prévus<input type="number" value={edtForm.supports_prevus} onChange={e => setEdtForm({...edtForm, supports_prevus:e.target.value})}/></label>
               <label>Description<textarea value={edtForm.description} onChange={e => setEdtForm({...edtForm, description:e.target.value})}/></label>
-              <button className="v07-primary" disabled={busy}>{edtForm.id ? 'Enregistrer' : 'Créer l’EDT'}</button>
+              <button className="v07-primary" disabled={busy||Boolean(previewTargetId)}>{edtForm.id ? 'Enregistrer' : 'Créer l’EDT'}</button>
             </form>
           )}
 
@@ -342,10 +343,10 @@ try {
                   </button>
                   <div className="progress-track"><i style={{width:`${progress}%`}}/></div>
                   <small>{progress}% — {edt.client || 'Client non précisé'} — fin prévue {edt.date_fin_prevue || '—'}</small>
-                  {canManage && <div className="edt-actions">
+                  {canEdit && <div className="edt-actions">
                     <button onClick={() => setEdtForm({...emptyEdt, ...edt})}>Modifier</button>
                     {canDeleteEdt && <button className="danger" disabled={busy} onClick={() => openDeleteDialog(edt)}><Trash2 size={15}/> Supprimer l'EDT</button>}
-                    <button onClick={() => run(() => closeEdt(edt.id), 'EDT clôturé.')}>Clôturer</button>
+                    {canManage&&<button onClick={() => run(() => closeEdt(edt.id), 'EDT clôturé.')}>Clôturer</button>}
                   </div>}
                 </article>;
               })}

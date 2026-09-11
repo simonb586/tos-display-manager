@@ -1,0 +1,23 @@
+import fs from 'node:fs';
+let source=fs.readFileSync('scripts/verify_final_blockers_local.mjs','utf8');
+source=source.slice(0,source.indexOf("await db.exec(fs.readFileSync('scripts/sql/verify_legacy_photo_log_read.sql'"));
+source+=`
+const baseline=JSON.parse(fs.readFileSync('docs/stabilization-local/certification/remote/dashboard-p0/baseline-functions.json'));
+for(const f of baseline)await db.exec(f.definition);
+await db.exec(fs.readFileSync('supabase/migrations/20260910232602_portal_dashboard_summary.sql','utf8'));
+for(const f of JSON.parse(fs.readFileSync('.cache/parity-live-functions.json')))await db.exec(f.definition);
+await db.exec("INSERT INTO public.clients(id,nom_client,statut) VALUES(2,'EXO','Actif');");
+await db.exec('CREATE ROLE authenticator;CREATE SCHEMA IF NOT EXISTS storage;CREATE TABLE IF NOT EXISTS storage.objects(id uuid,bucket_id text,name text);');
+await db.exec(fs.readFileSync('supabase/migrations/20260911024938_client_admin_business_parity.sql','utf8'));
+await db.exec(fs.readFileSync('supabase/migrations/20260911025750_portal_business_read_performance.sql','utf8'));
+await db.exec(fs.readFileSync('supabase/migrations/20260911030201_portal_business_tenant_query_filter.sql','utf8'));
+await db.exec(fs.readFileSync('supabase/migrations/20260911030456_client_request_owned_supports.sql','utf8'));
+await db.exec('ALTER TABLE auth.users ADD COLUMN raw_user_meta_data jsonb;');
+await db.exec(fs.readFileSync('supabase/migrations/20260911030921_preview_target_activation_state.sql','utf8'));
+console.log('candidate migrations applied locally');
+await db.exec('CREATE UNIQUE INDEX parity_role_unique ON public.role_ui_permissions(role);');
+await db.exec(fs.readFileSync('scripts/sql/verify_business_parity.sql','utf8'));
+console.log('business parity SQL tests PASS');
+await db.close();
+`;
+await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));

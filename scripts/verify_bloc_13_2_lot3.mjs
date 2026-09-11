@@ -10,7 +10,7 @@ assert.ok(fs.existsSync('public/assets/logo-groupe-tos-officiel.png'));
 assert.ok(fs.existsSync('public/assets/logo-groupe-tos-web-transparent.png'));
 assert.ok(brand.includes('alt="Groupe TOS"'));
 assert.ok(main.includes('lazy(() => import'));
-assert.ok(main.includes("fallback: () => import('./data/infrastructures.json')"));
+assert.ok(fs.readFileSync('src/lib/businessTableConfig.js','utf8').includes("fallback: () => import('../data/infrastructures.json')"));
 assert.ok(dataService.includes('resolveFallback'));
 assert.ok(main.includes('Suspense'));
 assert.ok(main.includes('<BrandLogo priority/>'));

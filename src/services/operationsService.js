@@ -1,3 +1,4 @@
+import {loadBusinessContext} from './businessParityService';
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
 
 function ensureSupabase() {
@@ -6,65 +7,7 @@ function ensureSupabase() {
   }
 }
 
-export async function loadOperationsData() {
-  ensureSupabase();
-
-  const [
-    edtResult,
-    btResult,
-    requestsResult,
-    phasesResult,
-    assignmentsResult,
-    historyResult,
-    usersResult,
-    edtSupportsResult,
-    dashboardResult,
-    campaignsResult,
-    reportsResult
-  ] = await Promise.all([
-    supabase.from('suivi_des_edt').select('*').is('archived_at', null).order('date_debut', { ascending: false, nullsFirst: false }),
-    supabase.from('bons_de_travail').select('*').order('date_cible', { ascending: true, nullsFirst: false }),
-    supabase.from('requetes_clients').select('*').order('created_at', { ascending: false }),
-    supabase.from('edt_phases').select('*').order('ordre', { ascending: true }),
-    supabase.from('edt_assignments').select('*').order('created_at', { ascending: false }),
-    supabase.from('operations_history').select('*').order('created_at', { ascending: false }).limit(500),
-    supabase.from('utilisateurs').select('id,nom,courriel,role,statut').order('nom'),
-    supabase.from('edt_supports').select('*').order('updated_at', { ascending: false }),
-    supabase.rpc('tableau_bord_edt_v0129', { p_edt_id: null }),
-    supabase.from('campagnes_maitres').select('id,code_campagne,nom_campagne,date_debut,date_fin,statut').order('date_fin',{ascending:false,nullsFirst:false}),
-    supabase.from('edt_phase_reports').select('*').order('version',{ascending:false})
-  ]);
-
-  for (const result of [
-    edtResult,
-    btResult,
-    requestsResult,
-    phasesResult,
-    assignmentsResult,
-    historyResult,
-    usersResult,
-    edtSupportsResult,
-    dashboardResult,
-    campaignsResult,
-    reportsResult
-  ]) {
-    if (result.error) throw result.error;
-  }
-
-  return {
-    edts: edtResult.data || [],
-    workOrders: btResult.data || [],
-    requests: requestsResult.data || [],
-    phases: phasesResult.data || [],
-    assignments: assignmentsResult.data || [],
-    history: historyResult.data || [],
-    users: usersResult.data || [],
-    edtSupports: edtSupportsResult.data || [],
-    dashboard: dashboardResult.data || [],
-    campaigns: campaignsResult.data || [],
-    phaseReports: reportsResult.data || []
-  };
-}
+export async function loadOperationsData(targetUserId=null) {return loadBusinessContext('operations',null,targetUserId);}
 
 export async function createEdt(payload) {
   ensureSupabase();

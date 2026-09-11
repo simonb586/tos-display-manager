@@ -5,7 +5,7 @@ import JSZip from'jszip';
 import {parse} from '@babel/parser';
 import {projectClientExportRows} from '../src/lib/clientPortalViewRegistry.js';
 
-const main=fs.readFileSync('src/main.jsx','utf8');
+const main=(fs.readFileSync('src/main.jsx','utf8')+'\n'+fs.readFileSync('src/components/BusinessTable.jsx','utf8')+'\n'+fs.readFileSync('src/lib/businessTableConfig.js','utf8'));
 const client=fs.readFileSync('src/components/ClientPortal.jsx','utf8');
 const center=fs.readFileSync('src/components/ExportsCenter.jsx','utf8');
 const utils=fs.readFileSync('src/lib/utils.js','utf8');
