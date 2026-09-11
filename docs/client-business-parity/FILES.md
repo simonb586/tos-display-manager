@@ -1,8 +1,12 @@
 # Fichiers de la livraison
 
+- [docs/client-business-parity/FILES.md](../../docs/client-business-parity/FILES.md)
 - [docs/client-business-parity/REPORT.md](../../docs/client-business-parity/REPORT.md)
 - [docs/client-business-parity/application-local.json](../../docs/client-business-parity/application-local.json)
+- [docs/client-business-parity/application-production.json](../../docs/client-business-parity/application-production.json)
 - [docs/client-business-parity/browser.json](../../docs/client-business-parity/browser.json)
+- [docs/client-business-parity/database-validation.json](../../docs/client-business-parity/database-validation.json)
+- [docs/client-business-parity/deployment.json](../../docs/client-business-parity/deployment.json)
 - [docs/client-business-parity/live-api.json](../../docs/client-business-parity/live-api.json)
 - [package.json](../../package.json)
 - [scripts/fixtures/business-parity-final-entry.jsx](../../scripts/fixtures/business-parity-final-entry.jsx)
@@ -16,6 +20,7 @@
 - [scripts/verify_business_parity_browser.mjs](../../scripts/verify_business_parity_browser.mjs)
 - [scripts/verify_business_parity_live.mjs](../../scripts/verify_business_parity_live.mjs)
 - [scripts/verify_business_parity_local.mjs](../../scripts/verify_business_parity_local.mjs)
+- [scripts/verify_edt_update_payload.mjs](../../scripts/verify_edt_update_payload.mjs)
 - [scripts/verify_exports_photos_xlsx_v138.mjs](../../scripts/verify_exports_photos_xlsx_v138.mjs)
 - [scripts/verify_infrastructure_context_return.mjs](../../scripts/verify_infrastructure_context_return.mjs)
 - [scripts/verify_interactive_map_v114.mjs](../../scripts/verify_interactive_map_v114.mjs)

@@ -1,10 +1,10 @@
 {
-  "at": "2026-09-11T03:23:15.959Z",
-  "sourceCommit": "7fc1c8f",
+  "at": "2026-09-11T03:30:17.888Z",
+  "sourceCommit": "a1bf0c9",
   "branch": "release/v1.3.3",
-  "deploymentId": "dpl_HQZeCgjCynyRf19myETnGW95Pa4D",
+  "deploymentId": "dpl_4H36rE5c8BTC6gm8JRnC8DAMwAV6",
   "url": "https://portail.groupetos.com",
-  "deploymentUrl": "https://tos-display-manager-q93ntcruc-tos3.vercel.app",
+  "deploymentUrl": "https://tos-display-manager-hfhk5c6na-tos3.vercel.app",
   "state": "READY",
   "migrations": [
     "20260911024938",
@@ -17,6 +17,12 @@
     "fullCheck": "PASS",
     "localSql": "PASS",
     "browserFixtures": "PASS",
-    "productionBrowser": "RUNNING"
-  }
+    "productionBrowser": "PASS"
+  },
+  "publicAsset": "/assets/index-BzHaL5pX.js",
+  "publicHttp": 200,
+  "cliStreamError": "Not authorized during log streaming; inspect independently confirmed Ready and production aliases",
+  "edtPayloadCorrectionInPublicBundle": true,
+  "validatedAt": "2026-09-11T03:33:54.440Z",
+  "verdict": "PASS"
 }

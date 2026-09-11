@@ -90,4 +90,6 @@ Aucune variable d’environnement applicative nouvelle. Le hook PostgREST d’ap
 
 Le contrôle Supabase conserve deux avertissements Auth préexistants : [durée OTP](https://supabase.com/docs/guides/platform/going-into-prod#security) et [protection contre les mots de passe compromis](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). Le contrôle [SECURITY DEFINER](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable) passe de 109 à 112 fonctions signalées : les deux prédicats RLS et la lecture Admin de l’unique indicateur d’activation sont intentionnels, avec recherche de l’identité active, permissions explicites et `search_path` fermé. Les essais d’accès refusé couvrent ces entrées. Aucun nouvel avertissement de table sans RLS n’a été signalé.
 
-VERDICT : **validation de livraison en cours**.
+VERDICT : **PASS**.
+
+Version applicative `a1bf0c9`, pr?c?d?e du commit de parit? `7fc1c8f`, pouss?e sur `release/v1.3.3` et d?ploy?e sur [le portail public](https://portail.groupetos.com). D?ploiement Vercel `dpl_4H36rE5c8BTC6gm8JRnC8DAMwAV6` confirm? Ready et associ? au domaine. La derni?re passe navigateur de production est PASS pour les profils Client, Client-Admin, Installateur et les aper?us Admin/Installateur/Client-Admin/Client en attente. Le retour ? Admin est PASS. [Preuve de livraison](deployment.json).
