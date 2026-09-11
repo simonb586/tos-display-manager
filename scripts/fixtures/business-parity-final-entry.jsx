@@ -13,7 +13,7 @@ const summary=()=>({version:1,identity:{user_id:'user-'+fixture.client,profile_i
 window.testApi=(file,name,args)=>{
  fixture.calls.push({name,args});
  if(name==='loadDashboardSummary'||name==='loadPreviewSummary')return Promise.resolve(summary());
- if(name==='loadBusinessRows')return Promise.resolve({rows:rows(),total:120});
+ if(name==='loadBusinessRows')return new Promise(resolve=>setTimeout(()=>resolve({rows:rows(),total:120}),fixture.rowDelay||0));
  if(name==='listClientPortalSection')return Promise.resolve({rows:rows(),total:120,page:1,page_size:25});
  if(name==='listAllClientPortalSection')return Promise.resolve(rows());
  if(name==='createMultiSupportClientRequest')return new Promise(resolve=>setTimeout(()=>resolve({request_id:1,support_count:args[0].supportIds.length}),30));

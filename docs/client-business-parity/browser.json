@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-11T03:10:39.270Z",
+  "at": "2026-09-11T08:28:13.332Z",
   "records": [
     {
       "role": "Client",
@@ -40,6 +40,12 @@
       "mapRoundTrip": "PASS",
       "pagePreserved": "PASS",
       "detail": "PASS"
+    },
+    {
+      "repeatedNavigationDuringLoad": "PASS",
+      "loadingFeedback": "PASS",
+      "lateMapResponseIgnored": "PASS",
+      "sidebarMapRoundTrip": "PASS"
     },
     {
       "role": "Client",

@@ -35,6 +35,7 @@ import './features/v13/field-catalog.css';
 import './features/v14/module-14.css';
 import './features/v15/module-15.css';
 import './features/v17/client-portal.css';
+import './features/shared/portal-shell.css';
 
 import manifest from './data/manifest.json';
 import {

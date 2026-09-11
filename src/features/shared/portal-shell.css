@@ -1,0 +1,30 @@
+/* The Admin and Client shells share the same palette. */
+:root {
+  --tos-sidebar-background: linear-gradient(180deg, #0b2341 0%, #102e52 100%);
+  --tos-sidebar-text: #c8d9eb;
+  --tos-sidebar-active-text: #12345a;
+  --tos-portal-text: #162033;
+}
+.app > aside, .client-body > aside {
+  background: var(--tos-sidebar-background);
+  color: #dbeafe;
+  border: 0;
+  box-shadow: 12px 0 40px rgba(11,35,65,.08);
+}
+.app > aside button, .client-body > aside button {
+  color: var(--tos-sidebar-text);
+  background: transparent;
+}
+.app > aside button:hover, .client-body > aside button:hover {
+  background: rgba(255,255,255,.08);
+  color: #fff;
+}
+.app > aside button.active, .client-body > aside button.active {
+  background: #fff;
+  color: var(--tos-sidebar-active-text);
+  box-shadow: 0 7px 20px rgba(0,0,0,.16);
+}
+.client-portal { background: var(--tos-bg); color: var(--tos-portal-text); }
+.client-portal > header { background: var(--tos-surface); border-color: var(--tos-line); }
+.client-title span { color: var(--tos-muted); }
+.client-body > main { max-width: none; }

@@ -1,0 +1,24 @@
+{
+  "at": "2026-09-11T08:25:17.744Z",
+  "mode": "production",
+  "profile": 25,
+  "client": 2,
+  "before": "1–50 sur 6 6190 sélectionnée(s)",
+  "repeatedNavigationRetainsRows": false,
+  "mapInSidebar": false,
+  "adminPalette": {
+    "background": "linear-gradient(rgb(11, 35, 65), rgb(16, 46, 82))",
+    "color": "rgb(219, 234, 254)",
+    "activeBackground": "rgb(255, 255, 255)",
+    "activeText": "rgb(18, 52, 90)",
+    "body": "rgb(243, 246, 250)"
+  },
+  "clientPalette": {
+    "background": "none",
+    "color": "rgb(24, 50, 75)",
+    "activeBackground": "rgb(233, 243, 255)",
+    "activeText": "rgb(13, 91, 166)",
+    "body": "rgb(243, 246, 250)"
+  },
+  "status": "DIAGNOSIS"
+}

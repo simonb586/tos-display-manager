@@ -49,7 +49,7 @@ function renderTableCell(tableName, row, column) {
   return String(row[column] ?? '').slice(0, 160);
 }
 
-export default function TableView({ name, dataStore, onOpenMap, rolePermission, role, onRowsUpdated, initialSupportId='', initialGridContext=null, scopedData=null, scopeKey='', previewMode=false, previewTargetId=null }) {
+export default function TableView({ name, dataStore, onOpenMap, onGridContextChange, rolePermission, role, onRowsUpdated, initialSupportId='', initialGridContext=null, scopedData=null, scopeKey='', previewMode=false, previewTargetId=null }) {
   const rows = dataStore?.[name]?.rows || [];
   const config = tableConfig[name];
   const allCols = getCols(rows, name);
@@ -147,6 +147,10 @@ export default function TableView({ name, dataStore, onOpenMap, rolePermission, 
       mapRows: sorted
     };
   }
+
+  useEffect(() => {
+    if (name === 'Infrastructures') onGridContextChange?.(infrastructureNavigationContext(''));
+  }, [name, onGridContextChange, currentPage, pageSize, filters, query, sortState, gridSettings.preferences, sorted]);
 
   function rowToken(row, index) {
     try {

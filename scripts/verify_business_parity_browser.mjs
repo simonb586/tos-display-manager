@@ -12,10 +12,15 @@ await offlineBrowser('scripts/fixtures/business-parity-final-entry.jsx',async b=
   await b.sleep(100);
   await b.waitFor("!!document.querySelector('.client-body aside button') && document.querySelector('[data-dashboard-state]')?.dataset.dashboardState==='ready'");
   await click('Infrastructures');await ready();
+  await click('Infrastructures');await b.sleep(150);
+  assert(await b.evaluate("Boolean(document.querySelector('.tablePage tbody tr'))"),'Reopening the current menu entry must retain the infrastructure rows');
   assert.deepEqual(await b.evaluate("[...document.querySelectorAll('.tablePage thead .data-grid-header-row th')].map(x=>x.textContent)"),headers);
   assert.equal(await b.evaluate("!!document.querySelector('[data-business-write=update]')"),role==='Client-Admin',`${role} preview=${preview}`);
   await b.evaluate("document.querySelector('[aria-label=\"Page suivante\"]').click()");await b.waitFor("document.querySelector('.grid-pagination-summary strong')?.textContent==='51–100'");
   await click('Carte');await b.waitFor("!!document.querySelector('.client-back')");await click('Tableau');
+  assert.equal(await b.evaluate("document.querySelector('.grid-pagination-summary strong').textContent"),'51–100');
+  await click('Carte interactive');await b.waitFor("!!document.querySelector('.client-back')");
+  await click('Infrastructures');await ready();
   assert.equal(await b.evaluate("document.querySelector('.grid-pagination-summary strong').textContent"),'51–100');
   await b.evaluate("document.querySelector('.tablePage tbody tr').click()");await b.waitFor("!!document.querySelector('.drawer')");
   assert.equal(await b.evaluate("document.querySelector('.drawer').textContent.includes('Modifier la fiche')"),role==='Client-Admin');
@@ -34,6 +39,17 @@ await offlineBrowser('scripts/fixtures/business-parity-final-entry.jsx',async b=
   }
   records.push({role,preview,columns:'PASS',editButton:'PASS',mapRoundTrip:'PASS',pagePreserved:'PASS',detail:'PASS'});
  }
+ await b.evaluate("mount('Client-Admin')");await b.sleep(100);
+ await b.waitFor("document.querySelector('[data-dashboard-state]')?.dataset.dashboardState==='ready'");
+ await b.evaluate('fixture.rowDelay=250');await click('Infrastructures');
+ await b.waitFor("document.querySelector('.client-loading[role=status]')?.textContent.includes('Chargement')");
+ await click('Infrastructures');await ready();
+ assert.equal(await b.evaluate("fixture.calls.filter(c=>c.name==='loadBusinessRows').length"),1);
+ await click('Sommaire');await click('Carte interactive');
+ await b.waitFor("document.querySelector('.client-loading')?.textContent.includes('carte interactive')");
+ await click('Sommaire');await b.sleep(350);
+ assert.equal(await b.evaluate("!!document.querySelector('.leaflet-container')"),false,'A late map response must not reopen a map after leaving');
+ records.push({repeatedNavigationDuringLoad:'PASS',loadingFeedback:'PASS',lateMapResponseIgnored:'PASS',sidebarMapRoundTrip:'PASS'});
  for(const role of ['Client','Client-Admin']){
   await b.evaluate(`mount(${JSON.stringify(role)},2,'requests')`);await b.sleep(100);
   await b.waitFor("[...document.querySelectorAll('button')].some(x=>x.textContent.trim()==='Nouvelle requête')");
