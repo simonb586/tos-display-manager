@@ -9,13 +9,15 @@ Les données historiques sans propriétaire explicite ont été rattachées à *
 ## Inventaire et périmètre
 
 - ADMIN VIEWS : **35** routes inventoriées par le registre existant.
-- CLIENT VIEWS : **4** vues métier autorisées, **7** entrées avec Sommaire, Exports et Carte interactive.
-- CLIENT-ADMIN VIEWS : **13** vues métier autorisées, **16** entrées avec Sommaire, Exports et Carte interactive.
+- CLIENT VIEWS : **7** vues métier autorisées, **10** entrées avec Sommaire, Exports et Carte interactive (complément du 11 septembre).
+- CLIENT-ADMIN VIEWS : **15** vues métier autorisées, **18** entrées avec Sommaire, Exports et Carte interactive (complément du 11 septembre).
 - « Voir en tant que » est une commande Admin supplémentaire, pas une catégorie métier.
 
 Les valeurs ci-dessous sont celles de la validation SQL. Un écart de publication ou de propriétaire est une restriction existante, pas une source de données différente. N/A signifie que la configuration actuelle n’autorise pas cette vue pour Client.
 
 Le [correctif de navigation Marylène](MARYLENE_NAVIGATION_FIX.md) complète cette validation après le signalement d’un tableau vidé par un clic répété, de la Carte absente du menu et d’une palette différente.
+
+Le [complément d’accès aux affectations](ASSIGNMENT_ACCESS.md) ajoute les deux vues par site et supports à Client et Client-Admin, ainsi que l’accès Client aux communications opérationnelles. Il est déployé et validé en production avec les comptes 25 et 33 et l’aperçu Marylène. Le tableau ci-dessous conserve les résultats de l’audit initial; les nouvelles vues et leur déduplication sont détaillées dans ce complément.
 
 | Vue canonique | Admin : lignes | EXO : lignes | Client | Client-Admin | Édition CA |
 |---|---:|---:|---|---|---|

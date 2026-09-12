@@ -25,4 +25,4 @@ Fichiers applicatifs :
 
 Tests : `scripts/verify_business_parity_browser.mjs`, `scripts/fixtures/business-parity-final-entry.jsx`, `scripts/verify_marylene_navigation.mjs`. Les autres fichiers modifiés de ce correctif sont les rapports et preuves de ce dossier.
 
-Livraison : vérification de production en attente.
+Livraison : déployé avec le commit `618ba03`, déploiement Vercel `dpl_GEHRWyBNzSCuWVQyheBATiRhFiiK`. [Vérification de production PASS](marylene-navigation-production.json), y compris les deux nouvelles vues par site et supports. Voir le [rapport complémentaire](ASSIGNMENT_ACCESS.md).
