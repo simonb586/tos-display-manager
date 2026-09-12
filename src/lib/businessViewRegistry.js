@@ -136,8 +136,8 @@ export const BUSINESS_VIEW_REGISTRY = Object.freeze([
     "adminComponents": [
       "SiteSupportAssignmentsView"
     ],
-    "clientViewId": null,
-    "clientPolicy": "not_implemented",
+    "clientViewId": "marketing_assignments",
+    "clientPolicy": "scoped_projection",
     "columnContract": null
   },
   {
@@ -163,8 +163,8 @@ export const BUSINESS_VIEW_REGISTRY = Object.freeze([
     "adminComponents": [
       "SiteSupportAssignmentsView"
     ],
-    "clientViewId": null,
-    "clientPolicy": "not_implemented",
+    "clientViewId": "operational_assignments",
+    "clientPolicy": "scoped_projection",
     "columnContract": null
   },
   {

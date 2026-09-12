@@ -8,6 +8,12 @@ export function validateDashboardSummary(data) {
       !Array.isArray(data.permission?.visible_tables) || !data.kpis || !data.sections) {
     throw new Error('Résumé du tableau de bord incomplet. Réessayez.');
   }
+  // Assignment grids share the existing Admin logical-assignment KPIs. Older
+  // summary RPCs already return these totals under kpis, not under sections.
+  data = {...data, sections: {...data.sections}};
+  for (const [section, key] of [['marketing_assignments','marketing_places'], ['operational_assignments','operational_places']]) {
+    if (!data.sections[section] && Number.isSafeInteger(data.kpis[key])) data.sections[section] = {total:data.kpis[key]};
+  }
   for (const value of [...Object.values(data.kpis), ...Object.values(data.sections).map(section => section?.total)]) {
     if (!Number.isSafeInteger(value) || value < 0) throw new Error('Un indicateur est indisponible. Réessayez.');
   }

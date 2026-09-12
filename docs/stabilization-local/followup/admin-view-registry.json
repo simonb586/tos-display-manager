@@ -1,0 +1,398 @@
+{
+  "navigationCount": 35,
+  "views": [
+    {
+      "name": "Tableau de bord",
+      "route": "Tableau de bord",
+      "components": [
+        "Module14Dashboard",
+        "Dashboard"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Exports",
+      "route": "Exports",
+      "components": [
+        "ExportsCenter"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Centre de commandement",
+      "route": "Centre de commandement",
+      "components": [
+        "OperationalCommandCenter"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Gestionnaire des champs",
+      "route": "Gestionnaire des champs",
+      "components": [
+        "FieldCatalogManager"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Administration",
+      "route": "Administration",
+      "components": [
+        "AdminPanel"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Utilisateurs réels",
+      "route": "Utilisateurs réels",
+      "components": [
+        "UserProvisioningPanel"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Visibilité par rôle",
+      "route": "Visibilité par rôle",
+      "components": [
+        "RoleVisibilityAdmin"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Édition — Historique",
+      "route": "Édition — Historique",
+      "components": [
+        "ChangeHistoryPanel"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Photos et inventaire",
+      "route": "Photos et inventaire",
+      "components": [
+        "PhotoInventoryCenter"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Centre EDT et BT",
+      "route": "Centre EDT et BT",
+      "components": [
+        "OperationsCenter"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Rapports EDT",
+      "route": "Rapports EDT",
+      "components": [
+        "Module15Reports"
+      ],
+      "clientView": "reports",
+      "clientComponent": "ClientBusinessGrid",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Automatisations",
+      "route": "Automatisations",
+      "components": [
+        "AutomationAssistant"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Campagnes maîtres",
+      "route": "Campagnes maîtres",
+      "components": [
+        "CampaignsPanel"
+      ],
+      "clientView": "campaigns",
+      "clientComponent": "ClientBusinessGrid",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Campagne — Visuels et formats",
+      "route": "Campagne — Visuels et formats",
+      "components": [
+        "CampaignVisualManager"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Campagnes et visuels par site et supports",
+      "route": "Campagnes et visuels par site et supports",
+      "components": [
+        "SiteSupportAssignmentsView"
+      ],
+      "clientView": "marketing_assignments",
+      "clientComponent": "SiteSupportAssignmentsView",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Communications opérationnelles",
+      "route": "Communications opérationnelles",
+      "components": [
+        "CampaignsPanel"
+      ],
+      "clientView": "communications",
+      "clientComponent": "ClientBusinessGrid",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Communication opérationnelle — Visuels",
+      "route": "Communication opérationnelle — Visuels",
+      "components": [
+        "CampaignVisualManager"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Communications opérationnelles par site et supports",
+      "route": "Communications opérationnelles par site et supports",
+      "components": [
+        "SiteSupportAssignmentsView"
+      ],
+      "clientView": "operational_assignments",
+      "clientComponent": "SiteSupportAssignmentsView",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Carte interactive",
+      "route": "Carte interactive",
+      "components": [
+        "InteractiveMap"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Application terrain",
+      "route": "Application terrain",
+      "components": [
+        "TerrainApp"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Recherche terrain",
+      "route": "Recherche terrain",
+      "components": [
+        "FieldSearch"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Infrastructures",
+      "route": "Infrastructures",
+      "components": [
+        "TableView"
+      ],
+      "clientView": "infrastructures",
+      "clientComponent": "ClientBusinessGrid",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Répertoire des affiches",
+      "route": "Répertoire des affiches",
+      "components": [
+        "TableView"
+      ],
+      "clientView": "poster_directory",
+      "clientComponent": "ClientBusinessGrid",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Enjeux des cadres et supports",
+      "route": "Enjeux des cadres et supports",
+      "components": [
+        "TableView"
+      ],
+      "clientView": "issues",
+      "clientComponent": "ClientBusinessGrid",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Centres d’information",
+      "route": "Centres d’information",
+      "components": [
+        "TableView"
+      ],
+      "clientView": "information_centers",
+      "clientComponent": "ClientBusinessGrid",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "C.I. avec enjeux",
+      "route": "C.I. avec enjeux",
+      "components": [
+        "TableView"
+      ],
+      "clientView": "information_centers_issues",
+      "clientComponent": "ClientBusinessGrid",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Liste des arrêts",
+      "route": "Liste des arrêts",
+      "components": [
+        "TableView"
+      ],
+      "clientView": "stops",
+      "clientComponent": "ClientBusinessGrid",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Voitures / trains",
+      "route": "Voitures / trains",
+      "components": [
+        "TableView"
+      ],
+      "clientView": "vehicles_trains",
+      "clientComponent": "ClientBusinessGrid",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Photos",
+      "route": "Photos",
+      "components": [
+        "TableView"
+      ],
+      "clientView": "photos",
+      "clientComponent": "ClientBusinessGrid",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Bons de travail",
+      "route": "Bons de travail",
+      "components": [
+        "WorkOrdersPanel"
+      ],
+      "clientView": "requests",
+      "clientComponent": "ClientRequestForm",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Historique des campagnes",
+      "route": "Historique des campagnes",
+      "components": [
+        "TableView"
+      ],
+      "clientView": "history",
+      "clientComponent": "ClientBusinessGrid",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Suivi des EDT",
+      "route": "Suivi des EDT",
+      "components": [
+        "OperationsCenter"
+      ],
+      "clientView": "edt",
+      "clientComponent": "ClientBusinessGrid",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Utilisateurs",
+      "route": "Utilisateurs",
+      "components": [
+        "TableView"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Clients",
+      "route": "Clients",
+      "components": [
+        "ClientsAccessAdmin"
+      ],
+      "clientView": "members",
+      "clientComponent": "ClientBusinessGrid",
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    },
+    {
+      "name": "Journal des événements",
+      "route": "Journal des événements",
+      "components": [
+        "ActivityJournal"
+      ],
+      "clientView": null,
+      "clientComponent": null,
+      "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
+      "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
+    }
+  ],
+  "contextRoutes": [
+    "Connexion",
+    "Diagnostic terrain",
+    "Rapports finaux",
+    "Validation système",
+    "Import anciennes photos"
+  ]
+}

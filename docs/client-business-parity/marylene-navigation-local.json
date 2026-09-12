@@ -1,9 +1,19 @@
 {
-  "at": "2026-09-11T08:27:47.045Z",
+  "at": "2026-09-12T03:00:59.516Z",
   "mode": "local",
   "profile": 25,
   "client": 2,
   "before": "1–50 sur 6 6190 sélectionnée(s)",
+  "assignmentViews": [
+    {
+      "label": "Campagnes et visuels par site et supports",
+      "summary": "1–25 sur 1640 sélectionnée(s)"
+    },
+    {
+      "label": "Communications opérationnelles par site et supports",
+      "summary": "1–25 sur 520 sélectionnée(s)"
+    }
+  ],
   "repeatedNavigationRetainsRows": true,
   "mapInSidebar": true,
   "adminPalette": {

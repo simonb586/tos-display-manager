@@ -27,6 +27,12 @@ try{
   await b.evaluate("(()=>{const s=document.querySelector('.ca-preview select');s.value='25';s.dispatchEvent(new Event('change',{bubbles:true}));})()");await b.pause(100);await click('Ouvrir sa vue réelle');
   await b.waitFor("!!document.querySelector('.client-portal') && document.querySelector('[data-dashboard-state]')?.dataset.dashboardState==='ready'",60);
   const clientPalette=await palette('.client-body > aside');
+  const assignmentViews=[];
+  if(!diagnose)for(const label of ['Campagnes et visuels par site et supports','Communications opérationnelles par site et supports']){
+   await click(label);await b.waitFor("!!document.querySelector('.assignment-page tbody tr') && !document.querySelector('.assignment-page .client-loading')",90);
+   assert(await b.evaluate("!!document.querySelector('.assignment-actions [aria-label=Modifier]')"));
+   assignmentViews.push({label,summary:await b.evaluate("document.querySelector('.assignment-page .grid-pagination-summary')?.textContent")});
+  }
   await click('Infrastructures');await b.waitFor("!!document.querySelector('.tablePage tbody tr')",90);
   const before=await b.evaluate("document.querySelector('.grid-pagination-summary')?.textContent");
   await click('Infrastructures');await b.pause(250);
@@ -44,7 +50,7 @@ try{
    assert.deepEqual(b.errors,[]);
    assert.deepEqual(b.responses.filter(r=>r.status>=400&&!r.url.includes('tile.openstreetmap')).map(({url,status})=>({url,status})),[]);
   }
-  return {at:new Date().toISOString(),mode:production?'production':'local',profile:25,client:2,before,repeatedNavigationRetainsRows:retained,mapInSidebar:menuMap,adminPalette,clientPalette,status:diagnose?'DIAGNOSIS':'PASS'};
+  return {at:new Date().toISOString(),mode:production?'production':'local',profile:25,client:2,before,assignmentViews,repeatedNavigationRetainsRows:retained,mapInSidebar:menuMap,adminPalette,clientPalette,status:diagnose?'DIAGNOSIS':'PASS'};
  });
  fs.writeFileSync(`docs/client-business-parity/marylene-navigation-${diagnose?'before':production?'production':'local'}.json`,JSON.stringify(record,null,2)+'\n');console.log(JSON.stringify(record));
 }finally{if(actor)await actor.client.auth.signOut({scope:'local'});server?.close();delete process.env.TDM_TEST_PORTAL_ORIGIN;}

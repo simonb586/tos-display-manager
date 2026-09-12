@@ -1,0 +1,38 @@
+{
+  "at": "2026-09-12T02:58:44.742Z",
+  "mode": "local-build-real-backend",
+  "records": [
+    {
+      "profileId": 25,
+      "views": [
+        {
+          "label": "Campagnes et visuels par site et supports",
+          "edit": true,
+          "summary": "1–25 sur 1640 sélectionnée(s)"
+        },
+        {
+          "label": "Communications opérationnelles par site et supports",
+          "edit": true,
+          "summary": "1–25 sur 520 sélectionnée(s)"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "profileId": 33,
+      "views": [
+        {
+          "label": "Campagnes et visuels par site et supports",
+          "edit": false,
+          "summary": "1–25 sur 1630 sélectionnée(s)"
+        },
+        {
+          "label": "Communications opérationnelles par site et supports",
+          "edit": false,
+          "summary": "1–25 sur 520 sélectionnée(s)"
+        }
+      ],
+      "status": "PASS"
+    }
+  ]
+}

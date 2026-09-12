@@ -2,16 +2,20 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import ClientPortal from '../../src/components/ClientPortal';
 import BusinessTable from '../../src/components/BusinessTable';
+import SiteSupportAssignmentsView from '../../src/components/SiteSupportAssignmentsView';
+import {assignmentViewName} from '../../src/lib/assignmentEditing';
 import Dashboard from '../../src/components/Module14Dashboard';
 import {CLIENT_BUSINESS_ROUTES} from '../../src/lib/clientBusinessRoutes';
 const root=createRoot(document.getElementById('root'));let serial=0;
 window.confirm=()=>true;
 window.fixture={calls:[],role:'Client',client:2,view:'infrastructures'};
 const rows=()=>Array.from({length:120},(_,i)=>({id:i+1,client_id:fixture.client,support_id:`SUP-${fixture.client}-${i+1}`,site:i<70?'Nord':'Sud',commentaires:'Initial',latitude:45.5+i/10000,longitude:-73.5,...fixture.overrides?.[i+1]}));
-const permission=()=>({visible_tables:[fixture.view==='requests'?'Bons de travail':CLIENT_BUSINESS_ROUTES[fixture.view]||'Infrastructures'],visible_columns:{},capabilities:fixture.role==='Client-Admin'?{'*':{update:true}}:{}});
+const permission=()=>({visible_tables:fixture.view==='assignments'?['Infrastructures',assignmentViewName('marketing'),assignmentViewName('operational_communication')]:[fixture.view==='requests'?'Bons de travail':CLIENT_BUSINESS_ROUTES[fixture.view]||'Infrastructures'],visible_columns:{},capabilities:fixture.role==='Client-Admin'?{'*':{update:true}}:{}});
 const summary=()=>({version:1,identity:{user_id:'user-'+fixture.client,profile_id:fixture.client,client_id:fixture.client,role:fixture.role,client_name:fixture.client===2?'EXO':'Client B'},permission:permission(),kpis:{infrastructures_total:120,infrastructures_active:120,missing_photos:120},sections:{supports:{total:120}}});
 window.testApi=(file,name,args)=>{
  fixture.calls.push({name,args});
+ if(name==='getMarketingAssignmentsBySiteAndSupport'||name==='getOperationalCommunicationAssignmentsBySiteAndSupport'){const operational=name.includes('Operational');return Promise.resolve({rows:[{id:1,logical_key:'A',support_id:'SUP-2-1',_assignment_table:operational?'communications_operationnelles_sites_supports':'campagnes_visuels_sites_supports',nom_campagne:'Campagne A',message:'Communication A',visuel_terrain:'Visuel A',statut:'Initial',statut_campagne:'Initial',...fixture.assignmentChanges}],total:1,page:1,pageSize:25})}
+ if(name==='updateSiteSupportAssignment')return new Promise(resolve=>setTimeout(()=>{fixture.assignmentChanges=args[1];resolve({id:1})},40));
  if(name==='loadDashboardSummary'||name==='loadPreviewSummary')return Promise.resolve(summary());
  if(name==='loadBusinessRows')return new Promise(resolve=>setTimeout(()=>resolve({rows:rows(),total:120}),fixture.rowDelay||0));
  if(name==='listClientPortalSection')return Promise.resolve({rows:rows(),total:120,page:1,page_size:25});
@@ -32,3 +36,5 @@ window.mount=(role='Client',client=2,view='infrastructures',preview=false)=>{
  root.render(role==='Administrateur'&&!preview?<BusinessTable key={++serial} name={CLIENT_BUSINESS_ROUTES[view]} dataStore={{[CLIENT_BUSINESS_ROUTES[view]]:{rows:rows()}}} role={role} rolePermission={permission()} onRowsUpdated={()=>{}}/>:<ClientPortal key={++serial} profile={profile} preview={preview?{target_user:profile}:null} onClose={()=>{}}/>);
 };
 window.mountDashboard=(role='Administrateur')=>{fixture={calls:[],role,client:2,view:'infrastructures'};root.render(<Dashboard key={++serial} role={role} onNavigate={()=>{}} {...(role!=='Administrateur'?{clientProjection:{identity:summary().identity,views:[],kpis:summary().kpis}}:{})}/>);};
+
+window.mountAssignments=(role,context='marketing')=>{fixture={calls:[],role,client:2,view:'assignments'};root.render(<div key={++serial} data-fixture-role={role}><SiteSupportAssignmentsView role={role} context={context} permission={permission()} scopeKey={role}/></div>);};

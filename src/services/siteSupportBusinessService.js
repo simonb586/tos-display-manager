@@ -3,6 +3,8 @@ import { BUSINESS_CONTEXT, normalizeBusinessContext } from '../lib/businessConte
 import { assignmentLogicalKey, normalizeUniqueAssignments } from '../lib/siteSupportAssignments.js';
 import { defaultSortForColumn, sortRows } from '../lib/gridSorting.js';
 
+import { assignmentUpdatePayload } from '../lib/assignmentEditing.js';
+
 const PAGE_SIZES=[25,50,100,200];
 const FETCH_SIZE=1000;
 const safePageSize=value=>PAGE_SIZES.includes(Number(value))?Number(value):25;
@@ -15,10 +17,10 @@ const normalizedText=value=>String(value??'').trim().toLocaleLowerCase('fr-CA');
 // V1.2.2 server-query semantics are preserved locally across both sources:
 // .eq('business_context',context), searchableFor(context), .order(sortColumn, { ascending }).
 
-async function fetchAll(table,select='*',signal){
+async function fetchAll(table,select='*',signal,previewTargetId){
   const rows=[];
   for(let from=0;;from+=FETCH_SIZE){
-    let query=supabase.from(table).select(select).range(from,from+FETCH_SIZE-1);
+    let query=previewTargetId ? supabase.rpc('admin_preview_assignment_source',{p_target_user_id:previewTargetId,p_table:table,p_offset:from,p_limit:FETCH_SIZE}) : supabase.from(table).select(select).order('id').range(from,from+FETCH_SIZE-1);
     if(signal)query=query.abortSignal(signal);
     const{data,error}=await query;
     if(error)throw error;
@@ -42,7 +44,7 @@ export function canonicalAssignmentRows(assignments,campaigns,infrastructures,vi
     const infrastructure=infrastructureBySupport.get(String(assignment.support_id))||{};
     const visual=(visualsByCampaign.get(String(campaign.id))||[]).find(item=>normalizedText(item.nom_visuel)===normalizedText(assignment.visuel_attendu));
     const common={
-      id:assignment.id,legacy_id:assignment.id,source_table:'campagnes_supports',site:infrastructure.site??null,
+      _assignment_table:'campagnes_supports',visuel_attendu:assignment.visuel_attendu,statut:assignment.statut,id:assignment.id,legacy_id:assignment.id,source_table:'campagnes_supports',site:infrastructure.site??null,
       infrastructure_id:infrastructure.id??null,campaign_id:campaign.id,visual_id:visual?.id??null,
       business_context:context,support_id:assignment.support_id,created_at:assignment.created_at,
       updated_at:assignment.updated_at,raw_data:assignment,installation:assignment.date_completion,
@@ -58,14 +60,14 @@ export function canonicalAssignmentRows(assignments,campaigns,infrastructures,vi
   });
 }
 
-async function loadRows(context,signal,infrastructureRows){
+async function loadRows(context,signal,infrastructureRows,previewTargetId){
   const [historical,assignments,campaigns,infrastructures,visuals]=await Promise.all([
-    fetchAll(tableFor(context),'*',signal),fetchAll('campagnes_supports','*',signal),fetchAll('campagnes_maitres','*',signal),
-    infrastructureRows ?? fetchAll('infrastructures','id,support_id,site,emplacement_visibilite',signal),
-    fetchAll('campagne_visuels_formats','id,campagne_id,nom_visuel',signal)
+    fetchAll(tableFor(context),'*',signal,previewTargetId),fetchAll('campagnes_supports','*',signal,previewTargetId),fetchAll('campagnes_maitres','*',signal,previewTargetId),
+    infrastructureRows ?? fetchAll('infrastructures','id,support_id,site,emplacement_visibilite',signal,previewTargetId),
+    fetchAll('campagne_visuels_formats','id,campagne_id,nom_visuel',signal,previewTargetId)
   ]);
   const current=canonicalAssignmentRows(assignments,campaigns,infrastructures,visuals).filter(row=>row.business_context===context);
-  const tagged=[...current,...historical.filter(row=>row.business_context===context)].map(row=>({...row,logical_key:assignmentLogicalKey(row)}));
+  const tagged=[...current,...historical.filter(row=>row.business_context===context).map(row=>({...row,_assignment_table:tableFor(context)}))].map(row=>({...row,logical_key:assignmentLogicalKey(row)}));
   return normalizeUniqueAssignments(tagged);
 }
 
@@ -91,17 +93,25 @@ export function prepareRows(rows,context,search,filters,sortState){
 
 export function paginateRows(rows,page,pageSize){const size=safePageSize(pageSize),current=Math.max(1,Number(page)||1),from=(current-1)*size;return{rows:rows.slice(from,from+size),total:rows.length,page:current,pageSize:size}}
 
-export async function getAssignmentsBySiteAndSupport({context=BUSINESS_CONTEXT.MARKETING,page=1,pageSize=25,search='',filters={},sortState=null,signal}={}){
+export async function getAssignmentsBySiteAndSupport({context=BUSINESS_CONTEXT.MARKETING,page=1,pageSize=25,search='',filters={},sortState=null,signal,previewTargetId}={}){
   const size=safePageSize(pageSize),current=Math.max(1,Number(page)||1);
   if(!supabaseConfigured||!supabase)return{rows:[],total:0,page:current,pageSize:size};
-  const rows=prepareRows(await loadRows(context,signal),context,search,filters,sortState);
+  const rows=prepareRows(await loadRows(context,signal,undefined,previewTargetId),context,search,filters,sortState);
   return paginateRows(rows,current,size);
 }
 
 export const getMarketingAssignmentsBySiteAndSupport=options=>getAssignmentsBySiteAndSupport({...options,context:BUSINESS_CONTEXT.MARKETING});
 export const getOperationalCommunicationAssignmentsBySiteAndSupport=options=>getAssignmentsBySiteAndSupport({...options,context:BUSINESS_CONTEXT.OPERATIONAL});
 
-export async function getAllAssignmentsBySiteAndSupport({context=BUSINESS_CONTEXT.MARKETING,search='',filters={},sortState=null,infrastructureRows}={}){
+export async function getAllAssignmentsBySiteAndSupport({context=BUSINESS_CONTEXT.MARKETING,search='',filters={},sortState=null,infrastructureRows,previewTargetId}={}){
   if(!supabaseConfigured||!supabase)return[];
-  return prepareRows(await loadRows(context,undefined,infrastructureRows),context,search,filters,sortState);
+  return prepareRows(await loadRows(context,undefined,infrastructureRows,previewTargetId),context,search,filters,sortState);
+}
+
+export async function updateSiteSupportAssignment(row, form) {
+  if (!supabaseConfigured || !supabase) throw new Error('Supabase indisponible.');
+  const payload = assignmentUpdatePayload(row, form);
+  const { data, error } = await supabase.from(row._assignment_table).update(payload).eq('id', row.id).select('id').single();
+  if (error) throw error;
+  return data;
 }

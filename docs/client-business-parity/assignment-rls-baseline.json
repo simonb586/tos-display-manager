@@ -1,0 +1,110 @@
+[
+  {
+    "tablename": "campagnes_supports",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "cmd": "DELETE",
+    "roles": "{authenticated}",
+    "qual": "(tos_remaining_tenant_scope('campagnes_supports'::text, to_jsonb(campagnes_supports.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "tablename": "campagnes_supports",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "cmd": "INSERT",
+    "roles": "{authenticated}",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('campagnes_supports'::text, to_jsonb(campagnes_supports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "tablename": "campagnes_supports",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "cmd": "SELECT",
+    "roles": "{authenticated}",
+    "qual": "(tos_remaining_tenant_scope('campagnes_supports'::text, to_jsonb(campagnes_supports.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "tablename": "campagnes_supports",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "cmd": "UPDATE",
+    "roles": "{authenticated}",
+    "qual": "(tos_remaining_tenant_scope('campagnes_supports'::text, to_jsonb(campagnes_supports.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('campagnes_supports'::text, to_jsonb(campagnes_supports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "tablename": "campagnes_visuels_sites_supports",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "cmd": "DELETE",
+    "roles": "{authenticated}",
+    "qual": "(tos_remaining_tenant_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "tablename": "campagnes_visuels_sites_supports",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "cmd": "INSERT",
+    "roles": "{authenticated}",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "tablename": "campagnes_visuels_sites_supports",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "cmd": "SELECT",
+    "roles": "{authenticated}",
+    "qual": "(tos_remaining_tenant_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "tablename": "campagnes_visuels_sites_supports",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "cmd": "UPDATE",
+    "roles": "{authenticated}",
+    "qual": "(tos_remaining_tenant_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "tablename": "communications_operationnelles_sites_supports",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "cmd": "DELETE",
+    "roles": "{authenticated}",
+    "qual": "(tos_remaining_tenant_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "tablename": "communications_operationnelles_sites_supports",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "cmd": "INSERT",
+    "roles": "{authenticated}",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "tablename": "communications_operationnelles_sites_supports",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "cmd": "SELECT",
+    "roles": "{authenticated}",
+    "qual": "(tos_remaining_tenant_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "tablename": "communications_operationnelles_sites_supports",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "cmd": "UPDATE",
+    "roles": "{authenticated}",
+    "qual": "(tos_remaining_tenant_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), 'write'::text) IS TRUE)"
+  }
+]
