@@ -40,7 +40,8 @@ for(const marker of ['auth.uid() is null','terrain_role_denied','cross_client_de
 assert.match(edtSchema,/unique\s*\(edt_id,\s*support_id\)/);
 assert.ok(edtPhaseSchema.includes('on public.edt_supports(phase_id,support_id)'));
 assert.doesNotMatch(sql,/infrastructures[^;]+edt_associe\s*=\s*[^,;]+[^;]+where[^;]+edt_associe/i);
-assert.ok(terrain.includes('phaseId: issuePhaseId'));
-assert.ok(terrain.includes('Contexte EDT / phase d’installation'));
+assert.ok(terrain.includes("phaseId: action === 'enjeu' ? issuePhaseId : null"));
+assert.ok(!terrain.includes('Contexte EDT / phase d’installation'));
+assert.ok(service.includes('p_edt_phase_id: null'));
 assert.ok(service.includes("rpc('lister_visuels_installation_terrain_v1331'"));
 console.log('V1.3.3.1 Terrain many-to-many, visuels et brouillons : PASS.');

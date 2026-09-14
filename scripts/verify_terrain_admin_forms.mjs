@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import {offlineBrowser} from './lib/offlineBrowser.mjs';
+await offlineBrowser('scripts/fixtures/terrain-p0-admin-entry.jsx',async({evaluate,waitFor,sleep,exceptions})=>{
+  await evaluate("mount('visual')");await waitFor("Array.from(document.querySelectorAll('button')).some(b=>b.title==='Modifier'||b.textContent.includes('Modifier'))");
+  await evaluate("Array.from(document.querySelectorAll('button')).find(b=>b.title==='Modifier'||b.textContent.includes('Modifier')).click()");
+  await waitFor("!!document.querySelector('form')");
+  await evaluate("window.change=(e,v)=>{e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}))};change(document.querySelectorAll('form select')[1],'114')");await sleep(80);
+  await evaluate("document.querySelector('form').requestSubmit()");await waitFor("fixture.calls.some(c=>c.name==='saveCampaignVisual')");
+  assert.equal(await evaluate("fixture.calls.find(c=>c.name==='saveCampaignVisual').args[0].edt_phase_id"),'114');
+  await evaluate("mount('edt')");await waitFor("document.body.textContent.includes('Visible')");
+  assert(await evaluate("document.body.textContent.includes('Détacher de cet EDT')"));
+  await evaluate("Array.from(document.querySelectorAll('button')).find(b=>b.textContent.includes('Détacher')).click()");
+  await waitFor("document.body.textContent.includes('Aucun visuel associé')");
+  await evaluate("change(document.querySelector('form select'),'34')");await sleep(80);await evaluate("document.querySelector('form').requestSubmit()");
+  await waitFor("document.body.textContent.includes('Détacher de cet EDT')");assert.equal(await evaluate('fixture.phase'),'114');
+  await evaluate("mount('visual','Coordonnateur')");await waitFor("Array.from(document.querySelectorAll('button')).some(b=>b.title==='Modifier'||b.textContent.includes('Modifier'))");
+  await evaluate("Array.from(document.querySelectorAll('button')).find(b=>b.title==='Modifier'||b.textContent.includes('Modifier')).click()");await waitFor("!!document.querySelector('form')");
+  assert.equal(await evaluate("document.querySelectorAll('form select')[1].disabled"),true);
+  assert.deepEqual(exceptions,[]);
+});
+console.log('PASS: visual form -> EDT link; EDT form reads/detaches/reattaches same relation; coordinator control disabled. Local browser UI contracts.');

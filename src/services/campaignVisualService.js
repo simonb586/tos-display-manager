@@ -32,17 +32,13 @@ export async function diagnoseCompatibleVisualsForSupport(support, phaseId) {
     reason: ''
   };
 
-  if (!phaseId) {
-    return { visuals: [], diagnostic: { ...baseDiagnostic, reason: 'Sélectionne d’abord la phase d’installation.' } };
-  }
-
   const { data, error } = await supabase.rpc('lister_visuels_installation_terrain_v1331', {
     p_support_id: String(support?.support_id || ''),
-    p_edt_phase_id: Number(phaseId)
+    p_edt_phase_id: null
   });
 
   if (error) {
-    throw new Error(`Lecture des visuels impossible : ${error.message || error}`);
+    throw error;
   }
 
   const activeCampaigns = Array.isArray(data) ? data : [];
@@ -94,6 +90,17 @@ export async function listCampaignVisuals() {
     .order('nom_visuel');
   if (error) throw error;
   return data || [];
+}
+
+export async function assignVisualToEdt(visualId, phaseId) {
+  ready();
+  const {data,error}=await supabase.rpc('rattacher_visuel_edt_v1343', {
+    p_visual_id:Number(visualId), p_phase_id:phaseId ? Number(phaseId) : null
+  });
+  if(error) throw error;
+  if(!data?.ok) throw new Error('Le rattachement du visuel n’a pas été confirmé.');
+  window.dispatchEvent(new CustomEvent('tos-terrain-data-updated'));
+  return data;
 }
 
 export async function listEdtPhasesForCampaign(campaignId) {

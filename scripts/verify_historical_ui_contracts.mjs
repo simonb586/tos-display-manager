@@ -16,7 +16,7 @@ await offlineBrowser('scripts/fixtures/historical-ui-entry.jsx',async({evaluate,
   }
  }
  for(const [identity,role] of [['Marylene EXO','Client-Admin'],['EXO','Client'],['Client B','Client'],['Preview Marylene','Administrateur']]){
-  await evaluate(`mount('client-dashboard',${JSON.stringify(identity)},${JSON.stringify(role)})`);await waitFor(`document.body.textContent.includes(${JSON.stringify(identity)})`);
+  await evaluate(`mount('client-dashboard',${JSON.stringify(identity)},${JSON.stringify(role)})`);await waitFor(`document.querySelector('.executive-kpi strong')?.textContent==='7'`);
   assert.equal(await evaluate('calls.length'),0,'scoped dashboard must never load Admin services');
   assert.deepEqual(await evaluate("[...document.querySelectorAll('.executive-kpi strong')].map(x=>x.textContent)"),['7']);
   assert.equal(await evaluate("document.querySelectorAll('.executive-kpi').length"),1,'only permitted view rendered');
@@ -27,7 +27,9 @@ await offlineBrowser('scripts/fixtures/historical-ui-entry.jsx',async({evaluate,
   await evaluate(`mount('assignments',${JSON.stringify(context)})`);await waitFor("Boolean(document.querySelector('button[title=\"Fiche 360\"]'))");
   for(const label of ['ID historique','Contexte métier','Données source'])assert.equal(await evaluate(`document.querySelector('table').textContent.includes(${JSON.stringify(label)})`),true,'canonical assignment column '+label);
   for(const [label,target] of [['Fiche 360','Infrastructures'],['Photos','Photos et inventaire'],['Historique','Édition — Historique'],['EDT','Centre EDT et BT'],['Visuel',context==='marketing'?'Campagne — Visuels et formats':'Communication opérationnelle — Visuels']]){
-   await click(label,'.assignment-actions button');assert.equal(await evaluate('routes.at(-1)'),target);
+   await click(label,'.assignment-actions button');
+   if(label==='Visuel'){await waitFor("Boolean(document.querySelector('[role=dialog]'))");await click('Gérer les visuels','[role=dialog] button');}
+   assert.equal(await evaluate('routes.at(-1)'),target);
    assert.equal(await evaluate("JSON.parse(sessionStorage.getItem('tos_assignment_context')).support_id"),'EXO-2');
    records.push({role:'Administrateur',view:context,control:label,result:'PASS_LOCAL_BROWSER',target});
   }

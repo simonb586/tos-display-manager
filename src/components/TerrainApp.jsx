@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { terrainErrorMessage } from '../lib/terrainErrors';
 import '../features/terrain/terrain-issue-reporting-p0.css';
 import {
   AlertTriangle,
@@ -40,6 +41,8 @@ export default function TerrainApp({ dataStore, role, session }) {
   const [issueContexts, setIssueContexts] = useState([]);
   const [issuePhaseId, setIssuePhaseId] = useState('');
   const [issueContextsLoading, setIssueContextsLoading] = useState(false);
+  const [contextError, setContextError] = useState('');
+  const [visualError, setVisualError] = useState('');
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState('');
   const [message, setMessage] = useState('');
@@ -48,6 +51,7 @@ export default function TerrainApp({ dataStore, role, session }) {
   const fileInputRef = useRef(null);
   const submittingRef = useRef(false);
   const visualRequestRef = useRef(0);
+  const contextRequestRef = useRef(0);
 
   const rows = source === 'Infrastructure' ? infrastructures : stops;
   const idField = source === 'Infrastructure' ? 'support_id' : 'no_arret';
@@ -106,6 +110,7 @@ export default function TerrainApp({ dataStore, role, session }) {
     }
 
     setVisualsLoading(true);
+    setVisualError('');
     setMessage('');
     setMessageType('info');
 
@@ -116,29 +121,19 @@ export default function TerrainApp({ dataStore, role, session }) {
       setVisualDiagnostic(result.diagnostic);
     } catch (error) {
       if (requestId !== visualRequestRef.current) return;
+      console.error('Lecture des visuels Terrain impossible', error);
       setVisuals([]);
-      setVisualDiagnostic({
-        supportId: String(row?.support_id || ''),
-        supportFormat: String(
-          row?.format_affichage || row?.format || row?.type_support || ''
-        ),
-        supportFormatKey: '',
-        totalActiveVisuals: 0,
-        matchingFormat: 0,
-        publishedCampaigns: 0,
-        activeCampaigns: 0,
-        eligibleCount: 0,
-        availableFormats: [],
-        reason: error.message || 'Diagnostic des visuels impossible.'
-      });
-      setMessageType('error');
-      setMessage(error.message || 'Diagnostic des visuels impossible.');
+      setVisualDiagnostic(null);
+      setVisualError(terrainErrorMessage(error, 'read'));
     } finally {
       if (requestId === visualRequestRef.current) setVisualsLoading(false);
     }
   }
 
   async function choose(row) {
+    ++visualRequestRef.current;
+    setVisualsLoading(false);
+    setVisualError('');
     setSelected(row);
     setQuery(String(row[idField] || ''));
     setVisualId('');
@@ -148,25 +143,29 @@ export default function TerrainApp({ dataStore, role, session }) {
     setMessageType('info');
     setIssueContexts([]);
     setIssuePhaseId('');
-    await loadIssueContexts(row);
+    await Promise.all([loadIssueContexts(row), loadVisuals(row)]);
   }
 
   async function loadIssueContexts(row) {
     if (source !== 'Infrastructure') return;
+    const requestId = ++contextRequestRef.current;
+    setContextError('');
     setIssueContextsLoading(true);
     try {
       const contexts = await listTerrainIssueContexts(row.support_id);
+      if (requestId !== contextRequestRef.current) return;
       setIssueContexts(contexts);
       const installations = contexts.filter(context => context.phase_type === 'installation');
       const phaseId = installations.length === 1 ? String(installations[0].phase_id) : '';
       setIssuePhaseId(phaseId);
-      if (phaseId) await loadVisuals(row, phaseId);
     } catch (error) {
+      if (requestId !== contextRequestRef.current) return;
       console.error('Contexte EDT/phase Terrain indisponible', error);
       setIssueContexts([]);
       setIssuePhaseId('');
+      setContextError(terrainErrorMessage(error, 'read'));
     } finally {
-      setIssueContextsLoading(false);
+      if (requestId === contextRequestRef.current) setIssueContextsLoading(false);
     }
   }
 
@@ -183,12 +182,6 @@ export default function TerrainApp({ dataStore, role, session }) {
     if (requiresVisual && !visualId) {
       setMessageType('error');
       setMessage('Sélectionne un visuel compatible pour une installation.');
-      return;
-    }
-
-    if (requiresVisual && !issuePhaseId) {
-      setMessageType('error');
-      setMessage('Sélectionne le contexte EDT et la phase d’installation.');
       return;
     }
 
@@ -215,14 +208,13 @@ export default function TerrainApp({ dataStore, role, session }) {
       const supportId = selected.support_id || selected.no_arret;
       const uploaded = await uploadTerrainPhoto(file, supportId, action, {
         campaignCode:visual?.campagne?.nom_campagne || selected.campagne_actuelle || selected.campagne_selon_visuel,
-        edt:visual?.campagne?.no_edt || selected.edt_associe,
+        edt:action === 'installation' ? visual?.edt_number : undefined,
         source:'terrain'
       });
 
       try { if (source === 'Infrastructure' && action === 'installation') {
         const result = await finalizeTerrainInstallation({
           supportId: selected.support_id,
-          phaseId: issuePhaseId,
           visualId,
           fileName: uploaded.normalizedFilename,
           storagePath: uploaded.path,
@@ -232,7 +224,7 @@ export default function TerrainApp({ dataStore, role, session }) {
         });
         if (!result?.ok || !result?.reference) throw new Error('Le serveur n’a pas confirmé la mise à jour complète.');
         setMessageType('success');
-        setMessage(`Installation confirmée. Infrastructure, historique et photo mis à jour. Référence : ${result.reference}`);
+        setMessage(`Installation confirmée. La nouvelle photo est principale ; les précédentes restent dans la galerie. Référence : ${result.reference}`);
       } else {
         if (source !== 'Infrastructure') {
           throw new Error('La stabilisation v0.12.8 exige une Infrastructure pour cette opération.');
@@ -240,7 +232,7 @@ export default function TerrainApp({ dataStore, role, session }) {
 
         const result = await finalizeTerrainIntervention({
           supportId: selected.support_id,
-          phaseId: issuePhaseId,
+          phaseId: action === 'enjeu' ? issuePhaseId : null,
           action,
           issueType,
           comments,
@@ -263,8 +255,10 @@ export default function TerrainApp({ dataStore, role, session }) {
       }
 
       if (!(source === 'Infrastructure' && action === 'installation')) {
-        const explanation = action === 'inspection'
-          ? 'Photo validée et ajoutée à la galerie, sans remplacer la photo principale.'
+        const explanation = action === 'retrait'
+          ? 'Retrait confirmé. Le support est sans affiche ; les photos restent dans la galerie.'
+          : action === 'inspection'
+          ? 'Photo validée et ajoutée à la galerie.'
           : 'Photo ajoutée à la galerie en attente de validation, sans remplacer le visuel actuel.';
         setMessageType('success');
         setMessage(`Intervention terminée. ${explanation}`);
@@ -282,7 +276,7 @@ export default function TerrainApp({ dataStore, role, session }) {
     } catch (error) {
       console.error('Échec de l’intervention Terrain', error);
       setMessageType('error');
-      setMessage(`Échec de l’intervention : ${error.message || error}`);
+      setMessage(terrainErrorMessage(error));
     } finally {
       submittingRef.current = false;
       setBusy(false);
@@ -307,6 +301,11 @@ export default function TerrainApp({ dataStore, role, session }) {
               value={source}
               onChange={event => {
                 visualRequestRef.current += 1;
+                contextRequestRef.current += 1;
+                setIssueContextsLoading(false);
+                setVisualsLoading(false);
+                setContextError('');
+                setVisualError('');
                 setSource(event.target.value);
                 setSelected(null);
                 setQuery('');
@@ -359,36 +358,26 @@ export default function TerrainApp({ dataStore, role, session }) {
               }}
             >
               <option value="installation">Installation</option>
+              <option value="retrait">Retrait — support sans affiche</option>
               <option value="inspection">Inspection</option>
               <option value="enjeu">Enjeu</option>
               <option value="photo">Autre photo</option>
             </select>
           </label>
 
+          {action === 'installation' && <p>La nouvelle photo remplacera la principale. Les anciennes resteront dans la galerie ; aucun retrait séparé n’est nécessaire.</p>}
+          {action === 'retrait' && <p>À utiliser seulement si aucune nouvelle affiche n’est installée. Joins une photo du support après le retrait ; les photos précédentes seront conservées.</p>}
+
+          {selected && action === 'enjeu' && contextError && (
+            <div className="terrain-message error" role="alert">
+              <p>{contextError}</p>
+              <button type="button" disabled={issueContextsLoading} onClick={() => loadIssueContexts(selected)}>
+                <RefreshCw size={16}/> Réessayer
+              </button>
+            </div>
+          )}
           {requiresVisual && selected && (
             <>
-              <label>
-                Contexte EDT / phase d’installation
-                <select
-                  required
-                  disabled={issueContextsLoading}
-                  value={issuePhaseId}
-                  onChange={event => {
-                    const phaseId = event.target.value;
-                    setIssuePhaseId(phaseId);
-                    setVisualId('');
-                    setVisuals([]);
-                    if (phaseId) loadVisuals(selected, phaseId);
-                  }}
-                >
-                  <option value="">Sélectionner le contexte</option>
-                  {issueContexts.filter(context => context.phase_type === 'installation').map(context => (
-                    <option key={context.phase_id} value={context.phase_id}>
-                      {context.edt_number} — {context.phase_name || 'Installation'}
-                    </option>
-                  ))}
-                </select>
-              </label>
               <label>
                 Visuel compatible
                 <select
@@ -408,6 +397,14 @@ export default function TerrainApp({ dataStore, role, session }) {
                 </select>
               </label>
 
+              {visualError && (
+                <div className="terrain-message error" role="alert">
+                  <p>{visualError}</p>
+                  <button type="button" disabled={visualsLoading} onClick={() => loadVisuals(selected)}>
+                    <RefreshCw size={16}/> Réessayer
+                  </button>
+                </div>
+              )}
               {!visualsLoading && !visuals.length && visualDiagnostic && (
                 <div className="terrain-visual-diagnostic" role="alert">
                   <div className="terrain-visual-diagnostic-title">
@@ -447,7 +444,7 @@ export default function TerrainApp({ dataStore, role, session }) {
               <span>Campagne : {visual.campagne?.nom_campagne}</span>
               <span>Contexte : {visual.business_context === 'operational_communication' ? 'Communication opérationnelle' : 'Marketing'}</span>
               <span>Phase : {visual.phase || '—'}</span>
-              <span>EDT : {visual.campagne?.no_edt || '—'}</span>
+              <span>EDT : {visual.edt_number || 'Aucun EDT associé au visuel'}</span>
             </div>
           )}
 

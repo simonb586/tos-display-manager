@@ -2,7 +2,7 @@ import assert from'node:assert/strict';
 import fs from'node:fs';
 
 const migration=fs.readFileSync('supabase/migrations/20260901145601_terrain_issue_client_derivation_v138.sql','utf8');
-const main=fs.readFileSync('src/main.jsx','utf8');
+const main=fs.readFileSync('src/lib/businessTableConfig.js','utf8');
 
 for(const marker of [
   'derive_terrain_issue_client_v138',

@@ -11,7 +11,7 @@ import SortableHeader from './SortableHeader';
 import useSortableRows from '../hooks/useSortableRows';
 import EdtIntegrityDiagnostics from './EdtIntegrityDiagnostics';
 
-export default function EdtEnterprisePanel({ edt, data, canManage, busy, run }) {
+export default function EdtEnterprisePanel({ edt, data, canManage, canAssign = false, busy, run }) {
   const [supportText, setSupportText] = useState('');
   const [phaseId, setPhaseId] = useState('');
   const [assignedTo, setAssignedTo] = useState('');
@@ -78,7 +78,7 @@ export default function EdtEnterprisePanel({ edt, data, canManage, busy, run }) 
         <div className="edt-overdue"><AlertTriangle size={17}/> Cet EDT est en retard selon sa date de fin prévue.</div>
       )}
 
-      {canManage && (
+      {canAssign && (
         <form className="edt-support-import" onSubmit={submit}>
           <div className="edt-support-import-main">
             <label>Numéro du support à ajouter
@@ -161,7 +161,7 @@ export default function EdtEnterprisePanel({ edt, data, canManage, busy, run }) 
                   <td>{item.assigne_a || '—'}</td>
                   <td>{item.date_cible || '—'}</td>
                   <td>{bt?.no_bt || '—'}</td>
-                  {canManage && <td><button className="danger-link" onClick={() => run(() => removeSupportFromEdt(edt.id, item.support_id), 'Support retiré de l’EDT.')}><Trash2 size={15}/> Retirer</button></td>}
+                  {canManage && <td>{canAssign && <button className="danger-link" onClick={() => run(() => removeSupportFromEdt(edt.id, item.support_id), 'Support retiré de l’EDT.')}><Trash2 size={15}/> Retirer</button>}</td>}
                 </tr>
               );
             })}

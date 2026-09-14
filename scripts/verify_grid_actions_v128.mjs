@@ -28,7 +28,7 @@ try {
   }
   const actionCount = adminViews.reduce((total, html) => total + (html.match(/<button/g) || []).length, 0);
   assert.ok(actionCount >= 16, `Inventaire rendu incomplet: ${actionCount}`);
-  assert.ok(source.includes("{canEdit&&<button title=\"Modifier\""), 'Permission Modifier non appliquée avant rendu');
+  assert.ok(source.includes("{canEdit&&editableFields(row).length>0&&<button title=\"Modifier\""), 'Permission et champs modifiables non appliqués avant rendu');
   assert.ok(source.includes("sessionStorage.setItem('tos_assignment_context'"), 'Contexte de navigation non conservé');
   console.log(`V1.2.8 actions: ${actionCount} boutons de barre rendus et ${rowActions.length} contrats d’action de ligne audités sur les grilles consolidées; permissions et destinations validées.`);
 } finally {

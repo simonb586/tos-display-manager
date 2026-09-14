@@ -163,7 +163,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
                 <select
                   required
                   value={form.campagne_id}
-                  onChange={event => setForm({ ...form, campagne_id: event.target.value })}
+                  onChange={event => setForm({ ...form, campagne_id: event.target.value, edt_phase_id: '' })}
                 >
                   <option value="">Sélectionner</option>
                   {campaigns.map(campaign => (
@@ -176,10 +176,11 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
 
               <label>
                 EDT associé
-                <select value={form.edt_phase_id || ''} onChange={event => setForm({ ...form, edt_phase_id: event.target.value })}>
+                <select disabled={role !== 'Administrateur'} value={form.edt_phase_id || ''} onChange={event => setForm({ ...form, edt_phase_id: event.target.value })}>
                   <option value="">Aucun EDT associé</option>
-                  {edts.map(phase => <option key={phase.id} value={phase.id}>{phase.edt?.no_edt} — {phase.phase_type === 'retrait' ? 'Retrait' : 'Installation'}</option>)}
+                  {edts.filter(phase => phase.phase_type === 'installation').map(phase => <option key={phase.id} value={phase.id}>{phase.edt?.no_edt} — Installation</option>)}
                 </select>
+                {role !== 'Administrateur' && <small>Le rattachement à un EDT est réservé à l’administrateur.</small>}
               </label>
 
               <label>

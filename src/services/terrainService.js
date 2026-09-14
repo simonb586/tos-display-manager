@@ -43,7 +43,7 @@ async function uploadTerrainPhotoLegacy(file, supportId, action = 'inspection') 
 
 export async function uploadTerrainPhoto(file, supportId, action = 'inspection', context = {}) {
   const uploaded = await prepareAndUploadPhoto(file, {
-    supportId, type:action === 'photo' ? 'autre' : action,
+    supportId, storageSupportId:supportId, type:action === 'photo' ? 'autre' : action,
     campaignCode:context.campaignCode || 'NONE', edt:context.edt || 'NONE',
     capturedAt:context.capturedAt, source:context.source || 'terrain'
   }, 'terrain-photos');
@@ -192,9 +192,8 @@ export async function finalizeTerrainInstallation({
     throw new Error('Supabase n’est pas configuré.');
   }
 
-  const { data, error } = await supabase.rpc('finaliser_installation_terrain_v1331', {
+  const { data, error } = await supabase.rpc('finaliser_installation_terrain_v1343', {
     p_support_id: String(supportId),
-    p_edt_phase_id: Number(phaseId),
     p_visuel_id: Number(visualId),
     p_nom_fichier: fileName,
     p_storage_path: storagePath,
@@ -205,7 +204,7 @@ export async function finalizeTerrainInstallation({
   });
 
   if (error) throw error;
-  if (!data?.ok) throw new Error(data?.message || 'La mise à jour terrain a échoué.');
+  if (!data?.ok) throw Object.assign(new Error(data?.message || 'La mise à jour terrain a échoué.'), {code:data?.code});
 
   window.dispatchEvent(new CustomEvent('tos-terrain-data-updated', {
     detail: data
@@ -233,7 +232,7 @@ export async function finalizeTerrainIntervention({
   const reference = `TERRAIN-${String(action).toUpperCase()}-${String(supportId)}-${String(storagePath)}`;
   const { data, error } = await supabase.rpc('finaliser_intervention_terrain_v1342', {
     p_support_id: String(supportId),
-    p_edt_phase_id: phaseId === null ? null : Number(phaseId),
+    p_edt_phase_id: phaseId === null || String(phaseId).trim() === '' ? null : Number(phaseId),
     p_action: String(action),
     p_type_enjeu: issueType || null,
     p_commentaires: comments || null,
@@ -245,7 +244,7 @@ export async function finalizeTerrainIntervention({
   });
 
   if (error) throw error;
-  if (!data?.ok) throw new Error(data?.message || 'L’intervention terrain a échoué.');
+  if (!data?.ok) throw Object.assign(new Error(data?.message || 'L’intervention terrain a échoué.'), {code:data?.code});
 
   window.dispatchEvent(new CustomEvent('tos-terrain-data-updated', { detail: data }));
   return data;

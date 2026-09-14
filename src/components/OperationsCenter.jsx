@@ -15,6 +15,7 @@ import {
   Users
 } from 'lucide-react';
 import EdtEnterprisePanel from './EdtEnterprisePanel';
+import EdtVisualAssignments from './EdtVisualAssignments';
 import EdtLifecyclePanel from './EdtLifecyclePanel';
 import SortableHeader from './SortableHeader';
 import useSortableRows from '../hooks/useSortableRows';
@@ -414,9 +415,13 @@ try {
               edt={selectedEdt}
               data={data}
               canManage={canManage}
+              canAssign={role === 'Administrateur'}
               busy={busy}
               run={run}
             />
+          )}
+          {selectedEdt && role === 'Administrateur' && (
+            <EdtVisualAssignments key={selectedEdt.id} edt={selectedEdt} phases={data.phases || []} busy={busy} run={run}/>
           )}
         </div>
       )}

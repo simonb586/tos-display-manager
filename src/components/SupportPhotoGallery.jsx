@@ -89,6 +89,7 @@ export default function SupportPhotoGallery({ supportId, canDelete=false, canMan
           {checked[photo.id]?<CheckSquare size={20}/>:<Square size={20}/>}
         </button>
         {photo.est_principale&&<span className="primary-badge"><Star size={13}/> Principale</span>}
+        {!photo.est_principale && ['installation','inspection'].includes(String(photo.type_photo).toLowerCase()) && <span className="primary-badge">Archivée</span>}
         <button className="support-gallery-open" type="button" onClick={()=>setSelected(photo)}>
           {<PhotoImage loading="lazy" photo={photo} alt={photo.nom_fichier||'Photo du support'}/>}
           <span>{photo.prise_le?new Date(photo.prise_le).toLocaleDateString('fr-CA'):'Date inconnue'}</span>

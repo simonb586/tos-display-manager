@@ -47,9 +47,15 @@ export function photoDate(value, fallback=new Date()) {
   return date;
 }
 
-export function generatePhotoIdentity({supportId, capturedAt, uploadedAt=new Date(), type, campaignCode='NONE', edt='NONE', sequence=1, originalFilename='', mimeType=''}) {
+export function generatePhotoIdentity({supportId, storageSupportId, capturedAt, uploadedAt=new Date(), type, campaignCode='NONE', edt='NONE', sequence=1, originalFilename='', mimeType=''}) {
   const support = ascii(supportId);
   if (!support) throw new Error('Un support valide est obligatoire.');
+  // Terrain Storage authorization resolves the business identifier exactly.
+  // Filename normalization must not change the directory's resource identity.
+  const storageSupport = storageSupportId === undefined ? support : String(storageSupportId);
+  if (!storageSupport || storageSupport === '.' || storageSupport === '..' || /[\\/\\\\?#%\u0000-\u001f]/.test(storageSupport)) {
+    throw new Error('L’identifiant du support ne permet pas de créer un chemin photo valide.');
+  }
   const normalizedType = normalizePhotoType(type || 'inspection');
   const date = photoDate(capturedAt, uploadedAt);
   const ymd = `${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}`;
@@ -58,7 +64,7 @@ export function generatePhotoIdentity({supportId, capturedAt, uploadedAt=new Dat
   const normalizedFilename = `${support}-${ymd}-${ascii(normalizedType)}-${ascii(campaignCode)||'NONE'}-${ascii(edt)||'NONE'}-${seq}.${extension}`;
   return {
     originalFilename:String(originalFilename || ''), normalizedFilename,
-    storagePath:`supports/${support}/${ymd.slice(0,4)}/${ascii(campaignCode)||'NONE'}/${ascii(normalizedType)}/${normalizedFilename}`,
+    storagePath:`supports/${storageSupport}/${ymd.slice(0,4)}/${ascii(campaignCode)||'NONE'}/${ascii(normalizedType)}/${normalizedFilename}`,
     capturedAt:date.toISOString(), uploadedAt:photoDate(uploadedAt).toISOString(), type:normalizedType
   };
 }

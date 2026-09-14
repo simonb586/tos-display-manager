@@ -4,7 +4,7 @@ import {offlineBrowser} from './lib/offlineBrowser.mjs';
 const records=[];const certification=process.argv.includes("--certification");
 await offlineBrowser('scripts/fixtures/terrain-form-entry.jsx',async({evaluate,waitFor,sleep,exceptions,consoleErrors})=>{
  await waitFor("typeof mount==='function'");
- for(const role of certification?['Administrateur','Coordonnateur']:['Installateur'])for(const action of ['installation','inspection','enjeu']){
+ for(const role of certification?['Administrateur','Coordonnateur']:['Installateur'])for(const action of ['installation','inspection','enjeu','retrait']){
   await evaluate(`mount('${role}')`);await sleep(80);
   await evaluate("document.querySelector('button[type=submit]').click()");await waitFor("document.body.textContent.includes('Sélectionne une fiche')");
   assert.equal(await evaluate('terrainFixture.calls.length'),0);
@@ -20,7 +20,8 @@ await offlineBrowser('scripts/fixtures/terrain-form-entry.jsx',async({evaluate,w
   await evaluate("document.querySelector('button[type=submit]').click()");await waitFor("document.body.textContent.includes('joins une photo')");
   await evaluate("window.attach=(type)=>{const dt=new DataTransfer();dt.items.add(new File([new Uint8Array([137,80,78,71])],'local.png',{type}));const n=document.querySelector('input[type=file]');n.files=dt.files;n.dispatchEvent(new Event('change',{bubbles:true}))};attach('text/plain')");await waitFor("document.body.textContent.includes('doit être une image')");
   await evaluate("attach('image/png')");await sleep(40);
-  await evaluate("change(document.querySelector('form textarea'),'Comment preserved');terrainFixture.fail=true;document.querySelector('button[type=submit]').click()");await waitFor("document.body.textContent.includes('TERRAIN_FIXTURE_ERROR')");
+  await evaluate("change(document.querySelector('form textarea'),'Comment preserved');terrainFixture.fail=true;document.querySelector('button[type=submit]').click()");await waitFor("document.body.textContent.includes('L’intervention n’a pas pu être enregistrée')");
+  assert.equal(await evaluate("document.body.textContent.includes('TERRAIN_FIXTURE_ERROR')"),false);
   assert.equal(await evaluate("document.querySelector('form textarea').value"),'Comment preserved');
   assert.equal(await evaluate("document.querySelector('input[type=file]').files.length"),1);
   assert.equal(await evaluate("terrainFixture.calls.filter(c=>c.name==='rollbackUploadedPhoto').length"),1,'failed finalization rolls back upload');

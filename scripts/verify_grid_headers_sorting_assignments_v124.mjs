@@ -52,7 +52,7 @@ const filteredSorted=prepareRows(rows,BUSINESS_CONTEXT.MARKETING,'',{site:'A'},{
 assert.deepEqual(filteredSorted.map(row=>row.support_id),['SUP-2'],'Filtres puis tri');
 assert.deepEqual(prepareRows(rows,BUSINESS_CONTEXT.MARKETING,'','','').slice(0,1).length,1,'Tri avant pagination');
 for(const marker of ['sortRows(filtered','rows.slice(from,from+size)','getAllAssignmentsBySiteAndSupport','campagnes_supports','campagnes_maitres','campaign.business_context'])assert.ok(service.includes(marker),marker);
-for(const marker of ['exportCsv(result.rows','exportCsv(picked','getAllAssignmentsBySiteAndSupport({context,search,filters,sortState})'])assert.ok(view.includes(marker),marker);
+for(const marker of ['exportCsv(result.rows','exportCsv(picked','getAllAssignmentsBySiteAndSupport({context,search,filters,sortState,previewTargetId})'])assert.ok(view.includes(marker),marker);
 assert.ok(module14.includes('getAllAssignmentsBySiteAndSupport'),'Module 14 utilise la même source canonique');
 assert.ok(module17.includes("rpc('client_portal_list_v120'"),'Module 17 reste derrière la RPC/RLS sécurisée');
 console.log('V1.2.4: en-têtes, tris typés, filtres/pagination/exports et affectations canoniques validés. duplicateLogicalRows = 0.');
