@@ -1,0 +1,65 @@
+{
+  "origin": "https://portail.groupetos.com",
+  "at": "2026-09-15T08:31:47.339Z",
+  "records": [
+    {
+      "test": "Real API multi-EDT add, modify dates and remove association",
+      "result": "PASS"
+    },
+    {
+      "test": "Real Terrain browser normal",
+      "result": "PASS"
+    },
+    {
+      "test": "Real Terrain browser without",
+      "result": "PASS"
+    },
+    {
+      "test": "Real Terrain browser inspection",
+      "result": "PASS"
+    },
+    {
+      "test": "Real Terrain browser enjeu",
+      "result": "PASS"
+    },
+    {
+      "test": "Real Terrain browser retrait",
+      "result": "PASS"
+    },
+    {
+      "test": "Client reads scoped private photos and cannot modify them",
+      "result": "PASS"
+    },
+    {
+      "test": "Client-Admin reads scoped private photos and cannot modify them",
+      "result": "PASS"
+    },
+    {
+      "test": "Client B has zero EXO photos and signing denied",
+      "result": "PASS"
+    },
+    {
+      "test": "Marylène actual dashboard, four photo folders, private images and capabilities",
+      "result": "PASS"
+    },
+    {
+      "test": "Client actual dashboard, four photo folders, private images and capabilities",
+      "result": "PASS"
+    },
+    {
+      "test": "Admin actual dashboard, four photo folders, private images and capabilities",
+      "result": "PASS"
+    }
+  ],
+  "fixture": {
+    "support": "TARGETED-17DE6AC1",
+    "edtId": 204,
+    "edt2Id": 205,
+    "phaseId": 345,
+    "phase2Id": 346,
+    "visualId": 173,
+    "supportId": 6646
+  },
+  "result": "PASS",
+  "fixtureCleaned": true
+}

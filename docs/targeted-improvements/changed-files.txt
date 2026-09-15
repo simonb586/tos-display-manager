@@ -4,10 +4,13 @@ docs/targeted-improvements/REPORT.md
 docs/targeted-improvements/browser-tests.json
 docs/targeted-improvements/changed-files.txt
 docs/targeted-improvements/check.log
+docs/targeted-improvements/deployment.json
 docs/targeted-improvements/functions-before.json
 docs/targeted-improvements/local-live.json
 docs/targeted-improvements/local-sql-tests.json
 docs/targeted-improvements/photo-scope-tests.json
+docs/targeted-improvements/production-assets.json
+docs/targeted-improvements/production.json
 docs/targeted-improvements/remote-transaction-tests.json
 docs/targeted-improvements/vercel-build.log
 scripts/fixtures/targeted-improvements-entry.jsx
@@ -21,6 +24,7 @@ scripts/targeted_remote_access.mjs
 scripts/targeted_test_accounts.mjs
 scripts/targeted_test_browser.mjs
 scripts/verify_private_photo_access_v120.mjs
+scripts/verify_targeted_assets.mjs
 scripts/verify_targeted_browser.mjs
 scripts/verify_targeted_improvements.mjs
 scripts/verify_targeted_live.mjs

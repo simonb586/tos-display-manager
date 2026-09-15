@@ -52,7 +52,7 @@ Ordre suivi : tests SQL isolés, transaction réelle annulée, migrations, contr
 - Composants React réels : PASS pour les trois rôles, dossiers, recherche, zoom et formulaires.
 - API réelle : multi-EDT, cinq opérations Terrain, lecture privée des deux clients EXO, écritures refusées, isolation Client B : PASS.
 - `vercel build --prod` : PASS.
-- `git diff --check` : PASS.
+- `git diff --check` : PASS sur le travail suivi final. Le contrôle initial des nouveaux fichiers indexés a signalé un espace final sur une ligne vide de la migration déjà appliquée (ligne 154). Ce fichier est conservé tel qu’appliqué pour respecter son immutabilité.
 
 Un essai local Client a atteint le délai de 4,5 secondes du tableau de bord. La reprise est vérifiée séparément et toute nouvelle tentative figure dans `local-live.json` / `production.json`. Les avertissements existants de taille des bundles et d’imports mixtes Vite restent présents. Les alertes Supabase préexistantes relatives aux fonctions definer et aux réglages Auth ne sont pas une certification globale de sécurité ; aucun réglage Auth n’a été modifié.
 
@@ -60,4 +60,14 @@ Liste précise des fichiers : [changed-files.txt](changed-files.txt). Méthode d
 
 ## Livraison
 
-Commit, push, URL Vercel et verdict de production : à compléter après les contrôles finaux.
+- Commit applicatif : `6e8f6f911e13a13c0a698c34115f36e24a6bcc25`.
+- Push : **PASS**, normal sur `release/v1.3.3`.
+- Vercel : **PASS**, `dpl_DKBWpNM4ZYUZC9vJD4LFjL68BHQc`, `READY`.
+- Déploiement : https://tos-display-manager-duonszgwo-tos3.vercel.app
+- Portail : https://portail.groupetos.com
+- Production : **PASS**, 12 contrôles réels enregistrés dans [production.json](production.json), sans reprise du dashboard nécessaire lors du test final.
+- Fichiers publics JavaScript/CSS : empreintes SHA-256 identiques au build validé, [production-assets.json](production-assets.json).
+- Nettoyage : zéro support et zéro profil de test restants ; 12 photos métier et 4 associations historiques conservées.
+- Les preuves finales sont enregistrées dans un commit documentaire distinct, sans modification du code déployé.
+
+**VERDICT : PRODUCTION UPDATE COMPLETE**

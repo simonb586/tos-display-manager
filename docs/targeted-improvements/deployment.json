@@ -1,0 +1,17 @@
+{
+  "result": "PASS",
+  "codeCommit": "6e8f6f911e13a13c0a698c34115f36e24a6bcc25",
+  "branch": "release/v1.3.3",
+  "push": "PASS",
+  "id": "dpl_DKBWpNM4ZYUZC9vJD4LFjL68BHQc",
+  "url": "https://tos-display-manager-duonszgwo-tos3.vercel.app",
+  "production": "https://portail.groupetos.com",
+  "state": "READY",
+  "verification": "2026-09-15T08:31:47.339Z",
+  "cleanup": {
+    "remainingTestSupports": 0,
+    "remainingTestProfiles": 0,
+    "canonicalPhotos": 12,
+    "visualEdtLinks": 4
+  }
+}
