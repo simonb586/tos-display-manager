@@ -96,8 +96,8 @@
       "components": [
         "PhotoInventoryCenter"
       ],
-      "clientView": null,
-      "clientComponent": null,
+      "clientView": "photos",
+      "clientComponent": "PhotoInventoryCenter",
       "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
       "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
     },
@@ -317,7 +317,7 @@
         "TableView"
       ],
       "clientView": "photos",
-      "clientComponent": "ClientBusinessGrid",
+      "clientComponent": "PhotoInventoryCenter",
       "source": "src/main.jsx navigation expressions evaluated for Administrateur; manifest included",
       "status": "INVENTORIED_NOT_RENDER_CERTIFIED"
     },

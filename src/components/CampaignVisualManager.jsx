@@ -20,6 +20,7 @@ const empty = {
   actif: true,
   is_out_of_frame: false,
   instructions_terrain: '',
+  edt_associations: [],
   edt_phase_id: ''
 };
 
@@ -79,7 +80,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
     setBusy(true);
 
     try {
-      await saveCampaignVisual(form);
+      await saveCampaignVisual({...form,edt_associations:role==='Administrateur'?form.edt_associations:undefined});
       setMessage(form.id ? 'Visuel modifié.' : 'Visuel enregistré.');
       clearFormDraft('visual', businessContext);
       setForm(empty);
@@ -130,7 +131,8 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
       actif: visual.actif !== false,
       is_out_of_frame: visual.is_out_of_frame === true,
       instructions_terrain: visual.instructions_terrain || '',
-      edt_phase_id: visual.edt_phase_id || ''
+      edt_phase_id: visual.edt_phase_id || '',
+      edt_associations: role==='Administrateur'?(visual.edt_associations||[]):undefined
     });
     setFormOpen(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -163,7 +165,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
                 <select
                   required
                   value={form.campagne_id}
-                  onChange={event => setForm({ ...form, campagne_id: event.target.value, edt_phase_id: '' })}
+                  onChange={event => setForm({ ...form, campagne_id: event.target.value, edt_phase_id: '', edt_associations: role==='Administrateur'?[]:undefined })}
                 >
                   <option value="">Sélectionner</option>
                   {campaigns.map(campaign => (
@@ -174,14 +176,15 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
                 </select>
               </label>
 
-              <label>
-                EDT associé
-                <select disabled={role !== 'Administrateur'} value={form.edt_phase_id || ''} onChange={event => setForm({ ...form, edt_phase_id: event.target.value })}>
-                  <option value="">Aucun EDT associé</option>
-                  {edts.filter(phase => phase.phase_type === 'installation').map(phase => <option key={phase.id} value={phase.id}>{phase.edt?.no_edt} — Installation</option>)}
-                </select>
-                {role !== 'Administrateur' && <small>Le rattachement à un EDT est réservé à l’administrateur.</small>}
-              </label>
+              <fieldset disabled={role!=='Administrateur'}><legend>EDT associés</legend>
+                {(form.edt_associations||[]).map((link,index)=><div key={index} className="v74-card">
+                  <label>EDT<select required value={link.phase_id||''} onChange={e=>setForm({...form,edt_associations:form.edt_associations.map((a,i)=>i===index?{...a,phase_id:e.target.value}:a)})}><option value="">Sélectionner</option>{edts.filter(p=>p.phase_type==='installation').map(p=><option key={p.id} value={p.id}>{p.edt?.no_edt}</option>)}</select></label>
+                  <label>Date début<input type="date" value={link.date_debut||''} onChange={e=>setForm({...form,edt_associations:form.edt_associations.map((a,i)=>i===index?{...a,date_debut:e.target.value}:a)})}/></label>
+                  <label>Date fin<input type="date" min={link.date_debut||undefined} value={link.date_fin||''} onChange={e=>setForm({...form,edt_associations:form.edt_associations.map((a,i)=>i===index?{...a,date_fin:e.target.value}:a)})}/></label>
+                  <button type="button" onClick={()=>setForm({...form,edt_associations:form.edt_associations.filter((_,i)=>i!==index)})}>Retirer cette association</button>
+                </div>)}
+                <button type="button" onClick={()=>setForm({...form,edt_associations:[...(form.edt_associations||[]),{phase_id:'',date_debut:'',date_fin:''}]})}>+ Ajouter un EDT</button>
+              </fieldset>
 
               <label>
                 Phase
@@ -271,8 +274,9 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
                 <b>{visual.nom_visuel}</b>
                 <span>{visual.campagne?.nom_campagne}</span>
                 <small>
-                  {visual.phase || 'Sans phase'} — {visual.format_support} {visual.is_out_of_frame ? '— Hors-Cadre' : ''} {visual.edt_phase ? `— ${visual.edt_phase.edt?.no_edt} — ${visual.edt_phase.phase_type === 'retrait' ? 'Retrait' : 'Installation'}` : ''}
+                  {visual.phase || 'Sans phase'} — {visual.format_support} {visual.is_out_of_frame ? '— Hors-Cadre' : ''}
                 </small>
+                {visual.edt_associations?.map(link=><small key={link.edt_id}>{link.edt?.no_edt} — {link.date_debut||'Début non défini'} → {link.date_fin||'Fin non définie'}</small>)}
               </div>
 
               <em>{visual.actif ? 'Actif' : 'Archivé / inactif'}</em>

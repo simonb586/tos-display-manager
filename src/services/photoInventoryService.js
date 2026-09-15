@@ -1,5 +1,4 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
-import { getSignedPhotoUrls } from './photoAccessService';
 
 export async function countSupportPhotos() {
   if (!supabaseConfigured || !supabase) throw new Error('Service photo indisponible.');
@@ -10,13 +9,15 @@ export async function countSupportPhotos() {
 
 export async function listSupportPhotosForValidation() {
   if (!supabaseConfigured || !supabase) return [];
-  const { data, error } = await supabase
-    .from('support_photos')
-    .select('*')
-    .order('prise_le', { ascending: false })
-    .limit(50);
-  if (error) throw error;
-  return getSignedPhotoUrls(data || [], { purpose:'preview' });
+  const photos=[];
+  for(let offset=0;;offset+=500){
+    const {data,error}=await supabase.from('support_photos').select('*,campagne:campagne_id(nom_campagne,business_context),visuel:visuel_id(nom_visuel)').is('deleted_at',null).order('id').range(offset,offset+499);
+    if(error)throw error;photos.push(...data);if(data.length<500)break;
+  }
+  const edts=[];
+  for(let offset=0;;offset+=500){const {data,error}=await supabase.from('suivi_des_edt').select('id,no_edt').order('id').range(offset,offset+499);if(error)throw error;edts.push(...data);if(data.length<500)break;}
+  const byId=new Map(edts.map(e=>[String(e.id),e.no_edt]));
+  return photos.map(p=>({...p,edt_number:byId.get(String(p.edt_id))||p.metadata?.edt_number||null}));
 }
 
 export async function validateSupportPhoto(id, status, comment = '') {

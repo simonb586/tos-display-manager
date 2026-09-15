@@ -1,4 +1,4 @@
-import PhotoImage from './PhotoImage';
+import PhotoFolderGallery from './PhotoFolderGallery';
 import useRefreshRequest from '../hooks/useRefreshRequest';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -26,7 +26,7 @@ import MassPhotoImporter from './MassPhotoImporter';
 import PhotoReviewQueue from './PhotoReviewQueue';
 import { filterSupportPhotos } from '../lib/supportNavigationContext';
 
-export default function PhotoInventoryCenter({ role, supportId = '', onClearSupportContext }) {
+export default function PhotoInventoryCenter({ role, supportId = '', onClearSupportContext, onOpenSupport }) {
   const [tab, setTab] = useState('photos');
   const [photos, setPhotos] = useState([]);
   const [movements, setMovements] = useState([]);
@@ -65,6 +65,7 @@ try {
   useEffect(() => { reload(); }, []);
 
   async function setStatus(photo, status) {
+    if(!canManage)return;
     const comment = status === 'Rejetée'
       ? window.prompt('Motif du rejet :', '') || ''
       : '';
@@ -97,6 +98,7 @@ try {
   }
 
   async function setPrimary(photo) {
+    if(!canManage)return;
     try {
       await makePrimaryPhoto(photo);
       setMessage('Photo principale mise à jour.');
@@ -136,7 +138,7 @@ try {
       <header className="editor-hero">
         <div>
           <h1><Image/> Photos et inventaire</h1>
-          <p>Validation des preuves terrain, photo principale et mouvements d’affiches.</p>
+          <p>{canManage?'Validation des preuves terrain, photo principale et mouvements d’affiches.':'Photos et inventaire de votre client — lecture seule.'}</p>
         </div>
         <button aria-busy={refreshRequest.refreshing} data-refresh-control="PhotoInventoryCenter" disabled={refreshRequest.refreshing} onClick={refreshRequest.onClick(reload)}><RefreshCw size={17}/> Actualiser</button>
       </header>
@@ -156,35 +158,10 @@ try {
       </div>
 
       {tab === 'mass-import' ? <MassPhotoImporter role={role}/> : tab === 'review' ? <PhotoReviewQueue/> : tab === 'photos' ? (
-        <div className="photo-review-grid">
-          {visiblePhotos.map(photo => (
-            <article key={photo.id}>
-              <div className="photo-review-image">
-                {(photo.storage_path||photo.photo_url||photo.thumbnail_url)
-                  ? <PhotoImage loading="lazy" photo={photo} alt={photo.nom_fichier}/>
-                  : <span>Aperçu indisponible</span>}
-              </div>
-              <div className="photo-review-body">
-                <strong>{photo.support_id}</strong>
-                <span>{photo.nom_fichier}</span>
-                <small>{photo.statut_validation} — {new Date(photo.prise_le).toLocaleString('fr-CA')}</small>
-                {photo.commentaire_validation && <small>{photo.commentaire_validation}</small>}
-                {canManage && (
-                  <div className="photo-review-actions">
-                    <button onClick={() => setStatus(photo, 'Validée')}><CheckCircle2/> Valider</button>
-                    <button onClick={() => setStatus(photo, 'Rejetée')}><XCircle/> Rejeter</button>
-                    <button onClick={() => setPrimary(photo)}><Star/> Principale</button>
-                    <button className="danger" onClick={() => removePhoto(photo)}><Trash2/> Supprimer</button>
-                  </div>
-                )}
-              </div>
-            </article>
-          ))}
-          {!visiblePhotos.length && <p>{supportId?'Aucune photo pour ce support':'Aucune photo à afficher.'}</p>}
-        </div>
+        <PhotoFolderGallery photos={visiblePhotos} onOpenSupport={onOpenSupport} renderActions={canManage?photo=><div className="photo-review-actions"><button onClick={()=>setStatus(photo,'Validée')}><CheckCircle2/> Valider</button><button onClick={()=>setStatus(photo,'Rejetée')}><XCircle/> Rejeter</button><button onClick={()=>setPrimary(photo)}><Star/> Principale</button><button className="danger" onClick={()=>removePhoto(photo)}><Trash2/> Supprimer</button></div>:undefined}/>
       ) : (
         <div className="inventory-layout">
-          <form className="v07-card" onSubmit={addMovement}>
+          {canManage && <form className="v07-card" onSubmit={addMovement}>
             <h2>Nouveau mouvement</h2>
             <label>Référence du visuel
               <input value={movement.item_reference} onChange={e => setMovement({...movement, item_reference: e.target.value})}/>
@@ -211,7 +188,7 @@ try {
               <textarea value={movement.notes} onChange={e => setMovement({...movement, notes: e.target.value})}/>
             </label>
             <button className="v07-primary" disabled={!canManage || savingMovement}>{savingMovement ? 'Enregistrement…' : 'Enregistrer'}</button>
-          </form>
+          </form>}
 
           <section className="v07-card">
             <h2>Historique des mouvements</h2>

@@ -6,7 +6,6 @@ export const INTERNAL_VIEW_REASONS=Object.freeze({
   "Utilisateurs réels": "Provisionnement et cycle de vie Auth des comptes, réservés à l’administration.",
   "Visibilité par rôle": "Configuration globale des permissions, réservée à l’administration.",
   "Édition — Historique": "Audit administratif des anciennes/nouvelles valeurs entre organisations. L’historique métier Client est une projection distincte autorisée.",
-  "Photos et inventaire": "Validation/rejet, suppression et mouvements de stock internes. La consultation Client des preuves utilise la vue Photos.",
   "Centre EDT et BT": "Planification interne des phases, affectation du personnel, clôture et suppression EDT. Le Client consulte Suivi des EDT et soumet ses propres requêtes.",
   "Automatisations": "Configuration globale du moteur et de ses destinations, explicitement réservée aux Administrateurs.",
   "Campagne — Visuels et formats": "Administration des fichiers, formats et phases de campagne. Le Client consulte les campagnes publiées dans son périmètre.",

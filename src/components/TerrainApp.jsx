@@ -13,7 +13,6 @@ import {
 import {
   finalizeTerrainInstallation,
   finalizeTerrainIntervention,
-  listTerrainIssueContexts,
   rollbackUploadedPhoto,
   uploadTerrainPhoto
 } from '../services/terrainService';
@@ -36,12 +35,10 @@ export default function TerrainApp({ dataStore, role, session }) {
   const [visualsLoading, setVisualsLoading] = useState(false);
   const [visualId, setVisualId] = useState('');
   const [action, setAction] = useState('installation');
+  const [withoutEdt,setWithoutEdt]=useState(false);
+  const [installationPhase,setInstallationPhase]=useState('');
   const [comments, setComments] = useState('');
   const [issueType, setIssueType] = useState('');
-  const [issueContexts, setIssueContexts] = useState([]);
-  const [issuePhaseId, setIssuePhaseId] = useState('');
-  const [issueContextsLoading, setIssueContextsLoading] = useState(false);
-  const [contextError, setContextError] = useState('');
   const [visualError, setVisualError] = useState('');
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState('');
@@ -51,7 +48,6 @@ export default function TerrainApp({ dataStore, role, session }) {
   const fileInputRef = useRef(null);
   const submittingRef = useRef(false);
   const visualRequestRef = useRef(0);
-  const contextRequestRef = useRef(0);
 
   const rows = source === 'Infrastructure' ? infrastructures : stops;
   const idField = source === 'Infrastructure' ? 'support_id' : 'no_arret';
@@ -101,7 +97,7 @@ export default function TerrainApp({ dataStore, role, session }) {
       : []
   ), [query, rows, idField]);
 
-  async function loadVisuals(row, phaseId = issuePhaseId) {
+  async function loadVisuals(row) {
     const requestId = ++visualRequestRef.current;
     if (source !== 'Infrastructure') {
       setVisuals([]);
@@ -115,7 +111,7 @@ export default function TerrainApp({ dataStore, role, session }) {
     setMessageType('info');
 
     try {
-      const result = await diagnoseCompatibleVisualsForSupport(row, phaseId);
+      const result = await diagnoseCompatibleVisualsForSupport(row);
       if (requestId !== visualRequestRef.current) return;
       setVisuals(result.visuals);
       setVisualDiagnostic(result.diagnostic);
@@ -135,38 +131,15 @@ export default function TerrainApp({ dataStore, role, session }) {
     setVisualsLoading(false);
     setVisualError('');
     setSelected(row);
+    setWithoutEdt(false);setInstallationPhase('');
     setQuery(String(row[idField] || ''));
     setVisualId('');
     setVisuals([]);
     setVisualDiagnostic(null);
     setMessage('');
     setMessageType('info');
-    setIssueContexts([]);
-    setIssuePhaseId('');
-    await Promise.all([loadIssueContexts(row), loadVisuals(row)]);
-  }
 
-  async function loadIssueContexts(row) {
-    if (source !== 'Infrastructure') return;
-    const requestId = ++contextRequestRef.current;
-    setContextError('');
-    setIssueContextsLoading(true);
-    try {
-      const contexts = await listTerrainIssueContexts(row.support_id);
-      if (requestId !== contextRequestRef.current) return;
-      setIssueContexts(contexts);
-      const installations = contexts.filter(context => context.phase_type === 'installation');
-      const phaseId = installations.length === 1 ? String(installations[0].phase_id) : '';
-      setIssuePhaseId(phaseId);
-    } catch (error) {
-      if (requestId !== contextRequestRef.current) return;
-      console.error('Contexte EDT/phase Terrain indisponible', error);
-      setIssueContexts([]);
-      setIssuePhaseId('');
-      setContextError(terrainErrorMessage(error, 'read'));
-    } finally {
-      if (requestId === contextRequestRef.current) setIssueContextsLoading(false);
-    }
+    await loadVisuals(row);
   }
 
   async function submit(event) {
@@ -185,12 +158,8 @@ export default function TerrainApp({ dataStore, role, session }) {
       return;
     }
 
-    if (action === 'enjeu' && !issuePhaseId) {
-      setMessageType('error');
-      setMessage(issueContexts.length > 1
-        ? 'Sélectionne le contexte EDT et la phase de cet enjeu.'
-        : 'Aucun contexte EDT/phase déterministe n’est disponible pour cet enjeu.');
-      return;
+    if (requiresVisual && !withoutEdt && !installationPhase) {
+      setMessageType('error');setMessage('Sélectionne un EDT pour cette installation.');return;
     }
 
     if (!file) {
@@ -208,7 +177,7 @@ export default function TerrainApp({ dataStore, role, session }) {
       const supportId = selected.support_id || selected.no_arret;
       const uploaded = await uploadTerrainPhoto(file, supportId, action, {
         campaignCode:visual?.campagne?.nom_campagne || selected.campagne_actuelle || selected.campagne_selon_visuel,
-        edt:action === 'installation' ? visual?.edt_number : undefined,
+        edt:action === 'installation' && !withoutEdt ? visuals.flatMap(v=>v.edt_associations||[]).find(a=>String(a.phase_id)===installationPhase)?.edt_number : undefined,
         source:'terrain'
       });
 
@@ -216,6 +185,8 @@ export default function TerrainApp({ dataStore, role, session }) {
         const result = await finalizeTerrainInstallation({
           supportId: selected.support_id,
           visualId,
+          phaseId:withoutEdt?null:installationPhase,
+          withoutEdt,
           fileName: uploaded.normalizedFilename,
           storagePath: uploaded.path,
           photoUrl: uploaded.storageReference,
@@ -232,7 +203,7 @@ export default function TerrainApp({ dataStore, role, session }) {
 
         const result = await finalizeTerrainIntervention({
           supportId: selected.support_id,
-          phaseId: action === 'enjeu' ? issuePhaseId : null,
+          phaseId: null,
           action,
           issueType,
           comments,
@@ -265,8 +236,7 @@ export default function TerrainApp({ dataStore, role, session }) {
       }
       setComments('');
       setIssueType('');
-      setIssueContexts([]);
-      setIssuePhaseId('');
+
       clearPhoto();
       setSelected(null);
       setQuery('');
@@ -301,10 +271,10 @@ export default function TerrainApp({ dataStore, role, session }) {
               value={source}
               onChange={event => {
                 visualRequestRef.current += 1;
-                contextRequestRef.current += 1;
-                setIssueContextsLoading(false);
+
+
                 setVisualsLoading(false);
-                setContextError('');
+
                 setVisualError('');
                 setSource(event.target.value);
                 setSelected(null);
@@ -312,8 +282,7 @@ export default function TerrainApp({ dataStore, role, session }) {
                 setVisuals([]);
                 setVisualDiagnostic(null);
                 setVisualId('');
-                setIssueContexts([]);
-                setIssuePhaseId('');
+
               }}
             >
               <option>Infrastructure</option>
@@ -368,14 +337,9 @@ export default function TerrainApp({ dataStore, role, session }) {
           {action === 'installation' && <p>La nouvelle photo remplacera la principale. Les anciennes resteront dans la galerie ; aucun retrait séparé n’est nécessaire.</p>}
           {action === 'retrait' && <p>À utiliser seulement si aucune nouvelle affiche n’est installée. Joins une photo du support après le retrait ; les photos précédentes seront conservées.</p>}
 
-          {selected && action === 'enjeu' && contextError && (
-            <div className="terrain-message error" role="alert">
-              <p>{contextError}</p>
-              <button type="button" disabled={issueContextsLoading} onClick={() => loadIssueContexts(selected)}>
-                <RefreshCw size={16}/> Réessayer
-              </button>
-            </div>
-          )}
+
+          {requiresVisual && <label><input type="checkbox" checked={withoutEdt} onChange={e=>{setWithoutEdt(e.target.checked);setInstallationPhase('');setVisualId('');}}/> Installation sans EDT</label>}
+          {requiresVisual && selected && !withoutEdt && <label>EDT<select required value={installationPhase} onChange={e=>{setInstallationPhase(e.target.value);setVisualId('');}}><option value="">Sélectionner un EDT</option>{[...new Map(visuals.flatMap(v=>v.edt_associations||[]).map(a=>[String(a.phase_id),a])).values()].map(a=><option key={a.phase_id} value={a.phase_id}>{a.edt_number}</option>)}</select></label>}
           {requiresVisual && selected && (
             <>
               <label>
@@ -389,7 +353,7 @@ export default function TerrainApp({ dataStore, role, session }) {
                   <option value="">
                     {visualsLoading ? 'Chargement des visuels…' : 'Sélectionner'}
                   </option>
-                  {visuals.map(item => (
+                  {visuals.filter(item=>withoutEdt||(item.edt_associations||[]).some(a=>String(a.phase_id)===installationPhase)).map(item => (
                     <option key={item.id} value={item.id}>
                       {item.nom_visuel} — {item.campagne?.nom_campagne} — {item.format_support} — {item.business_context === 'operational_communication' ? 'Communication opérationnelle' : 'Marketing'}{item.is_out_of_frame ? ' — Hors-Cadre' : ''}
                     </option>
@@ -444,31 +408,13 @@ export default function TerrainApp({ dataStore, role, session }) {
               <span>Campagne : {visual.campagne?.nom_campagne}</span>
               <span>Contexte : {visual.business_context === 'operational_communication' ? 'Communication opérationnelle' : 'Marketing'}</span>
               <span>Phase : {visual.phase || '—'}</span>
-              <span>EDT : {visual.edt_number || 'Aucun EDT associé au visuel'}</span>
+              <span>EDT : {withoutEdt?'Installation sans EDT':visual.edt_associations?.find(a=>String(a.phase_id)===installationPhase)?.edt_number}</span>
             </div>
           )}
 
 
           {action === 'enjeu' && (
             <>
-              <label>
-                Contexte EDT / phase
-                <select
-                  required
-                  disabled={issueContextsLoading}
-                  value={issuePhaseId}
-                  onChange={event => setIssuePhaseId(event.target.value)}
-                >
-                  <option value="">
-                    {issueContextsLoading ? 'Chargement du contexte…' : 'Sélectionner le contexte'}
-                  </option>
-                  {issueContexts.map(context => (
-                    <option key={context.phase_id} value={context.phase_id}>
-                      {context.edt_number} — {context.phase_name || context.phase_type}
-                    </option>
-                  ))}
-                </select>
-              </label>
               <label>
                 Type d’enjeu
                 <input
@@ -480,8 +426,6 @@ export default function TerrainApp({ dataStore, role, session }) {
               </label>
               {selected && <div className="terrain-issue-context" aria-label="Contexte de l’enjeu">
                 <span>Support : <strong>{selected.support_id}</strong></span>
-                <span>EDT : <strong>{issueContexts.find(item => String(item.phase_id) === issuePhaseId)?.edt_number || 'Non associé'}</strong></span>
-                <span>Phase : <strong>{issueContexts.find(item => String(item.phase_id) === issuePhaseId)?.phase_name || 'Non associée'}</strong></span>
               </div>}
             </>
           )}

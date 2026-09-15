@@ -181,6 +181,7 @@ export async function syncOfflineQueue() {
 export async function finalizeTerrainInstallation({
   supportId,
   phaseId,
+  withoutEdt = false,
   visualId,
   fileName,
   storagePath,
@@ -192,7 +193,9 @@ export async function finalizeTerrainInstallation({
     throw new Error('Supabase n’est pas configuré.');
   }
 
-  const { data, error } = await supabase.rpc('finaliser_installation_terrain_v1343', {
+  const { data, error } = await supabase.rpc('finaliser_installation_terrain_v1344', {
+    p_edt_phase_id: withoutEdt ? null : Number(phaseId),
+    p_sans_edt: withoutEdt,
     p_support_id: String(supportId),
     p_visuel_id: Number(visualId),
     p_nom_fichier: fileName,

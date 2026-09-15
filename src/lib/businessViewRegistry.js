@@ -82,8 +82,8 @@ export const BUSINESS_VIEW_REGISTRY = Object.freeze([
     "adminComponents": [
       "PhotoInventoryCenter"
     ],
-    "clientViewId": null,
-    "clientPolicy": "not_implemented",
+    "clientViewId": "photos",
+    "clientPolicy": "scoped_projection",
     "columnContract": null
   },
   {

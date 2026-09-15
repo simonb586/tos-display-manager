@@ -18,9 +18,9 @@ export default function EdtVisualAssignments({edt, phases, busy, run}) {
       .finally(()=>{if(current)setLoading(false);});
     return ()=>{current=false;};
   },[edt.id,edt.campagne_id,revision]);
-  const linked=visuals.filter(v=>installationPhases.some(p=>String(p.id)===String(v.edt_phase_id)));
+  const linked=visuals.filter(v=>v.edt_associations?.some(a=>String(a.edt_id)===String(edt.id)));
   const save=(id,phase)=>run(async()=>{
-    await assignVisualToEdt(id,phase);setRevision(n=>n+1);
+    await assignVisualToEdt(id,phase,phase?null:edt.id);setRevision(n=>n+1);
   },phase?'Visuel rattaché à l’EDT.':'Rattachement du visuel retiré.');
   return <section className="v07-card operations-wide" aria-label="Visuels associés à l’EDT">
     <h2>Visuels associés à l’EDT</h2>

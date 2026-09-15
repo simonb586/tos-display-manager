@@ -1,0 +1,65 @@
+{
+  "origin": "http://127.0.0.1:5180",
+  "at": "2026-09-15T08:27:57.154Z",
+  "records": [
+    {
+      "test": "Real API multi-EDT add, modify dates and remove association",
+      "result": "PASS"
+    },
+    {
+      "test": "Real Terrain browser normal",
+      "result": "PASS"
+    },
+    {
+      "test": "Real Terrain browser without",
+      "result": "PASS"
+    },
+    {
+      "test": "Real Terrain browser inspection",
+      "result": "PASS"
+    },
+    {
+      "test": "Real Terrain browser enjeu",
+      "result": "PASS"
+    },
+    {
+      "test": "Real Terrain browser retrait",
+      "result": "PASS"
+    },
+    {
+      "test": "Client reads scoped private photos and cannot modify them",
+      "result": "PASS"
+    },
+    {
+      "test": "Client-Admin reads scoped private photos and cannot modify them",
+      "result": "PASS"
+    },
+    {
+      "test": "Client B has zero EXO photos and signing denied",
+      "result": "PASS"
+    },
+    {
+      "test": "Marylène actual dashboard, four photo folders, private images and capabilities",
+      "result": "PASS"
+    },
+    {
+      "test": "Client actual dashboard, four photo folders, private images and capabilities",
+      "result": "PASS"
+    },
+    {
+      "test": "Admin actual dashboard, four photo folders, private images and capabilities",
+      "result": "PASS"
+    }
+  ],
+  "fixture": {
+    "support": "TARGETED-ED26DF93",
+    "edtId": 202,
+    "edt2Id": 203,
+    "phaseId": 343,
+    "phase2Id": 344,
+    "visualId": 172,
+    "supportId": 6645
+  },
+  "result": "PASS",
+  "fixtureCleaned": true
+}

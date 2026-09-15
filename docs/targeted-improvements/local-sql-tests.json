@@ -1,0 +1,46 @@
+[
+  {
+    "name": "Legacy EDT link backfilled",
+    "result": "PASS"
+  },
+  {
+    "name": "Multiple EDT links with distinct dates",
+    "result": "PASS"
+  },
+  {
+    "name": "Cross-client links and reversed dates rejected atomically",
+    "result": "PASS"
+  },
+  {
+    "name": "Modify and remove associations, including zero EDT",
+    "result": "PASS"
+  },
+  {
+    "name": "Normal installation, no-EDT linked visual, communication and out-of-frame; private metadata and idempotency",
+    "result": "PASS"
+  },
+  {
+    "name": "Explicit mode, required EDT and format enforced",
+    "result": "PASS"
+  },
+  {
+    "name": "Issue without EDT/phase, inspection and removal use existing writer",
+    "result": "PASS"
+  },
+  {
+    "name": "Canonical EXO campaign count is scoped",
+    "result": "PASS"
+  },
+  {
+    "name": "Client and Client-Admin counts match",
+    "result": "PASS"
+  },
+  {
+    "name": "Admin canonical count includes all authorized clients",
+    "result": "PASS"
+  },
+  {
+    "name": "Anonymous aggregate denied",
+    "result": "PASS"
+  }
+]

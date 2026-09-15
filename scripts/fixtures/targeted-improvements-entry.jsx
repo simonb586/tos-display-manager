@@ -1,0 +1,28 @@
+import React from 'react';
+import {createRoot} from 'react-dom/client';
+import TerrainApp from '../../src/components/TerrainApp';
+import PhotoInventoryCenter from '../../src/components/PhotoInventoryCenter';
+import CampaignVisualManager from '../../src/components/CampaignVisualManager';
+const root=createRoot(document.getElementById('root'));let serial=0;
+window.fixture={calls:[]};
+const campaign={id:7,nom_campagne:'Campagne A',business_context:'marketing'};
+const visual={id:35,campagne_id:7,nom_visuel:'Visuel A',format_support:'20 x 28',campagne:campaign,edt_associations:[{edt_id:64,phase_id:114,edt_number:'EDT-TOS-73-F',edt:{no_edt:'EDT-TOS-73-F'}}]};
+const photos=[{id:1,type_photo:'Installation',edt_id:'64',edt_number:'EDT-TOS-73-F'},{id:2,type_photo:'Inspection'},{id:3,type_photo:'Enjeu'},{id:4,type_photo:'Installation',metadata:{installation_sans_edt:true}}].map(p=>({...p,nom_fichier:`Photo-${p.id}.png`,support_id:'SUP-EXO',prise_le:'2026-09-14',storage_bucket:'terrain-photos',storage_path:`supports/SUP-EXO/${p.id}.png`,campagne:campaign,visuel:visual}));
+window.testApi=(file,name,args)=>{
+ fixture.calls.push({name,args});
+ if(name==='listTerrainIssueContexts')return Promise.resolve([]);
+ if(name==='diagnoseCompatibleVisualsForSupport')return Promise.resolve({visuals:[visual,{...visual,id:36,nom_visuel:'Sans association',edt_associations:[]}],diagnostic:{}});
+ if(name==='uploadTerrainPhoto')return Promise.resolve({normalizedFilename:'photo.png',path:'supports/SUP-EXO/test.png',storageReference:'terrain-photos/supports/SUP-EXO/test.png'});
+ if(name==='finalizeTerrainInstallation'||name==='finalizeTerrainIntervention')return Promise.resolve({ok:true,reference:'TEST'});
+ if(name==='listSupportPhotosForValidation')return Promise.resolve(photos);
+ if(name==='listInventoryMovements')return Promise.resolve([{id:1,item_reference:'Visuel A',quantity:1,movement_type:'Installation',created_at:'2026-09-14',support_id:'SUP-EXO'}]);
+ if(name==='getSignedPhotoUrl')return Promise.resolve('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
+ if(name==='listMasterCampaigns')return Promise.resolve([campaign]);
+ if(name==='listCampaignVisuals')return Promise.resolve([visual]);
+ if(name==='listEdtPhasesForCampaign')return Promise.resolve([{id:114,phase_type:'installation',edt:{id:64,no_edt:'EDT-TOS-73-F'}},{id:116,phase_type:'installation',edt:{id:66,no_edt:'EDT-TOS-85-D'}}]);
+ if(name==='saveCampaignVisual')return Promise.resolve({id:35});
+ throw Error('Unexpected fixture service '+name);
+};
+window.mount=(kind,role='Client')=>{fixture.calls=[];localStorage.clear();root.render(kind==='terrain'?<TerrainApp key={++serial} role="Installateur" session={{user:{email:'fixture@example.invalid'}}} dataStore={{Infrastructures:{rows:[{support_id:'SUP-EXO',format_affichage:'20 x 28'}]}}}/>:kind==='visual'?<CampaignVisualManager key={++serial} role={role}/>:<PhotoInventoryCenter key={++serial} role={role}/>);};
+window.setInput=(selector,value)=>{const input=document.querySelector(selector);Object.getOwnPropertyDescriptor(input.tagName==='SELECT'?HTMLSelectElement.prototype:input.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype,'value').set.call(input,value);input.dispatchEvent(new Event(input.tagName==='SELECT'?'change':'input',{bubbles:true}));};
+window.choosePhoto=()=>{const input=document.querySelector('input[type=file]'),data=new DataTransfer();data.items.add(new File(['image'],'photo.png',{type:'image/png'}));input.files=data.files;input.dispatchEvent(new Event('change',{bubbles:true}));};

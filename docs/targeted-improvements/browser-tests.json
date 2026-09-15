@@ -1,0 +1,36 @@
+[
+  {
+    "role": "Client",
+    "folders": "PASS",
+    "readOnly": "PASS",
+    "zoom": "PASS"
+  },
+  {
+    "role": "Client-Admin",
+    "folders": "PASS",
+    "readOnly": "PASS",
+    "zoom": "PASS"
+  },
+  {
+    "role": "Administrateur",
+    "folders": "PASS",
+    "readOnly": "internal management preserved",
+    "zoom": "PASS"
+  },
+  {
+    "visualMultiEdt": "PASS",
+    "dates": "PASS"
+  },
+  {
+    "terrain": "enjeu",
+    "result": "PASS"
+  },
+  {
+    "terrain": "normal",
+    "result": "PASS"
+  },
+  {
+    "terrain": "without",
+    "result": "PASS"
+  }
+]

@@ -10,5 +10,7 @@ ok(!sql.includes('add column if not exists edt_id'),'edt_id dupliqué inutilemen
 ok(sql.includes('having count(distinct phase_id)=1'),'Backfill non déterministe.');ok(sql.includes('where e.edt_phase_id is null'),'Historique NULL non préservé.');
 ok(sql.includes("if lower(trim(p_action))='enjeu' and p_edt_phase_id is null"),'Phase enjeu non obligatoire.');
 ok(service.includes("supabase.rpc('finaliser_intervention_terrain_v1342'")&&service.includes('p_edt_phase_id'),'Service sans phase V1.3.4.2.');
-ok(ui.includes('installations.length === 1')&&ui.includes('Contexte EDT / phase'),'Sélection automatique/ambiguë absente.');
+ok(!ui.includes('Contexte EDT / phase')&&ui.includes('phaseId: null'),'Un nouvel enjeu doit être déclaré directement sur son support.');
+const additive=fs.readFileSync('supabase/migrations/20260915023244_targeted_terrain_visual_photo_improvements.sql','utf8');
+ok(additive.includes("if lower(trim(p_action))='enjeu' and p_edt_phase_id is not null then"),'Le contexte historique des enjeux doit rester pris en charge.');
 console.log(`V1.3.4.2 contexte enjeu : ${checks} scénarios et contrôles réussis.`);

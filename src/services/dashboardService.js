@@ -11,6 +11,11 @@ export function validateDashboardSummary(data) {
   // Assignment grids share the existing Admin logical-assignment KPIs. Older
   // summary RPCs already return these totals under kpis, not under sections.
   data = {...data, sections: {...data.sections}};
+  // These sections are projections of the same canonical COUNTs as the cards.
+  // The historical section RPC still knows the former raw Photos permission.
+  for (const [section,key] of [['photos','photos'],['campaigns','marketing_total'],['communications','operational_total']]) {
+    if (Number.isSafeInteger(data.kpis[key])) data.sections[section] = {total:data.kpis[key]};
+  }
   for (const [section, key] of [['marketing_assignments','marketing_places'], ['operational_assignments','operational_places']]) {
     if (!data.sections[section] && Number.isSafeInteger(data.kpis[key])) data.sections[section] = {total:data.kpis[key]};
   }

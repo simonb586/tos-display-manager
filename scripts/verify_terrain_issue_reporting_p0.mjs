@@ -24,8 +24,8 @@ match(component, /console\.error\('Échec de l’intervention Terrain'/, 'Journa
 match(component, /setSelected\(null\)/, 'Fermeture après succès absente.');
 match(service, /tos-terrain-data-updated/, 'Rafraîchissement après succès absent.');
 match(component, /selected\.support_id/, 'Contexte support absent.');
-match(component, /issueContexts[\s\S]*edt_number/, 'Contexte EDT disponible absent.');
-match(component, /issuePhaseId[\s\S]*phase_name/, 'Contexte phase disponible absent.');
+assert.doesNotMatch(component, /listTerrainIssueContexts/, 'La déclaration d’enjeu ne dépend plus du chargement des EDT.'); checks += 1;
+match(component, /phaseId: null/, 'Un nouvel enjeu doit pouvoir être déclaré sans phase.');
 match(css, /terrain-form-footer\{position:sticky/, 'Footer sticky absent.');
 match(css, /safe-area-inset-bottom/, 'Safe-area absente.');
 assert.doesNotMatch(css, /pointer-events\s*:\s*none/i); checks += 1;

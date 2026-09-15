@@ -1,0 +1,12 @@
+import {createServer} from 'vite';
+import {managementToken} from './targeted_management_access.mjs';
+const project='cmdfomowtzrinywdsosy';
+const response=await fetch(`https://api.supabase.com/v1/projects/${project}/api-keys`,{headers:{Authorization:'Bearer '+managementToken()}});
+if(!response.ok)throw Error('Public project configuration unavailable');
+const keys=await response.json(),key=keys.find(k=>k.name==='anon')?.api_key;
+if(!key)throw Error('Public API key unavailable');
+process.env.VITE_SUPABASE_URL=`https://${project}.supabase.co`;
+process.env.VITE_SUPABASE_ANON_KEY=key;
+process.env.VITE_SUPABASE_PUBLISHABLE_KEY=key;
+const server=await createServer({server:{host:'127.0.0.1',port:5180,strictPort:true}});
+await server.listen();console.log('Targeted test frontend ready on http://127.0.0.1:5180');

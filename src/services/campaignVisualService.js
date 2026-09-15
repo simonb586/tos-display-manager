@@ -41,7 +41,9 @@ export async function diagnoseCompatibleVisualsForSupport(support, phaseId) {
     throw error;
   }
 
-  const activeCampaigns = Array.isArray(data) ? data : [];
+  const links=await supabase.from('visual_edt_associations').select('visual_id,phase_id,date_debut,date_fin,edt:edt_id(id,no_edt,archived_at)');
+  if(links.error)throw links.error;
+  const activeCampaigns = (Array.isArray(data) ? data : []).map(v=>({...v,edt_associations:(links.data||[]).filter(a=>a.visual_id===v.id&&a.edt&&!a.edt.archived_at).map(a=>({...a,edt_number:a.edt.no_edt}))}));
   const activeVisuals = activeCampaigns;
   const sameFormat = activeCampaigns;
   const published = activeCampaigns;
@@ -86,16 +88,16 @@ export async function listCampaignVisuals() {
   ready();
   const { data, error } = await supabase
     .from('campagne_visuels_formats')
-    .select('*, campagne:campagne_id(*), edt_phase:edt_phase_id(id,phase_type,edt:edt_id(id,no_edt))')
+    .select('*, campagne:campagne_id(*), edt_phase:edt_phase_id(id,phase_type,edt:edt_id(id,no_edt)), edt_associations:visual_edt_associations(edt_id,phase_id,date_debut,date_fin,edt:edt_id(id,no_edt))')
     .order('nom_visuel');
   if (error) throw error;
   return data || [];
 }
 
-export async function assignVisualToEdt(visualId, phaseId) {
+export async function assignVisualToEdt(visualId, phaseId, removedEdtId = null) {
   ready();
-  const {data,error}=await supabase.rpc('rattacher_visuel_edt_v1343', {
-    p_visual_id:Number(visualId), p_phase_id:phaseId ? Number(phaseId) : null
+  const {data,error}=await supabase.rpc('update_visual_edt_association', {
+    p_visual_id:Number(visualId), p_phase_id:phaseId ? Number(phaseId) : null, p_remove_edt_id:removedEdtId ? Number(removedEdtId):null
   });
   if(error) throw error;
   if(!data?.ok) throw new Error('Le rattachement du visuel n’a pas été confirmé.');
@@ -134,10 +136,10 @@ export async function saveCampaignVisual(visual) {
     throw new Error('Campagne, visuel et format sont obligatoires.');
   }
 
-  const query = visual.id
-    ? supabase.from('campagne_visuels_formats').update(payload).eq('id', visual.id)
-    : supabase.from('campagne_visuels_formats').insert(payload);
-  const { data, error } = await query.select().single();
+  const {data,error}=await supabase.rpc('save_campaign_visual_with_edts',{
+    p_visual:{...payload,...(visual.id?{id:visual.id}:{})},
+    p_links:visual.edt_associations===undefined?null:visual.edt_associations.map(a=>({phase_id:Number(a.phase_id),date_debut:a.date_debut||null,date_fin:a.date_fin||null}))
+  });
   if (error) throw error;
   return data;
 }

@@ -1,0 +1,21 @@
+{
+  "mode": "rollback",
+  "rows": [
+    {
+      "label": "Client-Admin:2",
+      "n": 12
+    },
+    {
+      "label": "Client-Admin:1",
+      "n": 0
+    },
+    {
+      "label": "Client:1",
+      "n": 0
+    },
+    {
+      "label": "Client:2",
+      "n": 12
+    }
+  ]
+}

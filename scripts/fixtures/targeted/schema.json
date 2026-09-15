@@ -1,0 +1,2104 @@
+{
+  "columns": [
+    {
+      "name": "id",
+      "type": "bigint",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "code_campagne",
+      "type": "text",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "nom_campagne",
+      "type": "text",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "client",
+      "type": "text",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "type_campagne",
+      "type": "text",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "visuel_generique",
+      "type": "text",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "no_edt",
+      "type": "text",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "date_debut",
+      "type": "date",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "date_fin",
+      "type": "date",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "priorite",
+      "type": "text",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "statut",
+      "type": "text",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "publiee_terrain",
+      "type": "boolean",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "instructions_terrain",
+      "type": "text",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "supports_cibles",
+      "type": "integer",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "supports_completes",
+      "type": "integer",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "created_by",
+      "type": "text",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "business_context",
+      "type": "text",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "client_id",
+      "type": "bigint",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "client_published",
+      "type": "boolean",
+      "table": "campagnes_maitres",
+      "schema": "public"
+    },
+    {
+      "name": "id",
+      "type": "bigint",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "support_id",
+      "type": "text",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "no_arret",
+      "type": "text",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "source_type",
+      "type": "text",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "emplacement",
+      "type": "text",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "action",
+      "type": "text",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "affiche_presente",
+      "type": "boolean",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "affiche_conforme",
+      "type": "boolean",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "support_endommage",
+      "type": "boolean",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "nettoyage_effectue",
+      "type": "boolean",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "remplacement_effectue",
+      "type": "boolean",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "commentaires",
+      "type": "text",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "latitude",
+      "type": "double precision",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "longitude",
+      "type": "double precision",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "precision_gps_m",
+      "type": "double precision",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "photo_path",
+      "type": "text",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "photo_url",
+      "type": "text",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "utilisateur_courriel",
+      "type": "text",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "statut",
+      "type": "text",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "sync_note",
+      "type": "text",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "campagne_id",
+      "type": "bigint",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "campagne",
+      "type": "text",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "visuel",
+      "type": "text",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "no_edt",
+      "type": "text",
+      "table": "inspections_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "id",
+      "type": "bigint",
+      "table": "clients",
+      "schema": "public"
+    },
+    {
+      "name": "nom_client",
+      "type": "text",
+      "table": "clients",
+      "schema": "public"
+    },
+    {
+      "name": "type_client",
+      "type": "text",
+      "table": "clients",
+      "schema": "public"
+    },
+    {
+      "name": "client_admin",
+      "type": "text",
+      "table": "clients",
+      "schema": "public"
+    },
+    {
+      "name": "statut",
+      "type": "text",
+      "table": "clients",
+      "schema": "public"
+    },
+    {
+      "name": "notes",
+      "type": "text",
+      "table": "clients",
+      "schema": "public"
+    },
+    {
+      "name": "raw_data",
+      "type": "jsonb",
+      "table": "clients",
+      "schema": "public"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "clients",
+      "schema": "public"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "table": "clients",
+      "schema": "public"
+    },
+    {
+      "name": "courriels_rapport",
+      "type": "text",
+      "table": "clients",
+      "schema": "public"
+    },
+    {
+      "name": "courriels_cc",
+      "type": "text",
+      "table": "clients",
+      "schema": "public"
+    },
+    {
+      "name": "logo_url",
+      "type": "text",
+      "table": "clients",
+      "schema": "public"
+    },
+    {
+      "name": "couleur_rapport",
+      "type": "text",
+      "table": "clients",
+      "schema": "public"
+    },
+    {
+      "name": "mention_legale",
+      "type": "text",
+      "table": "clients",
+      "schema": "public"
+    },
+    {
+      "name": "id",
+      "type": "bigint",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "campagne_id",
+      "type": "bigint",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "phase",
+      "type": "text",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "nom_visuel",
+      "type": "text",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "code_visuel",
+      "type": "text",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "format_support",
+      "type": "text",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "quantite_prevue",
+      "type": "integer",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "quantite_installee",
+      "type": "integer",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "actif",
+      "type": "boolean",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "instructions_terrain",
+      "type": "text",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "is_out_of_frame",
+      "type": "boolean",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "client_visible",
+      "type": "boolean",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "edt_phase_id",
+      "type": "bigint",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "client_id",
+      "type": "bigint",
+      "table": "campagne_visuels_formats",
+      "schema": "public"
+    },
+    {
+      "name": "id",
+      "type": "bigint",
+      "table": "historique_des_campagnes",
+      "schema": "public"
+    },
+    {
+      "name": "support_id",
+      "type": "text",
+      "table": "historique_des_campagnes",
+      "schema": "public"
+    },
+    {
+      "name": "campagne",
+      "type": "text",
+      "table": "historique_des_campagnes",
+      "schema": "public"
+    },
+    {
+      "name": "visuel",
+      "type": "text",
+      "table": "historique_des_campagnes",
+      "schema": "public"
+    },
+    {
+      "name": "no_edt",
+      "type": "text",
+      "table": "historique_des_campagnes",
+      "schema": "public"
+    },
+    {
+      "name": "date_installation",
+      "type": "text",
+      "table": "historique_des_campagnes",
+      "schema": "public"
+    },
+    {
+      "name": "date_retrait",
+      "type": "text",
+      "table": "historique_des_campagnes",
+      "schema": "public"
+    },
+    {
+      "name": "photo_installation",
+      "type": "text",
+      "table": "historique_des_campagnes",
+      "schema": "public"
+    },
+    {
+      "name": "utilisateur",
+      "type": "text",
+      "table": "historique_des_campagnes",
+      "schema": "public"
+    },
+    {
+      "name": "raw_data",
+      "type": "jsonb",
+      "table": "historique_des_campagnes",
+      "schema": "public"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "historique_des_campagnes",
+      "schema": "public"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "table": "historique_des_campagnes",
+      "schema": "public"
+    },
+    {
+      "name": "id",
+      "type": "bigint",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "nom",
+      "type": "text",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "courriel",
+      "type": "text",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "role",
+      "type": "text",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "organisation",
+      "type": "text",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "statut",
+      "type": "text",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "raw_data",
+      "type": "jsonb",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "auth_user_id",
+      "type": "uuid",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "client_id",
+      "type": "bigint",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "invitation_statut",
+      "type": "text",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "invitation_envoyee_le",
+      "type": "timestamp with time zone",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "derniere_activite_le",
+      "type": "timestamp with time zone",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "premiere_connexion_le",
+      "type": "timestamp with time zone",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "compte_active_le",
+      "type": "timestamp with time zone",
+      "table": "utilisateurs",
+      "schema": "public"
+    },
+    {
+      "name": "id",
+      "type": "bigint",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "support_id",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "type_support",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "format_affichage",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "medium_recommande",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "emplacement_visibilite",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "site",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "type_site",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "ligne_distribution",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "type_ligne_distribution",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "enjeux",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "type_enjeux",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "actif",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "campagne_selon_visuel",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "visuel_en_expo",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "commentaires",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "campagne_actuelle",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "visuel_campagne",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "visuel_actuel_cadre",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "date_derniere_manipulation",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "edt_associe",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "prochain_edt_cible",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "edt_precedent_associe",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "coordonnees_gps",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "latitude",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "longitude",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "lien_carte_interactive",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "raw_data",
+      "type": "jsonb",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "visuel_id",
+      "type": "bigint",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "phase_campagne",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "format_visuel",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "photo_principale_url",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "photo_miniature_url",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "campagne_precedente",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "visuel_precedent",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "legacy_campagnes_precedentes_quickbase",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "legacy_edt_precedent_quickbase",
+      "type": "text",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "date_visuel_actuel",
+      "type": "timestamp with time zone",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "client_id",
+      "type": "bigint",
+      "table": "infrastructures",
+      "schema": "public"
+    },
+    {
+      "name": "id",
+      "type": "bigint",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "no_edt",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "campagne",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "phase",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "client",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "date_debut_prevue",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "date_fin_prevue",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "dates_travaux",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "statut",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "supports_cibles",
+      "type": "integer",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "supports_completes",
+      "type": "integer",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "photos_recues",
+      "type": "integer",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "avancement",
+      "type": "numeric",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "coordonnateur",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "commentaires",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "raw_data",
+      "type": "jsonb",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "rapport_final_envoye",
+      "type": "boolean",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "rapport_final_path",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "nom",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "priorite",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "date_debut",
+      "type": "date",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "date_fin",
+      "type": "date",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "supports_prevus",
+      "type": "integer",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "supports_installes",
+      "type": "integer",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "progression",
+      "type": "integer",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "description",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "supports_planifies",
+      "type": "integer",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "supports_en_cours",
+      "type": "integer",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "supports_bloques",
+      "type": "integer",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "supports_termines",
+      "type": "integer",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "derniere_synchro",
+      "type": "timestamp with time zone",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "campagne_id",
+      "type": "bigint",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "lifecycle_status",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "retrait_date_proposee",
+      "type": "date",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "lifecycle_closed_at",
+      "type": "timestamp with time zone",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "lifecycle_closed_by",
+      "type": "uuid",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "lifecycle_exception",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "client_visible",
+      "type": "boolean",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "requester_contact_id",
+      "type": "bigint",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "archived_at",
+      "type": "timestamp with time zone",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "archived_by",
+      "type": "uuid",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "archive_reason",
+      "type": "text",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "client_id",
+      "type": "bigint",
+      "table": "suivi_des_edt",
+      "schema": "public"
+    },
+    {
+      "name": "id",
+      "type": "bigint",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "support_id",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "campagne_id",
+      "type": "bigint",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "visuel_id",
+      "type": "bigint",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "type_photo",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "nom_fichier",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "storage_path",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "photo_url",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "thumbnail_url",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "prise_le",
+      "type": "timestamp with time zone",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "utilisateur",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "statut_validation",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "est_principale",
+      "type": "boolean",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "commentaire_validation",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "validee_le",
+      "type": "timestamp with time zone",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "validee_par",
+      "type": "uuid",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "deleted_at",
+      "type": "timestamp with time zone",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "deleted_by",
+      "type": "uuid",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "edt_id",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "source",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "original_filename",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "normalized_filename",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "storage_bucket",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "captured_at",
+      "type": "timestamp with time zone",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "uploaded_at",
+      "type": "timestamp with time zone",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "uploaded_by",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "intervention_id",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "inspection_id",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "issue_id",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "is_current_visual",
+      "type": "boolean",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "replaced_photo_id",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "status",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "metadata",
+      "type": "jsonb",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "client_visible",
+      "type": "boolean",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "client_id",
+      "type": "bigint",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "review_status",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "ocr_text",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "ocr_confidence",
+      "type": "numeric(5,2)",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "ocr_suggestions",
+      "type": "jsonb",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "proposed_support_id",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "import_batch_id",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "assignment_pending",
+      "type": "boolean",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "target_storage_path",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "target_filename",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "target_support_id",
+      "type": "text",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "target_client_id",
+      "type": "bigint",
+      "table": "support_photos",
+      "schema": "public"
+    },
+    {
+      "name": "id",
+      "type": "bigint",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "edt_id",
+      "type": "bigint",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "nom",
+      "type": "text",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "ordre",
+      "type": "integer",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "statut",
+      "type": "text",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "date_debut_prevue",
+      "type": "date",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "date_fin_prevue",
+      "type": "date",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "date_debut_reelle",
+      "type": "timestamp with time zone",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "date_fin_reelle",
+      "type": "timestamp with time zone",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "progression",
+      "type": "integer",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "notes",
+      "type": "text",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "phase_type",
+      "type": "text",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "closed_at",
+      "type": "timestamp with time zone",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "closed_by",
+      "type": "uuid",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "report_ready_at",
+      "type": "timestamp with time zone",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "commentaire",
+      "type": "text",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "anomalies",
+      "type": "jsonb",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "photo_exception",
+      "type": "text",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "reopened_at",
+      "type": "timestamp with time zone",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "reopened_by",
+      "type": "uuid",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "reopen_reason",
+      "type": "text",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "client_id",
+      "type": "bigint",
+      "table": "edt_phases",
+      "schema": "public"
+    },
+    {
+      "name": "id",
+      "type": "uuid",
+      "table": "terrain_operations",
+      "schema": "public"
+    },
+    {
+      "name": "reference",
+      "type": "text",
+      "table": "terrain_operations",
+      "schema": "public"
+    },
+    {
+      "name": "type_operation",
+      "type": "text",
+      "table": "terrain_operations",
+      "schema": "public"
+    },
+    {
+      "name": "support_id",
+      "type": "text",
+      "table": "terrain_operations",
+      "schema": "public"
+    },
+    {
+      "name": "utilisateur",
+      "type": "text",
+      "table": "terrain_operations",
+      "schema": "public"
+    },
+    {
+      "name": "statut",
+      "type": "text",
+      "table": "terrain_operations",
+      "schema": "public"
+    },
+    {
+      "name": "etape",
+      "type": "text",
+      "table": "terrain_operations",
+      "schema": "public"
+    },
+    {
+      "name": "details",
+      "type": "jsonb",
+      "table": "terrain_operations",
+      "schema": "public"
+    },
+    {
+      "name": "erreur",
+      "type": "text",
+      "table": "terrain_operations",
+      "schema": "public"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "terrain_operations",
+      "schema": "public"
+    },
+    {
+      "name": "completed_at",
+      "type": "timestamp with time zone",
+      "table": "terrain_operations",
+      "schema": "public"
+    },
+    {
+      "name": "id",
+      "type": "bigint",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "reference",
+      "type": "text",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "support_id",
+      "type": "text",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "type_enjeu",
+      "type": "text",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "description",
+      "type": "text",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "statut",
+      "type": "text",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "priorite",
+      "type": "text",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "photo_id",
+      "type": "bigint",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "photo_url",
+      "type": "text",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "storage_path",
+      "type": "text",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "utilisateur",
+      "type": "text",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "resolved_at",
+      "type": "timestamp with time zone",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "client_visible",
+      "type": "boolean",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "edt_phase_id",
+      "type": "bigint",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "client_id",
+      "type": "bigint",
+      "table": "enjeux_terrain",
+      "schema": "public"
+    },
+    {
+      "name": "id",
+      "type": "bigint",
+      "table": "edt_supports",
+      "schema": "public"
+    },
+    {
+      "name": "edt_id",
+      "type": "bigint",
+      "table": "edt_supports",
+      "schema": "public"
+    },
+    {
+      "name": "phase_id",
+      "type": "bigint",
+      "table": "edt_supports",
+      "schema": "public"
+    },
+    {
+      "name": "support_id",
+      "type": "text",
+      "table": "edt_supports",
+      "schema": "public"
+    },
+    {
+      "name": "statut",
+      "type": "text",
+      "table": "edt_supports",
+      "schema": "public"
+    },
+    {
+      "name": "priorite",
+      "type": "text",
+      "table": "edt_supports",
+      "schema": "public"
+    },
+    {
+      "name": "assigne_a",
+      "type": "text",
+      "table": "edt_supports",
+      "schema": "public"
+    },
+    {
+      "name": "date_cible",
+      "type": "date",
+      "table": "edt_supports",
+      "schema": "public"
+    },
+    {
+      "name": "bon_de_travail_id",
+      "type": "bigint",
+      "table": "edt_supports",
+      "schema": "public"
+    },
+    {
+      "name": "progression",
+      "type": "integer",
+      "table": "edt_supports",
+      "schema": "public"
+    },
+    {
+      "name": "bloque",
+      "type": "boolean",
+      "table": "edt_supports",
+      "schema": "public"
+    },
+    {
+      "name": "motif_blocage",
+      "type": "text",
+      "table": "edt_supports",
+      "schema": "public"
+    },
+    {
+      "name": "completed_at",
+      "type": "timestamp with time zone",
+      "table": "edt_supports",
+      "schema": "public"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "edt_supports",
+      "schema": "public"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "table": "edt_supports",
+      "schema": "public"
+    },
+    {
+      "name": "id",
+      "type": "bigint",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "nom_campagne",
+      "type": "text",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "visuel_terrain",
+      "type": "text",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "date_debut",
+      "type": "text",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "date_fin",
+      "type": "text",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "statut_campagne",
+      "type": "text",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "support_id",
+      "type": "text",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "emplacement",
+      "type": "text",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "date_mise_a_jour",
+      "type": "text",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "raw_data",
+      "type": "jsonb",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "legacy_id",
+      "type": "bigint",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "site_id",
+      "type": "text",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "site",
+      "type": "text",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "infrastructure_id",
+      "type": "bigint",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "campaign_id",
+      "type": "bigint",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "visual_id",
+      "type": "bigint",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "business_context",
+      "type": "text",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "source_table",
+      "type": "text",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "historical_fingerprint",
+      "type": "text",
+      "table": "campagnes_visuels_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "id",
+      "type": "bigint",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "emplacement",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "message",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "date_debut",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "date_fin",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "statut",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "no_arret",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "site_ou_arret",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "support_id",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "no_edt",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "related_voiture",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "visuel_message",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "visuel_terrain",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "raw_data",
+      "type": "jsonb",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "legacy_id",
+      "type": "bigint",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "site_id",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "site",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "infrastructure_id",
+      "type": "bigint",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "campaign_id",
+      "type": "bigint",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "visual_id",
+      "type": "bigint",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "business_context",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "source_table",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    },
+    {
+      "name": "historical_fingerprint",
+      "type": "text",
+      "table": "communications_operationnelles_sites_supports",
+      "schema": "public"
+    }
+  ]
+}

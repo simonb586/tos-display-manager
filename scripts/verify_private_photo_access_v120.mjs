@@ -10,7 +10,8 @@ assert.ok(!workflow.includes('getPublicUrl')&&workflow.includes('storageReferenc
 assert.ok(workflow.includes('photo_url:null')&&workflow.includes('thumbnail_url:null'),'URL signée jamais persistée');
 assert.ok(library.includes('getSignedDownloadUrl')&&library.includes('getSignedPhotoUrls'),'Galerie et téléchargements centralisés');
 assert.ok(library.includes(".limit(50)"),'Galerie limitée aux photos visibles');
-assert.ok(inventory.includes('.limit(50)')&&inventory.includes('getSignedPhotoUrls'),'Inventaire limité à la page visible');
+assert.ok(inventory.includes('.range(offset,offset+499)')&&!inventory.includes('getSignedPhotoUrls'),'Métadonnées paginées pour tous les dossiers, sans signature anticipée');
+assert.ok(read('src/components/PhotoFolderGallery.jsx').includes('<PhotoImage loading="lazy"'),'Signatures privées chargées avec les photos du dossier ouvert');
 const grid=read('src/components/ClientBusinessGrid.jsx');
 assert.ok(client.includes('<ClientBusinessGrid'),'le portail utilise la grille testée');
 for(const source of [gallery,grid,map])assert.ok(source.includes('signed_')||source.includes('getSignedPhotoUrl')||source.includes('PhotoImage'),'Affichage privé signé');
