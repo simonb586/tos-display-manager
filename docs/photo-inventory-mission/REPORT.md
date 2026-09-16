@@ -68,4 +68,15 @@ L’advisor signale les huit nouveaux points d’entrée `SECURITY DEFINER` dest
 
 ## Publication
 
-Les validations avant publication sont PASS. Commit, push, déploiement Vercel et contrôles de production : à effectuer. Aucun verdict de production complète n’est encore prononcé.
+**Verdict : PRODUCTION UPDATE COMPLETE.**
+
+- Commit applicatif déployé : `06de94ad2e23a99a16cdd637fd212c8e7b64096b`.
+- Push normal : PASS, branche `release/v1.3.3`, dépôt `simonb586/tos-display-manager`.
+- Vercel : **READY**, déploiement `dpl_HdVuXqgmMfefkgLZ8mrXRkvxDixf`.
+- Site public : https://portail.groupetos.com ; déploiement : https://tos-display-manager-kw2lhcujf-tos3.vercel.app.
+- Lot réel de 48 photos en production : **PASS**, `production-live.json`. Les chiffres du tableau ci-dessus concernent ce lot de test, nettoyé après validation.
+- Cinq parcours Terrain, dossiers privés et accès Admin, Client et Marylène en production : **PASS**, `terrain-production.json`.
+- Fichiers JavaScript et CSS publics identiques octet par octet au build validé : **PASS**, `production-assets.json`.
+- Nettoyage final : **PASS**, `production-cleanup.json`. Les 12 photos métier préexistantes et la ligne de stock initiale sont conservées ; aucun support, compte, import ou objet Storage temporaire de ces essais ne subsiste.
+
+Les validations finales du tableau de bord passent sans reprise. Les journaux `check.log`, `extra-checks.log`, `vercel-build.log` et `vercel-deploy.log` conservent les résultats des commandes. Le build signale encore des avertissements de taille de bundles et d’imports mixtes, sans erreur bloquante. Le commit documentaire suivant contient les preuves recueillies après publication ; il ne modifie pas le code applicatif déployé.

@@ -1,0 +1,27 @@
+
+> tos-display-manager@0.6.3 test:dashboard-p0
+> node scripts/verify_dashboard_p0.mjs
+
+11 P0 dashboard browser contracts PASS
+
+> tos-display-manager@0.6.3 test:business-parity
+> node scripts/verify_user_view_preview_transport.mjs && node scripts/verify_business_parity_browser.mjs && node scripts/verify_edt_update_payload.mjs
+
+Real-view preview transport: target reads, side effects blocked, storage scope, return to Admin PASS
+Canonical business browser parity PASS
+EDT edit uses persisted columns; removal-phase creation inputs excluded PASS
+
+> tos-display-manager@0.6.3 test:private-photos
+> node ./scripts/verify_private_photo_access_v120.mjs
+
+V1.2.0 photos privées : signatures temporaires, cache, galerie, inventaire, carte, client, téléchargements et Terrain validés.
+
+> tos-display-manager@0.6.3 test:photo-review-queue
+> node ./scripts/verify_photo_review_queue.mjs
+
+File visuelle photo: appariement exact/fuzzy, conservation non appariée, renommage canonique, collisions, audit et isolation serveur vérifiés.
+
+> tos-display-manager@0.6.3 test:v1.2.1-mass-photos
+> node ./scripts/verify_mass_photo_import_v121.mjs
+
+V1.2.1 import massif: simulations 0/1/100/5 000/20 000, virtualisation, reprise et rapport réussis.

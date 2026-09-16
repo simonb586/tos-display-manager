@@ -1,0 +1,394 @@
+
+> tos-display-manager@0.6.3 precheck
+> node ./scripts/verify_official_workspace.mjs && npm run test:client-portal-rpc-v1364 && npm run test:client-data-ownership-v1362 && npm run test:exo-assignment-v1362 && npm run test:marylene-scope-v1362 && npm run test:future-client-assignment-v1362 && npm run test:client-transfer-v1362 && npm run test:activity-events-history-v1362 && npm run test:exo-id2-v1364 && npm run test:client-demo-legacy-v1364 && npm run test:infrastructure-aggregates-v1364 && npm run test:marylene-real-scope-v1364 && npm run test:terrain-rpc-security-v1342 && npm run test:terrain-issue-context-v1342
+
+Workspace officiel validé : C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable (release/v1.3.3).
+
+> tos-display-manager@0.6.3 test:client-portal-rpc-v1364
+> node ./scripts/verify_client_portal_rpc_completion_v1364.mjs
+
+V1.3.6.4 RPC completion and frontend contract PASS.
+
+> tos-display-manager@0.6.3 test:client-data-ownership-v1362
+> node ./scripts/verify_client_data_ownership_v1362.mjs
+
+V1.3.6.2 ownership PASS.
+
+> tos-display-manager@0.6.3 test:exo-assignment-v1362
+> node ./scripts/verify_exo_existing_data_assignment_v1362.mjs
+
+V1.3.6.2 EXO assignment and extension-free normalization PASS.
+
+> tos-display-manager@0.6.3 test:marylene-scope-v1362
+> node ./scripts/verify_marylene_client_admin_scope_v1362.mjs
+
+V1.3.6.2 Marylene scope PASS.
+
+> tos-display-manager@0.6.3 test:future-client-assignment-v1362
+> node ./scripts/verify_future_client_assignment_v1362.mjs
+
+V1.3.6.2 future assignment PASS.
+
+> tos-display-manager@0.6.3 test:client-transfer-v1362
+> node ./scripts/verify_client_assignment_transfer_v1362.mjs
+
+V1.3.6.2 transfer PASS.
+
+> tos-display-manager@0.6.3 test:activity-events-history-v1362
+> node ./scripts/verify_activity_events_client_history_v1362.mjs
+
+V1.3.6.2 activity_events safe client history PASS.
+
+> tos-display-manager@0.6.3 test:exo-id2-v1364
+> node ./scripts/verify_exo_client_id2_canonical_v1364.mjs
+
+V1.3.6.4 EXO canonical ID 2 PASS.
+
+> tos-display-manager@0.6.3 test:client-demo-legacy-v1364
+> node ./scripts/verify_client_demo_legacy_v1364.mjs
+
+V1.3.6.4 Client demo legacy PASS.
+
+> tos-display-manager@0.6.3 test:infrastructure-aggregates-v1364
+> node ./scripts/verify_infrastructure_ownership_aggregates_v1364.mjs
+
+V1.3.6.4 infrastructure NULL aggregates PASS.
+
+> tos-display-manager@0.6.3 test:marylene-real-scope-v1364
+> node ./scripts/verify_marylene_real_scope_v1364.mjs
+
+V1.3.6.4 Marylene real scope readiness PASS.
+
+> tos-display-manager@0.6.3 test:terrain-rpc-security-v1342
+> node ./scripts/verify_terrain_rpc_security_v1342.mjs
+
+V1.3.4.2 sécurité RPC Terrain : 17 contrôles réussis.
+
+> tos-display-manager@0.6.3 test:terrain-issue-context-v1342
+> node ./scripts/verify_terrain_issue_context_v1342.mjs
+
+V1.3.4.2 contexte enjeu : 15 scénarios et contrôles réussis.
+
+> tos-display-manager@0.6.3 check
+> npm run test:workspace && npm run test:client-role-views-v136 && npm run test:client-user-linking-v136 && npm run test:client-portal-view-coverage-v1361 && npm run test:client-portal-admin-preview-v1361 && npm run test:client-portal-data-scope-v1361 && npm run test:client-portal-parity-v137 && npm run test:clients-v135 && npm run test:terrain-issue-p0 && npm run test:terrain-p0-regression && npm run test:bloc13.1a && npm run test:bloc13.1a2 && npm run test:bloc13.1a30 && npm run test:bloc13.1a3 && npm run test:bloc13.1a32 && npm run test:bloc13.1a42 && npm run test:bloc13.1a43i && npm run test:bloc13.1a44 && npm run test:bloc13.1a45 && npm run test:bloc13.1a5 && npm run test:bloc13.1a6 && npm run test:bloc13.1a7 && npm run test:bloc13.1a8 && npm run test:bloc13.1a9 && npm run test:bloc13.1a10 && npm run test:bloc13.1.1 && npm run test:bloc13.1.1c1 && npm run test:preproduction-v13.1 && npm run test:deployment-v1 && npm run test:bloc13.2 && npm run test:bloc13.2-lot1 && npm run test:bloc13.2-lot2 && npm run test:bloc13.2-lot3 && npm run test:photo-p0 && npm run test:edt-p1 && npm run test:bloc13.3 && npm run test:v1.1.1 && npm run test:v1.1.2 && npm run test:v1.1.3-history && npm run test:v1.1.4-map && npm run test:v1.1.4c-terrain && npm run test:v1.1.5-activity && npm run build && npm run test:stabilization
+
+
+> tos-display-manager@0.6.3 test:workspace
+> node ./scripts/verify_workspace_policy.mjs && node ./scripts/verify_workspace_path_contract.mjs
+
+Politique workspace : stable officiel exact; parent, C:\dev et autres copies interdits hors CI/Vercel.
+Contrat workspace : stable PASS; parent FAIL; C:\dev FAIL; autre copie FAIL; CI/Vercel PASS.
+
+> tos-display-manager@0.6.3 test:client-role-views-v136
+> node ./scripts/verify_client_role_views_v136.mjs
+
+V1.3.6 vues par rôle : EXO, navigation dynamique, retrait sans code, état vide et vue inconnue validés.
+
+> tos-display-manager@0.6.3 test:client-user-linking-v136
+> node ./scripts/verify_client_user_linking_v136.mjs
+
+V1.3.6 rattachement : N utilisateurs/client, rôles Client et Client-Admin, transfert, détachement, invitations et audit validés.
+
+> tos-display-manager@0.6.3 test:client-portal-view-coverage-v1361
+> node ./scripts/verify_client_portal_view_coverage_v1361.mjs
+
+V1.3.6.1 couverture portail Client OK: 16 vues configurables, 2 rôles client, 17 vues supportées, 3 vues explicitement bloquées.
+
+> tos-display-manager@0.6.3 test:client-portal-admin-preview-v1361
+> node ./scripts/verify_client_portal_admin_preview_v1361.mjs
+
+V1.3.6.1 aperçu admin: bouton, bannière, diagnostic et RPC de preview sans impersonation Auth validés.
+
+> tos-display-manager@0.6.3 test:client-portal-data-scope-v1361
+> node ./scripts/verify_client_portal_data_scope_v1361.mjs
+
+V1.3.6.1 périmètre données Client: client réel, campagnes, supports et infrastructures restent dérivés côté serveur.
+
+> tos-display-manager@0.6.3 test:client-portal-parity-v137
+> node ./scripts/verify_client_portal_parity_v137.mjs
+
+V1.3.7 parité portail: PASS — 17 vues, grille/carte/dashboard/preview partagés, garde Client B transactionnel.
+
+> tos-display-manager@0.6.3 test:clients-v135
+> node ./scripts/verify_clients_access_admin_v135.mjs
+
+Clients V1.3.5: UI, statuts, permissions, batch et Module 17 validés.
+
+> tos-display-manager@0.6.3 test:terrain-issue-p0
+> node ./scripts/verify_terrain_issue_reporting_p0.mjs
+
+P0 Terrain enjeux : 21 contrôles réussis.
+
+> tos-display-manager@0.6.3 test:terrain-p0-regression
+> node ./scripts/verify_terrain_p0_regression.mjs
+
+Régression Terrain P0 : 14 invariants réussis.
+
+> tos-display-manager@0.6.3 test:bloc13.1a
+> node ./scripts/verifier_field_catalog_v0131a.mjs
+
+Phase 13.1-A1 : 31 contrôles du catalogue universel réussis.
+
+> tos-display-manager@0.6.3 test:bloc13.1a2
+> node ./scripts/verify_field_catalog_manager_v0131a2.mjs
+
+Phase 13.1-A2 : 30 contrôles du Gestionnaire des champs réussis.
+
+> tos-display-manager@0.6.3 test:bloc13.1a30
+> node ./scripts/verify_field_catalog_structure_v0131a30.mjs
+
+Phase 13.1-A3.0 : 42 contrôles de consolidation structurelle réussis.
+
+> tos-display-manager@0.6.3 test:bloc13.1a3
+> node ./scripts/verify_field_catalog_general_draft_v0131a3.mjs
+
+Phase 13.1-A3 : 58 contrôles de configuration générale en brouillon réussis.
+
+> tos-display-manager@0.6.3 test:bloc13.1a32
+> node ./scripts/verify_field_contracts_v0131a32.mjs
+
+Phase 13.1-A3.2 : contrats versionnés, purs et sans consommateur validés.
+
+> tos-display-manager@0.6.3 test:bloc13.1a42
+> node ./scripts/verify_field_catalog_display_draft_v0131a42.mjs
+
+Phase 13.1-A4.2 : stockage brouillon, protections et non-consommation validés.
+
+> tos-display-manager@0.6.3 test:bloc13.1a43i
+> node ./scripts/verify_field_catalog_display_ui_v0131a43i.mjs
+
+Phase 13.1-A4.3-I : interface Affichage, accessibilité et isolation validées.
+
+> tos-display-manager@0.6.3 test:bloc13.1a44
+> node ./scripts/verify_field_catalog_display_validation_v0131a44.mjs
+
+Phase 13.1-A4.4 : validation locale, accessibilité et non-consommation vérifiées.
+
+> tos-display-manager@0.6.3 test:bloc13.1a45
+> node ./scripts/verify_field_catalog_display_preview_v0131a45.mjs
+
+Phase 13.1-A4.5 : prévisualisation administrative simulée et isolée validée.
+
+> tos-display-manager@0.6.3 test:bloc13.1a5
+> node ./scripts/verify_field_catalog_validation_v0131a5.mjs
+
+Phase 13.1-A5 : ValidationConfig 1.0.0, sécurité, UI et isolation validées.
+
+> tos-display-manager@0.6.3 test:bloc13.1a6
+> node ./scripts/verify_field_catalog_permissions_v0131a6.mjs
+
+Phase 13.1-A6 : 74 contrôles des permissions déclaratives réussis.
+
+> tos-display-manager@0.6.3 test:bloc13.1a7
+> node ./scripts/verify_field_catalog_terrain_v0131a7.mjs
+
+Phase 13.1-A7 : 90 contrôles TerrainConfig déclaratifs réussis.
+
+> tos-display-manager@0.6.3 test:bloc13.1a8
+> node ./scripts/verify_field_catalog_import_export_v0131a8.mjs
+
+Phase 13.1-A8 : 66 contrôles ImportExportConfig déclaratifs réussis.
+
+> tos-display-manager@0.6.3 test:bloc13.1a9
+> node ./scripts/verify_field_catalog_relations_calculations_v0131a9.mjs
+
+Phase 13.1-A9 : 56 contrôles Relations/Calculs déclaratifs réussis.
+
+> tos-display-manager@0.6.3 test:bloc13.1a10
+> node ./scripts/verify_field_configuration_activation_v0131a10.mjs
+
+Phase 13.1-A10 : 45 contrôles d’activation théorique réussis.
+
+> tos-display-manager@0.6.3 test:bloc13.1.1
+> node ./scripts/verify_field_catalog_consolidation_v01311.mjs
+
+Bloc 13.1.1 : 139 contrôles de consolidation réussis. NO-GO A9 documenté.
+
+> tos-display-manager@0.6.3 test:bloc13.1.1c1
+> node ./scripts/verify_a9_audit_constraint_fix_v01311c1.mjs
+
+Bloc 13.1.1-C1 : 50 contrôles statiques du correctif audit réussis.
+
+> tos-display-manager@0.6.3 test:preproduction-v13.1
+> node ./scripts/verify_preproduction_package_v131.mjs
+
+Préproduction 13.1: 10 fichiers, ordre et garde-fous conformes.
+
+> tos-display-manager@0.6.3 test:deployment-v1
+> node ./scripts/verify_v1_deployment_package.mjs
+
+Déploiement V1: 10 fichiers, stratégie A, ordre et garde-fous conformes.
+
+> tos-display-manager@0.6.3 test:bloc13.2
+> node ./scripts/verify_bloc_13_2.mjs
+
+Bloc 13.2 : 27 contrôles réussis.
+
+> tos-display-manager@0.6.3 test:bloc13.2-lot1
+> node ./scripts/verify_bloc_13_2_lot1.mjs
+
+Bloc 13.2 Lot 1 : shell, dashboard réel, responsive et pagination Infrastructure validés.
+
+> tos-display-manager@0.6.3 test:bloc13.2-lot2
+> node ./scripts/verify_bloc_13_2_lot2.mjs
+
+Bloc 13.2 Lot 2 : centre de commandement, vues spécialisées, alertes et activité validés.
+
+> tos-display-manager@0.6.3 test:bloc13.2-lot3
+> node ./scripts/verify_bloc_13_2_lot3.mjs
+
+Bloc 13.2 Lot 3 : logo officiel, chargement différé, responsive, focus et mouvement réduit validés.
+
+> tos-display-manager@0.6.3 test:photo-p0
+> node ./scripts/verify_photo_workflow_v132p0.mjs
+
+Bloc 13.2-P0 : normalisation, associations, historique, rollback, visuel et suppression validés.
+
+> tos-display-manager@0.6.3 test:edt-p1
+> node ./scripts/verify_edt_lifecycle_v132p1.mjs
+
+Bloc 13.2-P1 : cycle EDT, dates, fermetures, rapports, historique, permissions et conservation validés.
+
+> tos-display-manager@0.6.3 test:bloc13.3
+> node ./scripts/verify_bloc_13_3.mjs && node ./scripts/verify_photo_bucket_deletion.mjs
+
+Bloc 13.3 — Lots A-E : 34 contrôles réussis.
+Suppression photo multi-buckets : 12 contrôles réussis.
+
+> tos-display-manager@0.6.3 test:v1.1.1
+> node ./scripts/verify_urgent_fixes_v111.mjs
+
+V1.1.1 : 335 contrôles réussis.
+
+> tos-display-manager@0.6.3 test:v1.1.2
+> node ./scripts/verify_v112_production_ui_fixes.mjs
+
+V1.1.2 : 91 contrôles de production réussis.
+
+> tos-display-manager@0.6.3 test:v1.1.3-history
+> node ./scripts/verify_v113_activity_history.mjs
+
+V1.1.3 historique : 47 contrôles réussis.
+
+> tos-display-manager@0.6.3 test:v1.1.4-map
+> node ./scripts/verify_interactive_map_v114.mjs
+
+Carte interactive V1.1.4 : 51 contrôles réussis.
+
+> tos-display-manager@0.6.3 test:v1.1.4c-terrain
+> node ./scripts/verify_terrain_sync_consistency_v114c.mjs
+
+V1.1.4C cohérence Terrain : 44 contrôles réussis.
+
+> tos-display-manager@0.6.3 test:v1.1.5-activity
+> node ./scripts/verify_recent_activity_v115.mjs
+
+Activité récente V1.1.5B : 47 contrôles réussis, rendu React vérifié.
+
+> tos-display-manager@0.6.3 build
+> vite build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 2164 modules transformed.
+rendering chunks...
+[plugin vite:reporter]
+(!) C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/services/photoAccessService.js is dynamically imported by C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/lib/utils.js, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/services/finalReportService.js but also statically imported by C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/components/ClientPortal.jsx, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/components/ExportsCenter.jsx, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/components/PhotoFolderGallery.jsx, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/components/PhotoImage.jsx, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/components/PhotoReviewQueue.jsx, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/main.jsx, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/services/clientAccessAdminService.js, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/services/clientPortalService.js, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/services/photoLibraryService.js, dynamic import will not move module into another chunk.
+
+computing gzip size...
+dist/index.html                                             0.43 kB │ gzip:   0.29 kB
+dist/assets/ClientPortal-D6T1Cc8X.css                       1.51 kB │ gzip:   0.52 kB
+dist/assets/ProductionLogin-DCOAq7jp.css                    1.58 kB │ gzip:   0.65 kB
+dist/assets/TerrainApp-D54cZFaz.css                         2.17 kB │ gzip:   0.82 kB
+dist/assets/ClientsAccessAdmin-rcQ3aPer.css                 3.25 kB │ gzip:   1.05 kB
+dist/assets/PhotoInventoryCenter-CNiTJ2KG.css               5.44 kB │ gzip:   1.68 kB
+dist/assets/FieldCatalogManager-DwV1rNJf.css               18.42 kB │ gzip:   2.99 kB
+dist/assets/index-a513Wu-L.css                            146.05 kB │ gzip:  30.13 kB
+dist/assets/journal_des_evenements-CN6cYbRC.js              0.18 kB │ gzip:   0.16 kB
+dist/assets/clients-DHBMi4ti.js                             0.18 kB │ gzip:   0.16 kB
+dist/assets/bons_de_travail-wVzNO3Ka.js                     0.22 kB │ gzip:   0.20 kB
+dist/assets/historique_des_campagnes-k4XW2tf9.js            0.22 kB │ gzip:   0.18 kB
+dist/assets/photos-F0SjH7G_.js                              0.28 kB │ gzip:   0.23 kB
+dist/assets/utilisateurs-CseQFqww.js                        0.29 kB │ gzip:   0.21 kB
+dist/assets/play-CjpZCjcP.js                                0.30 kB │ gzip:   0.25 kB
+dist/assets/plus-DaW1KY4w.js                                0.32 kB │ gzip:   0.25 kB
+dist/assets/filter-CUfdJAhe.js                              0.33 kB │ gzip:   0.26 kB
+dist/assets/suivi_des_edt-Dd8ZXU_A.js                       0.34 kB │ gzip:   0.25 kB
+dist/assets/circle-x-Bt7fUDrq.js                            0.37 kB │ gzip:   0.28 kB
+dist/assets/mail-CNpFnJdJ.js                                0.38 kB │ gzip:   0.30 kB
+dist/assets/settings-2-DxufzJRv.js                          0.42 kB │ gzip:   0.30 kB
+dist/assets/cloud-upload-BFGKL-kk.js                        0.42 kB │ gzip:   0.31 kB
+dist/assets/external-link-6gKElSdq.js                       0.42 kB │ gzip:   0.30 kB
+dist/assets/eye-txHYE0Rg.js                                 0.42 kB │ gzip:   0.30 kB
+dist/assets/user-check-Wjkkix5H.js                          0.42 kB │ gzip:   0.32 kB
+dist/assets/archive-MB2JH_iO.js                             0.42 kB │ gzip:   0.31 kB
+dist/assets/shield-C5ClhWYV.js                              0.44 kB │ gzip:   0.33 kB
+dist/assets/pencil-D5iZg3R-.js                              0.45 kB │ gzip:   0.32 kB
+dist/assets/send-C6hdLJb2.js                                0.46 kB │ gzip:   0.33 kB
+dist/assets/user-plus-Xtnvk156.js                           0.48 kB │ gzip:   0.33 kB
+dist/assets/supportNavigationContext-VhUhywx7.js            0.69 kB │ gzip:   0.29 kB
+dist/assets/schemaService-C7BPuki-.js                       1.25 kB │ gzip:   0.58 kB
+dist/assets/ValidationCenter-BvD6LWbO.js                    1.45 kB │ gzip:   0.75 kB
+dist/assets/userProvisioningService-F5Cou1WC.js             1.65 kB │ gzip:   0.79 kB
+dist/assets/ProductionLogin-BPnkAnha.js                     1.84 kB │ gzip:   0.85 kB
+dist/assets/formDraft-BpjJ8iLZ.js                           2.20 kB │ gzip:   1.00 kB
+dist/assets/UnifiedDataGrid-CmM3B62K.js                     2.31 kB │ gzip:   0.94 kB
+dist/assets/LegacyPhotoImporter-CS3a7Xbo.js                 2.41 kB │ gzip:   1.25 kB
+dist/assets/ActivityJournal-CM1UNauL.js                     3.37 kB │ gzip:   1.31 kB
+dist/assets/InstallerTerrainShell-DVpVqb7r.js               3.44 kB │ gzip:   1.37 kB
+dist/assets/RoleVisibilityAdmin-C7n_pWMn.js                 4.31 kB │ gzip:   1.71 kB
+dist/assets/campaignVisualService-CH3cL2P8.js               4.33 kB │ gzip:   1.84 kB
+dist/assets/TerrainSyncDiagnostics-Bztqh9yb.js              4.65 kB │ gzip:   1.83 kB
+dist/assets/ExportsCenter-V8Uz9za4.js                       5.28 kB │ gzip:   2.23 kB
+dist/assets/c_i_avec_enjeux-AZoxnaE7.js                     6.09 kB │ gzip:   0.98 kB
+dist/assets/FinalReportsCenter-BKQcTihe.js                  6.51 kB │ gzip:   2.41 kB
+dist/assets/activityLogService-B2JDnJ5I.js                  6.60 kB │ gzip:   2.47 kB
+dist/assets/CampaignVisualManager-BvYGzoed.js               7.61 kB │ gzip:   2.51 kB
+dist/assets/CampaignsPanel-B-KRu4wL.js                      7.64 kB │ gzip:   2.77 kB
+dist/assets/UserProvisioningPanel-4NfI0bW0.js               7.70 kB │ gzip:   2.67 kB
+dist/assets/reportDataService-PVaGmtZt.js                   9.10 kB │ gzip:   3.49 kB
+dist/assets/WorkOrdersPanel-Divp8oXX.js                     9.33 kB │ gzip:   3.12 kB
+dist/assets/AdminPanel-xDDntKPq.js                          9.92 kB │ gzip:   2.99 kB
+dist/assets/finalReportService-BU2F3t6J.js                 11.50 kB │ gzip:   4.53 kB
+dist/assets/ClientsAccessAdmin-DXJsYuCy.js                 12.94 kB │ gzip:   4.50 kB
+dist/assets/Module14Dashboard-Ybiv6bsz.js                  13.38 kB │ gzip:   4.46 kB
+dist/assets/TerrainApp-CWTubirr.js                         14.98 kB │ gzip:   4.94 kB
+dist/assets/Module15Reports-ClUB19h_.js                    15.09 kB │ gzip:   4.98 kB
+dist/assets/SiteSupportAssignmentsView-Dj-MUupy.js         18.50 kB │ gzip:   6.81 kB
+dist/assets/ClientPortal-CU2C361R.js                       25.77 kB │ gzip:   8.87 kB
+dist/assets/purify.es-Jn2rvFN8.js                          28.91 kB │ gzip:  10.90 kB
+dist/assets/communications_operationnelles-BxdEyNfM.js     31.95 kB │ gzip:   1.98 kB
+dist/assets/centres_dinformation-D0PlJtBY.js               31.97 kB │ gzip:   1.87 kB
+dist/assets/enjeux_des_cadres_et_supports-DCZ7eGgo.js      41.35 kB │ gzip:   3.68 kB
+dist/assets/OperationsCenter-obUGF8f-.js                   49.81 kB │ gzip:  12.95 kB
+dist/assets/PhotoInventoryCenter-BBjOBGuq.js               57.50 kB │ gzip:  18.00 kB
+dist/assets/AutomationAssistant-8_GoHV_8.js                65.12 kB │ gzip:  16.24 kB
+dist/assets/voitures_trains-vDXTsTq6.js                    65.24 kB │ gzip:   4.14 kB
+dist/assets/repertoire_des_affiches-DzewKAaw.js           118.43 kB │ gzip:   5.96 kB
+dist/assets/FieldCatalogManager--fP6KVFL.js               128.22 kB │ gzip:  32.48 kB
+dist/assets/index.es-DAh2B7zz.js                          159.64 kB │ gzip:  53.54 kB
+dist/assets/InteractiveMap-CM2nHhxs.js                    168.59 kB │ gzip:  49.31 kB
+dist/assets/html2canvas.esm-QH1iLAAe.js                   202.38 kB │ gzip:  48.04 kB
+dist/assets/jspdf.es.min-n4a_Qdbz.js                      390.79 kB │ gzip: 128.83 kB
+dist/assets/xlsx-CkFp8p6R.js                              429.53 kB │ gzip: 143.08 kB
+dist/assets/index-BDTIiaRT.js                             635.64 kB │ gzip: 187.01 kB
+dist/assets/exceljs.min-R5ubw66l.js                       939.98 kB │ gzip: 271.21 kB
+dist/assets/liste_des_arrets-Dw9VFMc0.js                1,645.90 kB │ gzip:  69.17 kB
+dist/assets/infrastructures-BSg2vF3-.js                 6,084.07 kB │ gzip: 158.01 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 18.72s
+
+> tos-display-manager@0.6.3 test:stabilization
+> node ./scripts/verify_stabilization_guards.mjs && node ./scripts/verify_stabilization_edge.mjs && node ./scripts/verify_stabilization_cache.mjs && node ./scripts/verify_admin_view_registry.mjs && node ./scripts/verify_business_column_contracts.mjs
+
+{"files":189,"controls":956,"refreshCandidates":25,"missingHandlerCandidates":0}
+Dead-button AST guard, 15 registry views, column/export restrictions and alias reorder PASS. Static guards do not prove all control behavior.
+29 Edge handler cases PASS; no mail or network.
+Table cache invalidation, competing refreshes and stale signed-photo rejection PASS.
+Progressive table loading preserves complete results without blocking on the slowest table PASS.
+35 actual Admin navigation views inventoried; registry completeness guard PASS (not functional certification)
+Shared Infrastructure column schema, labels, hidden fields and alias permission intersection PASS

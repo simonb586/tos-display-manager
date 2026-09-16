@@ -1,0 +1,17 @@
+{
+  "origin": "https://portail.groupetos.com",
+  "at": "2026-09-16T00:59:12.876Z",
+  "result": "PASS",
+  "records": [
+    {
+      "path": "/assets/index-B7Mibz7n.js",
+      "sha256": "fab20ae8c34e7f313407b54bf0b07c5949e8a5e88ec9489eb67d7a1a11d2bcd4",
+      "result": "PASS"
+    },
+    {
+      "path": "/assets/index-a513Wu-L.css",
+      "sha256": "371fddbe40b0127d2c7f3d44b58ff2f1867d29da5efcf0dc1e476c229889e81e",
+      "result": "PASS"
+    }
+  ]
+}

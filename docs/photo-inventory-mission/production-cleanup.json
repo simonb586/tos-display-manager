@@ -1,0 +1,12 @@
+{
+  "result": "PASS",
+  "source": "Read-only PostgreSQL verification after production tests",
+  "verification": {
+    "test_storage": 0,
+    "test_profiles": 0,
+    "test_supports": 0,
+    "business_photos": 12,
+    "original_stock_row": 1,
+    "test_import_photos": 0
+  }
+}

@@ -1,0 +1,123 @@
+Vercel CLI 56.5.0 (Node.js 24.18.0)
+Installing dependencies...
+
+up to date in 9s
+
+17 packages are looking for funding
+  run `npm fund` for details
+npm warn allow-scripts 2 packages have install scripts not yet covered by allowScripts:
+npm warn allow-scripts   core-js@3.49.0 (install: (install scripts present))
+npm warn allow-scripts   esbuild@0.25.12 (install: (install scripts present))
+npm warn allow-scripts
+npm warn allow-scripts Run `npm approve-scripts --allow-scripts-pending` to review, or `npm approve-scripts <pkg>` to allow.
+Running "npm run build"
+
+> tos-display-manager@0.6.3 build
+> vite build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 2164 modules transformed.
+rendering chunks...
+[plugin vite:reporter]
+(!) C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/services/photoAccessService.js is dynamically imported by C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/lib/utils.js, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/services/finalReportService.js but also statically imported by C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/components/ClientPortal.jsx, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/components/ExportsCenter.jsx, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/components/PhotoFolderGallery.jsx, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/components/PhotoImage.jsx, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/components/PhotoReviewQueue.jsx, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/main.jsx, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/services/clientAccessAdminService.js, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/services/clientPortalService.js, C:/Users/sim-0/OneDrive/Documents/GitHub/tos-display-manager/tos-display-manager-stable/src/services/photoLibraryService.js, dynamic import will not move module into another chunk.
+
+computing gzip size...
+dist/index.html                                             0.43 kB │ gzip:   0.29 kB
+dist/assets/ClientPortal-D6T1Cc8X.css                       1.51 kB │ gzip:   0.52 kB
+dist/assets/ProductionLogin-DCOAq7jp.css                    1.58 kB │ gzip:   0.65 kB
+dist/assets/TerrainApp-D54cZFaz.css                         2.17 kB │ gzip:   0.82 kB
+dist/assets/ClientsAccessAdmin-rcQ3aPer.css                 3.25 kB │ gzip:   1.05 kB
+dist/assets/PhotoInventoryCenter-CNiTJ2KG.css               5.44 kB │ gzip:   1.68 kB
+dist/assets/FieldCatalogManager-DwV1rNJf.css               18.42 kB │ gzip:   2.99 kB
+dist/assets/index-a513Wu-L.css                            146.05 kB │ gzip:  30.13 kB
+dist/assets/journal_des_evenements-CN6cYbRC.js              0.18 kB │ gzip:   0.16 kB
+dist/assets/clients-DHBMi4ti.js                             0.18 kB │ gzip:   0.16 kB
+dist/assets/bons_de_travail-wVzNO3Ka.js                     0.22 kB │ gzip:   0.20 kB
+dist/assets/historique_des_campagnes-k4XW2tf9.js            0.22 kB │ gzip:   0.18 kB
+dist/assets/photos-F0SjH7G_.js                              0.28 kB │ gzip:   0.23 kB
+dist/assets/utilisateurs-CseQFqww.js                        0.29 kB │ gzip:   0.21 kB
+dist/assets/play-MyCA4Lu2.js                                0.30 kB │ gzip:   0.25 kB
+dist/assets/plus-D7mDriGT.js                                0.32 kB │ gzip:   0.25 kB
+dist/assets/filter-BMeJWxUs.js                              0.33 kB │ gzip:   0.26 kB
+dist/assets/suivi_des_edt-Dd8ZXU_A.js                       0.34 kB │ gzip:   0.25 kB
+dist/assets/circle-x-gmjR6uVu.js                            0.37 kB │ gzip:   0.28 kB
+dist/assets/mail-B44yKAD2.js                                0.38 kB │ gzip:   0.30 kB
+dist/assets/settings-2-C8MwPs-Z.js                          0.42 kB │ gzip:   0.29 kB
+dist/assets/cloud-upload-BXP6U3TH.js                        0.42 kB │ gzip:   0.31 kB
+dist/assets/external-link-Bs8irXqM.js                       0.42 kB │ gzip:   0.30 kB
+dist/assets/eye-BxZaWGyR.js                                 0.42 kB │ gzip:   0.30 kB
+dist/assets/user-check-Vw8Shp8d.js                          0.42 kB │ gzip:   0.32 kB
+dist/assets/archive-DWitDfXW.js                             0.42 kB │ gzip:   0.31 kB
+dist/assets/shield--fJ0q4I-.js                              0.44 kB │ gzip:   0.33 kB
+dist/assets/pencil-VnCSks5c.js                              0.45 kB │ gzip:   0.32 kB
+dist/assets/send-DGVCEgre.js                                0.46 kB │ gzip:   0.33 kB
+dist/assets/user-plus-h0yGCXC0.js                           0.48 kB │ gzip:   0.33 kB
+dist/assets/supportNavigationContext-VhUhywx7.js            0.69 kB │ gzip:   0.29 kB
+dist/assets/schemaService-CGPlFwvj.js                       1.25 kB │ gzip:   0.58 kB
+dist/assets/ValidationCenter-D4-8ghkm.js                    1.45 kB │ gzip:   0.75 kB
+dist/assets/userProvisioningService-BA-UOR3c.js             1.65 kB │ gzip:   0.79 kB
+dist/assets/ProductionLogin-DAja5cdy.js                     1.84 kB │ gzip:   0.86 kB
+dist/assets/formDraft-I4j2t3D2.js                           2.20 kB │ gzip:   1.00 kB
+dist/assets/UnifiedDataGrid-CS0mf33F.js                     2.31 kB │ gzip:   0.94 kB
+dist/assets/LegacyPhotoImporter-ByCOYeR2.js                 2.41 kB │ gzip:   1.25 kB
+dist/assets/ActivityJournal-BtJWrsca.js                     3.37 kB │ gzip:   1.31 kB
+dist/assets/InstallerTerrainShell-D-JK6VYw.js               3.44 kB │ gzip:   1.37 kB
+dist/assets/RoleVisibilityAdmin-JLZAEukG.js                 4.31 kB │ gzip:   1.71 kB
+dist/assets/campaignVisualService-CeZ_PMsk.js               4.33 kB │ gzip:   1.84 kB
+dist/assets/TerrainSyncDiagnostics-CcMnQRWh.js              4.65 kB │ gzip:   1.83 kB
+dist/assets/ExportsCenter-DU7TQCfM.js                       5.28 kB │ gzip:   2.23 kB
+dist/assets/c_i_avec_enjeux-AZoxnaE7.js                     6.09 kB │ gzip:   0.98 kB
+dist/assets/FinalReportsCenter-B9Xa5fBv.js                  6.51 kB │ gzip:   2.41 kB
+dist/assets/activityLogService-CrqO-wSU.js                  6.60 kB │ gzip:   2.47 kB
+dist/assets/CampaignVisualManager-C49h1-nG.js               7.61 kB │ gzip:   2.50 kB
+dist/assets/CampaignsPanel-B8SVmtQk.js                      7.64 kB │ gzip:   2.77 kB
+dist/assets/UserProvisioningPanel-CHYm6CRb.js               7.70 kB │ gzip:   2.67 kB
+dist/assets/reportDataService-BKtBDc3w.js                   9.10 kB │ gzip:   3.49 kB
+dist/assets/WorkOrdersPanel-BtAKBVxc.js                     9.33 kB │ gzip:   3.12 kB
+dist/assets/AdminPanel-C7Z105Ow.js                          9.92 kB │ gzip:   2.98 kB
+dist/assets/finalReportService-DhOxWZM0.js                 11.50 kB │ gzip:   4.53 kB
+dist/assets/ClientsAccessAdmin-BrOzwITt.js                 12.94 kB │ gzip:   4.49 kB
+dist/assets/Module14Dashboard-Cqng2nXZ.js                  13.38 kB │ gzip:   4.46 kB
+dist/assets/TerrainApp-5P4clsxU.js                         14.98 kB │ gzip:   4.94 kB
+dist/assets/Module15Reports-Dq5uC3h4.js                    15.09 kB │ gzip:   4.98 kB
+dist/assets/SiteSupportAssignmentsView-DHyxz1a-.js         18.50 kB │ gzip:   6.81 kB
+dist/assets/ClientPortal-D9dOgQrk.js                       25.77 kB │ gzip:   8.87 kB
+dist/assets/purify.es-Jn2rvFN8.js                          28.91 kB │ gzip:  10.90 kB
+dist/assets/communications_operationnelles-BxdEyNfM.js     31.95 kB │ gzip:   1.98 kB
+dist/assets/centres_dinformation-D0PlJtBY.js               31.97 kB │ gzip:   1.87 kB
+dist/assets/enjeux_des_cadres_et_supports-DCZ7eGgo.js      41.35 kB │ gzip:   3.68 kB
+dist/assets/OperationsCenter-D250xEq-.js                   49.81 kB │ gzip:  12.95 kB
+dist/assets/PhotoInventoryCenter-CALi5eVy.js               57.50 kB │ gzip:  18.00 kB
+dist/assets/AutomationAssistant-D0cjih7w.js                65.12 kB │ gzip:  16.24 kB
+dist/assets/voitures_trains-vDXTsTq6.js                    65.24 kB │ gzip:   4.14 kB
+dist/assets/repertoire_des_affiches-DzewKAaw.js           118.43 kB │ gzip:   5.96 kB
+dist/assets/FieldCatalogManager-BDYHJmBy.js               128.22 kB │ gzip:  32.48 kB
+dist/assets/index.es-C140HNCw.js                          159.64 kB │ gzip:  53.54 kB
+dist/assets/InteractiveMap-CyRpGp-N.js                    168.59 kB │ gzip:  49.30 kB
+dist/assets/html2canvas.esm-QH1iLAAe.js                   202.38 kB │ gzip:  48.04 kB
+dist/assets/jspdf.es.min-BGhbote1.js                      390.79 kB │ gzip: 128.83 kB
+dist/assets/xlsx-CkFp8p6R.js                              429.53 kB │ gzip: 143.08 kB
+dist/assets/index-B7Mibz7n.js                             635.84 kB │ gzip: 187.18 kB
+dist/assets/exceljs.min-BfKhQ4Sr.js                       939.98 kB │ gzip: 271.21 kB
+dist/assets/liste_des_arrets-Dw9VFMc0.js                1,645.90 kB │ gzip:  69.17 kB
+dist/assets/infrastructures-BSg2vF3-.js                 6,084.07 kB │ gzip: 158.01 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 15.39s
+{
+  "status": "ok",
+  "outputDir": "C:\\Users\\sim-0\\OneDrive\\Documents\\GitHub\\tos-display-manager\\tos-display-manager-stable\\.vercel\\output",
+  "outputDirRelative": ".vercel\\output",
+  "target": "production",
+  "message": "Build completed successfully.",
+  "next": [
+    {
+      "command": "vercel deploy",
+      "when": "Deploy the build output"
+    }
+  ]
+}

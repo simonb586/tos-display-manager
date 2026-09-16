@@ -1,0 +1,36 @@
+Vercel CLI 56.5.0 (Node.js 24.18.0)
+Retrieving project…
+Deploying tos3/tos-display-manager
+Uploading [--------------------] (0.0B/2.7MB)
+Uploading [=====---------------] (696.7KB/2.7MB)
+Uploading [==========----------] (1.4MB/2.7MB)
+Uploading [===============-----] (2.0MB/2.7MB)
+Uploading [====================] (2.7MB/2.7MB)
+  Inspect         https://vercel.com/tos3/tos-display-manager/HdVuXqgmMfefkgLZ8mrXRkvxDixf
+  Production      https://tos-display-manager-kw2lhcujf-tos3.vercel.app
+Building…
+[2K[1A[2K[G  Production      https://tos-display-manager-kw2lhcujf-tos3.vercel.app
+Completing…
+▲ Aliased         https://portail.groupetos.com
+{
+  "status": "ok",
+  "deployment": {
+    "id": "dpl_HdVuXqgmMfefkgLZ8mrXRkvxDixf",
+    "url": "https://tos-display-manager-kw2lhcujf-tos3.vercel.app",
+    "inspectorUrl": "https://vercel.com/tos3/tos-display-manager/HdVuXqgmMfefkgLZ8mrXRkvxDixf",
+    "readyState": "READY",
+    "target": "production",
+    "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_HdVuXqgmMfefkgLZ8mrXRkvxDixf"
+  },
+  "message": "Deployment tos-display-manager-kw2lhcujf-tos3.vercel.app ready.",
+  "next": [
+    {
+      "command": "vercel inspect tos-display-manager-kw2lhcujf-tos3.vercel.app",
+      "when": "Inspect deployment"
+    },
+    {
+      "command": "vercel deploy --prod",
+      "when": "Promote to production"
+    }
+  ]
+}
