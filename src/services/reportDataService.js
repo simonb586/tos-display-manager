@@ -1,4 +1,5 @@
 import{supabase,supabaseConfigured}from'../lib/supabaseClient';
+import {allPhotoProjectionRows} from './photoProjectionService';
 import{createReportDraft,parseRecipients,reportFileName,uniqueReportSupports,validateReportIntegrity}from'../lib/module15ReportModel';
 import{generateEdtReportPdf,uploadFinalReport}from'./finalReportService';
 const ready=()=>{if(!supabaseConfigured||!supabase)throw new Error('Service de rapports indisponible.')};
@@ -6,7 +7,7 @@ const text=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLo
 const latestBy=(items,key)=>[...items].sort((a,b)=>(b[key]||0)-(a[key]||0))[0]||null;
 const values=result=>{if(result.error)throw result.error;return result.data||[]};
 export const businessEmailError=value=>{const message=text(value);if(message.includes('requerant')||message.includes('recipient'))return'Requérant sans courriel';if(message.includes('missing_final_report')||message.includes('rapport'))return'Rapport final manquant';return'Envoi temporairement impossible'};
-export async function listEdtReports(){ready();return values(await supabase.from('edt_reports').select('*').order('report_version',{ascending:false})).filter(row=>row.status!=='deleted')}
+export async function listEdtReports(){ready();return (await allPhotoProjectionRows('edt_reports')).filter(row=>row.status!=='deleted').sort((a,b)=>b.report_version-a.report_version)}
 export async function listCompletedEdt(){ready();return values(await supabase.from('suivi_des_edt').select('*').eq('statut','Complété').order('date_fin',{ascending:false,nullsFirst:false}))}
 
 export async function loadEdtReportTracking(dataStore={}){
@@ -18,7 +19,7 @@ export async function loadEdtReportTracking(dataStore={}){
 
 export async function loadEdtReportSource(row,report=null){
   ready();const assignments=values(await supabase.from('edt_supports').select('*').eq('edt_id',row.id));const supportIds=[...new Set(assignments.map(item=>item.support_id).filter(Boolean))];
-  const [infraResult,photoResult,issueResult]=supportIds.length?await Promise.all([supabase.from('infrastructures').select('*').in('support_id',supportIds),supabase.from('support_photos').select('id,support_id,edt_id,type_photo,est_principale,thumbnail_url,photo_url,storage_bucket,storage_path,captured_at').in('support_id',supportIds),supabase.from('enjeux_terrain').select('*').in('support_id',supportIds)]):[{data:[]},{data:[]},{data:[]}];
+  const [infraResult,photoResult,issueResult]=supportIds.length?await Promise.all([supabase.from('infrastructures').select('*').in('support_id',supportIds),allPhotoProjectionRows('support_photos',{support_id:supportIds}).then(data=>({data})),allPhotoProjectionRows('enjeux_terrain',{support_id:supportIds}).then(data=>({data}))]):[{data:[]},{data:[]},{data:[]}];
   const infrastructures=values(infraResult),photos=values(photoResult),issues=values(issueResult),infraById=new Map(infrastructures.map(item=>[String(item.support_id),item]));
   const supports=uniqueReportSupports(assignments.map(item=>{const infra=infraById.get(String(item.support_id))||{};return{edt_id:row.id,assignment_id:item.id,support_id:item.support_id,site:infra.site||infra.no_arret||'—',infrastructure:infra.type_support||infra.infrastructure||'—',location:infra.emplacement_visibilite||infra.emplacement||'—',campaign_id:row.campagne_id,campaign:row.campaign_name,visual:item.visuel_attendu||infra.visuel_actuel_cadre||'—',format:item.format||infra.format||'—',installation_status:item.statut||'—',installation_date:item.date_completion||null,removal_date:item.date_retrait||null,issue:issues.find(issue=>String(issue.support_id)===String(item.support_id))?.description||''}}));
   return createReportDraft({edt:row,supports,photos,issues,workSummary:row.travaux_realises||row.description||''},report?.content_snapshot||{});

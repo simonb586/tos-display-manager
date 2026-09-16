@@ -71,7 +71,7 @@ const main = fs.readFileSync('src/main.jsx', 'utf8');
 ok(css.includes('.executive-activity .activity-event{display:block') && !css.includes('position:absolute'), 'Flux naturel non garanti');
 ok(css.includes('overflow-wrap:anywhere') && css.includes('min-width:0'), 'Protection des textes longs absente');
 ok(css.includes('@media(max-width:600px)') && css.includes('grid-column:2'), 'Responsive mobile absent');
-ok(service.includes('.limit(RECENT_ACTIVITY_LIMIT)') && service.includes("request.not('action', 'ilike', pattern)"), 'Limite ou exclusion serveur absente');
+ok(service.includes("readPhotoProjection('activity_events',{recent:true},0,RECENT_ACTIVITY_LIMIT)") && fs.readFileSync('supabase/migrations/20260916001452_photo_inventory_import_privacy_movements.sql','utf8').includes('action NOT ILIKE ALL'), 'Limite ou exclusion serveur absente');
 ok(widget.includes('Voir tout le journal') && widget.includes("onNavigate('Journal des événements')"), 'Bouton Journal absent');
 ok(main.includes('permission={rolePermission}') && main.includes('<ActivityJournal role={role}/>'), 'Permissions ou Journal non intégrés');
 

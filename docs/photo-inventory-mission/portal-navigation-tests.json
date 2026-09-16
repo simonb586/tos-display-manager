@@ -1,0 +1,23 @@
+[
+  {
+    "role": "Client",
+    "result": "PASS",
+    "rpcMs": 4545,
+    "serverMs": 4365.993,
+    "photos": 12
+  },
+  {
+    "role": "Client-Admin",
+    "result": "PASS",
+    "rpcMs": 4036,
+    "serverMs": 3964.245,
+    "photos": 12
+  },
+  {
+    "role": "Marylène",
+    "result": "PASS",
+    "rpcMs": 3493,
+    "serverMs": 3402.98,
+    "photos": 12
+  }
+]

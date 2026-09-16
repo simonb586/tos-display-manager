@@ -1,0 +1,27 @@
+[
+  {
+    "file": "supabase/migrations/20260916001452_photo_inventory_import_privacy_movements.sql",
+    "sha256": "81795268c83c16efec51651bd36cd0b92e3bc713f0040ee596150f0ea4970ee7",
+    "result": "PASS"
+  },
+  {
+    "file": "supabase/migrations/20260916001458_photo_import_canonical_movements.sql",
+    "sha256": "59867033cb4449e3c28661875f5990ca6bcf66c128433c4f1e3067e6148c241f",
+    "result": "PASS"
+  },
+  {
+    "file": "supabase/migrations/20260916003054_photo_projection_dashboard_compatibility.sql",
+    "sha256": "1771b9d1a142f7429bfdb75af0b7765ea487ce88aad88572b7b8b88f101c077a",
+    "result": "PASS"
+  },
+  {
+    "file": "supabase/migrations/20260916003405_photo_dashboard_scoped_aggregate_reuse.sql",
+    "sha256": "b4efa8f76f7ecb1ca0ca9afe3f652f16606f1ae4f11353f8de24985d85475424",
+    "result": "PASS"
+  },
+  {
+    "file": "supabase/migrations/20260916003918_photo_import_ambiguous_existing_movement_guard.sql",
+    "sha256": "eebe85dded1d0b30a87bd6acb58386043375a16e5e7267bcbcd69fae13eac1bc",
+    "result": "PASS"
+  }
+]

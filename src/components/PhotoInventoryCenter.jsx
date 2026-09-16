@@ -1,4 +1,5 @@
 import PhotoFolderGallery from './PhotoFolderGallery';
+import DisplayMovementInventory from './DisplayMovementInventory';
 import useRefreshRequest from '../hooks/useRefreshRequest';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -28,6 +29,7 @@ import { filterSupportPhotos } from '../lib/supportNavigationContext';
 
 export default function PhotoInventoryCenter({ role, supportId = '', onClearSupportContext, onOpenSupport }) {
   const [tab, setTab] = useState('photos');
+  const [edtFolder,setEdtFolder]=useState('');
   const [photos, setPhotos] = useState([]);
   const [movements, setMovements] = useState([]);
   const [message, setMessage] = useState('');
@@ -157,20 +159,23 @@ try {
         {canManage && <button className={tab === 'review' ? 'active' : ''} onClick={() => setTab('review')}><CheckCircle2 size={17}/> Photos à valider</button>}
       </div>
 
-      {tab === 'mass-import' ? <MassPhotoImporter role={role}/> : tab === 'review' ? <PhotoReviewQueue/> : tab === 'photos' ? (
-        <PhotoFolderGallery photos={visiblePhotos} onOpenSupport={onOpenSupport} renderActions={canManage?photo=><div className="photo-review-actions"><button onClick={()=>setStatus(photo,'Validée')}><CheckCircle2/> Valider</button><button onClick={()=>setStatus(photo,'Rejetée')}><XCircle/> Rejeter</button><button onClick={()=>setPrimary(photo)}><Star/> Principale</button><button className="danger" onClick={()=>removePhoto(photo)}><Trash2/> Supprimer</button></div>:undefined}/>
+      {tab === 'mass-import' ? <MassPhotoImporter role={role} onReview={()=>setTab('review')}/> : tab === 'review' ? <PhotoReviewQueue/> : tab === 'photos' ? (
+        <PhotoFolderGallery photos={visiblePhotos} onFolderChange={setEdtFolder} onOpenSupport={onOpenSupport} renderActions={canManage?photo=>photo.source==='mass_import'&&!photo.import_finalized_at?<div className="photo-review-actions"><button onClick={()=>setTab('review')}>Compléter la validation</button></div>:<div className="photo-review-actions"><button onClick={()=>setStatus(photo,'Validée')}><CheckCircle2/> Valider</button><button onClick={()=>setStatus(photo,'Rejetée')}><XCircle/> Rejeter</button><button onClick={()=>setPrimary(photo)}><Star/> Principale</button><button className="danger" onClick={()=>removePhoto(photo)}><Trash2/> Supprimer</button></div>:undefined}/>
       ) : (
+        <>
+        <DisplayMovementInventory supportId={supportId} edtNumber={edtFolder} onClearEdt={()=>setEdtFolder('')}/>
+        <details><summary>Stocks et ajustements</summary>
         <div className="inventory-layout">
           {canManage && <form className="v07-card" onSubmit={addMovement}>
-            <h2>Nouveau mouvement</h2>
+            <h2>Nouveau mouvement de stock</h2>
             <label>Référence du visuel
               <input value={movement.item_reference} onChange={e => setMovement({...movement, item_reference: e.target.value})}/>
             </label>
             <label>Type
               <select value={movement.movement_type} onChange={e => setMovement({...movement, movement_type: e.target.value})}>
                 <option>Entrée</option>
-                <option>Installation</option>
-                <option>Retrait</option>
+                <option value="Installation">Sortie pour installation</option>
+                <option value="Retrait">Retour après retrait</option>
                 <option>Retour</option>
                 <option>Ajustement</option>
               </select>
@@ -191,7 +196,7 @@ try {
           </form>}
 
           <section className="v07-card">
-            <h2>Historique des mouvements</h2>
+            <h2>Historique du stock</h2>
             <div className="tableWrap">
               <table>
                 <thead><tr>
@@ -216,6 +221,8 @@ try {
             </div>
           </section>
         </div>
+        </details>
+        </>
       )}
     </div>
   );

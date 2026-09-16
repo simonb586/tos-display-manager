@@ -1,0 +1,55 @@
+{
+  "results": [
+    {
+      "role": "Client",
+      "result": "PASS",
+      "exports": {
+        "csv": {
+          "bytes": 886,
+          "authorEmail": false
+        },
+        "xlsx": {
+          "bytes": 24747,
+          "authorEmail": false
+        },
+        "pdf": {
+          "bytes": 9496,
+          "authorEmail": false
+        },
+        "zip": {
+          "files": [
+            "image.jpg",
+            "image-8-1.jpg"
+          ],
+          "authorEmail": false
+        }
+      }
+    },
+    {
+      "role": "Client-Admin",
+      "result": "PASS",
+      "exports": {
+        "csv": {
+          "bytes": 886,
+          "authorEmail": false
+        },
+        "xlsx": {
+          "bytes": 24747,
+          "authorEmail": false
+        },
+        "pdf": {
+          "bytes": 9496,
+          "authorEmail": false
+        },
+        "zip": {
+          "files": [
+            "image.jpg",
+            "image-8-1.jpg"
+          ],
+          "authorEmail": false
+        }
+      }
+    }
+  ],
+  "scope": "Actual export functions with actual client API rows; ZIP image fetch uses a deterministic image, actual original bytes tested separately"
+}

@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+import {managementQuery} from './targeted_management_access.mjs';
+const versions=['20260916001452','20260916001458','20260916003054','20260916003405','20260916003918'];
+const rows=await managementQuery("SELECT version,name,statements FROM supabase_migrations.schema_migrations WHERE version=ANY($1::text[]) ORDER BY version",[versions]);
+assert.equal(rows.length,versions.length);
+const normalize=s=>s.replace(/\r\n/g,'\n').trim();
+const digest=s=>crypto.createHash('sha256').update(normalize(s)).digest('hex');
+const result=rows.map(row=>{const file=`supabase/migrations/${row.version}_${row.name}.sql`,local=fs.readFileSync(file,'utf8'),remote=row.statements.join('\n');assert.equal(digest(local),digest(remote),'Applied migration changed: '+file);return {file,sha256:digest(local),result:'PASS'};});
+fs.writeFileSync('docs/photo-inventory-mission/migration-integrity.json',JSON.stringify(result,null,2));console.log('Five applied migrations match local immutable files PASS');

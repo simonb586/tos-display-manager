@@ -8,6 +8,9 @@ export function businessCapabilities(role) {
 export function canEditBusinessView(role, permission, view) {
  if (role === 'Administrateur') return true;
  if (role !== 'Client-Admin') return false;
+ // Canonical photo movements remain read-only even with a broad grid capability.
+ if (['history','photos'].includes(resolveClientPortalView(view)?.id) || ['historique_des_campagnes','photos_et_inventaire'].includes(normalizeClientPortalViewKey(view))) return false;
+ if (permission?.capabilities?.[view]?.update === false) return false;
  const views = permission?.visible_tables || [];
  return (views.includes('*') || views.some(value=>normalizeClientPortalViewKey(value)===normalizeClientPortalViewKey(view) || (resolveClientPortalView(value)?.id && resolveClientPortalView(value)?.id===resolveClientPortalView(view)?.id))) &&
    (permission?.capabilities?.[view]?.update === true || permission?.capabilities?.['*']?.update === true);

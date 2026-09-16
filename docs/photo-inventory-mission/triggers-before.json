@@ -1,0 +1,472 @@
+[
+  {
+    "table_name": "automation_definitions",
+    "tgname": "prepare_automation_definition_v0131",
+    "definition": "CREATE TRIGGER prepare_automation_definition_v0131 BEFORE INSERT OR UPDATE ON public.automation_definitions FOR EACH ROW EXECUTE FUNCTION prepare_automation_definition_v0131()"
+  },
+  {
+    "table_name": "bons_de_travail",
+    "tgname": "portal_client_update_guard",
+    "definition": "CREATE TRIGGER portal_client_update_guard BEFORE UPDATE ON public.bons_de_travail FOR EACH ROW EXECUTE FUNCTION portal_client_update_guard()"
+  },
+  {
+    "table_name": "bons_de_travail",
+    "tgname": "sync_edt_progress_from_work_order",
+    "definition": "CREATE TRIGGER sync_edt_progress_from_work_order AFTER INSERT OR UPDATE OF statut, progression, edt_id ON public.bons_de_travail FOR EACH ROW EXECUTE FUNCTION sync_edt_progress_from_work_order()"
+  },
+  {
+    "table_name": "bons_de_travail",
+    "tgname": "sync_edt_support_from_bt_v013_insert",
+    "definition": "CREATE TRIGGER sync_edt_support_from_bt_v013_insert AFTER INSERT ON public.bons_de_travail FOR EACH ROW WHEN ((new.edt_support_id IS NOT NULL)) EXECUTE FUNCTION sync_edt_support_from_bt_v0129()"
+  },
+  {
+    "table_name": "bons_de_travail",
+    "tgname": "sync_edt_support_from_bt_v013_update",
+    "definition": "CREATE TRIGGER sync_edt_support_from_bt_v013_update AFTER UPDATE OF edt_support_id, edt_id, statut, progression, assigne_a, date_cible, date_fin_reelle ON public.bons_de_travail FOR EACH ROW WHEN (((new.edt_support_id IS NOT NULL) AND ((old.edt_support_id IS DISTINCT FROM new.edt_support_id) OR (old.edt_id IS DISTINCT FROM new.edt_id) OR (old.statut IS DISTINCT FROM new.statut) OR (old.progression IS DISTINCT FROM new.progression) OR (old.assigne_a IS DISTINCT FROM new.assigne_a) OR (old.date_cible IS DISTINCT FROM new.date_cible) OR (old.date_fin_reelle IS DISTINCT FROM new.date_fin_reelle)))) EXECUTE FUNCTION sync_edt_support_from_bt_v0129()"
+  },
+  {
+    "table_name": "bons_de_travail",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.bons_de_travail FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "bons_de_travail",
+    "tgname": "tdm_automation_v1310",
+    "definition": "CREATE TRIGGER tdm_automation_v1310 AFTER INSERT OR DELETE OR UPDATE ON public.bons_de_travail FOR EACH ROW EXECUTE FUNCTION tdm_automation_source_trigger_v1310()"
+  },
+  {
+    "table_name": "bons_de_travail",
+    "tgname": "tdm_operations_audit",
+    "definition": "CREATE TRIGGER tdm_operations_audit AFTER INSERT OR DELETE OR UPDATE ON public.bons_de_travail FOR EACH ROW EXECUTE FUNCTION tdm_operations_audit()"
+  },
+  {
+    "table_name": "c_i_avec_enjeux",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.c_i_avec_enjeux FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "tgname": "guard_visual_edt_assignment_v1343",
+    "definition": "CREATE TRIGGER guard_visual_edt_assignment_v1343 BEFORE INSERT OR UPDATE OF edt_phase_id, campagne_id, client_id ON public.campagne_visuels_formats FOR EACH ROW EXECUTE FUNCTION guard_visual_edt_assignment_v1343()"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "tgname": "guard_visual_edt_owner_change",
+    "definition": "CREATE TRIGGER guard_visual_edt_owner_change AFTER UPDATE OF campagne_id, client_id ON public.campagne_visuels_formats FOR EACH ROW EXECUTE FUNCTION guard_visual_edt_owner_change()"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "tgname": "sync_legacy_visual_edt",
+    "definition": "CREATE TRIGGER sync_legacy_visual_edt AFTER INSERT OR UPDATE OF edt_phase_id ON public.campagne_visuels_formats FOR EACH ROW EXECUTE FUNCTION sync_legacy_visual_edt()"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.campagne_visuels_formats FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "tgname": "tdm_relation_auto_v0129",
+    "definition": "CREATE TRIGGER tdm_relation_auto_v0129 AFTER INSERT OR UPDATE ON public.campagne_visuels_formats FOR EACH ROW EXECUTE FUNCTION tdm_relation_source_trigger_v0129()"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "tgname": "visuels_inherit_client_v1364",
+    "definition": "CREATE TRIGGER visuels_inherit_client_v1364 BEFORE INSERT OR UPDATE OF campagne_id, client_id ON public.campagne_visuels_formats FOR EACH ROW EXECUTE FUNCTION inherit_campaign_client_v1364()"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "tgname": "campagnes_require_client_v1364",
+    "definition": "CREATE TRIGGER campagnes_require_client_v1364 BEFORE INSERT OR UPDATE OF client_id ON public.campagnes_maitres FOR EACH ROW EXECUTE FUNCTION require_direct_client_v1364()"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "tgname": "portal_client_update_guard",
+    "definition": "CREATE TRIGGER portal_client_update_guard BEFORE UPDATE ON public.campagnes_maitres FOR EACH ROW EXECUTE FUNCTION portal_client_update_guard()"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.campagnes_maitres FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "tgname": "tdm_automation_v1310",
+    "definition": "CREATE TRIGGER tdm_automation_v1310 AFTER INSERT OR DELETE OR UPDATE ON public.campagnes_maitres FOR EACH ROW EXECUTE FUNCTION tdm_automation_source_trigger_v1310()"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "tgname": "tdm_relation_auto_v0129",
+    "definition": "CREATE TRIGGER tdm_relation_auto_v0129 AFTER INSERT OR UPDATE ON public.campagnes_maitres FOR EACH ROW EXECUTE FUNCTION tdm_relation_source_trigger_v0129()"
+  },
+  {
+    "table_name": "campagnes_supports",
+    "tgname": "campagnes_supports_inherit_client_v1364",
+    "definition": "CREATE TRIGGER campagnes_supports_inherit_client_v1364 BEFORE INSERT OR UPDATE OF campagne_id, client_id ON public.campagnes_supports FOR EACH ROW EXECUTE FUNCTION inherit_campaign_client_v1364()"
+  },
+  {
+    "table_name": "campagnes_supports",
+    "tgname": "portal_assignment_update_guard",
+    "definition": "CREATE TRIGGER portal_assignment_update_guard BEFORE UPDATE ON public.campagnes_supports FOR EACH ROW EXECUTE FUNCTION portal_assignment_update_guard()"
+  },
+  {
+    "table_name": "campagnes_supports",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.campagnes_supports FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "campagnes_visuels_sites_supports",
+    "tgname": "portal_assignment_update_guard",
+    "definition": "CREATE TRIGGER portal_assignment_update_guard BEFORE UPDATE ON public.campagnes_visuels_sites_supports FOR EACH ROW EXECUTE FUNCTION portal_assignment_update_guard()"
+  },
+  {
+    "table_name": "centres_dinformation",
+    "tgname": "portal_client_update_guard",
+    "definition": "CREATE TRIGGER portal_client_update_guard BEFORE UPDATE ON public.centres_dinformation FOR EACH ROW EXECUTE FUNCTION portal_client_update_guard()"
+  },
+  {
+    "table_name": "centres_dinformation",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.centres_dinformation FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "ci_avec_enjeux",
+    "tgname": "portal_client_update_guard",
+    "definition": "CREATE TRIGGER portal_client_update_guard BEFORE UPDATE ON public.ci_avec_enjeux FOR EACH ROW EXECUTE FUNCTION portal_client_update_guard()"
+  },
+  {
+    "table_name": "ci_avec_enjeux",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.ci_avec_enjeux FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "clients",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.clients FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "communications_finales",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.communications_finales FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "communications_operationnelles",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.communications_operationnelles FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "communications_operationnelles_sites_supports",
+    "tgname": "portal_assignment_update_guard",
+    "definition": "CREATE TRIGGER portal_assignment_update_guard BEFORE UPDATE ON public.communications_operationnelles_sites_supports FOR EACH ROW EXECUTE FUNCTION portal_assignment_update_guard()"
+  },
+  {
+    "table_name": "edt_assignments",
+    "tgname": "tdm_operations_audit",
+    "definition": "CREATE TRIGGER tdm_operations_audit AFTER INSERT OR DELETE OR UPDATE ON public.edt_assignments FOR EACH ROW EXECUTE FUNCTION tdm_operations_audit()"
+  },
+  {
+    "table_name": "edt_phases",
+    "tgname": "phases_inherit_client_v1364",
+    "definition": "CREATE TRIGGER phases_inherit_client_v1364 BEFORE INSERT OR UPDATE OF edt_id, client_id ON public.edt_phases FOR EACH ROW EXECUTE FUNCTION inherit_edt_client_v1364()"
+  },
+  {
+    "table_name": "edt_phases",
+    "tgname": "tdm_operations_audit",
+    "definition": "CREATE TRIGGER tdm_operations_audit AFTER INSERT OR DELETE OR UPDATE ON public.edt_phases FOR EACH ROW EXECUTE FUNCTION tdm_operations_audit()"
+  },
+  {
+    "table_name": "edt_reports",
+    "tgname": "edt_report_activity_v130",
+    "definition": "CREATE TRIGGER edt_report_activity_v130 AFTER INSERT OR UPDATE ON public.edt_reports FOR EACH ROW EXECUTE FUNCTION edt_report_activity_v130()"
+  },
+  {
+    "table_name": "edt_reports",
+    "tgname": "edt_report_deletion_guard",
+    "definition": "CREATE TRIGGER edt_report_deletion_guard BEFORE INSERT OR UPDATE ON public.edt_reports FOR EACH ROW EXECUTE FUNCTION guard_edt_report_deletion()"
+  },
+  {
+    "table_name": "edt_reports",
+    "tgname": "edt_report_revision_before",
+    "definition": "CREATE TRIGGER edt_report_revision_before BEFORE INSERT OR UPDATE ON public.edt_reports FOR EACH ROW EXECUTE FUNCTION edt_report_revision_before()"
+  },
+  {
+    "table_name": "edt_reports",
+    "tgname": "validate_edt_report_requester_v1301",
+    "definition": "CREATE TRIGGER validate_edt_report_requester_v1301 BEFORE INSERT OR UPDATE OF edt_id, requester_contact_id ON public.edt_reports FOR EACH ROW EXECUTE FUNCTION validate_edt_report_requester_v1301()"
+  },
+  {
+    "table_name": "edt_supports",
+    "tgname": "guard_support_edt_assignment_v1343",
+    "definition": "CREATE TRIGGER guard_support_edt_assignment_v1343 BEFORE INSERT OR DELETE OR UPDATE OF edt_id, phase_id, support_id ON public.edt_supports FOR EACH ROW EXECUTE FUNCTION guard_support_edt_assignment_v1343()"
+  },
+  {
+    "table_name": "edt_supports",
+    "tgname": "normaliser_edt_support_v013",
+    "definition": "CREATE TRIGGER normaliser_edt_support_v013 BEFORE INSERT OR UPDATE OF edt_id, phase_id, statut, progression, bloque, motif_blocage, completed_at ON public.edt_supports FOR EACH ROW EXECUTE FUNCTION normaliser_edt_support_v013()"
+  },
+  {
+    "table_name": "edt_supports",
+    "tgname": "sync_bt_from_edt_support_v013",
+    "definition": "CREATE TRIGGER sync_bt_from_edt_support_v013 AFTER UPDATE OF bon_de_travail_id, phase_id, assigne_a, priorite, date_cible, progression, statut ON public.edt_supports FOR EACH ROW WHEN (((new.bon_de_travail_id IS NOT NULL) AND ((old.bon_de_travail_id IS DISTINCT FROM new.bon_de_travail_id) OR (old.phase_id IS DISTINCT FROM new.phase_id) OR (old.assigne_a IS DISTINCT FROM new.assigne_a) OR (old.priorite IS DISTINCT FROM new.priorite) OR (old.date_cible IS DISTINCT FROM new.date_cible) OR (old.progression IS DISTINCT FROM new.progression) OR (old.statut IS DISTINCT FROM new.statut)))) EXECUTE FUNCTION sync_bt_from_edt_support_v0129()"
+  },
+  {
+    "table_name": "edt_supports",
+    "tgname": "tdm_operations_audit",
+    "definition": "CREATE TRIGGER tdm_operations_audit AFTER INSERT OR DELETE OR UPDATE ON public.edt_supports FOR EACH ROW EXECUTE FUNCTION tdm_operations_audit()"
+  },
+  {
+    "table_name": "email_delivery_log",
+    "tgname": "edt_email_activity_v131",
+    "definition": "CREATE TRIGGER edt_email_activity_v131 AFTER INSERT ON public.email_delivery_log FOR EACH ROW EXECUTE FUNCTION edt_email_activity_v131()"
+  },
+  {
+    "table_name": "enjeux_des_cadres_et_supports",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.enjeux_des_cadres_et_supports FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "tgname": "derive_terrain_issue_client_v138",
+    "definition": "CREATE TRIGGER derive_terrain_issue_client_v138 BEFORE INSERT OR UPDATE OF support_id, client_id ON public.enjeux_terrain FOR EACH ROW EXECUTE FUNCTION derive_terrain_issue_client_v138()"
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "tgname": "tdm_automation_v1310",
+    "definition": "CREATE TRIGGER tdm_automation_v1310 AFTER INSERT OR DELETE OR UPDATE ON public.enjeux_terrain FOR EACH ROW EXECUTE FUNCTION tdm_automation_source_trigger_v1310()"
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "tgname": "portal_client_update_guard",
+    "definition": "CREATE TRIGGER portal_client_update_guard BEFORE UPDATE ON public.historique_des_campagnes FOR EACH ROW EXECUTE FUNCTION portal_client_update_guard()"
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.historique_des_campagnes FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "infrastructures",
+    "tgname": "infrastructures_require_client_v1364",
+    "definition": "CREATE TRIGGER infrastructures_require_client_v1364 BEFORE INSERT OR UPDATE OF client_id ON public.infrastructures FOR EACH ROW EXECUTE FUNCTION require_direct_client_v1364()"
+  },
+  {
+    "table_name": "infrastructures",
+    "tgname": "portal_client_update_guard",
+    "definition": "CREATE TRIGGER portal_client_update_guard BEFORE UPDATE ON public.infrastructures FOR EACH ROW EXECUTE FUNCTION portal_client_update_guard()"
+  },
+  {
+    "table_name": "infrastructures",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.infrastructures FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "inspections_terrain",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.inspections_terrain FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "inspections_terrain",
+    "tgname": "tdm_automation_v1310",
+    "definition": "CREATE TRIGGER tdm_automation_v1310 AFTER INSERT OR DELETE OR UPDATE ON public.inspections_terrain FOR EACH ROW EXECUTE FUNCTION tdm_automation_source_trigger_v1310()"
+  },
+  {
+    "table_name": "inspections_terrain",
+    "tgname": "tdm_relation_auto_v0129",
+    "definition": "CREATE TRIGGER tdm_relation_auto_v0129 AFTER INSERT OR UPDATE ON public.inspections_terrain FOR EACH ROW EXECUTE FUNCTION tdm_relation_source_trigger_v0129()"
+  },
+  {
+    "table_name": "journal_des_evenements",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.journal_des_evenements FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "journal_propagations",
+    "tgname": "activity_capture_propagations_v113",
+    "definition": "CREATE TRIGGER activity_capture_propagations_v113 AFTER INSERT ON public.journal_propagations FOR EACH ROW EXECUTE FUNCTION capture_activity_source_v113()"
+  },
+  {
+    "table_name": "journal_propagations",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.journal_propagations FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "liste_des_arrets",
+    "tgname": "portal_client_update_guard",
+    "definition": "CREATE TRIGGER portal_client_update_guard BEFORE UPDATE ON public.liste_des_arrets FOR EACH ROW EXECUTE FUNCTION portal_client_update_guard()"
+  },
+  {
+    "table_name": "liste_des_arrets",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.liste_des_arrets FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "operations_history",
+    "tgname": "activity_capture_operations_history_v113",
+    "definition": "CREATE TRIGGER activity_capture_operations_history_v113 AFTER INSERT ON public.operations_history FOR EACH ROW EXECUTE FUNCTION capture_activity_source_v113()"
+  },
+  {
+    "table_name": "photo_action_log",
+    "tgname": "activity_capture_photo_log_v113",
+    "definition": "CREATE TRIGGER activity_capture_photo_log_v113 AFTER INSERT ON public.photo_action_log FOR EACH ROW EXECUTE FUNCTION capture_activity_source_v113()"
+  },
+  {
+    "table_name": "photos",
+    "tgname": "portal_client_update_guard",
+    "definition": "CREATE TRIGGER portal_client_update_guard BEFORE UPDATE ON public.photos FOR EACH ROW EXECUTE FUNCTION portal_client_update_guard()"
+  },
+  {
+    "table_name": "photos",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.photos FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "relation_field_config_audit",
+    "tgname": "activity_capture_field_audit_v113",
+    "definition": "CREATE TRIGGER activity_capture_field_audit_v113 AFTER INSERT ON public.relation_field_config_audit FOR EACH ROW EXECUTE FUNCTION capture_activity_source_v113()"
+  },
+  {
+    "table_name": "relation_fields",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.relation_fields FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "relation_rules",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.relation_rules FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "relation_test_logs",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.relation_test_logs FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "tgname": "portal_client_update_guard",
+    "definition": "CREATE TRIGGER portal_client_update_guard BEFORE UPDATE ON public.repertoire_des_affiches FOR EACH ROW EXECUTE FUNCTION portal_client_update_guard()"
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.repertoire_des_affiches FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "reports",
+    "tgname": "reports_activity_v130",
+    "definition": "CREATE TRIGGER reports_activity_v130 AFTER INSERT OR UPDATE ON public.reports FOR EACH ROW EXECUTE FUNCTION module15_report_activity_v130()"
+  },
+  {
+    "table_name": "reports",
+    "tgname": "reports_revision_before",
+    "definition": "CREATE TRIGGER reports_revision_before BEFORE INSERT OR UPDATE ON public.reports FOR EACH ROW EXECUTE FUNCTION module15_report_revision_before()"
+  },
+  {
+    "table_name": "requetes_clients",
+    "tgname": "tdm_automation_v1310",
+    "definition": "CREATE TRIGGER tdm_automation_v1310 AFTER INSERT OR DELETE OR UPDATE ON public.requetes_clients FOR EACH ROW EXECUTE FUNCTION tdm_automation_source_trigger_v1310()"
+  },
+  {
+    "table_name": "requetes_clients",
+    "tgname": "tdm_operations_audit",
+    "definition": "CREATE TRIGGER tdm_operations_audit AFTER INSERT OR DELETE OR UPDATE ON public.requetes_clients FOR EACH ROW EXECUTE FUNCTION tdm_operations_audit()"
+  },
+  {
+    "table_name": "role_ui_permissions",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.role_ui_permissions FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "tgname": "edt_inherit_client_v1364",
+    "definition": "CREATE TRIGGER edt_inherit_client_v1364 BEFORE INSERT OR UPDATE OF campagne_id, client_id ON public.suivi_des_edt FOR EACH ROW WHEN ((new.campagne_id IS NOT NULL)) EXECUTE FUNCTION inherit_campaign_client_v1364()"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "tgname": "enqueue_edt_completion_email_v131",
+    "definition": "CREATE TRIGGER enqueue_edt_completion_email_v131 AFTER UPDATE OF statut ON public.suivi_des_edt FOR EACH ROW EXECUTE FUNCTION enqueue_edt_completion_email_v131()"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "tgname": "portal_client_update_guard",
+    "definition": "CREATE TRIGGER portal_client_update_guard BEFORE UPDATE ON public.suivi_des_edt FOR EACH ROW EXECUTE FUNCTION portal_client_update_guard()"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.suivi_des_edt FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "tgname": "tdm_automation_v1310",
+    "definition": "CREATE TRIGGER tdm_automation_v1310 AFTER INSERT OR DELETE OR UPDATE ON public.suivi_des_edt FOR EACH ROW EXECUTE FUNCTION tdm_automation_source_trigger_v1310()"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "tgname": "tdm_operations_audit",
+    "definition": "CREATE TRIGGER tdm_operations_audit AFTER INSERT OR DELETE OR UPDATE ON public.suivi_des_edt FOR EACH ROW EXECUTE FUNCTION tdm_operations_audit()"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "tgname": "validate_edt_requester_v131",
+    "definition": "CREATE TRIGGER validate_edt_requester_v131 BEFORE INSERT OR UPDATE OF requester_contact_id, campagne_id ON public.suivi_des_edt FOR EACH ROW EXECUTE FUNCTION validate_edt_requester_v131()"
+  },
+  {
+    "table_name": "support_photos",
+    "tgname": "activity_capture_support_photos_v113",
+    "definition": "CREATE TRIGGER activity_capture_support_photos_v113 AFTER INSERT ON public.support_photos FOR EACH ROW EXECUTE FUNCTION capture_activity_source_v113()"
+  },
+  {
+    "table_name": "support_photos",
+    "tgname": "photos_inherit_client_v1364",
+    "definition": "CREATE TRIGGER photos_inherit_client_v1364 BEFORE INSERT OR UPDATE OF campagne_id, client_id ON public.support_photos FOR EACH ROW WHEN ((new.campagne_id IS NOT NULL)) EXECUTE FUNCTION inherit_campaign_client_v1364()"
+  },
+  {
+    "table_name": "support_photos",
+    "tgname": "support_photos_current_visual_v132p0",
+    "definition": "CREATE TRIGGER support_photos_current_visual_v132p0 AFTER INSERT OR UPDATE OF is_current_visual, status ON public.support_photos FOR EACH ROW EXECUTE FUNCTION apply_photo_current_visual_v132p0()"
+  },
+  {
+    "table_name": "support_photos",
+    "tgname": "support_photos_sync_infrastructure_thumbnail",
+    "definition": "CREATE TRIGGER support_photos_sync_infrastructure_thumbnail AFTER INSERT OR UPDATE OF thumbnail_url, photo_url, statut_validation, est_principale ON public.support_photos FOR EACH ROW EXECUTE FUNCTION sync_infrastructure_photo_thumbnail()"
+  },
+  {
+    "table_name": "support_photos",
+    "tgname": "support_photos_workflow_v132p0",
+    "definition": "CREATE TRIGGER support_photos_workflow_v132p0 BEFORE INSERT OR UPDATE ON public.support_photos FOR EACH ROW EXECUTE FUNCTION sync_photo_current_visual_v132p0()"
+  },
+  {
+    "table_name": "support_photos",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.support_photos FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "support_photos",
+    "tgname": "tdm_automation_v1310",
+    "definition": "CREATE TRIGGER tdm_automation_v1310 AFTER INSERT OR DELETE OR UPDATE ON public.support_photos FOR EACH ROW EXECUTE FUNCTION tdm_automation_source_trigger_v1310()"
+  },
+  {
+    "table_name": "terrain_operations",
+    "tgname": "activity_capture_terrain_operations_v113",
+    "definition": "CREATE TRIGGER activity_capture_terrain_operations_v113 AFTER INSERT OR UPDATE ON public.terrain_operations FOR EACH ROW EXECUTE FUNCTION capture_activity_source_v113()"
+  },
+  {
+    "table_name": "terrain_sync_diagnostics",
+    "tgname": "activity_capture_terrain_diagnostics_v113",
+    "definition": "CREATE TRIGGER activity_capture_terrain_diagnostics_v113 AFTER INSERT OR UPDATE ON public.terrain_sync_diagnostics FOR EACH ROW EXECUTE FUNCTION capture_activity_source_v113()"
+  },
+  {
+    "table_name": "utilisateurs",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.utilisateurs FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  },
+  {
+    "table_name": "voitures_trains",
+    "tgname": "portal_client_update_guard",
+    "definition": "CREATE TRIGGER portal_client_update_guard BEFORE UPDATE ON public.voitures_trains FOR EACH ROW EXECUTE FUNCTION portal_client_update_guard()"
+  },
+  {
+    "table_name": "voitures_trains",
+    "tgname": "tdm_audit_row_changes",
+    "definition": "CREATE TRIGGER tdm_audit_row_changes AFTER UPDATE ON public.voitures_trains FOR EACH ROW EXECUTE FUNCTION tdm_audit_row_changes()"
+  }
+]

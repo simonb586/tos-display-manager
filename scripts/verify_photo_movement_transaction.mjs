@@ -1,0 +1,32 @@
+import {photoMissionCandidateSql} from './photo_mission_candidate_sql.mjs';
+import fs from 'node:fs';
+import {managementQuery} from './targeted_management_access.mjs';
+const sql=await photoMissionCandidateSql();
+const result=await managementQuery(`BEGIN;${sql}
+DO $$DECLARE uid uuid;a bigint;b bigint;r bigint;state jsonb;BEGIN
+ SELECT auth_user_id INTO uid FROM public.utilisateurs WHERE role='Administrateur' AND statut='Actif' AND client_id IS NULL LIMIT 1;
+ IF uid IS NULL THEN RAISE EXCEPTION 'Missing admin test identity';END IF;
+ PERFORM set_config('request.jwt.claim.sub',uid::text,true);
+ INSERT INTO public.infrastructures(support_id,client_id,format_affichage,site) VALUES('IMPORT-SQL-ROLLBACK',2,'20 x 28','Controlled SQL transaction');
+ PERFORM tdm_private.capture_display_baseline('IMPORT-SQL-ROLLBACK');
+ INSERT INTO public.historique_des_campagnes(support_id,campagne,visuel,no_edt,date_installation,movement_meta) VALUES('IMPORT-SQL-ROLLBACK','Campagne A','Visuel A','EDT-A','2026-06-01',jsonb_build_object('installation',jsonb_build_object('state',jsonb_build_object('campagne_actuelle','Campagne A','visuel_campagne','Visuel A','edt_associe','EDT-A')))) RETURNING id INTO a;
+ INSERT INTO public.historique_des_campagnes(support_id,campagne,visuel,no_edt,date_retrait) VALUES('IMPORT-SQL-ROLLBACK','Campagne A','Visuel A','EDT-A','2026-06-15') RETURNING id INTO r;
+ INSERT INTO public.historique_des_campagnes(support_id,campagne,visuel,no_edt,date_installation,movement_meta) VALUES('IMPORT-SQL-ROLLBACK','Campagne B','Visuel B','EDT-B','2026-07-01',jsonb_build_object('installation',jsonb_build_object('state',jsonb_build_object('campagne_actuelle','Campagne B','visuel_campagne','Visuel B','edt_associe','EDT-B')))) RETURNING id INTO b;
+ state:=tdm_private.rebuild_display('IMPORT-SQL-ROLLBACK');IF state->>'visuel_campagne' IS DISTINCT FROM 'Visuel B' THEN RAISE EXCEPTION 'Initial B missing';END IF;
+ PERFORM public.cancel_display_movement(b,'installation','SQL rollback test');
+ IF (SELECT visuel_campagne FROM public.infrastructures WHERE support_id='IMPORT-SQL-ROLLBACK') IS NOT NULL THEN RAISE EXCEPTION 'Removal state not restored';END IF;
+ PERFORM public.cancel_display_movement(r,'retrait','SQL rollback test');
+ IF (SELECT visuel_campagne FROM public.infrastructures WHERE support_id='IMPORT-SQL-ROLLBACK') IS DISTINCT FROM 'Visuel A' THEN RAISE EXCEPTION 'A not restored after removal cancellation';END IF;
+ state:=public.cancel_display_movement(r,'retrait','Repeated click');IF state->>'already_cancelled' IS DISTINCT FROM 'true' THEN RAISE EXCEPTION 'Cancellation not idempotent';END IF;
+ state:=public.list_display_movements('IMPORT-SQL-ROLLBACK');IF (state->>'total')::int<>1 THEN RAISE EXCEPTION 'Active projection wrong: %',state;END IF;
+ IF (public.list_display_movements('IMPORT-SQL-ROLLBACK',NULL,'',true)->>'total')::int<>3 THEN RAISE EXCEPTION 'Audit lost';END IF;
+ PERFORM set_config('tdm.cancel_test_history',a::text,true);
+ SELECT auth_user_id INTO uid FROM public.utilisateurs WHERE id=25;
+ PERFORM set_config('request.jwt.claim.sub',uid::text,true);
+ BEGIN PERFORM public.cancel_display_movement(a,'installation');RAISE EXCEPTION 'Client-Admin cancellation allowed';EXCEPTION WHEN insufficient_privilege THEN NULL;END;
+ state:=public.list_display_movements('IMPORT-SQL-ROLLBACK');IF (state->>'total')::int<>1 THEN RAISE EXCEPTION 'Client movement missing';END IF;
+ PERFORM set_config('request.jwt.claim.sub','',true);
+ BEGIN PERFORM public.cancel_display_movement(a,'installation');RAISE EXCEPTION 'Anon cancellation allowed';EXCEPTION WHEN insufficient_privilege THEN NULL;END;
+END $$;
+SELECT 'PASS' AS movement_transaction;ROLLBACK;`);
+fs.writeFileSync('docs/photo-inventory-mission/movement-transaction-tests.json',JSON.stringify(result,null,2));console.log(result);

@@ -1,0 +1,18 @@
+.import-context-fields{display:grid;gap:12px;min-width:280px;background:#fff;color:#182c3b;padding:20px;border:1px solid #ccd7df;border-radius:10px}
+.import-context-fields label,.import-batch-decision label{display:grid;gap:5px}
+.import-confirmed-fields{display:grid;gap:6px;font-size:.85rem}
+.import-confirmed-fields [data-validation-state="TO_REVIEW"]{color:#895200}
+.import-confirmed-fields [data-validation-state="AUTO_CONFIRMED"],.import-confirmed-fields [data-validation-state="MANUAL_CONFIRMED"]{color:#17633a}
+.import-context-viewer{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(300px,440px);gap:20px;padding:24px;overflow:auto;align-items:start!important}
+.import-context-viewer>button:first-child{grid-column:1/-1;justify-self:start}
+.import-photo-pane{overflow:auto;min-height:300px}
+.import-photo-pane .photo-review-image{width:100%;min-height:320px;overflow:auto}
+.import-photo-pane img{max-height:65vh;object-fit:contain;transform-origin:center}
+.import-batch-decision{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0;padding:16px}
+.import-batch-decision p{flex-basis:100%}
+.mass-photo-import .review-grid .photo-review-image{width:100%;height:240px}
+.mass-photo-import .review-grid img{width:100%;height:100%;object-fit:contain}
+@media(max-width:760px){.import-context-viewer{grid-template-columns:1fr}.import-context-fields{min-width:0}}
+.movement-confirmation {position:fixed;inset:15% max(16px,calc((100vw - 620px)/2)) auto;z-index:1200;background:#fff;color:#182230;padding:24px;border:1px solid #b8c6d6;border-radius:12px;box-shadow:0 0 0 100vmax #0008;max-height:75vh;overflow:auto;}
+.movement-confirmation textarea {display:block;width:100%;min-height:80px;margin:8px 0 16px;}
+.movement-confirmation button {margin:4px;}

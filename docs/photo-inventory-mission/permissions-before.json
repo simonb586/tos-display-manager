@@ -1,0 +1,91 @@
+[
+  {
+    "role": "Administrateur",
+    "visible_tables": [
+      "*"
+    ],
+    "capabilities": {}
+  },
+  {
+    "role": "Installateur",
+    "visible_tables": [
+      "Infrastructures",
+      "Liste des arrêts",
+      "Photos",
+      "Bons de travail",
+      "Enjeux des cadres et supports"
+    ],
+    "capabilities": {}
+  },
+  {
+    "role": "Client-Admin",
+    "visible_tables": [
+      "Infrastructures",
+      "Campagnes et visuels",
+      "Bons de travail",
+      "Historique des campagnes",
+      "Suivi des EDT",
+      "Enjeux des cadres et supports",
+      "Communications opérationnelles",
+      "Répertoire des affiches",
+      "Centres d’information",
+      "C.I. avec enjeux",
+      "Liste des arrêts",
+      "Voitures / trains",
+      "Campagnes et visuels par site et supports",
+      "Communications opérationnelles par site et supports",
+      "Photos et inventaire"
+    ],
+    "capabilities": {
+      "*": {
+        "update": true
+      },
+      "Photos": {
+        "update": false
+      },
+      "Photos et inventaire": {
+        "update": false
+      }
+    }
+  },
+  {
+    "role": "Client",
+    "visible_tables": [
+      "Infrastructures",
+      "Campagnes et visuels",
+      "Bons de travail",
+      "Campagnes et visuels par site et supports",
+      "Communications opérationnelles par site et supports",
+      "Communications opérationnelles",
+      "Photos et inventaire"
+    ],
+    "capabilities": {
+      "Photos": {
+        "update": false
+      },
+      "Photos et inventaire": {
+        "update": false
+      }
+    }
+  },
+  {
+    "role": "Coordonnateur",
+    "visible_tables": [
+      "Infrastructures",
+      "Campagnes et visuels",
+      "Répertoire des affiches",
+      "Enjeux des cadres et supports",
+      "Liste des arrêts",
+      "Photos",
+      "Bons de travail",
+      "Historique des campagnes",
+      "Suivi des EDT",
+      "Communications opérationnelles",
+      "Centres d’information",
+      "C.I. avec enjeux",
+      "Voitures / trains",
+      "Clients"
+    ],
+    "capabilities": {}
+  }
+]

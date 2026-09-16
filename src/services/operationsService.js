@@ -1,4 +1,5 @@
 import {loadBusinessContext} from './businessParityService';
+import {allPhotoProjectionRows} from './photoProjectionService';
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
 
 function ensureSupabase() {
@@ -34,8 +35,8 @@ export async function loadEdtLifecycleData(edtId) {
   const [edtResult, phasesResult, reportsResult, historyResult] = await Promise.all([
     supabase.from('suivi_des_edt').select('*').eq('id', id).single(),
     supabase.from('edt_phases').select('*').eq('edt_id', id).order('ordre', { ascending: true }),
-    supabase.from('edt_phase_reports').select('*').eq('edt_id', id).order('version', { ascending: false }),
-    supabase.from('operations_history').select('*').eq('entity_type', 'edt_lifecycle').eq('entity_id', String(id)).order('created_at', { ascending: false }).limit(50)
+    allPhotoProjectionRows('edt_phase_reports',{edt_id:id}).then(data=>({data:data.sort((a,b)=>b.version-a.version)})),
+    allPhotoProjectionRows('operations_history',{entity_type:'edt_lifecycle',entity_id:String(id)}).then(data=>({data:data.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,50)}))
   ]);
   for (const [source, result] of [['suivi_des_edt',edtResult],['edt_phases',phasesResult],['edt_phase_reports',reportsResult],['operations_history',historyResult]]) {
     if (result.error) {

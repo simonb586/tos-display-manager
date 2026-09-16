@@ -1,0 +1,10 @@
+{
+  "result": "PASS",
+  "tests": [
+    "48 metadata rows, 12 rendered cards",
+    "Unidentified original corrected, context recomputed, visual ambiguity resolved, zoom/rotation, manual finalization",
+    "Batch validation retains two distinct supports",
+    "Client roles readonly; Admin explicit confirmation and double-click protection"
+  ],
+  "scope": "Actual React components with deterministic service fixtures"
+}

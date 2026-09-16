@@ -1,0 +1,70 @@
+{
+  "tests": [
+    {
+      "test": "Client history remains readonly with wildcard capability; unrelated Infrastructure editing preserved",
+      "result": "PASS"
+    },
+    {
+      "test": "Exact installation date, no prior support/visual relation",
+      "result": "PASS"
+    },
+    {
+      "test": "Exact removal date",
+      "result": "PASS"
+    },
+    {
+      "test": "All support EDTs and operational out-of-frame visual",
+      "result": "PASS"
+    },
+    {
+      "test": "Overlapping EDT dates remain ambiguous",
+      "result": "PASS"
+    },
+    {
+      "test": "Visual ambiguity preserves all certain context",
+      "result": "PASS"
+    },
+    {
+      "test": "No support: original remains unidentified",
+      "result": "PASS"
+    },
+    {
+      "test": "Two support identifiers never guessed",
+      "result": "PASS"
+    },
+    {
+      "test": "No matching EDT does not imply without-EDT installation",
+      "result": "PASS"
+    },
+    {
+      "test": "Manual support correction reruns dependencies",
+      "result": "PASS"
+    },
+    {
+      "test": "Manual without-EDT is explicit",
+      "result": "PASS"
+    },
+    {
+      "test": "Unknown and file modification dates require review",
+      "result": "PASS"
+    },
+    {
+      "test": "Inspection and issue do not become movements",
+      "result": "PASS"
+    },
+    {
+      "test": "Foreign visual cannot be selected manually",
+      "result": "PASS"
+    }
+  ],
+  "representativeBatch": {
+    "imported": 48,
+    "automatic": 8,
+    "ready": 24,
+    "review": 24,
+    "unidentified": 8,
+    "validated": 0,
+    "errors": 0
+  },
+  "scope": "Pure recognition; persistence and movement tests are separate"
+}

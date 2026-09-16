@@ -9,8 +9,8 @@ assert.ok(!workflow.match(/from\(bucket\)\.getPublicUrl[\s\S]{0,100}bucket==='su
 assert.ok(!workflow.includes('getPublicUrl')&&workflow.includes('storageReference'),'Terrain conserve une référence durable sans URL publique');
 assert.ok(workflow.includes('photo_url:null')&&workflow.includes('thumbnail_url:null'),'URL signée jamais persistée');
 assert.ok(library.includes('getSignedDownloadUrl')&&library.includes('getSignedPhotoUrls'),'Galerie et téléchargements centralisés');
-assert.ok(library.includes(".limit(50)"),'Galerie limitée aux photos visibles');
-assert.ok(inventory.includes('.range(offset,offset+499)')&&!inventory.includes('getSignedPhotoUrls'),'Métadonnées paginées pour tous les dossiers, sans signature anticipée');
+assert.ok(library.includes("readPhotoProjection('support_photos'")&&library.includes(',0,50)'),'Galerie limitée aux photos visibles');
+assert.ok(inventory.includes('allPhotoProjectionRows')&&!inventory.includes('getSignedPhotoUrls'),'Métadonnées paginées pour tous les dossiers, sans signature anticipée');
 assert.ok(read('src/components/PhotoFolderGallery.jsx').includes('<PhotoImage loading="lazy"'),'Signatures privées chargées avec les photos du dossier ouvert');
 const grid=read('src/components/ClientBusinessGrid.jsx');
 assert.ok(client.includes('<ClientBusinessGrid'),'le portail utilise la grille testée');
@@ -20,7 +20,7 @@ const vite=await createServer({server:{middlewareMode:true},appType:'custom',log
 try {
  const {default:ClientBusinessGrid}=await vite.ssrLoadModule('/src/components/ClientBusinessGrid.jsx');
  const html=renderToStaticMarkup(React.createElement(ClientBusinessGrid,{view:{id:'photos',label:'Photos'},result:{rows:[{id:1,support_id:'EXO-2',signed_thumbnail_url:'https://fixture.invalid/signed-thumbnail',photo_url:'PRIVATE_RAW_URL'}],total:1,page:1,page_size:25}}));
- assert.match(html,/Aperçu indisponible/,'Le rendu SSR attend une signature fraîche côté session');
+ assert.match(html,/Chargement de l’aperçu/,'Le rendu SSR attend une signature fraîche côté session et une miniature visible');
  assert.doesNotMatch(html,/PRIVATE_RAW_URL/,'URL brute absente de la grille');
 } finally {await vite.close()}
 assert.ok(clientService.includes("section === 'photos'")&&clientService.includes('getSignedPhotoUrls'),'Signature après RPC client scellée');

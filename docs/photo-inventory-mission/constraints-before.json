@@ -1,0 +1,987 @@
+[
+  {
+    "table_name": "activity_events",
+    "conname": "activity_events_confidence_check",
+    "definition": "CHECK ((confidence = ANY (ARRAY['exact'::text, 'derived'::text])))"
+  },
+  {
+    "table_name": "activity_events",
+    "conname": "activity_events_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "activity_events",
+    "conname": "activity_events_reconstruction_method_check",
+    "definition": "CHECK ((reconstruction_method = ANY (ARRAY['direct'::text, 'derived'::text])))"
+  },
+  {
+    "table_name": "activity_events",
+    "conname": "activity_events_source_system_source_record_id_key",
+    "definition": "UNIQUE (source_system, source_record_id)"
+  },
+  {
+    "table_name": "admin_change_log",
+    "conname": "admin_change_log_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "automation_bindings",
+    "conname": "automation_bindings_automation_definition_id_fkey",
+    "definition": "FOREIGN KEY (automation_definition_id) REFERENCES automation_definitions(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "automation_bindings",
+    "conname": "automation_bindings_automation_definition_id_source_table_t_key",
+    "definition": "UNIQUE (automation_definition_id, source_table, trigger_type, target_resource_key)"
+  },
+  {
+    "table_name": "automation_bindings",
+    "conname": "automation_bindings_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "automation_bindings",
+    "conname": "automation_bindings_relation_rule_id_fkey",
+    "definition": "FOREIGN KEY (relation_rule_id) REFERENCES relation_rules(id) ON DELETE SET NULL"
+  },
+  {
+    "table_name": "automation_bindings",
+    "conname": "automation_bindings_status_check",
+    "definition": "CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text, 'paused'::text])))"
+  },
+  {
+    "table_name": "automation_definitions",
+    "conname": "automation_active_requires_approval",
+    "definition": "CHECK (((status <> 'active'::text) OR ((approved_by IS NOT NULL) AND (approved_at IS NOT NULL))))"
+  },
+  {
+    "table_name": "automation_definitions",
+    "conname": "automation_definitions_definition_check",
+    "definition": "CHECK ((jsonb_typeof(definition) = 'object'::text))"
+  },
+  {
+    "table_name": "automation_definitions",
+    "conname": "automation_definitions_name_check",
+    "definition": "CHECK (((length(btrim(name)) >= 1) AND (length(btrim(name)) <= 120)))"
+  },
+  {
+    "table_name": "automation_definitions",
+    "conname": "automation_definitions_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "automation_definitions",
+    "conname": "automation_definitions_priority_check",
+    "definition": "CHECK ((priority = ANY (ARRAY['critical'::text, 'high'::text, 'normal'::text, 'low'::text])))"
+  },
+  {
+    "table_name": "automation_definitions",
+    "conname": "automation_definitions_schema_version_check",
+    "definition": "CHECK ((schema_version > 0))"
+  },
+  {
+    "table_name": "automation_definitions",
+    "conname": "automation_definitions_status_check",
+    "definition": "CHECK ((status = ANY (ARRAY['draft'::text, 'pending_validation'::text, 'active'::text, 'inactive'::text, 'paused'::text])))"
+  },
+  {
+    "table_name": "automation_resource_states",
+    "conname": "automation_resource_states_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "automation_resource_states",
+    "conname": "automation_resource_states_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "automation_resource_states",
+    "conname": "automation_resource_states_resource_type_check",
+    "definition": "CHECK ((resource_type = ANY (ARRAY['module'::text, 'table'::text, 'view'::text])))"
+  },
+  {
+    "table_name": "automation_resource_states",
+    "conname": "automation_resource_states_status_check",
+    "definition": "CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text])))"
+  },
+  {
+    "table_name": "bons_de_travail",
+    "conname": "bons_de_travail_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "bons_de_travail",
+    "conname": "bons_de_travail_edt_id_fkey",
+    "definition": "FOREIGN KEY (edt_id) REFERENCES suivi_des_edt(id) ON DELETE SET NULL"
+  },
+  {
+    "table_name": "bons_de_travail",
+    "conname": "bons_de_travail_edt_support_id_fkey",
+    "definition": "FOREIGN KEY (edt_support_id) REFERENCES edt_supports(id) ON DELETE SET NULL"
+  },
+  {
+    "table_name": "bons_de_travail",
+    "conname": "bons_de_travail_no_bt_key",
+    "definition": "UNIQUE (no_bt)"
+  },
+  {
+    "table_name": "bons_de_travail",
+    "conname": "bons_de_travail_phase_id_fkey",
+    "definition": "FOREIGN KEY (phase_id) REFERENCES edt_phases(id) ON DELETE SET NULL"
+  },
+  {
+    "table_name": "bons_de_travail",
+    "conname": "bons_de_travail_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "bons_de_travail",
+    "conname": "bons_de_travail_requete_client_id_fkey",
+    "definition": "FOREIGN KEY (requete_client_id) REFERENCES requetes_clients(id) ON DELETE SET NULL"
+  },
+  {
+    "table_name": "c_i_avec_enjeux",
+    "conname": "c_i_avec_enjeux_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "conname": "campagne_visuels_formats_campagne_id_fkey",
+    "definition": "FOREIGN KEY (campagne_id) REFERENCES campagnes_maitres(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "conname": "campagne_visuels_formats_campagne_id_phase_nom_visuel_forma_key",
+    "definition": "UNIQUE (campagne_id, phase, nom_visuel, format_support)"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "conname": "campagne_visuels_formats_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "conname": "campagne_visuels_formats_edt_phase_id_fkey",
+    "definition": "FOREIGN KEY (edt_phase_id) REFERENCES edt_phases(id) ON DELETE SET NULL"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "conname": "campagne_visuels_formats_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "conname": "campagnes_maitres_business_context_v120_check",
+    "definition": "CHECK ((business_context = ANY (ARRAY['marketing'::text, 'operational_communication'::text])))"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "conname": "campagnes_maitres_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "conname": "campagnes_maitres_code_campagne_key",
+    "definition": "UNIQUE (code_campagne)"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "conname": "campagnes_maitres_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "campagnes_supports",
+    "conname": "campagnes_supports_campagne_id_fkey",
+    "definition": "FOREIGN KEY (campagne_id) REFERENCES campagnes_maitres(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "campagnes_supports",
+    "conname": "campagnes_supports_campagne_id_support_id_key",
+    "definition": "UNIQUE (campagne_id, support_id)"
+  },
+  {
+    "table_name": "campagnes_supports",
+    "conname": "campagnes_supports_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "campagnes_supports",
+    "conname": "campagnes_supports_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "campagnes_visuels_sites_supports",
+    "conname": "campagnes_visuels_sites_supports_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id)"
+  },
+  {
+    "table_name": "campagnes_visuels_sites_supports",
+    "conname": "campagnes_visuels_sites_supports_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "centres_dinformation",
+    "conname": "centres_dinformation_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id)"
+  },
+  {
+    "table_name": "centres_dinformation",
+    "conname": "centres_dinformation_nom_ci_key",
+    "definition": "UNIQUE (nom_ci)"
+  },
+  {
+    "table_name": "centres_dinformation",
+    "conname": "centres_dinformation_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "ci_avec_enjeux",
+    "conname": "ci_avec_enjeux_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id)"
+  },
+  {
+    "table_name": "ci_avec_enjeux",
+    "conname": "ci_avec_enjeux_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "client_campaign_access",
+    "conname": "client_campaign_access_campaign_id_fkey",
+    "definition": "FOREIGN KEY (campaign_id) REFERENCES campagnes_maitres(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "client_campaign_access",
+    "conname": "client_campaign_access_client_id_campaign_id_user_id_key",
+    "definition": "UNIQUE NULLS NOT DISTINCT (client_id, campaign_id, user_id)"
+  },
+  {
+    "table_name": "client_campaign_access",
+    "conname": "client_campaign_access_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "client_campaign_access",
+    "conname": "client_campaign_access_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "client_campaign_access",
+    "conname": "client_campaign_access_user_id_fkey",
+    "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "client_member_invitations",
+    "conname": "client_member_invitations_client_id_email_status_key",
+    "definition": "UNIQUE (client_id, email, status)"
+  },
+  {
+    "table_name": "client_member_invitations",
+    "conname": "client_member_invitations_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "client_member_invitations",
+    "conname": "client_member_invitations_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "client_member_invitations",
+    "conname": "client_member_invitations_requested_role_check",
+    "definition": "CHECK ((requested_role = 'Client'::text))"
+  },
+  {
+    "table_name": "client_member_invitations",
+    "conname": "client_member_invitations_status_check",
+    "definition": "CHECK ((status = ANY (ARRAY['pending'::text, 'accepted'::text, 'cancelled'::text, 'expired'::text])))"
+  },
+  {
+    "table_name": "client_request_supports",
+    "conname": "client_request_supports_pkey",
+    "definition": "PRIMARY KEY (request_id, support_id)"
+  },
+  {
+    "table_name": "client_request_supports",
+    "conname": "client_request_supports_request_id_fkey",
+    "definition": "FOREIGN KEY (request_id) REFERENCES requetes_clients(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "client_request_supports",
+    "conname": "client_request_supports_support_id_fkey",
+    "definition": "FOREIGN KEY (support_id) REFERENCES infrastructures(support_id) ON UPDATE CASCADE ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "clients",
+    "conname": "clients_nom_client_key",
+    "definition": "UNIQUE (nom_client)"
+  },
+  {
+    "table_name": "clients",
+    "conname": "clients_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "communications_finales",
+    "conname": "communications_finales_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "communications_finales",
+    "conname": "communications_finales_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "communications_operationnelles",
+    "conname": "communications_operationnelles_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "communications_operationnelles_sites_supports",
+    "conname": "communications_operationnelles_sites_supports_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id)"
+  },
+  {
+    "table_name": "communications_operationnelles_sites_supports",
+    "conname": "communications_operationnelles_sites_supports_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "edt_assignments",
+    "conname": "edt_assignments_edt_id_fkey",
+    "definition": "FOREIGN KEY (edt_id) REFERENCES suivi_des_edt(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "edt_assignments",
+    "conname": "edt_assignments_edt_id_user_email_role_assignment_key",
+    "definition": "UNIQUE (edt_id, user_email, role_assignment)"
+  },
+  {
+    "table_name": "edt_assignments",
+    "conname": "edt_assignments_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "edt_phase_reports",
+    "conname": "edt_phase_reports_edt_id_fkey",
+    "definition": "FOREIGN KEY (edt_id) REFERENCES suivi_des_edt(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "edt_phase_reports",
+    "conname": "edt_phase_reports_phase_id_fkey",
+    "definition": "FOREIGN KEY (phase_id) REFERENCES edt_phases(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "edt_phase_reports",
+    "conname": "edt_phase_reports_phase_id_version_key",
+    "definition": "UNIQUE (phase_id, version)"
+  },
+  {
+    "table_name": "edt_phase_reports",
+    "conname": "edt_phase_reports_phase_type_check",
+    "definition": "CHECK ((phase_type = ANY (ARRAY['installation'::text, 'retrait'::text])))"
+  },
+  {
+    "table_name": "edt_phase_reports",
+    "conname": "edt_phase_reports_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "edt_phase_reports",
+    "conname": "edt_phase_reports_status_check",
+    "definition": "CHECK ((status = ANY (ARRAY['brouillon'::text, 'genere'::text, 'envoye'::text, 'echec'::text])))"
+  },
+  {
+    "table_name": "edt_phases",
+    "conname": "edt_phases_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "edt_phases",
+    "conname": "edt_phases_edt_id_fkey",
+    "definition": "FOREIGN KEY (edt_id) REFERENCES suivi_des_edt(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "edt_phases",
+    "conname": "edt_phases_phase_type_v133_ck",
+    "definition": "CHECK ((phase_type = ANY (ARRAY['installation'::text, 'retrait'::text])))"
+  },
+  {
+    "table_name": "edt_phases",
+    "conname": "edt_phases_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "edt_phases",
+    "conname": "edt_phases_progression_check",
+    "definition": "CHECK (((progression >= 0) AND (progression <= 100)))"
+  },
+  {
+    "table_name": "edt_reports",
+    "conname": "edt_reports_edt_id_fkey",
+    "definition": "FOREIGN KEY (edt_id) REFERENCES suivi_des_edt(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "edt_reports",
+    "conname": "edt_reports_edt_id_report_version_key",
+    "definition": "UNIQUE (edt_id, report_version)"
+  },
+  {
+    "table_name": "edt_reports",
+    "conname": "edt_reports_file_ready_v132",
+    "definition": "CHECK (((status = ANY (ARRAY['draft'::text, 'error'::text, 'deleted'::text])) OR ((report_path IS NOT NULL) AND (generated_at IS NOT NULL))))"
+  },
+  {
+    "table_name": "edt_reports",
+    "conname": "edt_reports_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "edt_reports",
+    "conname": "edt_reports_report_version_check",
+    "definition": "CHECK ((report_version > 0))"
+  },
+  {
+    "table_name": "edt_reports",
+    "conname": "edt_reports_requester_contact_id_fkey",
+    "definition": "FOREIGN KEY (requester_contact_id) REFERENCES utilisateurs(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "edt_reports",
+    "conname": "edt_reports_status_check",
+    "definition": "CHECK ((status = ANY (ARRAY['draft'::text, 'generated'::text, 'ready'::text, 'error'::text, 'deleted'::text])))"
+  },
+  {
+    "table_name": "edt_reports",
+    "conname": "edt_reports_support_count_v132",
+    "definition": "CHECK ((support_count >= 0))"
+  },
+  {
+    "table_name": "edt_supports",
+    "conname": "edt_supports_bon_de_travail_id_fkey",
+    "definition": "FOREIGN KEY (bon_de_travail_id) REFERENCES bons_de_travail(id) ON DELETE SET NULL"
+  },
+  {
+    "table_name": "edt_supports",
+    "conname": "edt_supports_edt_id_fkey",
+    "definition": "FOREIGN KEY (edt_id) REFERENCES suivi_des_edt(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "edt_supports",
+    "conname": "edt_supports_phase_id_fkey",
+    "definition": "FOREIGN KEY (phase_id) REFERENCES edt_phases(id) ON DELETE SET NULL"
+  },
+  {
+    "table_name": "edt_supports",
+    "conname": "edt_supports_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "edt_supports",
+    "conname": "edt_supports_progression_check",
+    "definition": "CHECK (((progression >= 0) AND (progression <= 100)))"
+  },
+  {
+    "table_name": "edt_supports",
+    "conname": "edt_supports_support_id_fkey",
+    "definition": "FOREIGN KEY (support_id) REFERENCES infrastructures(support_id) ON UPDATE CASCADE ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "email_delivery_log",
+    "conname": "email_delivery_log_edt_id_fkey",
+    "definition": "FOREIGN KEY (edt_id) REFERENCES suivi_des_edt(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "email_delivery_log",
+    "conname": "email_delivery_log_outbox_id_fkey",
+    "definition": "FOREIGN KEY (outbox_id) REFERENCES email_outbox(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "email_delivery_log",
+    "conname": "email_delivery_log_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "email_delivery_log",
+    "conname": "email_delivery_log_report_id_fkey",
+    "definition": "FOREIGN KEY (report_id) REFERENCES edt_reports(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "email_delivery_log",
+    "conname": "email_delivery_log_status_check",
+    "definition": "CHECK ((status = ANY (ARRAY['sent'::text, 'failed'::text])))"
+  },
+  {
+    "table_name": "email_outbox",
+    "conname": "email_outbox_attempt_count_check",
+    "definition": "CHECK (((attempt_count >= 0) AND (attempt_count <= 5)))"
+  },
+  {
+    "table_name": "email_outbox",
+    "conname": "email_outbox_edt_id_fkey",
+    "definition": "FOREIGN KEY (edt_id) REFERENCES suivi_des_edt(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "email_outbox",
+    "conname": "email_outbox_event_type_check",
+    "definition": "CHECK ((event_type = 'edt_completed_report_sent'::text))"
+  },
+  {
+    "table_name": "email_outbox",
+    "conname": "email_outbox_idempotency_key_key",
+    "definition": "UNIQUE (idempotency_key)"
+  },
+  {
+    "table_name": "email_outbox",
+    "conname": "email_outbox_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "email_outbox",
+    "conname": "email_outbox_report_id_fkey",
+    "definition": "FOREIGN KEY (report_id) REFERENCES edt_reports(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "email_outbox",
+    "conname": "email_outbox_status_check",
+    "definition": "CHECK ((status = ANY (ARRAY['pending'::text, 'sending'::text, 'sent'::text, 'failed'::text])))"
+  },
+  {
+    "table_name": "enjeux_des_cadres_et_supports",
+    "conname": "enjeux_des_cadres_et_supports_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id)"
+  },
+  {
+    "table_name": "enjeux_des_cadres_et_supports",
+    "conname": "enjeux_des_cadres_et_supports_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "conname": "enjeux_terrain_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "conname": "enjeux_terrain_edt_phase_id_fkey",
+    "definition": "FOREIGN KEY (edt_phase_id) REFERENCES edt_phases(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "conname": "enjeux_terrain_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "conname": "enjeux_terrain_reference_key",
+    "definition": "UNIQUE (reference)"
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "conname": "historique_des_campagnes_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id)"
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "conname": "historique_des_campagnes_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "infrastructures",
+    "conname": "infrastructures_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "infrastructures",
+    "conname": "infrastructures_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "infrastructures",
+    "conname": "infrastructures_support_id_key",
+    "definition": "UNIQUE (support_id)"
+  },
+  {
+    "table_name": "inspections_terrain",
+    "conname": "inspections_terrain_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "inventory_movements",
+    "conname": "inventory_movements_movement_type_check",
+    "definition": "CHECK ((movement_type = ANY (ARRAY['Entrée'::text, 'Installation'::text, 'Retrait'::text, 'Retour'::text, 'Ajustement'::text])))"
+  },
+  {
+    "table_name": "inventory_movements",
+    "conname": "inventory_movements_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "journal_des_evenements",
+    "conname": "journal_des_evenements_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "journal_propagations",
+    "conname": "journal_propagations_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "liste_des_arrets",
+    "conname": "liste_des_arrets_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id)"
+  },
+  {
+    "table_name": "liste_des_arrets",
+    "conname": "liste_des_arrets_no_arret_key",
+    "definition": "UNIQUE (no_arret)"
+  },
+  {
+    "table_name": "liste_des_arrets",
+    "conname": "liste_des_arrets_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "operations_history",
+    "conname": "operations_history_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "photo_action_log",
+    "conname": "photo_action_log_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "photo_review_audit",
+    "conname": "photo_review_audit_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "photo_review_audit",
+    "conname": "photo_review_audit_photo_id_fkey",
+    "definition": "FOREIGN KEY (photo_id) REFERENCES support_photos(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "photo_review_audit",
+    "conname": "photo_review_audit_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "photos",
+    "conname": "photos_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id)"
+  },
+  {
+    "table_name": "photos",
+    "conname": "photos_photo_id_key",
+    "definition": "UNIQUE (photo_id)"
+  },
+  {
+    "table_name": "photos",
+    "conname": "photos_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "relation_execution_logs",
+    "conname": "relation_execution_logs_automation_definition_id_fkey",
+    "definition": "FOREIGN KEY (automation_definition_id) REFERENCES automation_definitions(id) ON DELETE SET NULL"
+  },
+  {
+    "table_name": "relation_execution_logs",
+    "conname": "relation_execution_logs_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "relation_execution_logs",
+    "conname": "relation_execution_logs_rule_id_fkey",
+    "definition": "FOREIGN KEY (rule_id) REFERENCES relation_rules(id) ON DELETE SET NULL"
+  },
+  {
+    "table_name": "relation_field_config_audit",
+    "conname": "relation_field_config_audit_configuration_status_check",
+    "definition": "CHECK ((configuration_status = 'draft'::text))"
+  },
+  {
+    "table_name": "relation_field_config_audit",
+    "conname": "relation_field_config_audit_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "relation_field_config_audit",
+    "conname": "relation_field_config_audit_type_v01311c1_check",
+    "definition": "CHECK (((configuration_type IS NULL) OR (configuration_type = ANY (ARRAY['general'::text, 'display'::text, 'validation'::text, 'permission'::text, 'terrain'::text, 'import_export'::text, 'relation'::text, 'calculation'::text])))) NOT VALID"
+  },
+  {
+    "table_name": "relation_fields",
+    "conname": "relation_fields_configuration_status_v0131a_check",
+    "definition": "CHECK ((configuration_status = ANY (ARRAY['unconfigured'::text, 'draft'::text, 'active'::text, 'inactive'::text]))) NOT VALID"
+  },
+  {
+    "table_name": "relation_fields",
+    "conname": "relation_fields_field_type_v0131a_check",
+    "definition": "CHECK (((field_type IS NULL) OR (field_type = ANY (ARRAY['short_text'::text, 'long_text'::text, 'number'::text, 'currency'::text, 'date'::text, 'datetime'::text, 'boolean'::text, 'single_select'::text, 'multi_select'::text, 'photo'::text, 'file'::text, 'relation'::text, 'calculated'::text])))) NOT VALID"
+  },
+  {
+    "table_name": "relation_fields",
+    "conname": "relation_fields_import_export_config_v0131a8_check",
+    "definition": "CHECK ((jsonb_typeof(import_export_config) = 'object'::text)) NOT VALID"
+  },
+  {
+    "table_name": "relation_fields",
+    "conname": "relation_fields_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "relation_fields",
+    "conname": "relation_fields_role_permissions_object_v0131a6_check",
+    "definition": "CHECK ((jsonb_typeof(role_permissions) = 'object'::text)) NOT VALID"
+  },
+  {
+    "table_name": "relation_fields",
+    "conname": "relation_fields_table_name_field_name_key",
+    "definition": "UNIQUE (table_name, field_name)"
+  },
+  {
+    "table_name": "relation_fields",
+    "conname": "relation_fields_terrain_config_object_v0131a7_check",
+    "definition": "CHECK ((jsonb_typeof(terrain_config) = 'object'::text)) NOT VALID"
+  },
+  {
+    "table_name": "relation_fields",
+    "conname": "relation_fields_validation_rules_object_v0131a5_check",
+    "definition": "CHECK ((jsonb_typeof(validation_rules) = 'object'::text)) NOT VALID"
+  },
+  {
+    "table_name": "relation_rules",
+    "conname": "relation_rules_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "relation_rules",
+    "conname": "relation_rules_source_table_source_field_destination_table__key",
+    "definition": "UNIQUE (source_table, source_field, destination_table, destination_field)"
+  },
+  {
+    "table_name": "relation_test_logs",
+    "conname": "relation_test_logs_automation_definition_id_fkey",
+    "definition": "FOREIGN KEY (automation_definition_id) REFERENCES automation_definitions(id) ON DELETE SET NULL"
+  },
+  {
+    "table_name": "relation_test_logs",
+    "conname": "relation_test_logs_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "relation_test_logs",
+    "conname": "relation_test_logs_rule_id_fkey",
+    "definition": "FOREIGN KEY (rule_id) REFERENCES relation_rules(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "conname": "repertoire_des_affiches_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id)"
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "conname": "repertoire_des_affiches_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "reports",
+    "conname": "reports_archive_v130",
+    "definition": "CHECK ((((status = 'archived'::text) AND (archived_at IS NOT NULL)) OR (status <> 'archived'::text)))"
+  },
+  {
+    "table_name": "reports",
+    "conname": "reports_campaign_id_fkey",
+    "definition": "FOREIGN KEY (campaign_id) REFERENCES campagnes_maitres(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "reports",
+    "conname": "reports_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "reports",
+    "conname": "reports_communication_id_fkey",
+    "definition": "FOREIGN KEY (communication_id) REFERENCES campagnes_maitres(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "reports",
+    "conname": "reports_parent_report_id_fkey",
+    "definition": "FOREIGN KEY (parent_report_id) REFERENCES reports(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "reports",
+    "conname": "reports_period_v130",
+    "definition": "CHECK (((period_end IS NULL) OR (period_start IS NULL) OR (period_end >= period_start)))"
+  },
+  {
+    "table_name": "reports",
+    "conname": "reports_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "reports",
+    "conname": "reports_publication_v130",
+    "definition": "CHECK ((((status = 'published'::text) AND client_published AND (published_at IS NOT NULL)) OR ((status <> 'published'::text) AND (NOT client_published))))"
+  },
+  {
+    "table_name": "reports",
+    "conname": "reports_scope_v130",
+    "definition": "CHECK ((((report_type = 'campaign'::text) AND (campaign_id IS NOT NULL) AND (communication_id IS NULL)) OR ((report_type = 'operational_communication'::text) AND (communication_id IS NOT NULL) AND (campaign_id IS NULL)) OR (report_type = ANY (ARRAY['site_support'::text, 'client'::text, 'edt'::text, 'inspection'::text, 'photos'::text, 'issues'::text, 'summary'::text]))))"
+  },
+  {
+    "table_name": "reports",
+    "conname": "reports_status_v130",
+    "definition": "CHECK ((status = ANY (ARRAY['draft'::text, 'generated'::text, 'published'::text, 'archived'::text, 'error'::text])))"
+  },
+  {
+    "table_name": "reports",
+    "conname": "reports_type_v130",
+    "definition": "CHECK ((report_type = ANY (ARRAY['campaign'::text, 'operational_communication'::text, 'site_support'::text, 'client'::text, 'edt'::text, 'inspection'::text, 'photos'::text, 'issues'::text, 'summary'::text])))"
+  },
+  {
+    "table_name": "reports",
+    "conname": "reports_version_v130",
+    "definition": "CHECK ((version > 0))"
+  },
+  {
+    "table_name": "requetes_clients",
+    "conname": "requetes_clients_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "requetes_clients",
+    "conname": "requetes_clients_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "role_ui_permissions",
+    "conname": "role_ui_permissions_pkey",
+    "definition": "PRIMARY KEY (role)"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "conname": "suivi_des_edt_campagne_id_fkey",
+    "definition": "FOREIGN KEY (campagne_id) REFERENCES campagnes_maitres(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "conname": "suivi_des_edt_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "conname": "suivi_des_edt_no_edt_key",
+    "definition": "UNIQUE (no_edt)"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "conname": "suivi_des_edt_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "conname": "suivi_des_edt_requester_contact_id_fkey",
+    "definition": "FOREIGN KEY (requester_contact_id) REFERENCES utilisateurs(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "support_photos",
+    "conname": "support_photos_campagne_id_fkey",
+    "definition": "FOREIGN KEY (campagne_id) REFERENCES campagnes_maitres(id)"
+  },
+  {
+    "table_name": "support_photos",
+    "conname": "support_photos_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "support_photos",
+    "conname": "support_photos_ocr_confidence_check",
+    "definition": "CHECK (((ocr_confidence IS NULL) OR ((ocr_confidence >= (0)::numeric) AND (ocr_confidence <= (100)::numeric))))"
+  },
+  {
+    "table_name": "support_photos",
+    "conname": "support_photos_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "support_photos",
+    "conname": "support_photos_review_status_check",
+    "definition": "CHECK (((review_status IS NULL) OR (review_status = ANY (ARRAY['auto_matched'::text, 'needs_review'::text, 'unmatched'::text, 'manually_validated'::text, 'ignored'::text, 'error'::text]))))"
+  },
+  {
+    "table_name": "support_photos",
+    "conname": "support_photos_target_client_id_fkey",
+    "definition": "FOREIGN KEY (target_client_id) REFERENCES clients(id) ON DELETE RESTRICT"
+  },
+  {
+    "table_name": "support_photos",
+    "conname": "support_photos_visuel_id_fkey",
+    "definition": "FOREIGN KEY (visuel_id) REFERENCES campagne_visuels_formats(id)"
+  },
+  {
+    "table_name": "terrain_operations",
+    "conname": "terrain_operations_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "terrain_operations",
+    "conname": "terrain_operations_reference_key",
+    "definition": "UNIQUE (reference)"
+  },
+  {
+    "table_name": "terrain_sync_diagnostics",
+    "conname": "terrain_sync_diagnostics_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "utilisateurs",
+    "conname": "utilisateurs_courriel_key",
+    "definition": "UNIQUE (courriel)"
+  },
+  {
+    "table_name": "utilisateurs",
+    "conname": "utilisateurs_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "visual_edt_associations",
+    "conname": "visual_edt_associations_check",
+    "definition": "CHECK (((date_debut IS NULL) OR (date_fin IS NULL) OR (date_fin >= date_debut)))"
+  },
+  {
+    "table_name": "visual_edt_associations",
+    "conname": "visual_edt_associations_edt_id_fkey",
+    "definition": "FOREIGN KEY (edt_id) REFERENCES suivi_des_edt(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "visual_edt_associations",
+    "conname": "visual_edt_associations_phase_id_fkey",
+    "definition": "FOREIGN KEY (phase_id) REFERENCES edt_phases(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "visual_edt_associations",
+    "conname": "visual_edt_associations_pkey",
+    "definition": "PRIMARY KEY (visual_id, edt_id)"
+  },
+  {
+    "table_name": "visual_edt_associations",
+    "conname": "visual_edt_associations_visual_id_fkey",
+    "definition": "FOREIGN KEY (visual_id) REFERENCES campagne_visuels_formats(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "voitures_trains",
+    "conname": "voitures_trains_client_id_fkey",
+    "definition": "FOREIGN KEY (client_id) REFERENCES clients(id)"
+  },
+  {
+    "table_name": "voitures_trains",
+    "conname": "voitures_trains_no_voiture_key",
+    "definition": "UNIQUE (no_voiture)"
+  },
+  {
+    "table_name": "voitures_trains",
+    "conname": "voitures_trains_pkey",
+    "definition": "PRIMARY KEY (id)"
+  }
+]

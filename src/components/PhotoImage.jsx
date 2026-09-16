@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { getSignedPhotoUrl, PHOTO_URL_TTL } from '../services/photoAccessService';
 
 // A business reference is never replaced by a temporary URL in the source row.
@@ -9,7 +9,17 @@ export default function PhotoImage({ photo, purpose='preview', alt='', ...props 
     thumbnail_url:photo?.thumbnail_url || photo?.photo_miniature_url
   });
   const [resolved, setResolved] = useState({ reference:'', url:'' });
+  const element=useRef(null);
+  const [visible,setVisible]=useState(props.loading!=='lazy');
+  useEffect(()=>{
+    if(props.loading!=='lazy'||typeof IntersectionObserver==='undefined'){setVisible(true);return;}
+    setVisible(false);
+    const observer=new IntersectionObserver(entries=>{if(entries.some(entry=>entry.isIntersecting)){setVisible(true);observer.disconnect();}},{rootMargin:'200px'});
+    if(element.current)observer.observe(element.current);
+    return()=>observer.disconnect();
+  },[reference,props.loading]);
   useEffect(() => {
+    if(!visible)return;
     let live = true, request = 0;
     const resolve = async () => {
       const current = ++request;
@@ -30,8 +40,8 @@ export default function PhotoImage({ photo, purpose='preview', alt='', ...props 
       window.removeEventListener('online', resolve);
       window.removeEventListener('focus', resolve);
     };
-  }, [reference, purpose]);
+  }, [reference, purpose, visible]);
   const url = resolved.reference === reference ? resolved.url : '';
-  return url ? <img {...props} src={url} alt={alt} onError={() => { setResolved({ reference, url:'' }); }}/>
-    : <span className={props.className} role="status" title={alt}>Aperçu indisponible</span>;
+  return url ? <img {...props} ref={element} src={url} alt={alt} onError={() => { setResolved({ reference, url:'' }); }}/>
+    : <span ref={element} className={props.className} role="status" title={alt} style={props.loading==='lazy'?{display:'inline-block',minHeight:120,minWidth:120}:undefined}>{visible?'Aperçu indisponible':'Chargement de l’aperçu…'}</span>;
 }

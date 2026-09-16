@@ -1,4 +1,5 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
+import {allPhotoProjectionRows} from './photoProjectionService';
 
 const firstValue = (row, keys, fallback = '') => {
   for (const key of keys) {
@@ -391,13 +392,7 @@ export async function closeEdtAndSendFinalReport({
 }
 
 export async function listFinalCommunications() {
-  const { data, error } = await supabase
-    .from('communications_finales')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return data || [];
+  return (await allPhotoProjectionRows('communications_finales')).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
 }
 
 export async function resendFinalCommunication(communication) {

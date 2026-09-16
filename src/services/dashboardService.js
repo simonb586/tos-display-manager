@@ -1,7 +1,9 @@
 import {supabase, supabaseConfigured} from '../lib/supabaseClient';
 import {normalizeClientPortalViewKey, resolveClientPortalViews} from '../lib/clientPortalViewRegistry';
 
-export const DASHBOARD_TIMEOUT_MS = 4500;
+// Keep cancellation bounded while allowing the scoped SQL request to complete
+// after a bulk import; the previous 4.5s deadline rejected valid responses.
+export const DASHBOARD_TIMEOUT_MS = 10000;
 
 export function validateDashboardSummary(data) {
   if (data?.version !== 1 || !data.identity?.user_id || !data.identity?.role ||

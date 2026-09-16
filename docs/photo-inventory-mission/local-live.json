@@ -1,0 +1,79 @@
+{
+  "at": "2026-09-16T00:46:18.179Z",
+  "prefix": "MISSION-A5E0B48E",
+  "records": [
+    {
+      "test": "48 real JPEG originals imported through application services; EXIF, zero byte loss, no draft infrastructure mutation",
+      "result": "PASS",
+      "imported": 48,
+      "automatic": 16,
+      "ready": 24,
+      "review": 24,
+      "unidentified": 8,
+      "validated": 0,
+      "errors": 0
+    },
+    {
+      "test": "24 initial confirmations, ambiguous rejection, manual support correction and batch confirmation; N photos share one movement",
+      "result": "PASS"
+    },
+    {
+      "test": "Cancellation replays current state and is idempotent; all 48 photo rows retained",
+      "result": "PASS",
+      "validated": 41,
+      "remaining": 7
+    },
+    {
+      "test": "Client raw identity blocked, safe photos/movements, mutations refused, scoped signed original accessible",
+      "result": "PASS"
+    },
+    {
+      "test": "Client-Admin raw identity blocked, safe photos/movements, mutations refused, scoped signed original accessible",
+      "result": "PASS"
+    },
+    {
+      "test": "Client B: zero EXO fixture photos/movements and signed URL denied",
+      "result": "PASS"
+    },
+    {
+      "test": "Marylène real session: scoped projection without internal author",
+      "result": "PASS"
+    },
+    {
+      "test": "Actual Admin preview header: client projection and write denial",
+      "result": "PASS"
+    },
+    {
+      "test": "Admin actual portal inventory, search, role capability",
+      "result": "PASS"
+    },
+    {
+      "test": "Client actual portal inventory, search, role capability",
+      "result": "PASS"
+    },
+    {
+      "test": "Client-Admin actual portal inventory, search, role capability",
+      "result": "PASS"
+    }
+  ],
+  "origin": "http://127.0.0.1:5180",
+  "fixture": {
+    "edt": 223,
+    "removal": 376,
+    "visualA": 197,
+    "visualB": 198,
+    "visualC": 199,
+    "installation": 375
+  },
+  "initialCounts": {
+    "imported": 48,
+    "automatic": 16,
+    "ready": 24,
+    "review": 24,
+    "unidentified": 8,
+    "validated": 0,
+    "errors": 0
+  },
+  "result": "PASS",
+  "fixtureCleaned": true
+}

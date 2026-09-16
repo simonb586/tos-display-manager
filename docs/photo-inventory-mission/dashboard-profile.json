@@ -1,0 +1,160 @@
+[
+  {
+    "jit": "on",
+    "timings": [
+      {
+        "ms": 609.931,
+        "section": {
+          "missing_photos": 5775,
+          "infrastructures_total": 6619,
+          "infrastructures_active": 5135
+        }
+      },
+      {
+        "ms": 3.73,
+        "section": {
+          "marketing_soon": 0,
+          "marketing_total": 21,
+          "marketing_active": 17
+        }
+      },
+      {
+        "ms": 67.143,
+        "section": {
+          "marketing_visuals": 0
+        }
+      },
+      {
+        "ms": 843.15,
+        "section": {
+          "marketing_places": 164
+        }
+      },
+      {
+        "ms": 2.064,
+        "section": {
+          "operational_soon": 0,
+          "operational_total": 10,
+          "operational_active": 6
+        }
+      },
+      {
+        "ms": 52.636,
+        "section": {
+          "operational_visuals": 0
+        }
+      },
+      {
+        "ms": 301.206,
+        "section": {
+          "operational_places": 52
+        }
+      },
+      {
+        "ms": 29.208,
+        "section": {
+          "edt_late": 0,
+          "edt_active": 16
+        }
+      },
+      {
+        "ms": 7.44,
+        "section": {
+          "photos": 0
+        }
+      },
+      {
+        "ms": 4.752,
+        "section": {
+          "work_orders": 1,
+          "urgent_work_orders": 0
+        }
+      },
+      {
+        "ms": 37.946,
+        "section": {
+          "issues_open": 104
+        }
+      }
+    ]
+  },
+  {
+    "jit": "off",
+    "timings": [
+      {
+        "ms": 619.402,
+        "section": {
+          "missing_photos": 5775,
+          "infrastructures_total": 6619,
+          "infrastructures_active": 5135
+        }
+      },
+      {
+        "ms": 3.545,
+        "section": {
+          "marketing_soon": 0,
+          "marketing_total": 21,
+          "marketing_active": 17
+        }
+      },
+      {
+        "ms": 67.887,
+        "section": {
+          "marketing_visuals": 0
+        }
+      },
+      {
+        "ms": 845.3,
+        "section": {
+          "marketing_places": 164
+        }
+      },
+      {
+        "ms": 2.14,
+        "section": {
+          "operational_soon": 0,
+          "operational_total": 10,
+          "operational_active": 6
+        }
+      },
+      {
+        "ms": 53.387,
+        "section": {
+          "operational_visuals": 0
+        }
+      },
+      {
+        "ms": 304.395,
+        "section": {
+          "operational_places": 52
+        }
+      },
+      {
+        "ms": 28.221,
+        "section": {
+          "edt_late": 0,
+          "edt_active": 16
+        }
+      },
+      {
+        "ms": 6.796,
+        "section": {
+          "photos": 0
+        }
+      },
+      {
+        "ms": 4.639,
+        "section": {
+          "work_orders": 1,
+          "urgent_work_orders": 0
+        }
+      },
+      {
+        "ms": 37.771,
+        "section": {
+          "issues_open": 104
+        }
+      }
+    ]
+  }
+]

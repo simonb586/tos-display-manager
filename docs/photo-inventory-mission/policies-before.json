@@ -1,0 +1,3542 @@
+[
+  {
+    "schemaname": "public",
+    "tablename": "activity_events",
+    "policyname": "activity_events_insert_exact",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((actor_id = auth.uid()) AND (confidence = 'exact'::text) AND (reconstruction_method = 'direct'::text))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "activity_events",
+    "policyname": "activity_events_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "activity_events",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('activity_events'::text, to_jsonb(activity_events.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "activity_events",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('activity_events'::text, to_jsonb(activity_events.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "activity_events",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('activity_events'::text, to_jsonb(activity_events.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "activity_events",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('activity_events'::text, to_jsonb(activity_events.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('activity_events'::text, to_jsonb(activity_events.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "admin_change_log",
+    "policyname": "admin_change_log_admin_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "admin_change_log",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('admin_change_log'::text, to_jsonb(admin_change_log.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "admin_change_log",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('admin_change_log'::text, to_jsonb(admin_change_log.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "admin_change_log",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('admin_change_log'::text, to_jsonb(admin_change_log.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "admin_change_log",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('admin_change_log'::text, to_jsonb(admin_change_log.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('admin_change_log'::text, to_jsonb(admin_change_log.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_bindings",
+    "policyname": "automation_bindings_admin_read_v1310",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_bindings",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('automation_bindings'::text, to_jsonb(automation_bindings.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_bindings",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('automation_bindings'::text, to_jsonb(automation_bindings.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_bindings",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('automation_bindings'::text, to_jsonb(automation_bindings.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_bindings",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('automation_bindings'::text, to_jsonb(automation_bindings.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('automation_bindings'::text, to_jsonb(automation_bindings.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_definitions",
+    "policyname": "automation_definitions_admin_delete",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_definitions",
+    "policyname": "automation_definitions_admin_insert",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((current_app_role() = 'Administrateur'::text) AND (created_by = auth.uid()) AND (updated_by = auth.uid()) AND (approved_by IS NULL) AND (approved_at IS NULL) AND (status <> 'active'::text))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_definitions",
+    "policyname": "automation_definitions_admin_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_definitions",
+    "policyname": "automation_definitions_admin_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_definitions",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('automation_definitions'::text, to_jsonb(automation_definitions.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_definitions",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('automation_definitions'::text, to_jsonb(automation_definitions.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_definitions",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('automation_definitions'::text, to_jsonb(automation_definitions.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_definitions",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('automation_definitions'::text, to_jsonb(automation_definitions.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('automation_definitions'::text, to_jsonb(automation_definitions.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_resource_states",
+    "policyname": "automation_resource_states_admin_read_v1310",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_resource_states",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('automation_resource_states'::text, to_jsonb(automation_resource_states.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_resource_states",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('automation_resource_states'::text, to_jsonb(automation_resource_states.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_resource_states",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('automation_resource_states'::text, to_jsonb(automation_resource_states.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "automation_resource_states",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('automation_resource_states'::text, to_jsonb(automation_resource_states.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('automation_resource_states'::text, to_jsonb(automation_resource_states.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "bons_de_travail",
+    "policyname": "portal_client_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(( SELECT portal_view_allowed('Bons de travail'::text) AS portal_view_allowed) AND ((client_id IS NULL) OR (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = ( SELECT auth.uid() AS uid)) AND (u.statut = 'Actif'::text))))) AND portal_client_row_scope(to_jsonb(bons_de_travail.*)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "bons_de_travail",
+    "policyname": "portal_client_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(portal_view_allowed('Bons de travail'::text, true) AND portal_client_row_scope(to_jsonb(bons_de_travail.*)))",
+    "with_check": "(portal_view_allowed('Bons de travail'::text, true) AND portal_client_row_scope(to_jsonb(bons_de_travail.*)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "bons_de_travail",
+    "policyname": "private_bons_de_travail_delete",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND (tos_table_resource_scope(client_id, support_id, NULL::bigint, edt_id, true) OR tos_legacy_work_order_scope(id, client_id, support_id, edt_id)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "bons_de_travail",
+    "policyname": "private_bons_de_travail_insert",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text])) AND tos_table_resource_scope(client_id, support_id, NULL::bigint, edt_id, true))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "bons_de_travail",
+    "policyname": "private_bons_de_travail_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) AND (tos_table_resource_scope(client_id, support_id, NULL::bigint, edt_id, true) OR tos_legacy_work_order_scope(id, client_id, support_id, edt_id)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "bons_de_travail",
+    "policyname": "private_bons_de_travail_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text])) AND (tos_table_resource_scope(client_id, support_id, NULL::bigint, edt_id, true) OR tos_legacy_work_order_scope(id, client_id, support_id, edt_id)))",
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text])) AND (tos_table_resource_scope(client_id, support_id, NULL::bigint, edt_id, true) OR tos_legacy_work_order_scope(id, client_id, support_id, edt_id)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "c_i_avec_enjeux",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('c_i_avec_enjeux'::text, to_jsonb(c_i_avec_enjeux.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "c_i_avec_enjeux",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('c_i_avec_enjeux'::text, to_jsonb(c_i_avec_enjeux.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "c_i_avec_enjeux",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('c_i_avec_enjeux'::text, to_jsonb(c_i_avec_enjeux.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "c_i_avec_enjeux",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('c_i_avec_enjeux'::text, to_jsonb(c_i_avec_enjeux.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('c_i_avec_enjeux'::text, to_jsonb(c_i_avec_enjeux.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "c_i_avec_enjeux",
+    "policyname": "tdm_admin_universal_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagne_visuels_formats",
+    "policyname": "campagne_visuals_scoped_read_v120",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) OR (client_visible AND client_can_access_campaign_v120(campagne_id)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagne_visuels_formats",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('campagne_visuels_formats'::text, to_jsonb(campagne_visuels_formats.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagne_visuels_formats",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('campagne_visuels_formats'::text, to_jsonb(campagne_visuels_formats.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagne_visuels_formats",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('campagne_visuels_formats'::text, to_jsonb(campagne_visuels_formats.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagne_visuels_formats",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('campagne_visuels_formats'::text, to_jsonb(campagne_visuels_formats.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('campagne_visuels_formats'::text, to_jsonb(campagne_visuels_formats.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagne_visuels_formats",
+    "policyname": "tdm_admin_universal_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagne_visuels_formats",
+    "policyname": "visuals_manager_write_v075",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_maitres",
+    "policyname": "campagnes_maitres_admin_write",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_maitres",
+    "policyname": "campagnes_maitres_manager_write_v075",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_maitres",
+    "policyname": "campagnes_maitres_scoped_read_v120",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) OR client_can_access_campaign_v120(id))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_maitres",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('campagnes_maitres'::text, to_jsonb(campagnes_maitres.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_maitres",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('campagnes_maitres'::text, to_jsonb(campagnes_maitres.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_maitres",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('campagnes_maitres'::text, to_jsonb(campagnes_maitres.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_maitres",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('campagnes_maitres'::text, to_jsonb(campagnes_maitres.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('campagnes_maitres'::text, to_jsonb(campagnes_maitres.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_maitres",
+    "policyname": "portal_client_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(portal_view_allowed(\nCASE\n    WHEN (business_context = 'operational_communication'::text) THEN 'Communications opérationnelles'::text\n    ELSE 'Campagnes maîtres'::text\nEND, true) AND portal_client_row_scope(to_jsonb(campagnes_maitres.*)))",
+    "with_check": "(portal_view_allowed(\nCASE\n    WHEN (business_context = 'operational_communication'::text) THEN 'Communications opérationnelles'::text\n    ELSE 'Campagnes maîtres'::text\nEND, true) AND portal_client_row_scope(to_jsonb(campagnes_maitres.*)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_maitres",
+    "policyname": "tdm_admin_universal_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_supports",
+    "policyname": "campagnes_supports_admin_write",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_supports",
+    "policyname": "campagnes_supports_authenticated_write",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text]))",
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_supports",
+    "policyname": "campagnes_supports_scoped_read_v120",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) OR (client_visible AND client_can_access_campaign_v120(campagne_id)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_supports",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('campagnes_supports'::text, to_jsonb(campagnes_supports.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_supports",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('campagnes_supports'::text, to_jsonb(campagnes_supports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_supports",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('campagnes_supports'::text, to_jsonb(campagnes_supports.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_supports",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('campagnes_supports'::text, to_jsonb(campagnes_supports.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('campagnes_supports'::text, to_jsonb(campagnes_supports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_supports",
+    "policyname": "portal_assignment_delete_guard",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_supports",
+    "policyname": "portal_assignment_insert_guard",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_supports",
+    "policyname": "portal_assignment_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "portal_assignment_scope('campagnes_supports'::text, to_jsonb(campagnes_supports.*))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_supports",
+    "policyname": "portal_assignment_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "portal_assignment_scope('campagnes_supports'::text, to_jsonb(campagnes_supports.*), true)",
+    "with_check": "portal_assignment_scope('campagnes_supports'::text, to_jsonb(campagnes_supports.*), true)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_supports",
+    "policyname": "portal_assignment_update_guard",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text])) OR portal_assignment_scope('campagnes_supports'::text, to_jsonb(campagnes_supports.*), true))",
+    "with_check": "((tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text])) OR portal_assignment_scope('campagnes_supports'::text, to_jsonb(campagnes_supports.*), true))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_supports",
+    "policyname": "tdm_admin_universal_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_visuels_sites_supports",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_visuels_sites_supports",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_visuels_sites_supports",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(\nCASE\n    WHEN (tos_current_role() = ANY (ARRAY['Client'::text, 'Client-Admin'::text])) THEN portal_assignment_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*))\n    ELSE tos_remaining_tenant_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), 'read'::text)\nEND IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_visuels_sites_supports",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(\nCASE\n    WHEN (tos_current_role() = ANY (ARRAY['Client'::text, 'Client-Admin'::text])) THEN portal_assignment_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), true)\n    ELSE tos_remaining_tenant_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), 'write'::text)\nEND IS TRUE)",
+    "with_check": "(\nCASE\n    WHEN (tos_current_role() = ANY (ARRAY['Client'::text, 'Client-Admin'::text])) THEN portal_assignment_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), true)\n    ELSE tos_remaining_tenant_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), 'write'::text)\nEND IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_visuels_sites_supports",
+    "policyname": "internal_read_campaign_history_v121",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_visuels_sites_supports",
+    "policyname": "portal_assignment_delete_guard",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_visuels_sites_supports",
+    "policyname": "portal_assignment_insert_guard",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_visuels_sites_supports",
+    "policyname": "portal_assignment_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "portal_assignment_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_visuels_sites_supports",
+    "policyname": "portal_assignment_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "portal_assignment_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), true)",
+    "with_check": "portal_assignment_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), true)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "campagnes_visuels_sites_supports",
+    "policyname": "portal_assignment_update_guard",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text])) OR portal_assignment_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), true))",
+    "with_check": "((tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text])) OR portal_assignment_scope('campagnes_visuels_sites_supports'::text, to_jsonb(campagnes_visuels_sites_supports.*), true))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "centres_dinformation",
+    "policyname": "portal_client_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(( SELECT portal_view_allowed('Centres d’information'::text) AS portal_view_allowed) AND ((client_id IS NULL) OR (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = ( SELECT auth.uid() AS uid)) AND (u.statut = 'Actif'::text))))) AND portal_client_row_scope(to_jsonb(centres_dinformation.*)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "centres_dinformation",
+    "policyname": "portal_client_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(portal_view_allowed('Centres d’information'::text, true) AND portal_client_row_scope(to_jsonb(centres_dinformation.*)))",
+    "with_check": "(portal_view_allowed('Centres d’information'::text, true) AND portal_client_row_scope(to_jsonb(centres_dinformation.*)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "centres_dinformation",
+    "policyname": "private_centres_dinformation_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "centres_dinformation",
+    "policyname": "private_centres_dinformation_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))",
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "ci_avec_enjeux",
+    "policyname": "portal_client_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(( SELECT portal_view_allowed('C.I. avec enjeux'::text) AS portal_view_allowed) AND ((client_id IS NULL) OR (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = ( SELECT auth.uid() AS uid)) AND (u.statut = 'Actif'::text))))) AND portal_client_row_scope(to_jsonb(ci_avec_enjeux.*)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "ci_avec_enjeux",
+    "policyname": "portal_client_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(portal_view_allowed('C.I. avec enjeux'::text, true) AND portal_client_row_scope(to_jsonb(ci_avec_enjeux.*)))",
+    "with_check": "(portal_view_allowed('C.I. avec enjeux'::text, true) AND portal_client_row_scope(to_jsonb(ci_avec_enjeux.*)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "ci_avec_enjeux",
+    "policyname": "private_ci_avec_enjeux_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "ci_avec_enjeux",
+    "policyname": "private_ci_avec_enjeux_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))",
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_campaign_access",
+    "policyname": "client_campaign_access_own_read_v120",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE (u.auth_user_id = auth.uid()))) AND ((user_id IS NULL) OR (user_id = auth.uid()) OR (current_app_role() = 'Client-Admin'::text)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_campaign_access",
+    "policyname": "client_campaign_access_staff_all_v120",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_campaign_access",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('client_campaign_access'::text, to_jsonb(client_campaign_access.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_campaign_access",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('client_campaign_access'::text, to_jsonb(client_campaign_access.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_campaign_access",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('client_campaign_access'::text, to_jsonb(client_campaign_access.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_campaign_access",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('client_campaign_access'::text, to_jsonb(client_campaign_access.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('client_campaign_access'::text, to_jsonb(client_campaign_access.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_member_invitations",
+    "policyname": "client_member_invitations_own_admin_read_v120",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((current_app_role() = 'Client-Admin'::text) AND (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE (u.auth_user_id = auth.uid()))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_member_invitations",
+    "policyname": "client_member_invitations_staff_all_v120",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_member_invitations",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('client_member_invitations'::text, to_jsonb(client_member_invitations.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_member_invitations",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('client_member_invitations'::text, to_jsonb(client_member_invitations.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_member_invitations",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('client_member_invitations'::text, to_jsonb(client_member_invitations.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_member_invitations",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('client_member_invitations'::text, to_jsonb(client_member_invitations.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('client_member_invitations'::text, to_jsonb(client_member_invitations.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_request_supports",
+    "policyname": "client_request_supports_scoped_read_v133",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text])) OR (EXISTS ( SELECT 1\n   FROM (requetes_clients r\n     JOIN utilisateurs u ON ((u.auth_user_id = auth.uid())))\n  WHERE ((r.id = client_request_supports.request_id) AND (r.client_id = u.client_id) AND (u.statut = 'Actif'::text) AND (u.role = ANY (ARRAY['Client'::text, 'Client-Admin'::text]))))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_request_supports",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('client_request_supports'::text, to_jsonb(client_request_supports.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_request_supports",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('client_request_supports'::text, to_jsonb(client_request_supports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_request_supports",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('client_request_supports'::text, to_jsonb(client_request_supports.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "client_request_supports",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('client_request_supports'::text, to_jsonb(client_request_supports.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('client_request_supports'::text, to_jsonb(client_request_supports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "clients",
+    "policyname": "private_clients_delete",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND (tos_table_resource_scope(id, NULL::text, NULL::bigint, NULL::bigint, false) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "clients",
+    "policyname": "private_clients_insert",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "clients",
+    "policyname": "private_clients_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT tos_current_role() AS tos_current_role) IS NOT NULL) AND (tos_table_resource_scope(id, NULL::text, NULL::bigint, NULL::bigint, false) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "clients",
+    "policyname": "private_clients_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND (tos_table_resource_scope(id, NULL::text, NULL::bigint, NULL::bigint, false) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))",
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND (tos_table_resource_scope(id, NULL::text, NULL::bigint, NULL::bigint, false) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_finales",
+    "policyname": "communications_finales_scoped_read_v120",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text])) OR (client_published AND (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = auth.uid()) AND (u.role = ANY (ARRAY['Client'::text, 'Client-Admin'::text])))))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_finales",
+    "policyname": "communications_finales_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_finales",
+    "policyname": "communications_finales_write",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_finales",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('communications_finales'::text, to_jsonb(communications_finales.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_finales",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('communications_finales'::text, to_jsonb(communications_finales.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_finales",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('communications_finales'::text, to_jsonb(communications_finales.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_finales",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('communications_finales'::text, to_jsonb(communications_finales.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('communications_finales'::text, to_jsonb(communications_finales.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_finales",
+    "policyname": "report_global_admin_only",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(EXISTS ( SELECT 1\n   FROM utilisateurs a\n  WHERE ((a.auth_user_id = auth.uid()) AND (lower(COALESCE(a.statut, ''::text)) = 'actif'::text) AND ((a.client_id IS NOT NULL) OR (a.role = 'Administrateur'::text)))))",
+    "with_check": "(EXISTS ( SELECT 1\n   FROM utilisateurs a\n  WHERE ((a.auth_user_id = auth.uid()) AND (lower(COALESCE(a.statut, ''::text)) = 'actif'::text) AND ((a.client_id IS NOT NULL) OR (a.role = 'Administrateur'::text)))))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_finales",
+    "policyname": "tdm_admin_universal_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_operationnelles",
+    "policyname": "private_communications_operationnelles_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) AND (tos_table_resource_scope(NULL::bigint, support_id, NULL::bigint, NULL::bigint, true) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_operationnelles",
+    "policyname": "private_communications_operationnelles_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND (tos_table_resource_scope(NULL::bigint, support_id, NULL::bigint, NULL::bigint, true) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))",
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND (tos_table_resource_scope(NULL::bigint, support_id, NULL::bigint, NULL::bigint, true) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_operationnelles_sites_supports",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_operationnelles_sites_supports",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_operationnelles_sites_supports",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(\nCASE\n    WHEN (tos_current_role() = ANY (ARRAY['Client'::text, 'Client-Admin'::text])) THEN portal_assignment_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*))\n    ELSE tos_remaining_tenant_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), 'read'::text)\nEND IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_operationnelles_sites_supports",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(\nCASE\n    WHEN (tos_current_role() = ANY (ARRAY['Client'::text, 'Client-Admin'::text])) THEN portal_assignment_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), true)\n    ELSE tos_remaining_tenant_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), 'write'::text)\nEND IS TRUE)",
+    "with_check": "(\nCASE\n    WHEN (tos_current_role() = ANY (ARRAY['Client'::text, 'Client-Admin'::text])) THEN portal_assignment_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), true)\n    ELSE tos_remaining_tenant_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), 'write'::text)\nEND IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_operationnelles_sites_supports",
+    "policyname": "internal_read_operational_history_v121",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_operationnelles_sites_supports",
+    "policyname": "portal_assignment_delete_guard",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_operationnelles_sites_supports",
+    "policyname": "portal_assignment_insert_guard",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_operationnelles_sites_supports",
+    "policyname": "portal_assignment_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "portal_assignment_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_operationnelles_sites_supports",
+    "policyname": "portal_assignment_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "portal_assignment_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), true)",
+    "with_check": "portal_assignment_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), true)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "communications_operationnelles_sites_supports",
+    "policyname": "portal_assignment_update_guard",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text])) OR portal_assignment_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), true))",
+    "with_check": "((tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text])) OR portal_assignment_scope('communications_operationnelles_sites_supports'::text, to_jsonb(communications_operationnelles_sites_supports.*), true))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_assignments",
+    "policyname": "edt_assignments_manage",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_assignments",
+    "policyname": "edt_assignments_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "true",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_assignments",
+    "policyname": "final_remaining_scope_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(tos_remaining_log_scope('edt_assignments'::text, to_jsonb(edt_assignments.*)) IS TRUE)",
+    "with_check": "(tos_remaining_log_scope('edt_assignments'::text, to_jsonb(edt_assignments.*)) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_phase_reports",
+    "policyname": "edt_phase_reports_manage",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_phase_reports",
+    "policyname": "edt_phase_reports_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text, 'Client-Admin'::text, 'Client'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_phase_reports",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('edt_phase_reports'::text, to_jsonb(edt_phase_reports.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_phase_reports",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('edt_phase_reports'::text, to_jsonb(edt_phase_reports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_phase_reports",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('edt_phase_reports'::text, to_jsonb(edt_phase_reports.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_phase_reports",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('edt_phase_reports'::text, to_jsonb(edt_phase_reports.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('edt_phase_reports'::text, to_jsonb(edt_phase_reports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_phase_reports",
+    "policyname": "report_global_admin_only",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(EXISTS ( SELECT 1\n   FROM utilisateurs a\n  WHERE ((a.auth_user_id = auth.uid()) AND (lower(COALESCE(a.statut, ''::text)) = 'actif'::text) AND ((a.client_id IS NOT NULL) OR (a.role = 'Administrateur'::text)))))",
+    "with_check": "(EXISTS ( SELECT 1\n   FROM utilisateurs a\n  WHERE ((a.auth_user_id = auth.uid()) AND (lower(COALESCE(a.statut, ''::text)) = 'actif'::text) AND ((a.client_id IS NOT NULL) OR (a.role = 'Administrateur'::text)))))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_phases",
+    "policyname": "edt_phases_manage",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_phases",
+    "policyname": "edt_phases_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "true",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_phases",
+    "policyname": "edt_phases_read_v133",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) OR (EXISTS ( SELECT 1\n   FROM (suivi_des_edt e\n     JOIN utilisateurs u ON ((u.auth_user_id = auth.uid())))\n  WHERE ((e.id = edt_phases.edt_id) AND (u.statut = 'Actif'::text) AND (u.role = ANY (ARRAY['Client'::text, 'Client-Admin'::text])) AND (e.client = (u.client_id)::text)))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_phases",
+    "policyname": "final_seven_delete_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_private_seven_scope('edt_phases'::text, to_jsonb(edt_phases.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_phases",
+    "policyname": "final_seven_insert_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_private_seven_scope('edt_phases'::text, to_jsonb(edt_phases.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_phases",
+    "policyname": "final_seven_read_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_private_seven_scope('edt_phases'::text, to_jsonb(edt_phases.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_phases",
+    "policyname": "final_seven_update_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_private_seven_scope('edt_phases'::text, to_jsonb(edt_phases.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_private_seven_scope('edt_phases'::text, to_jsonb(edt_phases.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_reports",
+    "policyname": "edt_reports_staff_insert_v130",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text])) AND (generated_by = auth.uid()))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_reports",
+    "policyname": "edt_reports_staff_read_v130",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_reports",
+    "policyname": "edt_reports_staff_update_v130",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_reports",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('edt_reports'::text, to_jsonb(edt_reports.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_reports",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('edt_reports'::text, to_jsonb(edt_reports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_reports",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('edt_reports'::text, to_jsonb(edt_reports.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_reports",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('edt_reports'::text, to_jsonb(edt_reports.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('edt_reports'::text, to_jsonb(edt_reports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_reports",
+    "policyname": "report_global_admin_only",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(EXISTS ( SELECT 1\n   FROM utilisateurs a\n  WHERE ((a.auth_user_id = auth.uid()) AND (lower(COALESCE(a.statut, ''::text)) = 'actif'::text) AND ((a.client_id IS NOT NULL) OR (a.role = 'Administrateur'::text)))))",
+    "with_check": "(EXISTS ( SELECT 1\n   FROM utilisateurs a\n  WHERE ((a.auth_user_id = auth.uid()) AND (lower(COALESCE(a.statut, ''::text)) = 'actif'::text) AND ((a.client_id IS NOT NULL) OR (a.role = 'Administrateur'::text)))))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_supports",
+    "policyname": "edt_supports_manage",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_supports",
+    "policyname": "edt_supports_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "true",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_supports",
+    "policyname": "final_seven_delete_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_private_seven_scope('edt_supports'::text, to_jsonb(edt_supports.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_supports",
+    "policyname": "final_seven_insert_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_private_seven_scope('edt_supports'::text, to_jsonb(edt_supports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_supports",
+    "policyname": "final_seven_read_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_private_seven_scope('edt_supports'::text, to_jsonb(edt_supports.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "edt_supports",
+    "policyname": "final_seven_update_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_private_seven_scope('edt_supports'::text, to_jsonb(edt_supports.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_private_seven_scope('edt_supports'::text, to_jsonb(edt_supports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "email_delivery_log",
+    "policyname": "email_delivery_staff_read_v131",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "email_delivery_log",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('email_delivery_log'::text, to_jsonb(email_delivery_log.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "email_delivery_log",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('email_delivery_log'::text, to_jsonb(email_delivery_log.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "email_delivery_log",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('email_delivery_log'::text, to_jsonb(email_delivery_log.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "email_delivery_log",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('email_delivery_log'::text, to_jsonb(email_delivery_log.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('email_delivery_log'::text, to_jsonb(email_delivery_log.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "email_delivery_log",
+    "policyname": "report_global_admin_only",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(EXISTS ( SELECT 1\n   FROM utilisateurs a\n  WHERE ((a.auth_user_id = auth.uid()) AND (lower(COALESCE(a.statut, ''::text)) = 'actif'::text) AND ((a.client_id IS NOT NULL) OR (a.role = 'Administrateur'::text)))))",
+    "with_check": "(EXISTS ( SELECT 1\n   FROM utilisateurs a\n  WHERE ((a.auth_user_id = auth.uid()) AND (lower(COALESCE(a.statut, ''::text)) = 'actif'::text) AND ((a.client_id IS NOT NULL) OR (a.role = 'Administrateur'::text)))))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "email_outbox",
+    "policyname": "email_outbox_staff_read_v131",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "email_outbox",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('email_outbox'::text, to_jsonb(email_outbox.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "email_outbox",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('email_outbox'::text, to_jsonb(email_outbox.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "email_outbox",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('email_outbox'::text, to_jsonb(email_outbox.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "email_outbox",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('email_outbox'::text, to_jsonb(email_outbox.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('email_outbox'::text, to_jsonb(email_outbox.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "email_outbox",
+    "policyname": "report_global_admin_only",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(EXISTS ( SELECT 1\n   FROM utilisateurs a\n  WHERE ((a.auth_user_id = auth.uid()) AND (lower(COALESCE(a.statut, ''::text)) = 'actif'::text) AND ((a.client_id IS NOT NULL) OR (a.role = 'Administrateur'::text)))))",
+    "with_check": "(EXISTS ( SELECT 1\n   FROM utilisateurs a\n  WHERE ((a.auth_user_id = auth.uid()) AND (lower(COALESCE(a.statut, ''::text)) = 'actif'::text) AND ((a.client_id IS NOT NULL) OR (a.role = 'Administrateur'::text)))))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "enjeux_des_cadres_et_supports",
+    "policyname": "portal_client_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(( SELECT portal_view_allowed('Enjeux des cadres et supports'::text) AS portal_view_allowed) AND ((client_id IS NULL) OR (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = ( SELECT auth.uid() AS uid)) AND (u.statut = 'Actif'::text))))) AND portal_client_row_scope(to_jsonb(enjeux_des_cadres_et_supports.*)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "enjeux_des_cadres_et_supports",
+    "policyname": "private_enjeux_des_cadres_et_supports_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) AND (tos_table_resource_scope(NULL::bigint, related_support, NULL::bigint, NULL::bigint, true) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "enjeux_des_cadres_et_supports",
+    "policyname": "private_enjeux_des_cadres_et_supports_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND (tos_table_resource_scope(NULL::bigint, related_support, NULL::bigint, NULL::bigint, true) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))",
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND (tos_table_resource_scope(NULL::bigint, related_support, NULL::bigint, NULL::bigint, true) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "enjeux_terrain",
+    "policyname": "enjeux_terrain_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "true",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "enjeux_terrain",
+    "policyname": "final_seven_delete_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_private_seven_scope('enjeux_terrain'::text, to_jsonb(enjeux_terrain.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "enjeux_terrain",
+    "policyname": "final_seven_insert_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_private_seven_scope('enjeux_terrain'::text, to_jsonb(enjeux_terrain.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "enjeux_terrain",
+    "policyname": "final_seven_read_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_private_seven_scope('enjeux_terrain'::text, to_jsonb(enjeux_terrain.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "enjeux_terrain",
+    "policyname": "final_seven_update_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_private_seven_scope('enjeux_terrain'::text, to_jsonb(enjeux_terrain.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_private_seven_scope('enjeux_terrain'::text, to_jsonb(enjeux_terrain.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "historique_des_campagnes",
+    "policyname": "portal_client_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(( SELECT portal_view_allowed('Historique des campagnes'::text) AS portal_view_allowed) AND ((client_id IS NULL) OR (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = ( SELECT auth.uid() AS uid)) AND (u.statut = 'Actif'::text))))) AND portal_client_row_scope(to_jsonb(historique_des_campagnes.*)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "historique_des_campagnes",
+    "policyname": "portal_client_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(portal_view_allowed('Historique des campagnes'::text, true) AND portal_client_row_scope(to_jsonb(historique_des_campagnes.*)))",
+    "with_check": "(portal_view_allowed('Historique des campagnes'::text, true) AND portal_client_row_scope(to_jsonb(historique_des_campagnes.*)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "historique_des_campagnes",
+    "policyname": "private_historique_des_campagnes_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) AND (tos_table_resource_scope(NULL::bigint, support_id, NULL::bigint, NULL::bigint, true) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "historique_des_campagnes",
+    "policyname": "private_historique_des_campagnes_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND (tos_table_resource_scope(NULL::bigint, support_id, NULL::bigint, NULL::bigint, true) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))",
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND (tos_table_resource_scope(NULL::bigint, support_id, NULL::bigint, NULL::bigint, true) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "infrastructures",
+    "policyname": "portal_client_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(( SELECT portal_view_allowed('Infrastructures'::text) AS portal_view_allowed) AND ((client_id IS NULL) OR (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = ( SELECT auth.uid() AS uid)) AND (u.statut = 'Actif'::text))))) AND portal_client_row_scope(to_jsonb(infrastructures.*)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "infrastructures",
+    "policyname": "portal_client_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(portal_view_allowed('Infrastructures'::text, true) AND portal_client_row_scope(to_jsonb(infrastructures.*)))",
+    "with_check": "(portal_view_allowed('Infrastructures'::text, true) AND portal_client_row_scope(to_jsonb(infrastructures.*)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "infrastructures",
+    "policyname": "private_infrastructures_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT tos_current_role() AS tos_current_role) IS NOT NULL) AND tos_table_resource_scope(client_id, NULL::text, NULL::bigint, NULL::bigint, false)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "infrastructures",
+    "policyname": "private_infrastructures_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(client_id, NULL::text, NULL::bigint, NULL::bigint, false))",
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(client_id, NULL::text, NULL::bigint, NULL::bigint, false))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "inspections_terrain",
+    "policyname": "final_seven_delete_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_private_seven_scope('inspections_terrain'::text, to_jsonb(inspections_terrain.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "inspections_terrain",
+    "policyname": "final_seven_insert_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_private_seven_scope('inspections_terrain'::text, to_jsonb(inspections_terrain.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "inspections_terrain",
+    "policyname": "final_seven_read_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_private_seven_scope('inspections_terrain'::text, to_jsonb(inspections_terrain.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "inspections_terrain",
+    "policyname": "final_seven_update_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_private_seven_scope('inspections_terrain'::text, to_jsonb(inspections_terrain.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_private_seven_scope('inspections_terrain'::text, to_jsonb(inspections_terrain.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "inspections_terrain",
+    "policyname": "tdm_admin_universal_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "inspections_terrain",
+    "policyname": "terrain_authenticated_insert",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "true"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "inspections_terrain",
+    "policyname": "terrain_authenticated_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "true",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "inventory_movements",
+    "policyname": "client_photo_no_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "inventory_movements",
+    "policyname": "client_photo_no_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "inventory_movements",
+    "policyname": "client_photo_no_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))",
+    "with_check": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "inventory_movements",
+    "policyname": "final_remaining_scope_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(tos_remaining_log_scope('inventory_movements'::text, to_jsonb(inventory_movements.*)) IS TRUE)",
+    "with_check": "(tos_remaining_log_scope('inventory_movements'::text, to_jsonb(inventory_movements.*)) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "inventory_movements",
+    "policyname": "inventory_movements_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "true",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "inventory_movements",
+    "policyname": "inventory_movements_staff_write",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "journal_des_evenements",
+    "policyname": "private_journal_des_evenements_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "journal_des_evenements",
+    "policyname": "private_journal_des_evenements_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))",
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "journal_propagations",
+    "policyname": "final_remaining_scope_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(tos_remaining_log_scope('journal_propagations'::text, to_jsonb(journal_propagations.*)) IS TRUE)",
+    "with_check": "(tos_remaining_log_scope('journal_propagations'::text, to_jsonb(journal_propagations.*)) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "journal_propagations",
+    "policyname": "journal_propagations_admin_write",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "journal_propagations",
+    "policyname": "journal_propagations_authenticated_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "true",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "journal_propagations",
+    "policyname": "tdm_admin_universal_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "liste_des_arrets",
+    "policyname": "portal_client_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(( SELECT portal_view_allowed('Liste des arrêts'::text) AS portal_view_allowed) AND ((client_id IS NULL) OR (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = ( SELECT auth.uid() AS uid)) AND (u.statut = 'Actif'::text))))) AND portal_client_row_scope(to_jsonb(liste_des_arrets.*)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "liste_des_arrets",
+    "policyname": "portal_client_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(portal_view_allowed('Liste des arrêts'::text, true) AND portal_client_row_scope(to_jsonb(liste_des_arrets.*)))",
+    "with_check": "(portal_view_allowed('Liste des arrêts'::text, true) AND portal_client_row_scope(to_jsonb(liste_des_arrets.*)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "liste_des_arrets",
+    "policyname": "private_liste_des_arrets_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "liste_des_arrets",
+    "policyname": "private_liste_des_arrets_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))",
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "operations_history",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('operations_history'::text, to_jsonb(operations_history.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "operations_history",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('operations_history'::text, to_jsonb(operations_history.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "operations_history",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('operations_history'::text, to_jsonb(operations_history.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "operations_history",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('operations_history'::text, to_jsonb(operations_history.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('operations_history'::text, to_jsonb(operations_history.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "operations_history",
+    "policyname": "operations_history_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photo_action_log",
+    "policyname": "final_seven_delete_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_private_seven_scope('photo_action_log'::text, to_jsonb(photo_action_log.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photo_action_log",
+    "policyname": "final_seven_insert_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_private_seven_scope('photo_action_log'::text, to_jsonb(photo_action_log.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photo_action_log",
+    "policyname": "final_seven_read_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_private_seven_scope('photo_action_log'::text, to_jsonb(photo_action_log.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photo_action_log",
+    "policyname": "final_seven_update_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_private_seven_scope('photo_action_log'::text, to_jsonb(photo_action_log.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_private_seven_scope('photo_action_log'::text, to_jsonb(photo_action_log.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photo_action_log",
+    "policyname": "photo_action_log_insert_authenticated",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((auth.uid() = user_id) OR (user_id IS NULL))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photo_action_log",
+    "policyname": "photo_action_log_read_authenticated",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "true",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photo_review_audit",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('photo_review_audit'::text, to_jsonb(photo_review_audit.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photo_review_audit",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('photo_review_audit'::text, to_jsonb(photo_review_audit.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photo_review_audit",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('photo_review_audit'::text, to_jsonb(photo_review_audit.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photo_review_audit",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('photo_review_audit'::text, to_jsonb(photo_review_audit.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('photo_review_audit'::text, to_jsonb(photo_review_audit.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photo_review_audit",
+    "policyname": "photo_review_audit_internal_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((current_app_role() = 'Administrateur'::text) OR ((current_app_role() = 'Coordonnateur'::text) AND ((client_id IS NULL) OR (( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = auth.uid()) AND (u.statut = 'Actif'::text))\n LIMIT 1) IS NULL) OR (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = auth.uid()) AND (u.statut = 'Actif'::text))\n LIMIT 1)))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photos",
+    "policyname": "client_photo_no_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photos",
+    "policyname": "client_photo_no_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photos",
+    "policyname": "client_photo_no_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))",
+    "with_check": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photos",
+    "policyname": "portal_client_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(( SELECT portal_view_allowed('Photos'::text) AS portal_view_allowed) AND ((client_id IS NULL) OR (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = ( SELECT auth.uid() AS uid)) AND (u.statut = 'Actif'::text))))) AND portal_client_row_scope(to_jsonb(photos.*)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photos",
+    "policyname": "portal_client_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(portal_view_allowed('Photos'::text, true) AND portal_client_row_scope(to_jsonb(photos.*)))",
+    "with_check": "(portal_view_allowed('Photos'::text, true) AND portal_client_row_scope(to_jsonb(photos.*)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photos",
+    "policyname": "private_photos_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) AND (tos_table_resource_scope(NULL::bigint, support_id, NULL::bigint, NULL::bigint, true) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "photos",
+    "policyname": "private_photos_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND (tos_table_resource_scope(NULL::bigint, support_id, NULL::bigint, NULL::bigint, true) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))",
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND (tos_table_resource_scope(NULL::bigint, support_id, NULL::bigint, NULL::bigint, true) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_execution_logs",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('relation_execution_logs'::text, to_jsonb(relation_execution_logs.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_execution_logs",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('relation_execution_logs'::text, to_jsonb(relation_execution_logs.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_execution_logs",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('relation_execution_logs'::text, to_jsonb(relation_execution_logs.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_execution_logs",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('relation_execution_logs'::text, to_jsonb(relation_execution_logs.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('relation_execution_logs'::text, to_jsonb(relation_execution_logs.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_execution_logs",
+    "policyname": "relation_execution_logs_admin_read_v1310",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_fields",
+    "policyname": "final_seven_delete_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_private_seven_scope('relation_fields'::text, to_jsonb(relation_fields.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_fields",
+    "policyname": "final_seven_insert_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_private_seven_scope('relation_fields'::text, to_jsonb(relation_fields.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_fields",
+    "policyname": "final_seven_read_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_private_seven_scope('relation_fields'::text, to_jsonb(relation_fields.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_fields",
+    "policyname": "final_seven_update_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_private_seven_scope('relation_fields'::text, to_jsonb(relation_fields.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_private_seven_scope('relation_fields'::text, to_jsonb(relation_fields.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_fields",
+    "policyname": "relation_fields_admin_all",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_fields",
+    "policyname": "relation_fields_admin_write",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_fields",
+    "policyname": "relation_fields_authenticated_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "true",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_fields",
+    "policyname": "relations_admin_write_v075",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_fields",
+    "policyname": "relations_authenticated_read_v075",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "true",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_fields",
+    "policyname": "tdm_admin_universal_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_rules",
+    "policyname": "final_seven_delete_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_private_seven_scope('relation_rules'::text, to_jsonb(relation_rules.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_rules",
+    "policyname": "final_seven_insert_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_private_seven_scope('relation_rules'::text, to_jsonb(relation_rules.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_rules",
+    "policyname": "final_seven_read_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_private_seven_scope('relation_rules'::text, to_jsonb(relation_rules.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_rules",
+    "policyname": "final_seven_update_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_private_seven_scope('relation_rules'::text, to_jsonb(relation_rules.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_private_seven_scope('relation_rules'::text, to_jsonb(relation_rules.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_rules",
+    "policyname": "relation_rules_admin_all",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_rules",
+    "policyname": "relation_rules_admin_write",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_rules",
+    "policyname": "relation_rules_admin_write_v075",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_rules",
+    "policyname": "relation_rules_authenticated_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "true",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_rules",
+    "policyname": "relation_rules_authenticated_read_v075",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "true",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_rules",
+    "policyname": "tdm_admin_universal_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_test_logs",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('relation_test_logs'::text, to_jsonb(relation_test_logs.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_test_logs",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('relation_test_logs'::text, to_jsonb(relation_test_logs.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_test_logs",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('relation_test_logs'::text, to_jsonb(relation_test_logs.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_test_logs",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('relation_test_logs'::text, to_jsonb(relation_test_logs.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('relation_test_logs'::text, to_jsonb(relation_test_logs.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_test_logs",
+    "policyname": "relation_test_logs_admin_read_v1310",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_test_logs",
+    "policyname": "relation_test_logs_admin_write",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "relation_test_logs",
+    "policyname": "tdm_admin_universal_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "repertoire_des_affiches",
+    "policyname": "portal_client_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(( SELECT portal_view_allowed('Répertoire des affiches'::text) AS portal_view_allowed) AND ((client_id IS NULL) OR (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = ( SELECT auth.uid() AS uid)) AND (u.statut = 'Actif'::text))))) AND portal_client_row_scope(to_jsonb(repertoire_des_affiches.*)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "repertoire_des_affiches",
+    "policyname": "portal_client_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(portal_view_allowed('Répertoire des affiches'::text, true) AND portal_client_row_scope(to_jsonb(repertoire_des_affiches.*)))",
+    "with_check": "(portal_view_allowed('Répertoire des affiches'::text, true) AND portal_client_row_scope(to_jsonb(repertoire_des_affiches.*)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "repertoire_des_affiches",
+    "policyname": "private_repertoire_des_affiches_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "repertoire_des_affiches",
+    "policyname": "private_repertoire_des_affiches_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))",
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "reports",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('reports'::text, to_jsonb(reports.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "reports",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('reports'::text, to_jsonb(reports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "reports",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('reports'::text, to_jsonb(reports.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "reports",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('reports'::text, to_jsonb(reports.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('reports'::text, to_jsonb(reports.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "reports",
+    "policyname": "report_global_admin_only",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(EXISTS ( SELECT 1\n   FROM utilisateurs a\n  WHERE ((a.auth_user_id = auth.uid()) AND (lower(COALESCE(a.statut, ''::text)) = 'actif'::text) AND ((a.client_id IS NOT NULL) OR (a.role = 'Administrateur'::text)))))",
+    "with_check": "(EXISTS ( SELECT 1\n   FROM utilisateurs a\n  WHERE ((a.auth_user_id = auth.uid()) AND (lower(COALESCE(a.statut, ''::text)) = 'actif'::text) AND ((a.client_id IS NOT NULL) OR (a.role = 'Administrateur'::text)))))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "reports",
+    "policyname": "reports_internal_insert_v130",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text])) AND (created_by = auth.uid()) AND (status = 'draft'::text) AND (NOT client_published))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "reports",
+    "policyname": "reports_internal_read_v130",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "reports",
+    "policyname": "reports_internal_update_v130",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "requetes_clients",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('requetes_clients'::text, to_jsonb(requetes_clients.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "requetes_clients",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('requetes_clients'::text, to_jsonb(requetes_clients.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "requetes_clients",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('requetes_clients'::text, to_jsonb(requetes_clients.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "requetes_clients",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('requetes_clients'::text, to_jsonb(requetes_clients.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('requetes_clients'::text, to_jsonb(requetes_clients.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "requetes_clients",
+    "policyname": "requetes_clients_create",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Client-Admin'::text, 'Client'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "requetes_clients",
+    "policyname": "requetes_clients_manage",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))",
+    "with_check": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "requetes_clients",
+    "policyname": "requetes_clients_scoped_read_v133",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text])) OR (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = auth.uid()) AND (u.statut = 'Actif'::text) AND (u.role = ANY (ARRAY['Client'::text, 'Client-Admin'::text]))))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "role_ui_permissions",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('role_ui_permissions'::text, to_jsonb(role_ui_permissions.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "role_ui_permissions",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('role_ui_permissions'::text, to_jsonb(role_ui_permissions.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "role_ui_permissions",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('role_ui_permissions'::text, to_jsonb(role_ui_permissions.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "role_ui_permissions",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('role_ui_permissions'::text, to_jsonb(role_ui_permissions.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('role_ui_permissions'::text, to_jsonb(role_ui_permissions.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "role_ui_permissions",
+    "policyname": "role_ui_permissions_admin_write",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "role_ui_permissions",
+    "policyname": "role_ui_permissions_authenticated_read_v136",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((current_app_role() = 'Administrateur'::text) OR (role = current_app_role()))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "role_ui_permissions",
+    "policyname": "tdm_admin_universal_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "suivi_des_edt",
+    "policyname": "portal_client_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(( SELECT portal_view_allowed('Suivi des EDT'::text) AS portal_view_allowed) AND ((client_id IS NULL) OR (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = ( SELECT auth.uid() AS uid)) AND (u.statut = 'Actif'::text))))) AND portal_client_row_scope(to_jsonb(suivi_des_edt.*)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "suivi_des_edt",
+    "policyname": "portal_client_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(portal_view_allowed('Suivi des EDT'::text, true) AND portal_client_row_scope(to_jsonb(suivi_des_edt.*)))",
+    "with_check": "(portal_view_allowed('Suivi des EDT'::text, true) AND portal_client_row_scope(to_jsonb(suivi_des_edt.*)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "suivi_des_edt",
+    "policyname": "private_suivi_des_edt_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) AND tos_table_resource_scope(client_id, NULL::text, campagne_id, NULL::bigint, false)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "suivi_des_edt",
+    "policyname": "private_suivi_des_edt_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(client_id, NULL::text, campagne_id, NULL::bigint, false))",
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(client_id, NULL::text, campagne_id, NULL::bigint, false))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "support_photos",
+    "policyname": "client_photo_no_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "support_photos",
+    "policyname": "client_photo_no_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "support_photos",
+    "policyname": "client_photo_no_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))",
+    "with_check": "(tos_current_role() <> ALL (ARRAY['Client'::text, 'Client-Admin'::text]))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "support_photos",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('support_photos'::text, to_jsonb(support_photos.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "support_photos",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('support_photos'::text, to_jsonb(support_photos.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "support_photos",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('support_photos'::text, to_jsonb(support_photos.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "support_photos",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('support_photos'::text, to_jsonb(support_photos.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('support_photos'::text, to_jsonb(support_photos.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "support_photos",
+    "policyname": "photo_client_inventory_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((tos_current_role() = ANY (ARRAY['Client'::text, 'Client-Admin'::text])) AND (deleted_at IS NULL) AND portal_view_allowed('Photos et inventaire'::text) AND tos_table_resource_scope(client_id, support_id, campagne_id,\nCASE\n    WHEN (edt_id ~ '^[0-9]+$'::text) THEN (edt_id)::bigint\n    ELSE NULL::bigint\nEND, false))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "support_photos",
+    "policyname": "photo_review_internal_insert",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((source = 'mass_import'::text) AND (review_status = ANY (ARRAY['needs_review'::text, 'unmatched'::text])) AND (support_id IS NULL) AND (client_id IS NULL) AND (NOT assignment_pending) AND (target_storage_path IS NULL) AND (target_filename IS NULL) AND (target_support_id IS NULL) AND (target_client_id IS NULL) AND (current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text])))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "support_photos",
+    "policyname": "photo_review_internal_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((review_status IS NOT NULL) AND ((current_app_role() = 'Administrateur'::text) OR ((current_app_role() = 'Coordonnateur'::text) AND ((client_id IS NULL) OR (( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = auth.uid()) AND (u.statut = 'Actif'::text))\n LIMIT 1) IS NULL) OR (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = auth.uid()) AND (u.statut = 'Actif'::text))\n LIMIT 1))))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "support_photos",
+    "policyname": "support_photos_delete_admin_v0129_lot3",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "((auth.uid() IS NOT NULL) AND (tos_current_role() = 'Administrateur'::text) AND (EXISTS ( SELECT 1\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = auth.uid()) AND (lower(COALESCE(u.statut, ''::text)) = 'actif'::text) AND (u.role = 'Administrateur'::text) AND (((support_photos.client_id IS NOT NULL) AND ((u.client_id IS NULL) OR (u.client_id = support_photos.client_id)) AND (EXISTS ( SELECT 1\n           FROM (infrastructures i\n             JOIN clients c ON ((c.id = i.client_id)))\n          WHERE ((i.support_id = support_photos.support_id) AND (i.client_id = support_photos.client_id))))) OR ((u.client_id IS NULL) AND (support_photos.client_id IS NULL) AND (support_photos.support_id IS NULL) AND (support_photos.source = 'mass_import'::text) AND (support_photos.review_status = ANY (ARRAY['needs_review'::text, 'unmatched'::text, 'ignored'::text, 'error'::text]))))))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "support_photos",
+    "policyname": "support_photos_field_write_v075",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) AND ((client_id IS NULL) OR ((support_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM infrastructures i\n  WHERE ((i.support_id = support_photos.support_id) AND (i.client_id = support_photos.client_id)))))) AND ((review_status IS NULL) OR ((source = 'mass_import'::text) AND (review_status = ANY (ARRAY['needs_review'::text, 'unmatched'::text])) AND (support_id IS NULL) AND (client_id IS NULL) AND (NOT assignment_pending) AND (target_storage_path IS NULL) AND (target_filename IS NULL) AND (target_support_id IS NULL) AND (target_client_id IS NULL) AND (current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text])))))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "support_photos",
+    "policyname": "support_photos_scoped_read_v120",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) OR (client_visible AND client_can_access_campaign_v120(campagne_id)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "support_photos",
+    "policyname": "tdm_admin_universal_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(current_app_role() = 'Administrateur'::text)",
+    "with_check": "(current_app_role() = 'Administrateur'::text)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "terrain_operations",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('terrain_operations'::text, to_jsonb(terrain_operations.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "terrain_operations",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('terrain_operations'::text, to_jsonb(terrain_operations.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "terrain_operations",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('terrain_operations'::text, to_jsonb(terrain_operations.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "terrain_operations",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('terrain_operations'::text, to_jsonb(terrain_operations.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('terrain_operations'::text, to_jsonb(terrain_operations.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "terrain_operations",
+    "policyname": "terrain_operations_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "terrain_sync_diagnostics",
+    "policyname": "final_tenant_delete",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_remaining_tenant_scope('terrain_sync_diagnostics'::text, to_jsonb(terrain_sync_diagnostics.*), 'write'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "terrain_sync_diagnostics",
+    "policyname": "final_tenant_insert",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_remaining_tenant_scope('terrain_sync_diagnostics'::text, to_jsonb(terrain_sync_diagnostics.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "terrain_sync_diagnostics",
+    "policyname": "final_tenant_read",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_remaining_tenant_scope('terrain_sync_diagnostics'::text, to_jsonb(terrain_sync_diagnostics.*), 'read'::text) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "terrain_sync_diagnostics",
+    "policyname": "final_tenant_update",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_remaining_tenant_scope('terrain_sync_diagnostics'::text, to_jsonb(terrain_sync_diagnostics.*), 'write'::text) IS TRUE)",
+    "with_check": "(tos_remaining_tenant_scope('terrain_sync_diagnostics'::text, to_jsonb(terrain_sync_diagnostics.*), 'write'::text) IS TRUE)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "terrain_sync_diagnostics",
+    "policyname": "terrain_sync_diagnostics_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text]))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "utilisateurs",
+    "policyname": "private_utilisateurs_delete",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(client_id, NULL::text, NULL::bigint, NULL::bigint, true))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "utilisateurs",
+    "policyname": "private_utilisateurs_insert",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(client_id, NULL::text, NULL::bigint, NULL::bigint, true))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "utilisateurs",
+    "policyname": "private_utilisateurs_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT tos_current_role() AS tos_current_role) IS NOT NULL) AND ((auth_user_id = ( SELECT auth.uid() AS uid)) OR ((( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) AND tos_table_resource_scope(client_id, NULL::text, NULL::bigint, NULL::bigint, true)))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "utilisateurs",
+    "policyname": "private_utilisateurs_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(client_id, NULL::text, NULL::bigint, NULL::bigint, true))",
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND tos_table_resource_scope(client_id, NULL::text, NULL::bigint, NULL::bigint, true))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "visual_edt_associations",
+    "policyname": "visual_edt_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((EXISTS ( SELECT 1\n   FROM campagne_visuels_formats v\n  WHERE (v.id = visual_edt_associations.visual_id))) AND (EXISTS ( SELECT 1\n   FROM suivi_des_edt e\n  WHERE (e.id = visual_edt_associations.edt_id))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "visual_edt_associations",
+    "policyname": "visual_edt_write",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "ALL",
+    "qual": "((tos_current_role() = 'Administrateur'::text) AND (EXISTS ( SELECT 1\n   FROM campagne_visuels_formats v\n  WHERE ((v.id = visual_edt_associations.visual_id) AND tos_table_resource_scope(v.client_id, NULL::text, v.campagne_id, visual_edt_associations.edt_id, false)))))",
+    "with_check": "((tos_current_role() = 'Administrateur'::text) AND (EXISTS ( SELECT 1\n   FROM ((campagne_visuels_formats v\n     JOIN suivi_des_edt e ON ((e.id = visual_edt_associations.edt_id)))\n     JOIN edt_phases p ON (((p.id = visual_edt_associations.phase_id) AND (p.edt_id = e.id))))\n  WHERE ((v.id = visual_edt_associations.visual_id) AND (e.campagne_id = v.campagne_id) AND (e.client_id = v.client_id) AND ((p.client_id IS NULL) OR (p.client_id = e.client_id)) AND (p.phase_type = 'installation'::text) AND tos_table_resource_scope(v.client_id, NULL::text, v.campagne_id, e.id, false)))))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "voitures_trains",
+    "policyname": "portal_client_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(( SELECT portal_view_allowed('Voitures / trains'::text) AS portal_view_allowed) AND ((client_id IS NULL) OR (client_id = ( SELECT u.client_id\n   FROM utilisateurs u\n  WHERE ((u.auth_user_id = ( SELECT auth.uid() AS uid)) AND (u.statut = 'Actif'::text))))) AND portal_client_row_scope(to_jsonb(voitures_trains.*)))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "voitures_trains",
+    "policyname": "portal_client_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(portal_view_allowed('Voitures / trains'::text, true) AND portal_client_row_scope(to_jsonb(voitures_trains.*)))",
+    "with_check": "(portal_view_allowed('Voitures / trains'::text, true) AND portal_client_row_scope(to_jsonb(voitures_trains.*)))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "voitures_trains",
+    "policyname": "private_voitures_trains_select",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND ((( SELECT tos_current_role() AS tos_current_role) = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) AND (tos_table_resource_scope(NULL::bigint, support_id, NULL::bigint, NULL::bigint, true) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "voitures_trains",
+    "policyname": "private_voitures_trains_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND (tos_table_resource_scope(NULL::bigint, support_id, NULL::bigint, NULL::bigint, true) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))",
+    "with_check": "((( SELECT auth.uid() AS uid) IS NOT NULL) AND (( SELECT tos_current_role() AS tos_current_role) = 'Administrateur'::text) AND (tos_table_resource_scope(NULL::bigint, support_id, NULL::bigint, NULL::bigint, true) OR tos_table_resource_scope(NULL::bigint, NULL::text, NULL::bigint, NULL::bigint, true)))"
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "Administrateurs suppriment terrain-photos",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "((auth.uid() IS NOT NULL) AND (bucket_id = 'terrain-photos'::text) AND (current_app_role() = 'Administrateur'::text))",
+    "with_check": null
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "final_reports_edt_client_read_v130",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((bucket_id = 'final-reports'::text) AND (EXISTS ( SELECT 1\n   FROM (((edt_reports r\n     JOIN suivi_des_edt e ON ((e.id = r.edt_id)))\n     JOIN campagnes_maitres c ON ((c.id = e.campagne_id)))\n     JOIN utilisateurs u ON ((u.client_id = c.client_id)))\n  WHERE ((r.report_path = objects.name) AND (r.status = 'ready'::text) AND r.client_visible AND e.client_visible AND c.client_published AND (u.auth_user_id = auth.uid()) AND (u.role = ANY (ARRAY['Client'::text, 'Client-Admin'::text])) AND client_can_access_campaign_v120(c.id)))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "final_reports_scoped_read_v120",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((bucket_id = 'final-reports'::text) AND ((current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text])) OR (EXISTS ( SELECT 1\n   FROM communications_finales r\n  WHERE ((r.report_path = objects.name) AND r.client_published AND (r.client_id = ( SELECT u.client_id\n           FROM utilisateurs u\n          WHERE (u.auth_user_id = auth.uid()))))))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "final_reports_staff_insert",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((bucket_id = 'final-reports'::text) AND (current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text])))"
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "final_reports_staff_update",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((bucket_id = 'final-reports'::text) AND (current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text])))",
+    "with_check": "((bucket_id = 'final-reports'::text) AND (current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text])))"
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "final_storage_client_report_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((bucket_id = 'final-reports'::text) AND (tos_current_role() = ANY (ARRAY['Client'::text, 'Client-Admin'::text])) AND (tos_storage_tenant_scope(bucket_id, name, 'read'::text, owner_id) IS TRUE))",
+    "with_check": null
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "final_storage_delete_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(tos_storage_tenant_scope(bucket_id, name, 'delete'::text, owner_id) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "final_storage_insert_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(tos_storage_tenant_scope(bucket_id, name, 'insert'::text, owner_id) IS TRUE)"
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "final_storage_read_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "(tos_storage_tenant_scope(bucket_id, name, 'read'::text, owner_id) IS TRUE)",
+    "with_check": null
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "final_storage_update_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(tos_storage_tenant_scope(bucket_id, name, 'update'::text, owner_id) IS TRUE)",
+    "with_check": "(tos_storage_tenant_scope(bucket_id, name, 'update'::text, owner_id) IS TRUE)"
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "support_photo_inventory_storage_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((bucket_id = 'support-photos'::text) AND (tos_current_role() = ANY (ARRAY['Client'::text, 'Client-Admin'::text])) AND portal_view_allowed('Photos et inventaire'::text) AND (EXISTS ( SELECT 1\n   FROM support_photos p\n  WHERE ((p.storage_bucket = objects.bucket_id) AND (p.storage_path = objects.name) AND (p.deleted_at IS NULL)))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "support_photos_storage_authenticated_insert_v075",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(bucket_id = ANY (ARRAY['support-photos'::text, 'terrain-photos'::text]))"
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "support_photos_storage_internal_move",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((bucket_id = 'support-photos'::text) AND (EXISTS ( SELECT 1\n   FROM support_photos p\n  WHERE ((p.storage_path = objects.name) AND p.assignment_pending AND ((current_app_role() = 'Administrateur'::text) OR ((current_app_role() = 'Coordonnateur'::text) AND ((( SELECT u.client_id\n           FROM utilisateurs u\n          WHERE ((u.auth_user_id = auth.uid()) AND (u.statut = 'Actif'::text))\n         LIMIT 1) IS NULL) OR (p.target_client_id = ( SELECT u.client_id\n           FROM utilisateurs u\n          WHERE ((u.auth_user_id = auth.uid()) AND (u.statut = 'Actif'::text))\n         LIMIT 1)))))))))",
+    "with_check": "((bucket_id = 'support-photos'::text) AND (EXISTS ( SELECT 1\n   FROM support_photos p\n  WHERE ((p.target_storage_path = objects.name) AND p.assignment_pending AND ((current_app_role() = 'Administrateur'::text) OR ((current_app_role() = 'Coordonnateur'::text) AND ((( SELECT u.client_id\n           FROM utilisateurs u\n          WHERE ((u.auth_user_id = auth.uid()) AND (u.statut = 'Actif'::text))\n         LIMIT 1) IS NULL) OR (p.target_client_id = ( SELECT u.client_id\n           FROM utilisateurs u\n          WHERE ((u.auth_user_id = auth.uid()) AND (u.statut = 'Actif'::text))\n         LIMIT 1)))))))))"
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "support_photos_storage_scoped_read_v120",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((bucket_id = 'support-photos'::text) AND ((current_app_role() = ANY (ARRAY['Administrateur'::text, 'Coordonnateur'::text, 'Installateur'::text])) OR (EXISTS ( SELECT 1\n   FROM ((support_photos p\n     JOIN campagnes_maitres c ON ((c.id = p.campagne_id)))\n     JOIN utilisateurs u ON ((u.auth_user_id = auth.uid())))\n  WHERE ((p.storage_path = objects.name) AND p.client_visible AND c.client_published AND (c.client_id = u.client_id) AND (u.statut = 'Actif'::text) AND (u.role = ANY (ARRAY['Client'::text, 'Client-Admin'::text])) AND client_can_access_campaign_v120(c.id))))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "terrain_photos_authenticated_upload",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(bucket_id = 'terrain-photos'::text)"
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "terrain_photos_public_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(bucket_id = 'terrain-photos'::text)",
+    "with_check": null
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "terrain_private_anon_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{anon}",
+    "cmd": "ALL",
+    "qual": "(bucket_id <> 'terrain-photos'::text)",
+    "with_check": "(bucket_id <> 'terrain-photos'::text)"
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "terrain_private_delete",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "((bucket_id = 'terrain-photos'::text) AND terrain_photo_access_prepared(name, 'delete'::text, owner_id, created_at))",
+    "with_check": null
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "terrain_private_delete_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "((bucket_id <> 'terrain-photos'::text) OR terrain_photo_access_prepared(name, 'delete'::text, owner_id, created_at))",
+    "with_check": null
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "terrain_private_insert",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((bucket_id = 'terrain-photos'::text) AND (owner_id = (auth.uid())::text) AND terrain_photo_access_prepared(name, 'insert'::text, owner_id))"
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "terrain_private_insert_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((bucket_id <> 'terrain-photos'::text) OR ((owner_id = (auth.uid())::text) AND terrain_photo_access_prepared(name, 'insert'::text, owner_id)))"
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "terrain_private_read",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((bucket_id = 'terrain-photos'::text) AND terrain_photo_access_prepared(name, 'read'::text, owner_id))",
+    "with_check": null
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "terrain_private_read_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((bucket_id <> 'terrain-photos'::text) OR terrain_photo_access_prepared(name, 'read'::text, owner_id))",
+    "with_check": null
+  },
+  {
+    "schemaname": "storage",
+    "tablename": "objects",
+    "policyname": "terrain_private_update_fence",
+    "permissive": "RESTRICTIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(bucket_id <> 'terrain-photos'::text)",
+    "with_check": "(bucket_id <> 'terrain-photos'::text)"
+  }
+]

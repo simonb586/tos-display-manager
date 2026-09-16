@@ -1,23 +1,25 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
+import {allPhotoProjectionRows,readPhotoProjection} from './photoProjectionService';
 
 export async function countSupportPhotos() {
   if (!supabaseConfigured || !supabase) throw new Error('Service photo indisponible.');
-  const { count, error } = await supabase.from('support_photos').select('id', { count:'exact', head:true }).is('deleted_at',null);
-  if (error) throw error;
-  return count;
+  return (await readPhotoProjection('support_photos',{deleted_at:null},0,1)).total;
 }
 
 export async function listSupportPhotosForValidation() {
   if (!supabaseConfigured || !supabase) return [];
-  const photos=[];
-  for(let offset=0;;offset+=500){
-    const {data,error}=await supabase.from('support_photos').select('*,campagne:campagne_id(nom_campagne,business_context),visuel:visuel_id(nom_visuel)').is('deleted_at',null).order('id').range(offset,offset+499);
-    if(error)throw error;photos.push(...data);if(data.length<500)break;
-  }
+  const photos=await allPhotoProjectionRows('support_photos',{deleted_at:null});
+  const campaignIds=[...new Set(photos.map(p=>p.campagne_id).filter(Boolean))],visualIds=[...new Set(photos.map(p=>p.visuel_id).filter(Boolean))];
+  const [campaigns,visuals]=await Promise.all([
+    campaignIds.length?supabase.from('campagnes_maitres').select('id,nom_campagne,business_context').in('id',campaignIds):{data:[]},
+    visualIds.length?supabase.from('campagne_visuels_formats').select('id,nom_visuel').in('id',visualIds):{data:[]}
+  ]);
+  if(campaigns.error)throw campaigns.error;if(visuals.error)throw visuals.error;
+  const campaignById=new Map(campaigns.data.map(c=>[String(c.id),c])),visualById=new Map(visuals.data.map(v=>[String(v.id),v]));
   const edts=[];
   for(let offset=0;;offset+=500){const {data,error}=await supabase.from('suivi_des_edt').select('id,no_edt').order('id').range(offset,offset+499);if(error)throw error;edts.push(...data);if(data.length<500)break;}
   const byId=new Map(edts.map(e=>[String(e.id),e.no_edt]));
-  return photos.map(p=>({...p,edt_number:byId.get(String(p.edt_id))||p.metadata?.edt_number||null}));
+  return photos.map(p=>({...p,campagne:campaignById.get(String(p.campagne_id)),visuel:visualById.get(String(p.visuel_id)),edt_number:byId.get(String(p.edt_id))||p.metadata?.edt_number||null}));
 }
 
 export async function validateSupportPhoto(id, status, comment = '') {

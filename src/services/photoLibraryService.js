@@ -7,6 +7,7 @@ import {
 } from '../lib/photoDeletion';
 import { prepareAndUploadPhoto, insertPhotoWithRollback } from './photoWorkflowService';
 import { getSignedDownloadUrl, getSignedPhotoUrls } from './photoAccessService';
+import {readPhotoProjection} from './photoProjectionService';
 
 const ready = () => {
   if (!supabaseConfigured || !supabase) throw new Error('Supabase n’est pas configuré.');
@@ -39,10 +40,8 @@ async function importLegacyPhotoPrevious({file,supportId,date,userEmail,sequence
 
 export async function listSupportPhotos(supportId) {
   ready();
-  const { data, error } = await supabase.from('support_photos').select('*')
-    .eq('support_id', supportId).order('prise_le', { ascending: false }).limit(50);
-  if(error) throw error;
-  return getSignedPhotoUrls(data || [], { purpose:'preview' });
+  const {rows}=await readPhotoProjection('support_photos',{support_id:supportId,deleted_at:null},0,50);
+  return getSignedPhotoUrls(rows.sort((a,b)=>new Date(b.prise_le)-new Date(a.prise_le)), { purpose:'preview' });
 }
 
 export function storagePathFromPhoto(photo) {
@@ -323,7 +322,14 @@ export async function downloadPhotosZip(photos, supportId, onProgress=()=>{}) {
     const photo=photos[i];
     const response=await fetch(await getSignedDownloadUrl(photo));
     if (!response.ok) throw new Error(`Impossible de télécharger ${photo.nom_fichier || photo.id}.`);
-    zip.file(safeFileName(photo.nom_fichier || `photo-${photo.id}.jpg`), await response.blob());
+    const originalName=safeFileName(photo.nom_fichier || `photo-${photo.id}.jpg`);
+    let archiveName=originalName,duplicate=0;
+    while(zip.file(archiveName)){
+      duplicate+=1;
+      const dot=originalName.lastIndexOf('.'),stem=dot>0?originalName.slice(0,dot):originalName,extension=dot>0?originalName.slice(dot):'';
+      archiveName=`${stem}-${photo.id||i+1}-${duplicate}${extension}`;
+    }
+    zip.file(archiveName, await response.blob());
     onProgress(i+1, photos.length);
   }
   const blob=await zip.generateAsync({type:'blob'});
