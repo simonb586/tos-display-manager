@@ -16,7 +16,8 @@ export async function uploadUnmatchedPhoto(item,{batchId}={}) {
  if(error){await supabase.storage.from('support-photos').remove([path]);throw error;}return data;
 }
 export async function listPhotoReviewQueue({status='all',batchId=null}={}) {
- ready();const filters={deleted_at:null,review_status:status==='all'?['auto_matched','needs_review','unmatched','manually_validated','ignored','error']:status};
+ ready();const filters={deleted_at:null,review_queue:true};
+ if(status!=='all')filters.review_status=status;
  if(batchId)filters.import_batch_id=batchId;
  return allPhotoProjectionRows('support_photos',filters);
 }

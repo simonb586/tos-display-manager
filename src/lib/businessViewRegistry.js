@@ -278,11 +278,11 @@ export const BUSINESS_VIEW_REGISTRY = Object.freeze([
   {
     "route": "Historique des campagnes",
     "adminComponents": [
-      "TableView"
+      "CampaignHistoryView"
     ],
     "clientViewId": "history",
     "clientPolicy": "scoped_projection",
-    "columnContract": "businessColumns:Historique des campagnes"
+    "columnContract": "CampaignHistoryView:summary"
   },
   {
     "route": "Suivi des EDT",

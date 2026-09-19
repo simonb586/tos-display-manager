@@ -15,6 +15,8 @@ window.testApi=(file,name,args)=>{
  if(name==='uploadTerrainPhoto')return Promise.resolve({normalizedFilename:'photo.png',path:'supports/SUP-EXO/test.png',storageReference:'terrain-photos/supports/SUP-EXO/test.png'});
  if(name==='finalizeTerrainInstallation'||name==='finalizeTerrainIntervention')return Promise.resolve({ok:true,reference:'TEST'});
  if(name==='listSupportPhotosForValidation')return Promise.resolve(photos);
+ if(name==='getPhotoInventoryCapabilities')return Promise.resolve({cancel:false,author:false});
+ if(name==='listDisplayMovements')return Promise.resolve({rows:[],total:0});
  if(name==='listInventoryMovements')return Promise.resolve([{id:1,item_reference:'Visuel A',quantity:1,movement_type:'Installation',created_at:'2026-09-14',support_id:'SUP-EXO'}]);
  if(name==='getSignedPhotoUrl')return Promise.resolve('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
  if(name==='listMasterCampaigns')return Promise.resolve([campaign]);

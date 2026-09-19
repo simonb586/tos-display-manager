@@ -1,3 +1,4 @@
+import {formatBusinessValue} from './businessTime.js';
 import { BUSINESS_CONTEXT } from './businessContext.js';
 
 const dateKeys = new Set(['date_debut', 'date_fin', 'date_completion', 'date_mise_a_jour', 'created_at', 'updated_at']);
@@ -12,6 +13,6 @@ export const ASSIGNMENT_COLUMNS = Object.freeze({
   [BUSINESS_CONTEXT.OPERATIONAL]: Object.freeze([...operational, ...enrichment].map(definition))
 });
 export const assignmentColumns = context => ASSIGNMENT_COLUMNS[context] || ASSIGNMENT_COLUMNS[BUSINESS_CONTEXT.MARKETING];
-export function formatAssignmentCell(key, value) { if (value === null || value === undefined || value === '') return '—'; if (dateKeys.has(key)) { const date = new Date(value); if (!Number.isNaN(date.getTime())) return dateFormatter.format(date); } return typeof value === 'object' ? JSON.stringify(value) : String(value); }
+export function formatAssignmentCell(key, value) { if (value === null || value === undefined || value === '') return '—'; if (dateKeys.has(key)) { const date = new Date(value); if (!Number.isNaN(date.getTime())) return dateFormatter.format(date); } return typeof value === 'object' ? JSON.stringify(value) : String(formatBusinessValue(value,key)); }
 export function mergeAssignmentPreferences(definitions, saved) { const byId = new Map(definitions.map(column => [column.id, column])); const order = Array.isArray(saved?.order) ? saved.order.filter((id, index, ids) => byId.has(id) && ids.indexOf(id) === index) : []; const columns = order.length ? order.map(id => byId.get(id)) : definitions; const widths = Object.fromEntries(Object.entries(saved?.widths || {}).filter(([id, width]) => byId.has(id) && Number.isFinite(Number(width)) && Number(width) > 0).map(([id, width]) => [id, Number(width)])); return { columns, widths }; }
 export const isLatestAssignmentRequest = (requestId, currentRequestId, signal) => requestId === currentRequestId && !signal?.aborted;

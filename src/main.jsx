@@ -1,3 +1,4 @@
+import CampaignHistoryView from './components/CampaignHistoryView';
 import {getUserViewPreview,setUserViewPreview,userViewSession} from './lib/userViewPreview';
 import UserViewPreview from './components/UserViewPreview';
 import TableView, {Detail} from './components/BusinessTable';
@@ -582,9 +583,10 @@ function ApplicationSession() {
   else if (active === 'Automatisations') content = <AutomationAssistant role={role}/>;
   else if (active === 'Validation système') content = <ValidationCenter role={role}/>;
   else if (active === 'Import anciennes photos') content = <LegacyPhotoImporter dataStore={dataStore} session={session}/>;
-  else if (active === 'Campagnes maîtres') content = <CampaignsPanel scopeKey={[currentDataScope,Boolean(getUserViewPreview())].join(':')} role={role} session={session} businessContext={BUSINESS_CONTEXT.MARKETING}/>;
+  else if (active === 'Historique des campagnes') content = <CampaignHistoryView onNavigate={(context,query)=>{setNavigationContext({historyQuery:query});setActive(context==='marketing'?'Campagnes maîtres':'Communications opérationnelles');}}/>;
+  else if (active === 'Campagnes maîtres') content = <CampaignsPanel scopeKey={[currentDataScope,Boolean(getUserViewPreview())].join(':')} role={role} session={session} historyQuery={navigationContext.historyQuery||''} businessContext={BUSINESS_CONTEXT.MARKETING}/>;
   else if (active === 'Campagne — Visuels et formats') content = <CampaignVisualManager role={role} businessContext={BUSINESS_CONTEXT.MARKETING}/>;
-  else if (active === 'Communications opérationnelles') content = <CampaignsPanel scopeKey={[currentDataScope,Boolean(getUserViewPreview())].join(':')} role={role} session={session} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
+  else if (active === 'Communications opérationnelles') content = <CampaignsPanel scopeKey={[currentDataScope,Boolean(getUserViewPreview())].join(':')} role={role} session={session} historyQuery={navigationContext.historyQuery||''} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
   else if (active === 'Communication opérationnelle — Visuels') content = <CampaignVisualManager role={role} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
   else if (active === 'Campagnes et visuels par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.MARKETING} role={role} onNavigate={setActive}/>;
   else if (active === 'Communications opérationnelles par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.OPERATIONAL} role={role} onNavigate={setActive}/>;

@@ -1,5 +1,6 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
 import { BUSINESS_CONTEXT, normalizeBusinessContext } from '../lib/businessContext';
+import {compareCampaigns} from '../lib/gridSorting';
 
 function ensureSupabase() {
   if (!supabaseConfigured || !supabase) throw new Error('Supabase n’est pas configuré.');
@@ -7,12 +8,16 @@ function ensureSupabase() {
 
 export async function listMasterCampaigns(publishedOnly = false, businessContext = null) {
   ensureSupabase();
-  let query = supabase.from('campagnes_maitres').select('*').order('nom_campagne');
+  let query = supabase.from('campagnes_maitres').select('*').order('nom_campagne').order('id');
   if (publishedOnly) query = query.eq('publiee_terrain', true);
   if (businessContext) query = query.eq('business_context', normalizeBusinessContext(businessContext));
-  const { data, error } = await query;
-  if (error) throw error;
-  return data || [];
+  const rows=[];
+  for(let offset=0;;offset+=500){
+    const {data,error}=await query.range(offset,offset+499);
+    if(error)throw error;
+    rows.push(...(data||[]));
+    if((data||[]).length<500)return rows.sort(compareCampaigns);
+  }
 }
 
 export async function listAssignableClients() {

@@ -1,3 +1,4 @@
+import {isTimeOnlyColumn,formatTimeHHMMSS} from '../lib/businessTime';
 import React from 'react';
 import { inferInputType } from '../services/universalEditorService';
 
@@ -8,7 +9,7 @@ export default function EditableField({
   disabled = false,
   compact = false
 }) {
-  const type = inferInputType(value, column);
+  const type = isTimeOnlyColumn(column) ? 'time' : inferInputType(value, column);
 
   if (type === 'boolean') {
     return (
@@ -43,9 +44,10 @@ export default function EditableField({
   return (
     <input
       className={compact ? 'universal-input compact' : 'universal-input'}
-      type={type === 'date' ? 'date' : type === 'number' ? 'number' : 'text'}
+      step={type === 'time' ? 1 : undefined}
+      type={type === 'time' ? 'time' : type === 'date' ? 'date' : type === 'number' ? 'number' : 'text'}
       value={
-        type === 'date' && value
+        type === 'time' ? formatTimeHHMMSS(value) : type === 'date' && value
           ? String(value).slice(0, 10)
           : value ?? ''
       }

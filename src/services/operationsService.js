@@ -1,3 +1,4 @@
+import {compareCampaigns} from '../lib/gridSorting';
 import {loadBusinessContext} from './businessParityService';
 import {allPhotoProjectionRows} from './photoProjectionService';
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
@@ -8,7 +9,7 @@ function ensureSupabase() {
   }
 }
 
-export async function loadOperationsData(targetUserId=null) {return loadBusinessContext('operations',null,targetUserId);}
+export async function loadOperationsData(targetUserId=null) {const data=await loadBusinessContext('operations',null,targetUserId);return {...data,campaigns:[...(data.campaigns||[])].sort(compareCampaigns)};}
 
 export async function createEdt(payload) {
   ensureSupabase();

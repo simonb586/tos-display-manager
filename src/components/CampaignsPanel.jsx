@@ -1,3 +1,5 @@
+import {compareCampaigns} from '../lib/gridSorting';
+import CampaignHistoryView from './CampaignHistoryView';
 import {businessCapabilities,canEditBusinessView} from '../lib/businessCapabilities';
 import React,{useEffect,useRef,useState}from'react';
 import{Eye,EyeOff,Megaphone,Pencil,Plus,Save,Trash2,X}from'lucide-react';
@@ -6,7 +8,7 @@ import{BUSINESS_CONTEXT,BUSINESS_CONTEXT_OPTIONS,businessContextLabel}from'../li
 import{clearFormDraft,readFormDraft,writeFormDraft}from'../lib/formDraft';
 
 const blank=context=>({nom_campagne:'',code_campagne:'',client:'',client_id:'',type_campagne:'Installation',visuel_generique:'',no_edt:'',statut:'Brouillon',publiee_terrain:false,instructions_terrain:'',business_context:context});
-export default function CampaignsPanel({role,businessContext=BUSINESS_CONTEXT.MARKETING,permission,scopedCampaigns=null,onReload,previewMode=false,scopeKey=role}){
+export default function CampaignsPanel({role,businessContext=BUSINESS_CONTEXT.MARKETING,permission,scopedCampaigns=null,onReload,previewMode=false,scopeKey=role,previewTargetId=null,historyQuery=''}){
  const mutationActive=useRef(false);
  const draftScope=[scopeKey,businessContext,previewMode?'preview':'live'].join(':');
 
@@ -14,8 +16,8 @@ export default function CampaignsPanel({role,businessContext=BUSINESS_CONTEXT.MA
  const[campaigns,setCampaigns]=useState([]),[clients,setClients]=useState([]),[form,setForm]=useState(initial.form),[formOpen,setFormOpen]=useState(Boolean(initial.formOpen)),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[hydratedContext,setHydratedContext]=useState(businessContext);
  const canManage=businessCapabilities(role).manageCampaigns;
  const canEdit=canManage||canEditBusinessView(role,permission,businessContext===BUSINESS_CONTEXT.MARKETING?'Campagnes maîtres':'Communications opérationnelles');
- useEffect(()=>{if(scopedCampaigns!==null)setCampaigns(scopedCampaigns)},[scopedCampaigns]);
- async function reload(){if(scopedCampaigns!==null){setCampaigns(scopedCampaigns);await onReload?.();return;}try{const[campaignRows,clientRows]=await Promise.all([listMasterCampaigns(false,businessContext),listAssignableClients()]);setCampaigns(campaignRows);setClients(clientRows);}catch(e){setMessage(e.message);}}
+ useEffect(()=>{if(scopedCampaigns!==null)setCampaigns([...scopedCampaigns].sort(compareCampaigns))},[scopedCampaigns]);
+ async function reload(){if(scopedCampaigns!==null){setCampaigns([...scopedCampaigns].sort(compareCampaigns));await onReload?.();return;}try{const[campaignRows,clientRows]=await Promise.all([listMasterCampaigns(false,businessContext),listAssignableClients()]);setCampaigns(campaignRows);setClients(clientRows);}catch(e){setMessage(e.message);}}
  useEffect(()=>{setHydratedContext(null);const draft=readFormDraft('campaign',draftScope,{form:blank(businessContext),formOpen:false});setForm(draft.form);setFormOpen(Boolean(draft.formOpen));setHydratedContext(businessContext);reload();},[businessContext,draftScope]);
  useEffect(()=>{if(hydratedContext!==businessContext)return;if(formOpen)writeFormDraft('campaign',draftScope,{form,formOpen});else clearFormDraft('campaign',draftScope);},[businessContext,draftScope,form,formOpen,hydratedContext]);
  function discard(){clearFormDraft('campaign',draftScope);setForm(blank(businessContext));setFormOpen(false);}
@@ -25,7 +27,7 @@ export default function CampaignsPanel({role,businessContext=BUSINESS_CONTEXT.MA
  async function remove(c){if(mutationActive.current||!window.confirm(`Supprimer ou archiver « ${c.nom_campagne} »? Ses photos, rapports et historiques seront conservés.`))return;mutationActive.current=true;setBusy(true);try{const result=await deleteOrArchiveMasterCampaign(c.id);setMessage(result?.action==='archived'?'Les dépendances sont conservées et l’élément a été archivé.':'Élément supprimé.');await reload();}catch(e){setMessage(e.message);}finally{mutationActive.current=false;setBusy(false);}}
  const title=businessContextLabel(businessContext);
  const createLabel=businessContext===BUSINESS_CONTEXT.MARKETING?'Créer une campagne':'Créer une communication';
- return <div className="campaigns-page"><header className="campaigns-hero"><div><h1>{businessContext===BUSINESS_CONTEXT.MARKETING?'Campagnes maîtres':'Communications opérationnelles'}</h1><p>Une seule source de vérité, classée par le champ « Est lié à ».</p></div>{canManage&&<button className="business-primary-action" type="button" onClick={()=>{setForm(blank(businessContext));setFormOpen(true)}}><Plus/> {createLabel}</button>}</header>{message&&<div className="relations-message" aria-live="polite">{message}</div>}<div className={formOpen?'campaigns-layout':'campaigns-layout campaigns-list-only'}>
+ return <div className="campaigns-page"><header className="campaigns-hero"><div><h1>{businessContext===BUSINESS_CONTEXT.MARKETING?'Campagnes maîtres':'Communications opérationnelles'}</h1><p>Une seule source de vérité, classée par le champ « Est lié à ».</p></div>{canManage&&<button className="business-primary-action" type="button" onClick={()=>{setForm(blank(businessContext));setFormOpen(true)}}><Plus/> {createLabel}</button>}</header>{message&&<div className="relations-message" aria-live="polite">{message}</div>}<CampaignHistoryView role={role} permission={permission} key={businessContext+historyQuery} context={businessContext} previewTargetId={previewTargetId} initialQuery={historyQuery}/><div className={formOpen?'campaigns-layout':'campaigns-layout campaigns-list-only'}>
  {canEdit&&formOpen&&<section className="relations-card"><h2>{form.id?<Pencil/>:<Plus/>} {form.id?'Modifier':createLabel}</h2><form className="campaigns-form" onSubmit={submit}>
  <label>Nom<input required value={form.nom_campagne} onChange={e=>setForm({...form,nom_campagne:e.target.value})}/></label><label>Code<input value={form.code_campagne} onChange={e=>setForm({...form,code_campagne:e.target.value})}/></label><label>Client *<select required disabled={!canManage} value={form.client_id||''} onChange={e=>{const selected=clients.find(item=>String(item.id)===e.target.value);setForm({...form,client_id:e.target.value,client:selected?.nom_client||''})}}><option value="">Choisir le client propriétaire</option>{(scopedCampaigns!==null?[{id:form.client_id,nom_client:form.client||'Mon organisation'}]:clients).map(item=><option key={item.id} value={item.id}>{item.nom_client}</option>)}</select></label>
  <label>Est lié à<select disabled={!canManage} value={form.business_context} onChange={e=>setForm({...form,business_context:e.target.value})}>{BUSINESS_CONTEXT_OPTIONS.map(option=><option key={option.value} value={option.value}>{option.label}</option>)}</select></label>

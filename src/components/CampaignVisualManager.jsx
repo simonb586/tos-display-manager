@@ -34,6 +34,8 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
   const [busy, setBusy] = useState(false);
   const mutationActive = useRef(false);
   const [edts, setEdts] = useState([]);
+  const [edtSearch,setEdtSearch]=useState('');
+  const [campaignSearch,setCampaignSearch]=useState(''),[visualSearch,setVisualSearch]=useState('');
   const [hydratedContext, setHydratedContext] = useState(businessContext);
 
   const canManage = ['Administrateur', 'Coordonnateur'].includes(role);
@@ -70,7 +72,9 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
   }, [businessContext, form, formOpen, hydratedContext]);
 
   useEffect(() => {
-    listEdtPhasesForCampaign(form.campagne_id).then(setEdts).catch(error => setMessage(error.message));
+    let live=true;setEdts([]);
+    listEdtPhasesForCampaign(form.campagne_id).then(rows=>{if(live)setEdts(rows);}).catch(error => {if(live)setMessage(error.message);});
+    return ()=>{live=false;};
   }, [form.campagne_id]);
 
   async function submit(event) {
@@ -160,6 +164,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
             <h2>{form.id ? <Pencil/> : <Plus/>} {form.id ? 'Modifier le visuel' : 'Ajouter un visuel'}</h2>
 
             <form className="v74-form" onSubmit={submit}>
+              <label>Rechercher une campagne<input value={campaignSearch} onChange={e=>setCampaignSearch(e.target.value)}/></label>
               <label>
                 Campagne
                 <select
@@ -168,7 +173,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
                   onChange={event => setForm({ ...form, campagne_id: event.target.value, edt_phase_id: '', edt_associations: role==='Administrateur'?[]:undefined })}
                 >
                   <option value="">Sélectionner</option>
-                  {campaigns.map(campaign => (
+                  {campaigns.filter(campaign=>String(campaign.id)===String(form.campagne_id)||[campaign.nom_campagne,campaign.code_campagne].join(' ').toLocaleLowerCase('fr').includes(campaignSearch.toLocaleLowerCase('fr'))).map(campaign => (
                     <option key={campaign.id} value={campaign.id}>
                       {campaign.nom_campagne}
                     </option>
@@ -176,9 +181,9 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
                 </select>
               </label>
 
-              <fieldset disabled={role!=='Administrateur'}><legend>EDT associés</legend>
+              <fieldset disabled={role!=='Administrateur'}><legend>EDT associés</legend><label>Rechercher un EDT<input value={edtSearch} onChange={e=>setEdtSearch(e.target.value)} placeholder="Numéro EDT"/></label>
                 {(form.edt_associations||[]).map((link,index)=><div key={index} className="v74-card">
-                  <label>EDT<select required value={link.phase_id||''} onChange={e=>setForm({...form,edt_associations:form.edt_associations.map((a,i)=>i===index?{...a,phase_id:e.target.value}:a)})}><option value="">Sélectionner</option>{edts.filter(p=>p.phase_type==='installation').map(p=><option key={p.id} value={p.id}>{p.edt?.no_edt}</option>)}</select></label>
+                  <label>EDT<select required value={link.phase_id||''} onChange={e=>setForm({...form,edt_associations:form.edt_associations.map((a,i)=>i===index?{...a,phase_id:e.target.value}:a)})}><option value="">Sélectionner</option>{edts.filter(p=>p.phase_type==='installation'&&(String(p.id)===String(link.phase_id)||String(p.edt?.no_edt).toLocaleLowerCase('fr').includes(edtSearch.toLocaleLowerCase('fr')))).map(p=><option key={p.id} value={p.id}>{p.edt?.no_edt}{p.edt?.archived_at?' — archivé (historique)':''}</option>)}</select></label>
                   <label>Date début<input type="date" value={link.date_debut||''} onChange={e=>setForm({...form,edt_associations:form.edt_associations.map((a,i)=>i===index?{...a,date_debut:e.target.value}:a)})}/></label>
                   <label>Date fin<input type="date" min={link.date_debut||undefined} value={link.date_fin||''} onChange={e=>setForm({...form,edt_associations:form.edt_associations.map((a,i)=>i===index?{...a,date_fin:e.target.value}:a)})}/></label>
                   <button type="button" onClick={()=>setForm({...form,edt_associations:form.edt_associations.filter((_,i)=>i!==index)})}>Retirer cette association</button>
@@ -267,8 +272,9 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
 
         <section className="v74-card">
           <h2>Visuels configurés</h2>
+          <label>Rechercher un visuel<input value={visualSearch} onChange={e=>setVisualSearch(e.target.value)} placeholder="Campagne, visuel, format ou EDT"/></label>
 
-          {visuals.map(visual => (
+          {visuals.filter(visual=>[visual.nom_visuel,visual.format_support,visual.campagne?.nom_campagne,...(visual.edt_associations||[]).map(a=>a.edt?.no_edt)].join(' ').toLocaleLowerCase('fr').includes(visualSearch.toLocaleLowerCase('fr'))).map(visual => (
             <article className="v74-row visual-managed-row" key={visual.id}>
               <div>
                 <b>{visual.nom_visuel}</b>

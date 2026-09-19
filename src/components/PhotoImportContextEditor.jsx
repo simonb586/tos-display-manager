@@ -42,7 +42,7 @@ export default function PhotoImportContextEditor({context,catalog,onChange,disab
   </>}
   {!['inspection','enjeu','photo'].includes(v.type)&&<>
    {options('campaign',c.campaign,row=>`${row.nom_campagne} — ${row.business_context==='operational_communication'?'Communication':'Marketing'}`)}
-   {options('visual',c.visual,row=>`${row.nom_visuel} — ${row.is_out_of_frame?'Hors-Cadre':row.format_support}`)}
+   {options('visual',c.visual,row=>`${row.campaign_name?row.campaign_name+' — ':''}${row.nom_visuel} — ${row.is_out_of_frame?'Hors-Cadre':row.format_support}`)}
   </>}
   <p>{r.ready?'Prête à confirmer':`À valider : ${r.pending.map(key=>labels[key]).join(', ')}`}</p>
  </fieldset>;

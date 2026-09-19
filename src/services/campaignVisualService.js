@@ -1,4 +1,5 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
+import {compareVisuals,compareNatural} from '../lib/gridSorting';
 import {
   normalizeDisplayFormat,
   supportDisplayFormat
@@ -65,7 +66,7 @@ export async function diagnoseCompatibleVisualsForSupport(support, phaseId) {
   }
 
   return {
-    visuals: activeCampaigns,
+    visuals: activeCampaigns.sort(compareVisuals),
     diagnostic: {
       ...baseDiagnostic,
       totalActiveVisuals: activeVisuals.length,
@@ -86,12 +87,12 @@ export async function listCompatibleVisualsForSupport(support, phaseId) {
 
 export async function listCampaignVisuals() {
   ready();
-  const { data, error } = await supabase
+  const query = supabase
     .from('campagne_visuels_formats')
     .select('*, campagne:campagne_id(*), edt_phase:edt_phase_id(id,phase_type,edt:edt_id(id,no_edt)), edt_associations:visual_edt_associations(edt_id,phase_id,date_debut,date_fin,edt:edt_id(id,no_edt))')
-    .order('nom_visuel');
-  if (error) throw error;
-  return data || [];
+    .order('id');
+  const rows=[];
+  for(let offset=0;;offset+=500){const {data,error}=await query.range(offset,offset+499);if(error)throw error;rows.push(...(data||[]));if((data||[]).length<500)return rows.sort(compareVisuals);}
 }
 
 export async function assignVisualToEdt(visualId, phaseId, removedEdtId = null) {
@@ -108,12 +109,9 @@ export async function assignVisualToEdt(visualId, phaseId, removedEdtId = null) 
 export async function listEdtPhasesForCampaign(campaignId) {
   ready();
   if (!campaignId) return [];
-  const { data, error } = await supabase.from('edt_phases')
-    .select('id,phase_type,date_debut_prevue,edt:edt_id!inner(id,no_edt,campagne_id,statut)')
-    .eq('edt.campagne_id', Number(campaignId))
-    .order('date_debut_prevue', { ascending: false, nullsFirst: false });
+  const { data, error } = await supabase.rpc('list_visual_eligible_edt_phases',{p_campaign_id:Number(campaignId)});
   if (error) throw error;
-  return data || [];
+  return (data || []).sort((a,b)=>compareNatural(a.edt?.no_edt,b.edt?.no_edt)||compareNatural(a.id,b.id));
 }
 
 export async function saveCampaignVisual(visual) {
@@ -134,6 +132,11 @@ export async function saveCampaignVisual(visual) {
 
   if (!payload.campagne_id || !payload.nom_visuel || !payload.format_support) {
     throw new Error('Campagne, visuel et format sont obligatoires.');
+  }
+  if(visual.edt_associations!==undefined){
+    const ids=visual.edt_associations.map(a=>Number(a.phase_id));
+    if(ids.some(id=>!Number.isSafeInteger(id)||id<=0))throw new Error('Sélectionnez un EDT pour chaque association.');
+    if(new Set(ids).size!==ids.length)throw new Error('Un EDT ne peut être associé qu’une seule fois au visuel.');
   }
 
   const {data,error}=await supabase.rpc('save_campaign_visual_with_edts',{

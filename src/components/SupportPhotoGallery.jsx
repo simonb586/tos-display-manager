@@ -1,3 +1,4 @@
+import {compareNatural} from '../lib/gridSorting';
 import PhotoImage from './PhotoImage';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CheckSquare, Download, Image, Square, Star, Trash2, X } from 'lucide-react';
@@ -38,7 +39,7 @@ export default function SupportPhotoGallery({ supportId, canDelete=false, canMan
   const selectedPhotos=photos.filter(p=>checked[p.id]);
   const types=[...new Set(photos.map(p=>p.type_photo).filter(Boolean))];
   const statuses=[...new Set(photos.map(p=>p.statut_validation).filter(Boolean))];
-  const campaigns=[...new Set(photos.map(p=>String(p.campagne_id||'')).filter(Boolean))];
+  const campaigns=[...new Set(photos.map(p=>String(p.campagne_id||'')).filter(Boolean))].sort(compareNatural);
   const edts=[...new Set(photos.map(p=>String(p.edt_id||'')).filter(Boolean))];
   const sources=[...new Set(photos.map(p=>String(p.source||'')).filter(Boolean))];
 

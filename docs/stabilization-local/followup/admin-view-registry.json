@@ -336,7 +336,7 @@
       "name": "Historique des campagnes",
       "route": "Historique des campagnes",
       "components": [
-        "TableView"
+        "CampaignHistoryView"
       ],
       "clientView": "history",
       "clientComponent": "ClientBusinessGrid",

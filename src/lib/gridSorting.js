@@ -3,6 +3,10 @@ const naturalCollator = new Intl.Collator('fr-CA', {
   sensitivity: 'base'
 });
 
+export const compareNatural = (a,b) => naturalCollator.compare(String(a??''),String(b??''));
+export const compareCampaigns = (a,b) => Number(b.statut==='Active')-Number(a.statut==='Active') || compareNatural(a.nom_campagne,b.nom_campagne) || compareNatural(a.id,b.id);
+export const compareVisuals = (a,b) => compareNatural(a.campagne?.nom_campagne||a.campaign_name,b.campagne?.nom_campagne||b.campaign_name) || compareNatural(a.nom_visuel,b.nom_visuel) || compareNatural(a.format_support,b.format_support) || compareNatural(a.id,b.id);
+
 export const isEmptySortValue = value =>
   value === null || value === undefined ||
   (typeof value === 'string' && value.trim() === '');

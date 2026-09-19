@@ -1,3 +1,4 @@
+import {formatBusinessValue} from '../lib/businessTime';
 import React, {useEffect,useMemo,useRef,useState} from 'react';
 import {Search,Download,FileSpreadsheet,FileText,MapPin,Edit3,Save,X} from 'lucide-react';
 import PhotoImage from './PhotoImage';
@@ -46,7 +47,7 @@ function renderTableCell(tableName, row, column) {
     return [campaign, visual].filter(Boolean).join(' – ');
   }
 
-  return String(row[column] ?? '').slice(0, 160);
+  return String(formatBusinessValue(row[column],column) ?? '').slice(0, 160);
 }
 
 export default function TableView({ name, dataStore, onOpenMap, onGridContextChange, rolePermission, role, onRowsUpdated, initialSupportId='', initialGridContext=null, scopedData=null, scopeKey='', previewMode=false, previewTargetId=null }) {
@@ -328,7 +329,7 @@ export function Detail({ name, row, role, config, onSaved, onClose, onOpenMap, r
               <EditableField disabled={protectedClientColumn(role,c)} column={c} value={draft[c]} onChange={value => setDraft(current => ({ ...current, [c]: value }))}/>
               {rule && !rule.is_primary_source && <small className="automatic-field-warning">Champ alimenté automatiquement depuis {rule.source_table || 'une relation'}.{rule.source_field || ''}. Une propagation future pourrait remplacer la valeur.</small>}
             </>
-          : <p>{String(row[c] ?? '—')}</p>}
+          : <p>{String(formatBusinessValue(row[c],c) ?? '—')}</p>}
       </div>;
     })}</div>
     {name === 'Infrastructures' && support && <Support360Panel supportId={support} role={role} scopedData={scopedData} previewTargetId={previewTargetId}/>}

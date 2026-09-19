@@ -1,3 +1,4 @@
+import {formatBusinessValue} from './businessTime.js';
 export const normalize = (value = '') => String(value ?? '')
   .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
@@ -37,7 +38,7 @@ export function professionalExportName(moduleName, extension, date = new Date())
 export function downloadCSV(filename, rows, columns){
   const safe=normalizeExportColumns(columns);
   const esc=v=>'"'+String(exportDisplayValue(v)).replaceAll('"','""')+'"';
-  const csv=[safe.map(column=>esc(column.label)).join(','),...rows.map(row=>safe.map(column=>esc(row[column.key])).join(','))].join('\n');
+  const csv=[safe.map(column=>esc(column.label)).join(','),...rows.map(row=>safe.map(column=>esc(formatBusinessValue(row[column.key],column))).join(','))].join('\n');
   const blob=new Blob([`\uFEFF${csv}`],{type:'text/csv;charset=utf-8'});
   const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
 }
@@ -56,14 +57,14 @@ export async function createProfessionalWorkbook({ moduleName, rows, columns, la
     [`Filtres : ${filterText}`],
     [`Nombre de lignes : ${rows.length}`],
     safe.map(column=>column.label),
-    ...rows.map(row=>safe.map(column=>exportDisplayValue(row[column.key])))
+    ...rows.map(row=>safe.map(column=>exportDisplayValue(formatBusinessValue(row[column.key],column))))
   ];
   const worksheet=XLSX.utils.aoa_to_sheet(aoa);
   if(safe.length>1)worksheet['!merges']=[{s:{r:0,c:0},e:{r:0,c:safe.length-1}}];
   worksheet['!autofilter']={ref:XLSX.utils.encode_range({s:{r:headerRow-1,c:0},e:{r:Math.max(headerRow,aoa.length-1),c:Math.max(0,safe.length-1)}})};
   worksheet['!freeze']={xSplit:0,ySplit:headerRow,topLeftCell:`A${headerRow+1}`,activePane:'bottomLeft',state:'frozen'};
   worksheet['!cols']=safe.map((column,index)=>{
-    const longest=Math.max(column.label.length,...rows.slice(0,200).map(row=>String(exportDisplayValue(row[column.key])).length));
+    const longest=Math.max(column.label.length,...rows.slice(0,200).map(row=>String(exportDisplayValue(formatBusinessValue(row[column.key],column))).length));
     return {wch:Math.max(12,Math.min(/comment|description|note/i.test(column.key)?55:32,longest+2))};
   });
   worksheet['!rows']=[{hpt:24},{hpt:18},{hpt:18},{hpt:30},{hpt:18},{hpt:24}];
@@ -126,7 +127,7 @@ export async function downloadExcelSelectionWithPhotos(filename, rows, columns, 
   worksheet.getRow(1).font = { bold:true, color:{ argb:'FFFFFFFF' } };
   worksheet.getRow(1).fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF4C1D95' } };
   worksheet.autoFilter = { from:{ row:1, column:1 }, to:{ row:1, column:safe.length + 1 } };
-  rows.forEach(row => worksheet.addRow(Object.fromEntries(safe.map(column => [column.key, exportDisplayValue(row[column.key])]))));
+  rows.forEach(row => worksheet.addRow(Object.fromEntries(safe.map(column => [column.key, exportDisplayValue(formatBusinessValue(row[column.key],column))]))));
   for (let index=0; index<rows.length; index+=1) {
     let url = '';
     try { url = await getSignedDownloadUrl(rows[index]); } catch { /* An inaccessible photo must never use its old public URL. */ }
@@ -176,7 +177,7 @@ export async function createProfessionalPdf({ title, moduleName, rows, columns, 
   function newPage(){doc.addPage();reportHeader();tableHeader();}
   reportHeader();tableHeader();
   rows.forEach(row=>{
-    const cells=safe.map(column=>doc.splitTextToSize(String(exportDisplayValue(row[column.key])),columnWidth-2).slice(0,5));
+    const cells=safe.map(column=>doc.splitTextToSize(String(exportDisplayValue(formatBusinessValue(row[column.key],column))),columnWidth-2).slice(0,5));
     const height=Math.max(7,...cells.map(lines=>lines.length*lineHeight+2));
     if(y+height>pageHeight-margin-8)newPage();
     doc.setDrawColor(226,232,240);doc.rect(margin,y,usable,height);

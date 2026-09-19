@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {offlineBrowser} from './lib/offlineBrowser.mjs';
+const results=[];
+await offlineBrowser('scripts/fixtures/review-edt-mission-entry.jsx',async b=>{
+ await b.evaluate(`catalogMode='slow';mount()`);await b.waitFor(`document.querySelectorAll('.review-grid article').length===12`);
+ assert.equal(await b.evaluate(`typeof releaseCatalog`),'function');results.push('Photos visible before catalogue resolves');
+ await b.evaluate(`releaseCatalog()`);await b.waitFor(`document.querySelectorAll('.review-grid article')[1].textContent.includes('EDT-1')`);
+ await b.evaluate(`catalogMode='error';mount()`);await b.waitFor(`document.querySelector('.photo-review-queue').textContent.includes('Catalogue test indisponible')`);
+ assert.equal(await b.evaluate(`document.querySelectorAll('.review-grid article').length`),12);results.push('Catalogue failure preserves originals in queue');
+ await b.evaluate(`mountHistory()`);await b.waitFor(`document.querySelectorAll('.campaign-history-view tbody tr').length===2`);
+ assert.equal(await b.evaluate(`document.querySelectorAll('.campaign-history-view tbody tr')[0].children[5].textContent`),'2');
+ await b.evaluate(`document.querySelector('.campaign-history-view tbody button').click()`);assert.deepEqual(await b.evaluate(`navigated`),{context:'marketing',query:'EDT-TOS-09'});
+ results.push('Summary counts distinct supports and navigates to context');
+ await b.evaluate(`mountHistory('operational_communication')`);await b.waitFor(`document.querySelectorAll('.campaign-history-view tbody tr').length===1`);
+ assert.equal(await b.evaluate(`document.querySelector('.campaign-history-view tbody').textContent.includes('Campagne 2')`),false);
+ await b.evaluate(`mountHistory(null,{visible_columns:{'Historique des campagnes':['campagne','nombre_supports']}})`);await b.waitFor(`document.querySelectorAll('.campaign-history-view thead tr:first-child th').length===3`);
+ assert.equal(await b.evaluate(`document.querySelector('.campaign-history-view tbody').textContent.includes('Visuel A')`),false);results.push('Context isolation and client column permissions');
+ assert.deepEqual(b.exceptions,[]);assert.deepEqual(b.consoleErrors,[]);
+});
+fs.writeFileSync('docs/review-edt-mission/browser-local.json',JSON.stringify({result:'PASS',tests:results},null,2));console.log(results);

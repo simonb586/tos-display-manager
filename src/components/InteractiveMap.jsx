@@ -1,3 +1,4 @@
+import {compareNatural} from '../lib/gridSorting';
 import React, { useEffect, useMemo, useState } from 'react';
 import L from 'leaflet';
 import {
@@ -160,7 +161,7 @@ export default function InteractiveMap({ dataStore, focusSupportId = '', onClear
   );
 
   const supportTypes = useMemo(() => buildMapOptions(points, 'supportType'), [points]);
-  const campaigns = useMemo(() => buildMapOptions(points, 'campaignLabel'), [points]);
+  const campaigns = useMemo(() => buildMapOptions(points, 'campaignLabel').sort(compareNatural), [points]);
   const edts = useMemo(() => buildMapOptions(points, 'edtLabel'), [points]);
   const clients = useMemo(() => buildMapOptions(points, 'clientLabel'), [points]);
   const statuses = useMemo(() => buildMapOptions(points, 'activeLabel'), [points]);

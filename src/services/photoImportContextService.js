@@ -1,5 +1,6 @@
 import {supabase} from '../lib/supabaseClient';
 import {recognizeImportPhoto} from '../lib/photoImportRecognition';
+import {compareCampaigns,compareVisuals,compareNatural} from '../lib/gridSorting';
 async function catalogRows(table,fields) {
  const rows=[];for(let offset=0;;offset+=500){const {data,error}=await supabase.from(table).select(fields).order('id').range(offset,offset+499);if(error)throw error;rows.push(...data);if(data.length<500)return rows;}
 }
@@ -13,7 +14,8 @@ export async function loadPhotoImportCatalog() {
   catalogRows('campagne_visuels_formats','id,client_id,campagne_id,nom_visuel,format_support,is_out_of_frame'),
   (async()=>{const rows=[];for(let offset=0;;offset+=500){const {data,error}=await supabase.from('visual_edt_associations').select('*').order('visual_id').order('edt_id').range(offset,offset+499);if(error)throw error;rows.push(...data);if(data.length<500)return rows;}})()
  ]);
- return {supports,edts,phases,links,campaigns,visuals,associations};
+ const campaignById=new Map(campaigns.map(c=>[String(c.id),c]));
+ return {supports,edts:edts.sort((a,b)=>compareNatural(a.no_edt,b.no_edt)),phases,links,campaigns:campaigns.sort(compareCampaigns),visuals:visuals.map(v=>({...v,campaign_name:campaignById.get(String(v.campagne_id))?.nom_campagne})).sort(compareVisuals),associations};
 }
 export function importContextForPhoto(photo,catalog,manual=photo.import_context?.manual||{}) {
  const input=photo.import_context?.input||{
