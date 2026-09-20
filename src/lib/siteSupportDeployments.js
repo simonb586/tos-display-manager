@@ -13,6 +13,13 @@ const displayValue = value => value && !/^(aucun|aucune|sans objet|n\/a|[-—])(
 // A projection of the existing movement ledger, never a second deployment store.
 // Photos and audit records do not participate in the identity of an installation.
 export function projectSiteSupportDeployments({history=[],assignments=[],campaigns=[],supports=[],visuals=[]}={}) {
+  // Legacy movements may omit the tenant. Resolve only an exact, unique support
+  // already returned by the caller's scoped infrastructure query.
+  history=history.map(row=>{
+    if(row.client_id!=null)return row;
+    const matches=supports.filter(s=>same(s.support_id,row.support_id)&&s.client_id!=null);
+    return matches.length===1?{...row,client_id:matches[0].client_id}:row;
+  });
   const latest = new Map();
   for (const row of history) for (const kind of ['installation','retrait']) {
     const date = row[`date_${kind}`];

@@ -41,7 +41,7 @@ Les PASS ci-dessous concernent la version locale et les contrôles distants expl
 | VERCEL | NON EFFECTUÉ | Migration requise avant déploiement |
 | PRODUCTION | NON VALIDÉE pour cette version | Portail déployé inchangé |
 
-Audit distant en lecture seule : 6 619 infrastructures ; 4 544 installations courantes projetées, dont 2 388 Marketing, 301 opérationnelles et 1 855 à classer. Les 38 lignes d'historique existantes restent conservées. Voir `remote-data.json`. Les neuf profils testés et leur isolation figurent dans `remote-roles.json`.
+Audit distant en lecture seule : 6 619 infrastructures ; 4 543 installations courantes projetées, dont 2 387 Marketing, 301 opérationnelles et 1 855 à classer. Les 38 lignes d'historique existantes restent conservées. Voir `remote-data.json`. Les neuf profils testés et leur isolation figurent dans `remote-roles.json`.
 
 Les essais de reconnaissance utilisent des images de test, avec perspective et identifiant de cadre, ainsi qu'un PDF généré. Ils démontrent le fonctionnement du traitement ; les références métier et les photos réelles devront être ajoutées par les utilisateurs. Une image floue, un visuel peu distinctif ou plusieurs références identiques peuvent nécessiter une validation manuelle.
 
@@ -62,3 +62,6 @@ Liste exhaustive : [changed-files.json](changed-files.json). Les autres fichiers
 
 
 Migration appliquée et enregistrée le 20 septembre 2026 sous la version `20260920085824`. Le fichier local porte cette version pour rester aligné avec le journal distant. Aucun nouvel avis de sécurité Supabase après migration. Build Vercel de production : PASS.
+
+
+Contrôle de production : les compteurs sont comparés au catalogue autorisé de chaque profil. Les droits de publication existants donnent accès à 23 campagnes pour Marylène, contre 32 pour Admin. Les autorisations ne sont pas élargies pour obtenir artificiellement des compteurs identiques. Une ligne historique sans client est rattachée en mémoire au seul support exact déjà accessible afin de supprimer un doublon ; aucune donnée historique n’est modifiée.

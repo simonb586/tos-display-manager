@@ -1,10 +1,5 @@
 [
   {
-    "name": "check",
-    "exitCode": 0,
-    "result": "PASS"
-  },
-  {
     "name": "verify_reference_recognition_browser",
     "exitCode": 0,
     "result": "PASS"
@@ -56,6 +51,11 @@
   },
   {
     "name": "verify_campaign_visual_actions_v129",
+    "exitCode": 0,
+    "result": "PASS"
+  },
+  {
+    "name": "check",
     "exitCode": 0,
     "result": "PASS"
   },
