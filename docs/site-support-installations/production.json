@@ -1,0 +1,98 @@
+{
+  "at": "2026-09-20T09:24:56.388Z",
+  "origin": "https://portail.groupetos.com",
+  "records": [
+    {
+      "actor": "admin",
+      "views": [
+        {
+          "label": "Campagnes et visuels par site et supports",
+          "count": 2387,
+          "readOnly": true
+        },
+        {
+          "label": "Communications opérationnelles par site et supports",
+          "count": 301,
+          "readOnly": true
+        }
+      ],
+      "expectedScope": {
+        "marketing": 2387,
+        "operational": 301,
+        "accessibleCampaigns": 32,
+        "accessibleVisuals": 157,
+        "supports": 6619
+      },
+      "result": "PASS"
+    },
+    {
+      "actor": "marylene",
+      "views": [
+        {
+          "label": "Campagnes et visuels par site et supports",
+          "count": 1202,
+          "readOnly": true
+        },
+        {
+          "label": "Communications opérationnelles par site et supports",
+          "count": 301,
+          "readOnly": true
+        }
+      ],
+      "expectedScope": {
+        "marketing": 1202,
+        "operational": 301,
+        "accessibleCampaigns": 23,
+        "accessibleVisuals": 0,
+        "supports": 6619
+      },
+      "result": "PASS"
+    },
+    {
+      "actor": "client",
+      "views": [
+        {
+          "label": "Campagnes et visuels par site et supports",
+          "count": 0,
+          "readOnly": true
+        },
+        {
+          "label": "Communications opérationnelles par site et supports",
+          "count": 0,
+          "readOnly": true
+        }
+      ],
+      "expectedScope": {
+        "marketing": 0,
+        "operational": 0,
+        "accessibleCampaigns": 0,
+        "accessibleVisuals": 0,
+        "supports": 6619
+      },
+      "result": "PASS"
+    },
+    {
+      "actor": "client-b",
+      "views": [
+        {
+          "label": "Campagnes et visuels par site et supports",
+          "count": 0,
+          "readOnly": true
+        },
+        {
+          "label": "Communications opérationnelles par site et supports",
+          "count": 0,
+          "readOnly": true
+        }
+      ],
+      "expectedScope": {
+        "marketing": 0,
+        "operational": 0,
+        "accessibleCampaigns": 1,
+        "accessibleVisuals": 0,
+        "supports": 0
+      },
+      "result": "PASS"
+    }
+  ]
+}

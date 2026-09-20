@@ -1,6 +1,6 @@
 # Installations par site/support et références visuelles
 
-État : tests locaux et test SQL distant PASS ; migration appliquée et vérifiée ; publication du frontal en cours.
+État : **PRODUCTION UPDATE COMPLETE**. Tests locaux et test SQL distant PASS ; migration appliquée et vérifiée ; frontal déployé et validé sur https://portail.groupetos.com.
 
 ## Fonctionnement livré dans le code
 
@@ -14,13 +14,14 @@
 
 ## Résultats
 
-Les PASS ci-dessous concernent la version locale et les contrôles distants explicitement décrits, pas une validation du nouveau frontal en production.
+Les PASS ci-dessous couvrent les tests locaux et les contrôles distants décrits. La version publiée a également été vérifiée avec les profils Admin, Marylène, Client EXO et Client B ; les compteurs correspondent au périmètre autorisé de chacun (`production.json`).
 
 | Contrôle | Résultat | Preuve |
 | --- | --- | --- |
 | Campagnes par site/support | PASS | Projection, 10 supports Marketing, navigateur |
 | Communications par site/support | PASS | Projection, 10 supports opérationnels, navigateur |
-| Classification Marketing / opérationnelle | PASS | Contexte canonique ; inconnus conservés séparément |
+| Classification Marketing | PASS | Contexte canonique ; inconnus conservés séparément |
+| Classification opérationnelle | PASS | Contexte canonique ; aucune attribution par supposition |
 | Visuels | PASS | Références photo/PDF et correspondance en navigateur |
 | EDT | PASS | Reconnaissance, multi-EDT et non-régression EDT |
 | Dates installation/retrait | PASS | Dates des mouvements, retraits exclus du courant |
@@ -36,10 +37,10 @@ Les PASS ci-dessous concernent la version locale et les contrôles distants expl
 | DIFF | PASS | `checks.json`, `diff.log` |
 | SQL et stockage privé | PASS local | PostgreSQL embarqué, RLS et archivage |
 | Test transactionnel du nouveau schéma en production | PASS | Neuf profils ; rollback vérifié (`remote-transaction.json`) |
-| COMMIT | `4bed7f8` | Fonctionnalités `5a46a99`, correction du doublon `4bed7f8` |
+| COMMIT | `2f95408` | Fonctionnalités `5a46a99`, déduplication `4bed7f8`, historique facultatif `2f95408` |
 | PUSH | PASS | Push normal sur `release/v1.3.3` |
-| VERCEL | PASS | `dpl_DbPjHYdsheBkQ53YVMgrV9fPgwpH`, domaine public associé |
-| PRODUCTION | Vérification en cours | HTML et fichiers initiaux identiques au build ; contrôle Admin PASS |
+| VERCEL | PASS | `dpl_HP97SGKSPLpmR64qEq9ksLqFaqi4`, domaine public associé |
+| PRODUCTION | PASS | HTML et fichiers initiaux identiques au build ; quatre profils validés |
 
 Audit distant en lecture seule : 6 619 infrastructures ; 4 543 installations courantes projetées, dont 2 387 Marketing, 301 opérationnelles et 1 855 à classer. Les 38 lignes d'historique existantes restent conservées. Voir `remote-data.json`. Les neuf profils testés et leur isolation figurent dans `remote-roles.json`.
 
@@ -53,15 +54,18 @@ Ordre exécuté : test transactionnel distant avec attente de verrou limitée à
 
 Limites des références : 25 Mo par fichier, 20 pages par PDF, 10 fichiers par visuel et 4 Mo de métadonnées de reconnaissance par visuel. Le moteur de reconnaissance est chargé à la demande. Le build signale la taille importante de ce module ; le test réel en navigateur passe.
 
-Verdict actuel : **NO-GO pour déclarer la mise à jour de production terminée**, en attente de la validation finale du frontal publié.
+Verdict : **PRODUCTION UPDATE COMPLETE**.
 
 
-## Fichiers modifies ou ajoutes
+## Fichiers modifiés ou ajoutés
 
-Liste exhaustive : [changed-files.json](changed-files.json). Les autres fichiers non suivis preexistants du depot ne font pas partie de cette livraison.
+Liste exhaustive : [changed-files.json](changed-files.json). Les autres fichiers non suivis préexistants du dépôt ne font pas partie de cette livraison. Les fichiers `.log` cités sont des journaux locaux ignorés par Git ; les résultats structurés `.json` sont versionnés.
 
 
 Migration appliquée et enregistrée le 20 septembre 2026 sous la version `20260920085824`. Le fichier local porte cette version pour rester aligné avec le journal distant. Aucun nouvel avis de sécurité Supabase après migration. Build Vercel de production : PASS.
 
 
 Contrôle de production : les compteurs sont comparés au catalogue autorisé de chaque profil. Les droits de publication existants donnent accès à 23 campagnes pour Marylène, contre 32 pour Admin. Les autorisations ne sont pas élargies pour obtenir artificiellement des compteurs identiques. Une ligne historique sans client est rattachée en mémoire au seul support exact déjà accessible afin de supprimer un doublon ; aucune donnée historique n’est modifiée.
+
+
+Le profil Client EXO testé n’a actuellement aucune campagne maître accessible : ses tables classées sont donc vides et ses installations restent dans la liste à classer. Les droits de publication et d’accès aux campagnes n’ont pas été modifiés par cette livraison. Le contrôle Client B utilise le compte de test déjà activé, sans terminer une invitation réelle.
