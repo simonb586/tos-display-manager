@@ -2,7 +2,7 @@
 
 ## État de livraison
 
-**Correction métier confirmée et appliquée ; livraison en cours.** Les quatre migrations ont été appliquées après tests PostgreSQL locaux et distants annulés. Les validations du build et des parcours sont reprises avant commit, push et déploiement.
+**PRODUCTION UPDATE COMPLETE.** Les quatre migrations sont appliquées, le code est commité et poussé, et le portail de production a été déployé puis validé dans le navigateur.
 
 Le propriétaire a confirmé explicitement que **l'EDT ID 10 a été réellement exécuté et terminé**. Il conserve son numéro **EDT-TOS-09 (0.1)** et ses relations. Son statut est maintenant **Terminé**, son cycle **ferme**, sa progression 100 %, et il est désarchivé. Les trois phases sont complètes. L'état précédent de l'EDT et des phases est conservé dans `raw_data.confirmed_completion_20260920`. Les horodatages de clôture indiquent la régularisation administrative ; aucune date réelle des travaux n'a été inventée. La recherche « EDT-TOS-09.0.1 » retrouve cet enregistrement sans créer de doublon ni toucher l'EDT distinct « EDT-TOS-09 ».
 
@@ -26,39 +26,47 @@ Le build corrigé contient `vendor/opencv-5.0.0-release.1.js`, correspondant à 
 
 ## Validations
 
-Les PASS frontend ci-dessous portent sur **le build local connecté au Supabase réel**, pas sur un nouveau déploiement du portail.
+Les parcours frontend ont réussi sur le build local connecté au Supabase réel, puis **sur https://portail.groupetos.com après déploiement**. Les fixtures créées pour les essais ont été supprimées après validation.
 
 | Contrôle demandé | Résultat |
 | --- | --- |
-| Bouton fiche visuel — Campagnes maîtres | PASS local |
-| Bouton fiche visuel — Communications | PASS local |
-| Présentation compacte visuels/formats | PASS local |
-| Références génériques dans Modifier | PASS local |
-| Ajout image générique | PASS navigateur réel |
-| Ajout PDF générique | PASS navigateur réel |
-| OpenCV | CORRIGÉ dans le build ; retry testé |
+| Bouton fiche visuel — Campagnes maîtres | PASS production |
+| Bouton fiche visuel — Communications | PASS production |
+| Présentation compacte visuels/formats | PASS production |
+| Références génériques dans Modifier | PASS production |
+| Ajout image générique | PASS production, navigateur réel |
+| Ajout PDF générique | PASS production, navigateur réel |
+| OpenCV | CORRIGÉ en production ; moteur, image/PDF et retry testés |
 | Tri EDT | PASS |
 | Recherche EDT | PASS, incluant l'alias 09.0.1 |
-| EDT-TOS-22-A | VISIBLE dans le build et retourné par le RPC distant |
+| EDT-TOS-22-A | VISIBLE en production et retourné par le RPC distant |
 | Statut 22-A | TERMINÉ, 100 %, désarchivé en base |
-| EDT-TOS-09.0.1 | VISIBLE sous son numéro existant 09 (0.1) |
+| EDT-TOS-09.0.1 | VISIBLE en production sous son numéro existant 09 (0.1) |
 | Statut 09.0.1 = Terminé | TERMINÉ, 100 %, désarchivé après confirmation |
-| Filtre Terminés | Validation des deux EDT dans les parcours actualisés |
+| Filtre Terminés | PASS production, les deux EDT à 100 % |
 | Filtre Tous | PASS |
-| Filtre Archivés | PASS ; 22-A exclu, archives réelles conservées |
+| Filtre Archivés | PASS production ; 22-A et ID 10 exclus, archives réelles conservées |
 | Client B | PASS SQL distant et navigateur réel ; rôle Client-Admin et périmètre respectés |
 | CHECK | PASS, nouveaux tests intégrés |
 | BUILD | PASS avec configuration publique Supabase vérifiée |
 | DIFF | PASS |
-| COMMIT | Non effectué |
-| PUSH | Non effectué |
-| VERCEL | Non déployé |
-| PRODUCTION | Validation frontend finale non effectuée |
-| VERDICT | Validation de livraison en cours |
+| COMMIT | `ca0a7ea` (code applicatif déployé) |
+| PUSH | PASS, `origin/release/v1.3.3`, sans force |
+| VERCEL | PASS, READY, `dpl_BLSELP49wBdGSCH8bpteJ9P278LC` |
+| PRODUCTION | PASS, assets et parcours navigateur réels |
+| VERDICT | **PRODUCTION UPDATE COMPLETE** |
 
 Tests exécutés : `npm run check`, tests unitaires EDT, PostgreSQL local des quatre migrations, transactions distantes annulées avant/après application, Admin/Marylène/Client/Client B, reconnaissance navigateur image/PDF/OCR, formulaires et doubles soumissions, parité navigateur Client/Client-Admin, campagnes clientes vides, import massif, file de validation photo, export CSV/XLSX, Terrain avec et sans EDT, conservation des photos privées et isolation client. Le profil Client testé n'a pas accès à la vue EDT : refus RPC et absence de navigation vérifiés ; Marylène et Client B utilisent la même recherche dans leur périmètre autorisé. Le build conserve les avertissements existants sur la taille de certains bundles et l'import mixte de `photoAccessService`.
 
 Les diagnostics de sécurité Supabase signalent des avertissements préexistants sur des fonctions definer et la configuration Auth. Les deux fonctions concernées ici restent invoker ; aucune politique RLS, aucun rôle et aucune permission client n'ont été élargis.
+
+## Publication et preuves finales
+
+Code applicatif : `ca0a7ea`, poussé sur `release/v1.3.3`. [Déploiement Vercel READY](https://vercel.com/tos3/tos-display-manager/BLSELP49wBdGSCH8bpteJ9P278LC), associé à [portail.groupetos.com](https://portail.groupetos.com). La première tentative a renvoyé « Not authorized » ; la publication a réussi en précisant le périmètre existant `--scope tos3`, sans changement des permissions.
+
+Les 87 fichiers statiques Vercel correspondent au build et ne contiennent aucune clé JWT serveur. Le HTML, les assets initiaux, OpenCV et le worker PDF servis en production correspondent octet par octet aux artefacts validés. Le type MIME JavaScript et les politiques de cache sont vérifiés. Les essais production couvrent création/modification du visuel, ajout image/PDF, retrait avec original conservé, sauvegarde/réouverture, reprise du chargement OpenCV, rechargements avec cache et forcé, tri/recherche/filtres EDT, et Admin/Marylène/Client/Client B. Les vérifications SQL après publication confirment la clôture de l'ID 10 et les quatre périmètres de permission. Le profil Client conserve son refus d'accès au centre EDT.
+
+Les résultats bruts sont conservés localement dans `.cache/campaign-edt/production-browser.json` et `.cache/campaign-edt/deployment.json`. Le commit documentaire suivant ne modifie pas le code applicatif déployé.
 
 ## Migrations et reprise
 
