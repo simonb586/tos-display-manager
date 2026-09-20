@@ -1,6 +1,8 @@
 import { clampImportOptions, manifestItem, readExifDate, sha256File } from '../lib/massPhotoImport.js';
 import { uploadUnmatchedPhoto } from './photoReviewService.js';
 import {importContextForPhoto,savePhotoImportContext} from './photoImportContextService';
+import {recognizeVisualReferences} from './visualReferenceRecognitionService';
+import {readFrameIdentifier} from './frameIdentifierOcrService';
 
 const DB_NAME='tos-mass-photo-import', STORE='manifests';
 export const saveImportManifest = manifest => new Promise((resolve,reject)=>{const request=indexedDB.open(DB_NAME,1);request.onupgradeneeded=()=>request.result.createObjectStore(STORE,{keyPath:'id'});request.onerror=()=>reject(request.error);request.onsuccess=()=>{const tx=request.result.transaction(STORE,'readwrite');tx.objectStore(STORE).put({...manifest,items:manifest.items.map(manifestItem),updatedAt:new Date().toISOString()});tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)}});
@@ -13,6 +15,20 @@ export async function analyzePhotoItem(item, context={}) {
   try{const exif=await readExifDate(next.file);if(exif)next={...next,capturedAt:exif.capturedAt,capturedAtSource:'EXIF',exifTag:exif.tag};}catch{next.exifWarning='EXIF illisible : original conservé, date à confirmer.';}
   try{
    next.hash=await sha256File(next.file);
+   if(!next.manual?.support){
+    try{
+     const ocr=await readFrameIdentifier(next.file,context.catalog?.supports||[]);
+     next={...next,ocrText:ocr.supportId||ocr.observations.map(o=>o.text).join('\n'),
+      ocrConfidence:ocr.supportId?ocr.candidates.find(c=>c.support_id===ocr.supportId).confidence:0,
+      suggestions:ocr.candidates,ocrRegion:ocr.supportId?ocr.candidates.find(c=>c.support_id===ocr.supportId).region:null};
+    }catch(error){next.ocrWarning='Identifiant non lu : attribuez le support manuellement.';}
+   }
+   try{
+    const preliminary=importContextForPhoto(next,context.catalog,next.manual||{});
+    const support=context.catalog?.supports.find(s=>s.support_id===preliminary.recognition.values.support);
+    const visuals=(context.catalog?.visuals||[]).filter(v=>!support||String(v.client_id)===String(support.client_id));
+    next.visualReferenceMatches=await recognizeVisualReferences(next.file,visuals);
+   }catch(error){next.referenceWarning='Reconnaissance des visuels indisponible : choisissez une référence manuellement.';}
    const import_context=importContextForPhoto(next,context.catalog,next.manual||{});
    return {...next,import_context,recognition:import_context.recognition,status:import_context.recognition.ready?'ready':'requires_review',reviewStatus:import_context.recognition.classification};
   }catch(error){return {...next,status:'failed',error:error.message||'VALIDATION_FAILED'}}

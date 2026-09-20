@@ -1,0 +1,78 @@
+{
+  "at": "2026-09-20T02:09:27.056Z",
+  "readOnly": true,
+  "records": [
+    {
+      "profile": -92501,
+      "role": "Client-Admin",
+      "client": 1,
+      "result": "PASS",
+      "supports": 0,
+      "history": 0
+    },
+    {
+      "profile": 1,
+      "role": "Administrateur",
+      "client": null,
+      "result": "PASS",
+      "supports": 6619,
+      "history": 38
+    },
+    {
+      "profile": 3,
+      "role": "Administrateur",
+      "client": null,
+      "result": "PASS",
+      "supports": 6619,
+      "history": 38
+    },
+    {
+      "profile": 25,
+      "role": "Client-Admin",
+      "client": 2,
+      "result": "PASS",
+      "supports": 6619,
+      "history": 0
+    },
+    {
+      "profile": 32,
+      "role": "Client",
+      "client": 2,
+      "result": "PASS",
+      "supports": 6619,
+      "history": 0
+    },
+    {
+      "profile": 33,
+      "role": "Client",
+      "client": 2,
+      "result": "PASS",
+      "supports": 6619,
+      "history": 0
+    },
+    {
+      "profile": 35,
+      "role": "Client",
+      "client": 2,
+      "result": "PASS",
+      "supports": 6619,
+      "history": 0
+    },
+    {
+      "profile": 36,
+      "role": "Client",
+      "client": 2,
+      "result": "PASS",
+      "supports": 6619,
+      "history": 0
+    },
+    {
+      "profile": 37,
+      "role": "Client",
+      "client": 1,
+      "result": "PASS",
+      "supports": 0,
+      "history": 0
+    }
+  ]
+}

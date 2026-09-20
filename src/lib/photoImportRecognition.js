@@ -1,4 +1,5 @@
 // Import-only inference. Terrain keeps its explicit capture workflow.
+import {normalizeFrameIdentifier} from './frameIdentifierOcr.js';
 export const REVIEW_FIELDS = ['support','date','type','edt','phase','campaign','visual'];
 const confirmed = state => ['AUTO_CONFIRMED','MANUAL_CONFIRMED','NOT_APPLICABLE'].includes(state);
 const same = (a,b) => a != null && b != null && String(a) === String(b);
@@ -17,7 +18,7 @@ export function recognizeImportPhoto(item, catalog, manual = {}) {
   const exact = supports.filter(s=>same(s.support_id,manual.support));
   let matches = exact;
   if(!manual.support){
-    const text=normalize(item.ocrText||'');const filename=normalize(item.originalFilename||'');
+    const text=normalizeFrameIdentifier(item.ocrText||'');const filename=normalize(item.originalFilename||'');
     matches=supports.filter(s=>{
       const key=normalize(s.support_id);if(!key)return false;
       if(same(item.supportId,s.support_id))return true;
@@ -72,10 +73,15 @@ export function recognizeImportPhoto(item, catalog, manual = {}) {
   }
   if(noMovement){na('campaign');na('visual');return result();}
   const edt=edts.find(e=>same(e.id,values.edt));
+  const referenceMatches=(item.visualReferenceMatches||[]).filter(match=>same(match.client_id,support.client_id)
+    && (catalog.visuals||[]).some(v=>same(v.id,match.visual_id)&&same(v.client_id,support.client_id)&&importFormatCompatible(support,v)));
+  const references=referenceMatches.filter(match=>match.confirmed);
+  const reference=references.length===1?references[0]:null;
+  const referenceConflict=reference&&edt?.campagne_id&&!same(reference.campaign_id,edt.campagne_id);
   const campaigns=(catalog.campaigns||[]).filter(c=>same(c.client_id,support.client_id)&&['marketing','operational_communication'].includes(c.business_context)&&
     (edt?.campagne_id||same(c.id,manual.campaign)||(!day(c.date_debut)||date>=day(c.date_debut))&&(!day(c.date_fin)||date<=day(c.date_fin))));
   candidates.campaign=campaigns.filter(c=>!edt?.campagne_id||same(c.id,edt.campagne_id));
-  const campaign=candidates.campaign.find(c=>same(c.id,manual.campaign||edt?.campagne_id));
+  const campaign=candidates.campaign.find(c=>same(c.id,manual.campaign||(!referenceConflict&&reference?.campaign_id)));
   if(campaign)accept('campaign',campaign.id,Boolean(manual.campaign));
   const visuals=(catalog.visuals||[]).filter(v=>same(v.client_id,support.client_id)&&importFormatCompatible(support,v)&&campaigns.some(c=>same(c.id,v.campagne_id))&&(!values.campaign||same(v.campagne_id,values.campaign)));
   // Existing support/visual links are deliberately not an eligibility condition.
@@ -84,9 +90,9 @@ export function recognizeImportPhoto(item, catalog, manual = {}) {
     if(!associations.length)return true;
     return associations.some(a=>(!a.date_debut||date>=a.date_debut)&&(!a.date_fin||date<=a.date_fin));
   });
-  const visual=manual.visual?candidates.visual.find(v=>same(v.id,manual.visual)):candidates.visual.length===1?candidates.visual[0]:null;
+  const visual=manual.visual?candidates.visual.find(v=>same(v.id,manual.visual)):!referenceConflict&&reference?candidates.visual.find(v=>same(v.id,reference.visual_id)):null;
   if(visual){accept('visual',visual.id,Boolean(manual.visual));if(!values.campaign)accept('campaign',visual.campagne_id,Boolean(manual.visual));}
-  else reasons.visual='Visuel à valider';
+  else reasons.visual=referenceConflict?'La référence reconnue ne correspond pas à la campagne de cet EDT':referenceMatches.length?'Références visuelles à départager':'Aucune référence générique reconnue : visuel à valider';
   return result();
 }
 

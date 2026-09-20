@@ -30,6 +30,7 @@ import { filterSupportPhotos } from '../lib/supportNavigationContext';
 export default function PhotoInventoryCenter({ role, supportId = '', onClearSupportContext, onOpenSupport }) {
   const [tab, setTab] = useState('photos');
   const [edtFolder,setEdtFolder]=useState('');
+  const [reviewPhotoId,setReviewPhotoId]=useState(null);
   const [photos, setPhotos] = useState([]);
   const [movements, setMovements] = useState([]);
   const [message, setMessage] = useState('');
@@ -159,8 +160,8 @@ try {
         {canManage && <button className={tab === 'review' ? 'active' : ''} onClick={() => setTab('review')}><CheckCircle2 size={17}/> Photos à valider</button>}
       </div>
 
-      {tab === 'mass-import' ? <MassPhotoImporter role={role} onReview={()=>setTab('review')}/> : tab === 'review' ? <PhotoReviewQueue/> : tab === 'photos' ? (
-        <PhotoFolderGallery photos={visiblePhotos} onFolderChange={setEdtFolder} onOpenSupport={onOpenSupport} renderActions={canManage?photo=>photo.source==='mass_import'&&!photo.import_finalized_at?<div className="photo-review-actions"><button onClick={()=>setTab('review')}>Compléter la validation</button></div>:<div className="photo-review-actions"><button onClick={()=>setStatus(photo,'Validée')}><CheckCircle2/> Valider</button><button onClick={()=>setStatus(photo,'Rejetée')}><XCircle/> Rejeter</button><button onClick={()=>setPrimary(photo)}><Star/> Principale</button><button className="danger" onClick={()=>removePhoto(photo)}><Trash2/> Supprimer</button></div>:undefined}/>
+      {tab === 'mass-import' ? <MassPhotoImporter role={role} onReview={()=>setTab('review')}/> : tab === 'review' ? <PhotoReviewQueue role={role} initialPhotoId={reviewPhotoId}/> : tab === 'photos' ? (
+        <PhotoFolderGallery photos={visiblePhotos} onFolderChange={setEdtFolder} onOpenSupport={onOpenSupport} renderActions={canManage?photo=>photo.source==='mass_import'&&!photo.import_finalized_at?<div className="photo-review-actions"><button onClick={()=>{setReviewPhotoId(photo.id);setTab('review')}}>Compléter la validation</button><button onClick={()=>{setReviewPhotoId(photo.id);setTab('review')}}>Attribuer un support</button><button className="danger" onClick={()=>removePhoto(photo)}><Trash2/> Supprimer</button></div>:<div className="photo-review-actions"><button onClick={()=>setStatus(photo,'Validée')}><CheckCircle2/> Valider</button><button onClick={()=>setStatus(photo,'Rejetée')}><XCircle/> Rejeter</button><button onClick={()=>setPrimary(photo)}><Star/> Principale</button><button className="danger" onClick={()=>removePhoto(photo)}><Trash2/> Supprimer</button></div>:undefined}/>
       ) : (
         <>
         <DisplayMovementInventory supportId={supportId} edtNumber={edtFolder} onClearEdt={()=>setEdtFolder('')}/>

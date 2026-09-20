@@ -2,6 +2,7 @@ import {formatBusinessValue} from '../lib/businessTime';
 import React, {useEffect,useMemo,useRef,useState} from 'react';
 import {Search,Download,FileSpreadsheet,FileText,MapPin,Edit3,Save,X} from 'lucide-react';
 import PhotoImage from './PhotoImage';
+import {VisualReferenceProvider,GenericCampaignVisual} from './VisualReferences';
 import Support360Panel from './Support360Panel';
 import EditableField from './EditableField';
 import GridColumnHeader from './GridColumnHeader';
@@ -28,6 +29,7 @@ const thumbnailForInfrastructure = row =>
     : '');
 
 function renderTableCell(tableName, row, column) {
+  if(tableName==='Infrastructures'&&column==='visuel_campagne')return <GenericCampaignVisual support={row}/>;
   if (tableName === 'Infrastructures' && column === 'visuel_actuel_cadre') {
     const url = thumbnailForInfrastructure(row);
     return url
@@ -203,7 +205,7 @@ export default function TableView({ name, dataStore, onOpenMap, onGridContextCha
     }
   }
 
-  return <div className="tablePage" data-business-role={role} data-can-edit={canEdit}>
+  return <VisualReferenceProvider scopeKey={scopeKey} previewTargetId={previewTargetId} enabled={name==='Infrastructures'&&cols.includes('visuel_campagne')}><div className="tablePage" data-business-role={role} data-can-edit={canEdit}>
     <header className="pageHead"><div><h1>📋 {name}</h1><p>{filtered.length.toLocaleString('fr-CA')} résultat(s) sur {rows.length.toLocaleString('fr-CA')} ligne(s).</p></div><div className="actions">
       {hasMapColumn && <button type="button" onClick={() => onOpenMap?.('', infrastructureNavigationContext(''))}><MapPin/> Carte</button>}
       <DataGridSettings gridId={`table-${name}`} columns={permittedCols} labels={Object.fromEntries(permittedCols.map(column=>[column,columnLabel(name,column)]))} preferences={gridSettings.preferences} setPreferences={gridSettings.setPreferences} onReset={gridSettings.reset}/>
@@ -250,7 +252,7 @@ export default function TableView({ name, dataStore, onOpenMap, onGridContextCha
     })}</tbody></table></div>
     <GridPagination page={currentPage} pageCount={pageCount} pageSize={pageSize} total={sorted.length} selectedCount={hasMapColumn?selectedRows.size:0} onPage={setPage} onPageSize={setPageSize}/>
     {selected && <Detail previewTargetId={previewTargetId} previewMode={previewMode} rolePermission={rolePermission} scopedData={scopedData} name={name} row={selected} role={role} config={config} onSaved={updated => { onRowsUpdated?.(name, [updated]); setSelected(updated); }} onClose={() => setSelected(null)} onOpenMap={onOpenMap}/>}
-  </div>;
+  </div></VisualReferenceProvider>;
 }
 
 export function Detail({ name, row, role, config, onSaved, onClose, onOpenMap, rolePermission, scopedData, previewMode=false, previewTargetId=null }) {

@@ -1,6 +1,7 @@
 import { supabase, supabaseConfigured } from '../lib/supabaseClient.js';
-import { BUSINESS_CONTEXT, normalizeBusinessContext } from '../lib/businessContext.js';
-import { assignmentLogicalKey, normalizeUniqueAssignments } from '../lib/siteSupportAssignments.js';
+import { BUSINESS_CONTEXT } from '../lib/businessContext.js';
+import { normalizeUniqueAssignments } from '../lib/siteSupportAssignments.js';
+import { projectSiteSupportDeployments } from '../lib/siteSupportDeployments.js';
 import { defaultSortForColumn, sortRows } from '../lib/gridSorting.js';
 
 import { assignmentUpdatePayload } from '../lib/assignmentEditing.js';
@@ -11,7 +12,7 @@ const safePageSize=value=>PAGE_SIZES.includes(Number(value))?Number(value):25;
 const tableFor=context=>context===BUSINESS_CONTEXT.OPERATIONAL?'communications_operationnelles_sites_supports':'campagnes_visuels_sites_supports';
 const searchableFor=context=>context===BUSINESS_CONTEXT.OPERATIONAL
   ?['emplacement','message','statut','no_arret','site_ou_arret','support_id','no_edt','related_voiture','visuel_message','visuel_terrain','site']
-  :['nom_campagne','visuel_terrain','statut_campagne','support_id','emplacement','date_mise_a_jour','site'];
+  :['nom_campagne','visuel_terrain','statut_campagne','support_id','emplacement','date_mise_a_jour','site','no_edt','format_visuel','format_support','client'];
 const exactFilterColumns=new Set(['id','legacy_id','infrastructure_id','campaign_id','visual_id']);
 const normalizedText=value=>String(value??'').trim().toLocaleLowerCase('fr-CA');
 // V1.2.2 server-query semantics are preserved locally across both sources:
@@ -40,15 +41,19 @@ export function canonicalAssignmentRows(assignments,campaigns,infrastructures,vi
   return assignments.flatMap(assignment=>{
     const campaign=campaignById.get(String(assignment.campagne_id));
     if(!campaign)return[];
-    const context=normalizeBusinessContext(campaign.business_context);
+    const context=campaign.business_context;
+    if(!Object.values(BUSINESS_CONTEXT).includes(context))return[];
     const infrastructure=infrastructureBySupport.get(String(assignment.support_id))||{};
+    if(assignment.client_id!=null&&String(assignment.client_id)!==String(campaign.client_id))return[];
+    if(infrastructure.client_id!=null&&String(infrastructure.client_id)!==String(campaign.client_id))return[];
     const visual=(visualsByCampaign.get(String(campaign.id))||[]).find(item=>normalizedText(item.nom_visuel)===normalizedText(assignment.visuel_attendu));
     const common={
       _assignment_table:'campagnes_supports',visuel_attendu:assignment.visuel_attendu,statut:assignment.statut,id:assignment.id,legacy_id:assignment.id,source_table:'campagnes_supports',site:infrastructure.site??null,
       infrastructure_id:infrastructure.id??null,campaign_id:campaign.id,visual_id:visual?.id??null,
+      client_id:campaign.client_id,client:campaign.client||String(campaign.client_id??''),format_visuel:visual?.format_support,format_support:infrastructure.format_affichage,photo:assignment.photo_url,
       business_context:context,support_id:assignment.support_id,created_at:assignment.created_at,
       updated_at:assignment.updated_at,raw_data:assignment,installation:assignment.date_completion,
-      date_completion:assignment.date_completion,no_edt:assignment.no_edt||campaign.no_edt||null
+      date_completion:assignment.date_completion,no_edt:assignment.no_edt||null
     };
     if(context===BUSINESS_CONTEXT.OPERATIONAL)return[{...common,emplacement:infrastructure.emplacement_visibilite??null,
       message:campaign.nom_campagne,date_debut:campaign.date_debut,date_fin:campaign.date_fin,statut:assignment.statut,
@@ -61,14 +66,18 @@ export function canonicalAssignmentRows(assignments,campaigns,infrastructures,vi
 }
 
 async function loadRows(context,signal,infrastructureRows,previewTargetId){
-  const [historical,assignments,campaigns,infrastructures,visuals]=await Promise.all([
-    fetchAll(tableFor(context),'*',signal,previewTargetId),fetchAll('campagnes_supports','*',signal,previewTargetId),fetchAll('campagnes_maitres','*',signal,previewTargetId),
-    infrastructureRows ?? fetchAll('infrastructures','id,support_id,site,emplacement_visibilite',signal,previewTargetId),
-    fetchAll('campagne_visuels_formats','id,campagne_id,nom_visuel',signal,previewTargetId)
+  const {loadBusinessRows}=await import('./businessParityService.js');
+  const [history,assignments,campaigns,infrastructures,visuals]=await Promise.all([
+    loadBusinessRows('Historique des campagnes',{targetUserId:previewTargetId}),
+    fetchAll('campagnes_supports','*',signal,previewTargetId),fetchAll('campagnes_maitres','*',signal,previewTargetId),
+    infrastructureRows ?? fetchAll('infrastructures','*',signal,previewTargetId),
+    fetchAll('campagne_visuels_formats','*',signal,previewTargetId)
   ]);
-  const current=canonicalAssignmentRows(assignments,campaigns,infrastructures,visuals).filter(row=>row.business_context===context);
-  const tagged=[...current,...historical.filter(row=>row.business_context===context).map(row=>({...row,_assignment_table:tableFor(context)}))].map(row=>({...row,logical_key:assignmentLogicalKey(row)}));
-  return normalizeUniqueAssignments(tagged);
+  const current=normalizeUniqueAssignments(canonicalAssignmentRows(assignments,campaigns,infrastructures,visuals));
+  const deployments=projectSiteSupportDeployments({history:history.rows,assignments:current,campaigns,supports:infrastructures,visuals});
+  // Only displays currently installed, never planned assignments or withdrawals.
+  const installed=deployments.filter(row=>row.etat_courant==='Oui');
+  return {rows:installed.filter(row=>row.business_context===context),unresolved:installed.filter(row=>!row.business_context).length,unclassified:installed.filter(row=>!row.business_context)};
 }
 
 export function filterRows(rows,context,search,filters){
@@ -96,8 +105,9 @@ export function paginateRows(rows,page,pageSize){const size=safePageSize(pageSiz
 export async function getAssignmentsBySiteAndSupport({context=BUSINESS_CONTEXT.MARKETING,page=1,pageSize=25,search='',filters={},sortState=null,signal,previewTargetId}={}){
   const size=safePageSize(pageSize),current=Math.max(1,Number(page)||1);
   if(!supabaseConfigured||!supabase)return{rows:[],total:0,page:current,pageSize:size};
-  const rows=prepareRows(await loadRows(context,signal,undefined,previewTargetId),context,search,filters,sortState);
-  return paginateRows(rows,current,size);
+  const source=await loadRows(context,signal,undefined,previewTargetId);
+  const rows=prepareRows(source.rows,context,search,filters,sortState);
+  return {...paginateRows(rows,current,size),unresolved:source.unresolved,unclassified:source.unclassified};
 }
 
 export const getMarketingAssignmentsBySiteAndSupport=options=>getAssignmentsBySiteAndSupport({...options,context:BUSINESS_CONTEXT.MARKETING});
@@ -105,7 +115,8 @@ export const getOperationalCommunicationAssignmentsBySiteAndSupport=options=>get
 
 export async function getAllAssignmentsBySiteAndSupport({context=BUSINESS_CONTEXT.MARKETING,search='',filters={},sortState=null,infrastructureRows,previewTargetId}={}){
   if(!supabaseConfigured||!supabase)return[];
-  return prepareRows(await loadRows(context,undefined,infrastructureRows,previewTargetId),context,search,filters,sortState);
+  const source=await loadRows(context,undefined,infrastructureRows,previewTargetId);
+  return prepareRows(source.rows,context,search,filters,sortState);
 }
 
 export async function updateSiteSupportAssignment(row, form) {

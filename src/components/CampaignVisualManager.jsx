@@ -1,3 +1,4 @@
+import VisualReferences from './VisualReferences';
 import React, { useEffect, useRef, useState } from 'react';
 import { Archive, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { listMasterCampaigns } from '../services/campaignService';
@@ -24,8 +25,10 @@ const empty = {
   edt_phase_id: ''
 };
 
-export default function CampaignVisualManager({ role, businessContext = BUSINESS_CONTEXT.MARKETING }) {
-  const initialDraft = readFormDraft('visual', businessContext, { form: empty, formOpen: false });
+export default function CampaignVisualManager({ role, businessContext = BUSINESS_CONTEXT.MARKETING, campaignId=null, previewMode=false }) {
+  const draftScope=campaignId ? businessContext+':'+campaignId : businessContext;
+  const emptyForCampaign={...empty,campagne_id:campaignId||''};
+  const initialDraft = readFormDraft('visual', draftScope, { form: {...empty,campagne_id:campaignId||''}, formOpen: false });
   const [campaigns, setCampaigns] = useState([]);
   const [visuals, setVisuals] = useState([]);
   const [form, setForm] = useState(initialDraft.form);
@@ -38,7 +41,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
   const [campaignSearch,setCampaignSearch]=useState(''),[visualSearch,setVisualSearch]=useState('');
   const [hydratedContext, setHydratedContext] = useState(businessContext);
 
-  const canManage = ['Administrateur', 'Coordonnateur'].includes(role);
+  const canManage = !previewMode&&['Administrateur', 'Coordonnateur'].includes(role);
 
   async function reload() {
     try {
@@ -46,8 +49,8 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
         listMasterCampaigns(false, businessContext),
         listCampaignVisuals()
       ]);
-      setCampaigns(nextCampaigns);
-      setVisuals(nextVisuals.filter(visual => isBusinessContext(visual.campagne, businessContext)));
+      setCampaigns(campaignId?nextCampaigns.filter(c=>String(c.id)===String(campaignId)):nextCampaigns);
+      setVisuals(nextVisuals.filter(visual => isBusinessContext(visual.campagne, businessContext)&&(!campaignId||String(visual.campagne_id)===String(campaignId))));
     } catch (error) {
       setMessage(error.message);
     }
@@ -55,20 +58,20 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
 
   useEffect(() => {
     reload();
-  }, [businessContext]);
+  }, [businessContext,campaignId]);
 
   useEffect(() => {
     setHydratedContext(null);
-    const draft = readFormDraft('visual', businessContext, { form: empty, formOpen: false });
+    const draft = readFormDraft('visual', draftScope, { form: emptyForCampaign, formOpen: false });
     setForm(draft.form);
     setFormOpen(Boolean(draft.formOpen));
     setHydratedContext(businessContext);
-  }, [businessContext]);
+  }, [businessContext,campaignId]);
 
   useEffect(() => {
     if (hydratedContext !== businessContext) return;
-    if (formOpen) writeFormDraft('visual', businessContext, { form, formOpen });
-    else clearFormDraft('visual', businessContext);
+    if (formOpen) writeFormDraft('visual', draftScope, { form, formOpen });
+    else clearFormDraft('visual', draftScope);
   }, [businessContext, form, formOpen, hydratedContext]);
 
   useEffect(() => {
@@ -86,8 +89,8 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
     try {
       await saveCampaignVisual({...form,edt_associations:role==='Administrateur'?form.edt_associations:undefined});
       setMessage(form.id ? 'Visuel modifié.' : 'Visuel enregistré.');
-      clearFormDraft('visual', businessContext);
-      setForm(empty);
+      clearFormDraft('visual', draftScope);
+      setForm(emptyForCampaign);
       setFormOpen(false);
       await reload();
     } catch (error) {
@@ -113,7 +116,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
           ? 'Le visuel était déjà utilisé et a été archivé.'
           : 'Visuel supprimé.'
       );
-      if (form.id === visual.id) setForm(empty);
+      if (form.id === visual.id) setForm(emptyForCampaign);
       await reload();
     } catch (error) {
       setMessage(error.message);
@@ -143,8 +146,8 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
   }
 
   function discardDraft() {
-    clearFormDraft('visual', businessContext);
-    setForm(empty);
+    clearFormDraft('visual', draftScope);
+    setForm(emptyForCampaign);
     setFormOpen(false);
   }
 
@@ -153,7 +156,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
       <header className="v74-hero">
         <div><h1>Campagne — Visuels et formats</h1>
         <p>Une campagne peut contenir plusieurs phases, visuels, formats et EDT.</p></div>
-        {canManage && <button type="button" className="business-primary-action" onClick={() => { setForm(empty); setFormOpen(true); }}><Plus/> Créer un visuel</button>}
+        {canManage && <button type="button" className="business-primary-action" onClick={() => { setForm(emptyForCampaign); setFormOpen(true); }}><Plus/> Créer un visuel</button>}
       </header>
 
       {message && <div className="v74-msg">{message}</div>}
@@ -285,7 +288,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
                 {visual.edt_associations?.map(link=><small key={link.edt_id}>{link.edt?.no_edt} — {link.date_debut||'Début non défini'} → {link.date_fin||'Fin non définie'}</small>)}
               </div>
 
-              <em>{visual.actif ? 'Actif' : 'Archivé / inactif'}</em>
+              <VisualReferences visual={visual} canManage={canManage} onChanged={reload}/><em>{visual.actif ? 'Actif' : 'Archivé / inactif'}</em>
 
               {canManage && (
                 <div className="visual-managed-actions">

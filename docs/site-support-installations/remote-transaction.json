@@ -1,0 +1,83 @@
+{
+  "at": "2026-09-20T08:57:39.527Z",
+  "rollback": true,
+  "results": [
+    {
+      "label": "Administrateur",
+      "details": {
+        "result": "PASS",
+        "client_id": null,
+        "profile_id": 1
+      }
+    },
+    {
+      "label": "Administrateur",
+      "details": {
+        "result": "PASS",
+        "client_id": null,
+        "profile_id": 3
+      }
+    },
+    {
+      "label": "Client-Admin",
+      "details": {
+        "result": "PASS",
+        "client_id": 1,
+        "profile_id": -92501
+      }
+    },
+    {
+      "label": "Client",
+      "details": {
+        "result": "PASS",
+        "client_id": 1,
+        "profile_id": 37
+      }
+    },
+    {
+      "label": "Client",
+      "details": {
+        "result": "PASS",
+        "client_id": 2,
+        "profile_id": 36
+      }
+    },
+    {
+      "label": "Client",
+      "details": {
+        "result": "PASS",
+        "client_id": 2,
+        "profile_id": 32
+      }
+    },
+    {
+      "label": "Client",
+      "details": {
+        "result": "PASS",
+        "client_id": 2,
+        "profile_id": 35
+      }
+    },
+    {
+      "label": "Client",
+      "details": {
+        "result": "PASS",
+        "client_id": 2,
+        "profile_id": 33
+      }
+    },
+    {
+      "label": "Client-Admin",
+      "details": {
+        "result": "PASS",
+        "client_id": 2,
+        "profile_id": 25
+      }
+    }
+  ],
+  "rollbackVerified": {
+    "reference_column": false,
+    "reference_bucket": false,
+    "reference_function": false
+  }
+}

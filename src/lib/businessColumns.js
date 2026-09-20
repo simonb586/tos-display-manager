@@ -15,7 +15,7 @@ const INFRASTRUCTURE_LABELS = {
   visuel_en_expo: 'Visuel en exposition',
   commentaires: 'Commentaires',
   campagne_actuelle: 'Nom de la campagne actuelle',
-  visuel_campagne: 'Visuel de la campagne',
+  visuel_campagne: 'Visuel générique de la campagne',
   visuel_actuel_cadre: 'Visuel actuel du cadre',
   date_derniere_manipulation: 'Date de la dernière manipulation',
   edt_associe: 'EDT associé',

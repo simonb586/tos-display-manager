@@ -1,6 +1,7 @@
 import React,{useMemo,useRef,useState} from 'react';
 import {createImportId,createImportItem,errorCsv,importReport,rematchManifestFiles,summaryCsv} from '../lib/massPhotoImport';
 import {analyzePhotoItem,listImportManifests,runControlledQueue,saveImportManifest,uploadPhotoItem} from '../services/massPhotoImportService';
+import {releaseFrameIdentifierOcr} from '../services/frameIdentifierOcrService';
 import {loadPhotoImportCatalog} from '../services/photoImportContextService';
 import PhotoImportContextEditor,{ImportPhotoPreview,ImportBatchDecision,updateImportManual} from './PhotoImportContextEditor';
 import '../features/v10/mass-photo-import.css';
@@ -27,7 +28,7 @@ export default function MassPhotoImporter({role,onReview}) {
    },{concurrency:mode==='analyze'?2:6,batchSize:100},{onBatch:()=>saveImportManifest({id:batchId,items:snapshot}).catch(()=>{})});
    control.current=task.control;await task.run;setItems([...snapshot]);await saveImportManifest({id:batchId,items:snapshot});
    setMessage(mode==='upload'?'Originaux conservés. Les associations peuvent être corrigées puis finalisées dans À valider.':'Analyse terminée. Les photos ambiguës et non identifiées peuvent aussi être importées.');
-  }catch(error){setMessage(error.message);}finally{active.current=false;setBusy(false);setPaused(false);}
+  }catch(error){setMessage(error.message);}finally{if(mode==='analyze')await releaseFrameIdentifierOcr();active.current=false;setBusy(false);setPaused(false);}
  }
  function updateContext(item,context){change(item.id,{import_context:context,manual:context.manual,recognition:context.recognition,status:context.recognition.ready?'ready':'requires_review'});}
  function bulk(decision){if(!window.confirm(`Appliquer ces choix à ${selected.length} photos, en conservant chaque support ?`))return;setItems(current=>current.map(item=>{if(!item.selected||!item.import_context||item.resultId)return item;const context=updateImportManual(item.import_context,catalog,decision);return {...item,import_context:context,manual:context.manual,recognition:context.recognition,status:context.recognition.ready?'ready':'requires_review'};}));}
@@ -46,7 +47,7 @@ export default function MassPhotoImporter({role,onReview}) {
   <div className="review-grid">{visible.map(item=><article key={item.id}>
    <label><input type="checkbox" checked={Boolean(item.selected)} disabled={busy||Boolean(item.resultId)} onChange={e=>change(item.id,{selected:e.target.checked})}/> Sélectionner</label>
    <ImportPhotoPreview photo={preview(item)} onClick={()=>{setOpened(item.id);setZoom(1);setRotation(0);}}/>
-   <div className="review-card-body"><strong>{item.originalFilename}</strong><p>{item.resultId?'Original importé':item.recognition?.ready?'Prête à confirmer':item.recognition?.unidentified?'À valider — non identifiée':item.recognition?'À valider':'À analyser'}</p><p>{item.recognition?.values.support||'Support à identifier'}</p>{item.error&&<p role="alert">{item.error}</p>}</div>
+   <div className="review-card-body"><strong>{item.originalFilename}</strong><p>{item.resultId?'Original importé':item.recognition?.ready?'Prête à confirmer':item.recognition?.unidentified?'À valider — non identifiée':item.recognition?'À valider':'À analyser'}</p><p>{item.recognition?.values.support||'Support à identifier'}</p>{item.error&&<p role="alert">{item.error}</p>}{item.ocrWarning&&<p>{item.ocrWarning}</p>}{item.referenceWarning&&<p>{item.referenceWarning}</p>}{item.suggestions?.length>0&&<p>Identifiants lus : {item.suggestions.map(s=>s.support_id).join(', ')}</p>}</div>
   </article>)}</div>
   <div className="mass-controls"><button disabled={page===0} onClick={()=>setPage(p=>p-1)}>Précédent</button><span>{page+1} / {Math.max(1,Math.ceil(items.length/12))}</span><button disabled={(page+1)*12>=items.length} onClick={()=>setPage(p=>p+1)}>Suivant</button>
    <button onClick={()=>download(errorCsv(items),'erreurs-import.csv')}>Exporter les erreurs</button><button onClick={()=>download(summaryCsv(importReport(items,{batchId,startedAt:started.current})),'resume-import.csv')}>Exporter le résumé</button>

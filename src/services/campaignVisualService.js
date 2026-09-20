@@ -168,6 +168,13 @@ export async function applyVisualToSupport({
 
 export async function deleteOrArchiveCampaignVisual(id) {
   ready();
+  const {data:visual,error:readError}=await supabase.from('campagne_visuels_formats').select('id,reference_assets').eq('id',Number(id)).single();
+  if(readError)throw readError;
+  if(visual.reference_assets?.length){
+    const {error}=await supabase.from('campagne_visuels_formats').update({actif:false,updated_at:new Date().toISOString()}).eq('id',Number(id)).select('id').single();
+    if(error)throw error;
+    return {action:'archived',used_count:visual.reference_assets.length};
+  }
   const { data, error } = await supabase.rpc('delete_or_archive_campaign_visual', {
     p_visual_id: Number(id)
   });

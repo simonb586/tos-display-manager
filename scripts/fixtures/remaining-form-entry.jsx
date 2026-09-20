@@ -13,6 +13,8 @@ window.testApi=(file,name,args)=>{
  if(mutations.includes(name))result={id:1,supports_affectes:1};
  else if(name==='listCampaignVisuals')result=[{id:1,campagne_id:1,nom_visuel:'Visual Fixture',campagne:{business_context:window.businessContext||'marketing'}}];
  else if(name==='listEdtPhasesForCampaign')result=[];
+ else if(name==='getPhotoInventoryCapabilities')result={import:true,cancel:true,author:true};
+ else if(name==='listDisplayMovements')result={rows:[],total:0};
  else if(name==='listAutomationDefinitions')result=[{...emptyAutomation(),id:'auto-local-1',name:'Local automation'}];
  else if(name==='listCrossModuleViews')result=[{...emptyCrossModuleView(),id:'view-local-1',name:'Local view',source:'infrastructures',destination:'support360'}];
  else if(name==='listAutomationEngineState')result={bindings:[],resources:[],logs:[]};

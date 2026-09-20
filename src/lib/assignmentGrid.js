@@ -1,11 +1,11 @@
 import {formatBusinessValue} from './businessTime.js';
 import { BUSINESS_CONTEXT } from './businessContext.js';
 
-const dateKeys = new Set(['date_debut', 'date_fin', 'date_completion', 'date_mise_a_jour', 'created_at', 'updated_at']);
+const dateKeys = new Set(['date_installation', 'date_retrait', 'date_debut', 'date_fin', 'date_completion', 'date_mise_a_jour', 'created_at', 'updated_at']);
 const dateFormatter = new Intl.DateTimeFormat('fr-CA', { timeZone: 'America/Toronto', day: '2-digit', month: 'short', year: 'numeric' });
 const campaign = [['id','ID'],['nom_campagne','Nom campagne'],['visuel_terrain','Visuel terrain'],['date_debut','Date début'],['date_fin','Date fin'],['statut_campagne','Statut'],['support_id','Support'],['emplacement','Infrastructure'],['no_edt','EDT'],['date_completion','Installation'],['date_mise_a_jour','Date mise à jour'],['created_at','Créé le'],['updated_at','Modifié le'],['raw_data','Données source']];
 const operational = [['id','ID'],['emplacement','Emplacement'],['message','Communication'],['date_debut','Date début'],['date_fin','Date fin'],['statut','Statut'],['no_arret','No arrêt'],['site_ou_arret','Site ou arrêt'],['support_id','Support'],['no_edt','EDT'],['date_completion','Installation'],['related_voiture','Voiture'],['visuel_message','Visuel message'],['visuel_terrain','Visuel terrain'],['created_at','Créé le'],['updated_at','Dernière activité'],['raw_data','Données source']];
-const enrichment = [['site','Site'],['infrastructure_id','Infrastructure ID'],['campaign_id','Relation campagne'],['visual_id','Relation visuel'],['business_context','Contexte métier'],['legacy_id','ID historique']];
+const enrichment = [['format_visuel','Format du visuel'],['format_support','Format du support'],['date_installation','Date installation'],['etat_courant','État courant'],['photo','Photo'],['client','Client'],['site','Site'],['infrastructure_id','Infrastructure ID'],['campaign_id','Relation campagne'],['visual_id','Relation visuel'],['business_context','Contexte métier'],['legacy_id','ID historique']];
 
 const definition = ([id, label]) => Object.freeze({ id, label, accessor: row => row?.[id], formatter: value => formatAssignmentCell(id, value), type: dateKeys.has(id) ? 'date' : id === 'id' || id.endsWith('_id') ? 'identifier' : 'text', sortable: id !== 'raw_data', filterable: id !== 'raw_data' });
 export const ASSIGNMENT_COLUMNS = Object.freeze({

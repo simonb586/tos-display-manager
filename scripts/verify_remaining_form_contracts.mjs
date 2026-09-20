@@ -9,7 +9,7 @@ const cases=[
  ['OperationsCenter','Supports','form.edt-support-import','assignSupportsToEdt'],
  ['OperationsCenter','BT','form.operations-form','createWorkOrderV11'],
  ['OperationsCenter','Request','form.operations-form','createClientRequest'],
- ['PhotoInventoryCenter','Movement','form','createInventoryMovement'],
+ ['PhotoInventoryCenter','Movement','.inventory-layout form','createInventoryMovement'],
  ['CampaignVisualManager','Visual','form.v74-form','saveCampaignVisual'],
  ['AutomationAssistant','Automation','form.automation-form','saveAutomationDefinition'],
  ['AutomationAssistant','View','form.view-form','saveCrossModuleView'],
@@ -24,7 +24,7 @@ await offlineBrowser('scripts/fixtures/remaining-form-entry.jsx',async({evaluate
   if(['Phase','Assignment','Supports'].includes(view)){await evaluate("document.querySelector('.edt-select').click()");await sleep(100)}
   if(view==='BT')await click('Bons de travail');
   if(view==='Request')await click('Requêtes clients');
-  if(view==='Movement')await click('Inventaire');
+  if(view==='Movement'){await click('Inventaire');await evaluate("document.querySelector('.photo-inventory-center details, .inventory-layout')?.closest('details')?.setAttribute('open','');document.querySelector('details:has(.inventory-layout)')?.setAttribute('open','')");}
   if(view==='Visual')await click('Créer un visuel');
   if(view==='Automation')await click('Nouvelle automatisation');
   if(view==='View'){await click('Vues entre');await click('Nouvelle vue')}
@@ -47,7 +47,7 @@ await offlineBrowser('scripts/fixtures/remaining-form-entry.jsx',async({evaluate
   }
   // Fill each independently so controlled updates cannot overwrite one another.
   const count=await evaluate("activeForm.querySelectorAll('input:not([type=checkbox]):not([type=radio]),textarea').length");
-  for(let i=0;i<count;i++){await evaluate(`(()=>{const n=activeForm.querySelectorAll('input:not([type=checkbox]):not([type=radio]),textarea')[${i}];if(n.readOnly||n.disabled)return;setFormValue(n,n.type==='number'?'1':n.type==='date'?'2026-09-10':n.type==='email'?'fixture@example.test':'LOCAL FORM')})()`);await sleep(10)}
+  for(let i=0;i<count;i++){await evaluate(`(()=>{const n=activeForm.querySelectorAll('input:not([type=checkbox]):not([type=radio]),textarea')[${i}];if(n.readOnly||n.disabled||n.closest('label')?.textContent.includes('Rechercher'))return;setFormValue(n,n.type==='number'?'1':n.type==='date'?'2026-09-10':n.type==='email'?'fixture@example.test':'LOCAL FORM')})()`);await sleep(10)}
   const selects=await evaluate("activeForm.querySelectorAll('select').length");
   for(let i=0;i<selects;i++){await evaluate(`(()=>{const n=activeForm.querySelectorAll('select')[${i}];if(!n.disabled&&!n.value&&n.options.length>1)setFormValue(n,n.options[1].value)})()`);await sleep(15)}
   if(view==='Rule'){await evaluate("setFormValue(activeForm.querySelectorAll('fieldset select')[3],'support_id')");await sleep(30)}

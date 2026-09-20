@@ -1,0 +1,72 @@
+[
+  {
+    "name": "check",
+    "exitCode": 0,
+    "result": "PASS"
+  },
+  {
+    "name": "verify_reference_recognition_browser",
+    "exitCode": 0,
+    "result": "PASS"
+  },
+  {
+    "name": "verify_photo_import_recognition",
+    "exitCode": 0,
+    "result": "PASS"
+  },
+  {
+    "name": "verify_photo_review_queue",
+    "exitCode": 0,
+    "result": "PASS"
+  },
+  {
+    "name": "verify_mass_photo_import_v121",
+    "exitCode": 0,
+    "result": "PASS"
+  },
+  {
+    "name": "verify_grid_headers_sorting_assignments_v124",
+    "exitCode": 0,
+    "result": "PASS"
+  },
+  {
+    "name": "verify_review_edt_mission",
+    "exitCode": 0,
+    "result": "PASS"
+  },
+  {
+    "name": "verify_terrain_visual_driven_local",
+    "exitCode": 0,
+    "result": "PASS"
+  },
+  {
+    "name": "verify_terrain_optional_context_local",
+    "exitCode": 0,
+    "result": "PASS"
+  },
+  {
+    "name": "verify_business_parity_browser",
+    "exitCode": 0,
+    "result": "PASS"
+  },
+  {
+    "name": "build",
+    "exitCode": 0,
+    "result": "PASS"
+  },
+  {
+    "name": "verify_campaign_visual_actions_v129",
+    "exitCode": 0,
+    "result": "PASS"
+  },
+  {
+    "name": "verify_site_support_installations_browser",
+    "exitCode": 0,
+    "result": "PASS"
+  },
+  {
+    "name": "diff",
+    "exitCode": 0,
+    "result": "PASS"
+  }
+]

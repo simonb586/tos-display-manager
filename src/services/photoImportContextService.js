@@ -11,19 +11,20 @@ export async function loadPhotoImportCatalog() {
   catalogRows('edt_phases','id,edt_id,phase_type,date_debut_prevue,date_fin_prevue,date_debut_reelle,date_fin_reelle'),
   catalogRows('edt_supports','id,edt_id,phase_id,support_id,date_cible'),
   catalogRows('campagnes_maitres','id,client_id,nom_campagne,business_context,date_debut,date_fin'),
-  catalogRows('campagne_visuels_formats','id,client_id,campagne_id,nom_visuel,format_support,is_out_of_frame'),
+  catalogRows('campagne_visuels_formats','id,client_id,campagne_id,nom_visuel,format_support,is_out_of_frame,reference_assets'),
   (async()=>{const rows=[];for(let offset=0;;offset+=500){const {data,error}=await supabase.from('visual_edt_associations').select('*').order('visual_id').order('edt_id').range(offset,offset+499);if(error)throw error;rows.push(...data);if(data.length<500)return rows;}})()
  ]);
  const campaignById=new Map(campaigns.map(c=>[String(c.id),c]));
  return {supports,edts:edts.sort((a,b)=>compareNatural(a.no_edt,b.no_edt)),phases,links,campaigns:campaigns.sort(compareCampaigns),visuals:visuals.map(v=>({...v,campaign_name:campaignById.get(String(v.campagne_id))?.nom_campagne})).sort(compareVisuals),associations};
 }
 export function importContextForPhoto(photo,catalog,manual=photo.import_context?.manual||{}) {
- const input=photo.import_context?.input||{
+ const input={...(photo.import_context?.input||{
   originalFilename:photo.originalFilename||photo.original_filename||photo.nom_fichier,
   supportId:photo.supportId||photo.proposed_support_id||'',capturedAt:photo.capturedAt||photo.captured_at||photo.prise_le,
   capturedAtSource:photo.capturedAtSource||photo.metadata?.captured_at_source||'IMPORT_DATE',
-  ocrText:photo.ocrText||photo.ocr_text,ocrConfidence:photo.ocrConfidence||photo.ocr_confidence
- };
+  visualReferenceMatches:photo.visualReferenceMatches||[],ocrText:photo.ocrText||photo.ocr_text,ocrConfidence:photo.ocrConfidence||photo.ocr_confidence
+ }),...(photo.visualReferenceMatches!==undefined?{visualReferenceMatches:photo.visualReferenceMatches}:{}),
+ ...(photo.ocrText!==undefined?{ocrText:photo.ocrText,ocrConfidence:photo.ocrConfidence}:{})};
  return {input,manual,recognition:recognizeImportPhoto(input,catalog,manual)};
 }
 export async function savePhotoImportContext(photoId,context) {

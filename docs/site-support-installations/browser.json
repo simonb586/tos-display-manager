@@ -1,0 +1,26 @@
+[
+  {
+    "view": "installations",
+    "role": "Administrateur",
+    "result": "PASS"
+  },
+  {
+    "view": "installations",
+    "role": "Client",
+    "result": "PASS"
+  },
+  {
+    "view": "installations",
+    "role": "Client-Admin",
+    "result": "PASS"
+  },
+  {
+    "newInstallationRefresh": "PASS"
+  },
+  {
+    "themesSearchOrderAndDetail": "PASS"
+  },
+  {
+    "photoSupportAssignmentAndDeletion": "PASS"
+  }
+]

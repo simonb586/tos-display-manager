@@ -2,6 +2,7 @@ import { BUSINESS_CONTEXT } from './businessContext.js';
 
 const scalar = value => value === null || value === undefined ? '' : String(value);
 export const assignmentLogicalKey = row => [
+  scalar(row.client_id),
   scalar(row.site_id ?? row.site),
   scalar(row.support_id),
   scalar(row.campaign_id ?? row.communication_id ?? row.campagne_id),

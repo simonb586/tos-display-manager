@@ -583,13 +583,13 @@ function ApplicationSession() {
   else if (active === 'Automatisations') content = <AutomationAssistant role={role}/>;
   else if (active === 'Validation système') content = <ValidationCenter role={role}/>;
   else if (active === 'Import anciennes photos') content = <LegacyPhotoImporter dataStore={dataStore} session={session}/>;
-  else if (active === 'Historique des campagnes') content = <CampaignHistoryView onNavigate={(context,query)=>{setNavigationContext({historyQuery:query});setActive(context==='marketing'?'Campagnes maîtres':'Communications opérationnelles');}}/>;
+  else if (active === 'Historique des campagnes') content = <CampaignHistoryView onNavigate={(context,query)=>{setNavigationContext({historyQuery:query});setActive(context==='marketing'?'Campagnes et visuels par site et supports':'Communications opérationnelles par site et supports');}}/>;
   else if (active === 'Campagnes maîtres') content = <CampaignsPanel scopeKey={[currentDataScope,Boolean(getUserViewPreview())].join(':')} role={role} session={session} historyQuery={navigationContext.historyQuery||''} businessContext={BUSINESS_CONTEXT.MARKETING}/>;
   else if (active === 'Campagne — Visuels et formats') content = <CampaignVisualManager role={role} businessContext={BUSINESS_CONTEXT.MARKETING}/>;
   else if (active === 'Communications opérationnelles') content = <CampaignsPanel scopeKey={[currentDataScope,Boolean(getUserViewPreview())].join(':')} role={role} session={session} historyQuery={navigationContext.historyQuery||''} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
   else if (active === 'Communication opérationnelle — Visuels') content = <CampaignVisualManager role={role} businessContext={BUSINESS_CONTEXT.OPERATIONAL}/>;
-  else if (active === 'Campagnes et visuels par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.MARKETING} role={role} onNavigate={setActive}/>;
-  else if (active === 'Communications opérationnelles par site et supports') content = <SiteSupportAssignmentsView context={BUSINESS_CONTEXT.OPERATIONAL} role={role} onNavigate={setActive}/>;
+  else if (active === 'Campagnes et visuels par site et supports') content = <SiteSupportAssignmentsView initialQuery={navigationContext.historyQuery||''} context={BUSINESS_CONTEXT.MARKETING} role={role} onNavigate={setActive}/>;
+  else if (active === 'Communications opérationnelles par site et supports') content = <SiteSupportAssignmentsView initialQuery={navigationContext.historyQuery||''} context={BUSINESS_CONTEXT.OPERATIONAL} role={role} onNavigate={setActive}/>;
   else if (active === 'Carte interactive') content = <InteractiveMap dataStore={navigationContext.mapRows?{Infrastructures:{rows:navigationContext.mapRows}}:dataStore} focusSupportId={mapFocusSupportId} onClearFocus={() => setMapFocusSupportId('')} onNavigate={navigateToView} onBackToInfrastructures={() => setActive('Infrastructures')} hasInfrastructureContext={navigationContext.sourceView==='infrastructures'} role={role}/>;
   else if (active === 'Application terrain') content = <TerrainApp dataStore={dataStore} role={role} session={session}/>;
   else if (active === 'Recherche terrain') content = <div className="dashboard"><FieldSearch dataStore={dataStore}/></div>;

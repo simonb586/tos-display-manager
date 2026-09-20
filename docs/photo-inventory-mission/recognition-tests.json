@@ -55,6 +55,14 @@
     {
       "test": "Foreign visual cannot be selected manually",
       "result": "PASS"
+    },
+    {
+      "test": "One eligible visual is insufficient without a generic reference match",
+      "result": "PASS"
+    },
+    {
+      "test": "Reference conflicting with EDT remains unresolved",
+      "result": "PASS"
     }
   ],
   "representativeBatch": {

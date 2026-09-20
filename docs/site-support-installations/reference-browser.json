@@ -1,0 +1,32 @@
+{
+  "at": "2026-09-20T02:02:35.216Z",
+  "result": "PASS",
+  "photoPoints": 999,
+  "pdfPoints": 1000,
+  "pdfPages": 1,
+  "matches": [
+    {
+      "inliers": 240,
+      "ratio": 0.9266409266409267,
+      "coverage": 0.559259506,
+      "reliable": true,
+      "score": 222.39,
+      "visual_id": 1,
+      "campaign_id": 7,
+      "client_id": 2,
+      "reference_id": "photo",
+      "page": 1,
+      "confirmed": true
+    }
+  ],
+  "ocr": {
+    "supportId": "3002-7",
+    "candidates": [
+      {
+        "support_id": "3002-7",
+        "confidence": 96,
+        "region": "upper-right"
+      }
+    ]
+  }
+}
