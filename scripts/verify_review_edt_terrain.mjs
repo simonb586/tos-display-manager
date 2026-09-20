@@ -46,17 +46,18 @@ try{
     assert.equal(await b.evaluate("document.querySelector('input[type=checkbox]').checked"),false);
     await b.waitFor(`Array.from(document.querySelectorAll('form select option')).some(o=>o.value==='${f.phase2Id}')`);
     await select('form select:nth-of-type(1)', 'installation');
-    await b.evaluate(`Array.from(document.querySelectorAll('form select')).find(s=>Array.from(s.options).some(o=>o.value==='${f.phase2Id}')).setAttribute('data-phase','')`);await select('[data-phase]',f.phase2Id);
+    await b.evaluate(`Array.from(document.querySelectorAll('form select')).find(s=>s.parentElement.textContent.trim().startsWith('EDT')).setAttribute('data-phase','')`);await select('[data-phase]',f.phase2Id);
    }else if(mode==='without'){await b.evaluate("document.querySelector('input[type=checkbox]').click()");await b.pause(150);}
    if(['normal','without'].includes(mode)){
     await b.waitFor(`Array.from(document.querySelectorAll('form select option')).some(o=>o.value==='${f.visualId}')`);
-    await b.evaluate(`Array.from(document.querySelectorAll('form select')).find(s=>Array.from(s.options).some(o=>o.value==='${f.visualId}')).setAttribute('data-visual','')`);await select('[data-visual]',f.visualId);
+    await b.evaluate(`Array.from(document.querySelectorAll('form select')).find(s=>s.parentElement.textContent.trim().startsWith('Visuel compatible')).setAttribute('data-visual','')`);await select('[data-visual]',f.visualId);
    }
    if(mode==='enjeu'){
     assert.equal(await b.evaluate("document.body.textContent.includes('Contexte EDT / phase')"),false);
     await b.evaluate("(()=>{const e=document.querySelector('input[placeholder^=\"Ex.\"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(e,'Vitre - test controle');e.dispatchEvent(new Event('input',{bubbles:true}));})()");
    }
    await b.evaluate(`(()=>{const d=new DataTransfer();d.items.add(new File([Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jF9sAAAAASUVORK5CYII='),x=>x.charCodeAt(0))],'${mode}.png',{type:'image/png'}));const e=document.querySelector('input[type=file]');e.files=d.files;e.dispatchEvent(new Event('change',{bubbles:true}));})()`);await b.pause(100);
+   assert.equal(await b.evaluate("document.querySelector('form').checkValidity()"),true,'Terrain test form must contain the selected EDT and visual');
    await b.evaluate("document.querySelector('form button[type=submit]').click()");await b.waitFor("!!document.querySelector('.terrain-message.success,.terrain-message.error')",90);
    assert(await b.evaluate("!!document.querySelector('.terrain-message.success')"),await b.evaluate("document.querySelector('.terrain-message').textContent"));
    pass('Real Terrain browser '+mode);
