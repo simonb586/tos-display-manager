@@ -9,7 +9,7 @@ const access=await targetedAccess(),actors=[],records=[],label=process.env.TDM_T
 const evidence={at:new Date().toISOString(),records},prefix='MISSION-'+crypto.randomUUID().slice(0,8),names=Array.from({length:5},(_,i)=>`${prefix}-${i}.png`);
 let visualId,admin;
 const save=()=>{fs.mkdirSync('docs/review-edt-mission',{recursive:true});fs.writeFileSync(`docs/review-edt-mission/${label}.json`,JSON.stringify(evidence,null,2));};
-if(process.env.TDM_TEST_CLIENTS_ONLY){const prior=JSON.parse(fs.readFileSync(`docs/review-edt-mission/${label}.json`));records.push(...prior.records.filter(r=>!r.name.includes('Maryl?ne')&&!r.name.includes('Client B')));evidence.resumedClientChecks=true;}
+if(process.env.TDM_TEST_CLIENTS_ONLY||process.env.TDM_TEST_VIEWS_ONLY){const prior=JSON.parse(fs.readFileSync(`docs/review-edt-mission/${label}.json`));records.push(...prior.records.filter(r=>!r.name.startsWith('Maryl')&&!r.name.includes('Client B')));evidence.resumedClientChecks=true;}
 const pass=(name,details={})=>{records.push({name,result:'PASS',...details});save();console.log(name+' PASS');};
 const actor=async(role,clientId,id)=>{const a=await fixtureSession(access,{role,clientId,profileId:id});actors.push(a);return a;};
 async function navigation(b,label){await b.waitFor(`Array.from(document.querySelectorAll('aside button')).some(e=>(e.textContent.trim().endsWith(${JSON.stringify(label)})||(${JSON.stringify(label)}==='Historique des campagnes'&&e.textContent.trim()==='Historique')))`,90);await b.evaluate(`Array.from(document.querySelectorAll('aside button')).find(e=>(e.textContent.trim().endsWith(${JSON.stringify(label)})||(${JSON.stringify(label)}==='Historique des campagnes'&&e.textContent.trim()==='Historique'))).click()`);}
@@ -20,6 +20,7 @@ try{
  const initial=await admin.client.rpc('photo_inventory_read',{p_table:'support_photos',p_filters:{deleted_at:null,review_queue:true},p_limit:1000});assert.ifError(initial.error);evidence.initialQueue=initial.data.total;
  const created=await admin.client.rpc('save_campaign_visual_with_edts',{p_visual:{campagne_id:11,nom_visuel:prefix,format_support:'20 x 28'},p_links:[]});assert.ifError(created.error);visualId=created.data.id;
  if(!process.env.TDM_TEST_CLIENTS_ONLY)await productionBrowser(admin.session,async b=>{
+  if(!process.env.TDM_TEST_VIEWS_ONLY){
   await navigation(b,'Photos et inventaire');await b.waitFor(`!!document.querySelector('.editor-tabs')`);await click(b,'Photos à valider');
   await b.waitFor(`document.querySelectorAll('.review-grid article').length>0`,90);
   const ids=new Set();
@@ -48,8 +49,9 @@ try{
   await b.waitFor(`document.querySelector('.v74-msg')?.textContent==='Visuel modifié.'`,45);
   const links=await admin.client.from('visual_edt_associations').select('edt_id,date_debut').eq('visual_id',visualId);assert.ifError(links.error);assert.equal(links.data.length,2);assert(links.data.some(a=>a.edt_id===22&&a.date_debut==='2026-09-01'));
   pass('Real visual edit: EDT-TOS-09, EDT-TOS-22-A, multi-EDT dates persisted');
+  }
   for(const route of ['Campagnes maîtres','Communications opérationnelles','Historique des campagnes']){
-   await navigation(b,route);await b.waitFor(`!!document.querySelector('.campaign-history-view')`,90);await b.waitFor(`!document.querySelector('.campaign-history-view [role=status]')`,90);
+   await navigation(b,route);await b.waitFor(`!!document.querySelector('.campaign-history-view')`,90);await b.waitFor(`!document.querySelector('.campaign-history-view > p[role=status]')`,90);
    assert.equal(await b.evaluate(`document.querySelector('.campaign-history-view [role=alert]')?.textContent||''`),'');
    if(route==='Historique des campagnes')assert(await b.evaluate(`document.querySelector('.campaign-history-view').textContent.includes('Nombre de supports')`));
    pass('Actual view: '+route,{rows:await b.evaluate(`document.querySelectorAll('.campaign-history-view tbody tr').length`)});
@@ -58,7 +60,7 @@ try{
  });
  for(const [name,a] of [['Marylène',await existingSession(access,25)],['Client B',await actor('Client',1,-94912)]]){
   try{const rows=await a.client.rpc('photo_inventory_read',{p_table:'support_photos',p_filters:{deleted_at:null},p_limit:1000});assert.ifError(rows.error);if(name==='Client B')assert.equal(rows.data.total,0);
-   await productionBrowser(a.session,async b=>{if(name==='Client B'){await b.waitFor(`document.querySelector('[data-dashboard-state]')?.dataset.dashboardState==='ready'`,90);assert.equal(await b.evaluate(`Array.from(document.querySelectorAll('aside button')).some(e=>e.textContent.trim()==='Historique')`),false);const h=await a.client.rpc('portal_business_rows',{p_view:'Historique des campagnes',p_offset:0,p_limit:1000});assert(h.error||h.data.total===0);assert.deepEqual(b.errors,[]);return;}await navigation(b,'Historique des campagnes');await b.waitFor(`!!document.querySelector('.campaign-history-view')`,90);await b.waitFor(`!document.querySelector('.campaign-history-view [role=status]')`,90);assert.equal(await b.evaluate(`document.querySelector('.campaign-history-view [role=alert]')?.textContent||''`),'');assert.equal(await b.evaluate(`document.querySelector('.campaign-history-view').textContent.includes('Modifier')`),false);assert.deepEqual(b.errors,[]);});
+   await productionBrowser(a.session,async b=>{if(name==='Client B'){await b.waitFor(`document.querySelector('[data-dashboard-state]')?.dataset.dashboardState==='ready'`,90);assert.equal(await b.evaluate(`Array.from(document.querySelectorAll('aside button')).some(e=>e.textContent.trim()==='Historique')`),false);const h=await a.client.rpc('portal_business_rows',{p_view:'Historique des campagnes',p_offset:0,p_limit:1000});assert(h.error||h.data.total===0);assert.deepEqual(b.errors,[]);return;}await navigation(b,'Historique des campagnes');await b.waitFor(`!!document.querySelector('.campaign-history-view')`,90);await b.waitFor(`!document.querySelector('.campaign-history-view > p[role=status]')`,90);assert.equal(await b.evaluate(`document.querySelector('.campaign-history-view [role=alert]')?.textContent||''`),'');assert.equal(await b.evaluate(`document.querySelector('.campaign-history-view').textContent.includes('Modifier')`),false);assert.deepEqual(b.errors,[]);});
    pass(name+' actual scoped history and photo isolation');
   }finally{if(name==='Marylène')await a.client.auth.signOut({scope:'local'});}
  }

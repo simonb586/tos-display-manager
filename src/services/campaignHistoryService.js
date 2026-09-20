@@ -9,10 +9,16 @@ async function catalog(table,fields,targetUserId){
  }
 }
 export async function loadCampaignHistory(targetUserId=null){
- const [history,campaigns,supports]=await Promise.all([
+ const [history,campaigns]=await Promise.all([
   loadBusinessRows('Historique des campagnes',{targetUserId}),
-  catalog('campagnes_maitres','id,client_id,nom_campagne,business_context',targetUserId),
-  catalog('infrastructures','id,support_id,site,format_affichage',targetUserId)
+  catalog('campagnes_maitres','id,client_id,nom_campagne,business_context',targetUserId)
  ]);
+ const ids=[...new Set(history.rows.map(row=>row.support_id).filter(Boolean))];
+ const supports=[];
+ if(ids.length&&targetUserId)supports.push(...await catalog('infrastructures','id,support_id,site,format_affichage',targetUserId));
+ else for(let offset=0;offset<ids.length;offset+=200){
+  const {data,error}=await supabase.from('infrastructures').select('id,support_id,site,format_affichage').in('support_id',ids.slice(offset,offset+200));
+  if(error)throw error;supports.push(...(data||[]));
+ }
  return projectCampaignHistory(history.rows,{campaigns,supports});
 }
