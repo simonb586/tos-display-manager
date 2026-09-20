@@ -1,11 +1,5 @@
 import {extractVisualFeatures,compareVisualFeatures,rankVisualReferenceMatches} from '../lib/visualReferenceFeatures.js';
-let engine;
-async function openCv(){
-  if(!engine)engine=import('@techstark/opencv-js').then(async module=>{
-    const cv=await module.default;if(!cv.Mat)await new Promise(resolve=>{cv.onRuntimeInitialized=resolve});return cv;
-  }).catch(error=>{engine=null;throw error});
-  return engine;
-}
+import {openCv} from './openCvLoader.js';
 function canvasForImage(image){
   const scale=Math.min(1,1600/Math.max(image.width,image.height)),canvas=document.createElement('canvas');
   canvas.width=Math.round(image.width*scale);canvas.height=Math.round(image.height*scale);

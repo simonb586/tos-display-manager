@@ -1,5 +1,8 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url);
+const openCvVersion=require('@techstark/opencv-js/package.json').version;
 
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
@@ -18,7 +21,10 @@ export default defineConfig(({ command, mode }) => {
     plugins: [react()],
     build: {
       outDir: 'dist',
-      emptyOutDir: true
+      emptyOutDir: true,
+      rollupOptions: {output: {assetFileNames: asset =>
+        asset.names?.includes('opencv.js') || asset.name==='opencv.js'
+          ? `vendor/opencv-${openCvVersion}.js` : 'assets/[name]-[hash][extname]'}}
     }
   };
 });

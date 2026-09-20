@@ -1,3 +1,4 @@
+import {edtStatus,filterEdts} from '../lib/edtList';
 import {businessCapabilities,canEditBusinessView} from '../lib/businessCapabilities';
 import useRefreshRequest from '../hooks/useRefreshRequest';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -83,6 +84,7 @@ const emptyWorkOrder = {
 };
 
 export default function OperationsCenter({ role, supportId = '', onClearSupportContext,permission,previewTargetId=null }) {
+  const [edtQuery,setEdtQuery]=useState(''),[edtFilter,setEdtFilter]=useState('Tous'),[edtDirection,setEdtDirection]=useState('asc');
   const [tab, setTab] = useState('edt');
   const [data, setData] = useState({
     edts: [],
@@ -133,6 +135,7 @@ export default function OperationsCenter({ role, supportId = '', onClearSupportC
   const contextual=useMemo(()=>filterSupportOperations(data,supportId),[data,supportId]);
   const {edts:visibleEdts,workOrders:visibleWorkOrders,requests:visibleRequests,history:visibleHistory}=contextual;
 
+  const listedEdts=useMemo(()=>filterEdts(visibleEdts,edtQuery,edtFilter,edtDirection),[visibleEdts,edtQuery,edtFilter,edtDirection]);
   const refreshRequest=useRefreshRequest([role,supportId].join(':'));
 async function reload() {
     const request=refreshRequest.start();
@@ -170,7 +173,7 @@ try {
   }, [selectedEdtId, lifecycleRevision]);
 
   const stats = useMemo(() => ({
-    activeEdts: data.edts.filter(item => !['Terminé', 'Annulé'].includes(item.statut)).length,
+    activeEdts: data.edts.filter(item => !['Terminé', 'Annulé', 'Annule', 'Archivé'].includes(edtStatus(item))).length,
     openOrders: data.workOrders.filter(item => !['Terminée', 'Annulée'].includes(item.statut)).length,
     newRequests: data.requests.filter(item => item.statut === 'Nouvelle').length,
     assignedUsers: data.assignments.filter(item => item.statut !== 'Retiré').length
@@ -334,16 +337,17 @@ try {
 
           <section className="v07-card operations-wide">
             <h2>EDT et progression</h2>
+            <div className="data-grid-toolbar"><label>Rechercher un EDT<input aria-label="Rechercher un EDT" value={edtQuery} onChange={e=>setEdtQuery(e.target.value)} placeholder="No EDT, nom, campagne, client, statut ou visuel"/></label><label>Statut<select aria-label="Filtrer les EDT" value={edtFilter} onChange={e=>setEdtFilter(e.target.value)}>{['Tous','Planifiés','En cours','Terminés','Archivés'].map(value=><option key={value}>{value}</option>)}</select></label><label>Tri<select value={edtDirection} onChange={e=>setEdtDirection(e.target.value)}><option value="asc">No EDT croissant</option><option value="desc">No EDT décroissant</option></select></label><span>{listedEdts.length} résultat(s)</span></div>
             <div className="edt-list">
-              {visibleEdts.map(edt => {
-                const progress = computeEdtProgress(edt, data.workOrders, data.phases);
+              {listedEdts.map(edt => {
+                const progress = edtStatus(edt)==='Terminé'?100:computeEdtProgress(edt, data.workOrders, data.phases);
                 return <article key={edt.id} className={String(selectedEdtId) === String(edt.id) ? 'selected' : ''}>
                   <button className="edt-select" onClick={() => setSelectedEdtId(String(edt.id))}>
                     <div><strong>{edt.no_edt || `EDT-${edt.id}`}</strong><span>{edt.nom || edt.campagne || 'EDT'}</span></div>
-                    <span>{edt.statut || 'Planifié'}</span>
+                    <span>{edtStatus(edt)}</span>
                   </button>
                   <div className="progress-track"><i style={{width:`${progress}%`}}/></div>
-                  <small>{progress}% — {edt.client || 'Client non précisé'} — fin prévue {edt.date_fin_prevue || '—'}</small>
+                  <small>{progress}% — {edt.campagne || 'Campagne non précisée'} — {edt.client || 'Client non précisé'} — début {edt.date_debut_prevue || edt.date_debut || '—'} — fin {edt.date_fin || edt.date_fin_prevue || '—'}</small>
                   {canEdit && <div className="edt-actions">
                     <button onClick={() => setEdtForm({...emptyEdt, ...edt})}>Modifier</button>
                     {canDeleteEdt && <button className="danger" disabled={busy} onClick={() => openDeleteDialog(edt)}><Trash2 size={15}/> Supprimer l'EDT</button>}
@@ -351,7 +355,7 @@ try {
                   </div>}
                 </article>;
               })}
-              {!visibleEdts.length && <p className="executive-empty">Aucun EDT pour ce support</p>}
+              {!listedEdts.length && <p className="executive-empty">Aucun EDT correspondant aux filtres</p>}
             </div>
           </section>
 

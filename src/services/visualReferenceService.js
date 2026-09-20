@@ -22,6 +22,12 @@ export async function visualReferenceUrl(asset){
   const {data,error}=await supabase.storage.from(bucket).createSignedUrl(asset.storage_path,300);
   if(error)throw error;return data.signedUrl;
 }
+export async function removeVisualReference(visualId,assetId){
+  const {data,error}=await supabase.rpc('remove_visual_reference',{p_visual_id:visualId,p_asset_id:assetId});
+  if(error)throw error;
+  window.dispatchEvent(new Event('tos-visual-references-updated'));
+  return data;
+}
 export async function listReferenceVisuals(previewTargetId=null){
   async function all(table,fields){
     const rows=[];for(let offset=0;;offset+=500){

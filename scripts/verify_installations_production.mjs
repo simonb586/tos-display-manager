@@ -41,9 +41,13 @@ for(const [actor,id] of [['admin',1],['marylene',25],['client',33],['client-b',-
     const names=await b.evaluate("[...document.querySelectorAll('.campaign-list article strong')].map(e=>e.textContent)");
     assert.deepEqual(names,[...names].sort((a,c)=>a.localeCompare(c,'fr',{numeric:true,sensitivity:'base'})));
     assert(await b.evaluate("!!document.querySelector('input[aria-label=\"Rechercher un thème ou une campagne\"]')"));
-    await b.evaluate("[...document.querySelectorAll('button')].find(e=>e.textContent==='Fiche du thème').click()");
-    await b.waitFor("!!document.querySelector('[role=dialog] .visual-references')");
-    assert(await b.evaluate("!!document.querySelector('[role=dialog] input[type=file][accept*=pdf]')"));
+    assert.equal(await b.evaluate("[...document.querySelectorAll('.campaign-list button')].some(e=>/Fiche du (thème|visuel)/.test(e.textContent))"),false);
+    await click('Campagne — Visuels et formats');
+    await b.waitFor("!!document.querySelector('.visuals-compact-table tbody tr button:not(:disabled)')");
+    assert.equal(await b.evaluate("document.querySelectorAll('.visuals-compact-table input[type=file]').length"),0);
+    await b.evaluate("document.querySelector('.visuals-compact-table tbody tr button').click()");
+    await b.waitFor("!!document.querySelector('form .visual-references')");
+    assert(await b.evaluate("!!document.querySelector('form .visual-references input[type=file][accept*=pdf]')"));
    }
    assert.deepEqual(b.errors,[]);
    assert.deepEqual(b.responses.filter(r=>r.status>=400&&r.url.includes('.supabase.co')&&!(r.status===403&&r.url.endsWith('/rpc/portal_business_rows'))),[]);

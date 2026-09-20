@@ -1,3 +1,5 @@
+import SortableHeader from './SortableHeader';
+import useSortableRows from '../hooks/useSortableRows';
 import VisualReferences from './VisualReferences';
 import React, { useEffect, useRef, useState } from 'react';
 import { Archive, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
@@ -41,6 +43,9 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
   const [campaignSearch,setCampaignSearch]=useState(''),[visualSearch,setVisualSearch]=useState('');
   const [hydratedContext, setHydratedContext] = useState(businessContext);
 
+  const tableRows=visuals.map(v=>({...v,campaign_name:v.campagne?.nom_campagne||'',edt_numbers:(v.edt_associations||[]).map(a=>a.edt?.no_edt).join(', ')})).filter(v=>[v.nom_visuel,v.code_visuel,v.format_support,v.campaign_name,v.edt_numbers].join(' ').toLocaleLowerCase('fr').includes(visualSearch.toLocaleLowerCase('fr')));
+  const {sortedRows,sortState,setSortState}=useSortableRows(tableRows,{column:'nom_visuel',direction:'asc',type:'text'});
+  const columns=[['campaign_name','Campagne'],['nom_visuel','Visuel'],['code_visuel','Code'],['phase','Phase'],['format_support','Format'],['quantite_prevue','Quantité'],['edt_numbers','EDT associés'],['actif','Actif']];
   const canManage = !previewMode&&['Administrateur', 'Coordonnateur'].includes(role);
 
   async function reload() {
@@ -260,6 +265,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
                 <span><b>Hors-Cadre</b><small>Permet d’utiliser ce visuel sans limiter les supports selon son format.</small></span>
               </label>
 
+              {form.id ? <VisualReferences key={form.id} visual={visuals.find(v=>String(v.id)===String(form.id))||form} canManage={canManage} onChanged={reload}/> : <p>Enregistrez le visuel, puis ouvrez Modifier pour ajouter ses photos ou PDF de référence.</p>}
               <div className="visual-form-actions">
                 <button disabled={busy}>
                   <Save/> {form.id ? 'Enregistrer les modifications' : 'Enregistrer'}
@@ -277,36 +283,16 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
           <h2>Visuels configurés</h2>
           <label>Rechercher un visuel<input value={visualSearch} onChange={e=>setVisualSearch(e.target.value)} placeholder="Campagne, visuel, format ou EDT"/></label>
 
-          {visuals.filter(visual=>[visual.nom_visuel,visual.format_support,visual.campagne?.nom_campagne,...(visual.edt_associations||[]).map(a=>a.edt?.no_edt)].join(' ').toLocaleLowerCase('fr').includes(visualSearch.toLocaleLowerCase('fr'))).map(visual => (
-            <article className="v74-row visual-managed-row" key={visual.id}>
-              <div>
-                <b>{visual.nom_visuel}</b>
-                <span>{visual.campagne?.nom_campagne}</span>
-                <small>
-                  {visual.phase || 'Sans phase'} — {visual.format_support} {visual.is_out_of_frame ? '— Hors-Cadre' : ''}
-                </small>
-                {visual.edt_associations?.map(link=><small key={link.edt_id}>{link.edt?.no_edt} — {link.date_debut||'Début non défini'} → {link.date_fin||'Fin non définie'}</small>)}
-              </div>
-
-              <VisualReferences visual={visual} canManage={canManage} onChanged={reload}/><em>{visual.actif ? 'Actif' : 'Archivé / inactif'}</em>
-
-              {canManage && (
-                <div className="visual-managed-actions">
-                  <button disabled={busy} onClick={() => editVisual(visual)}>
-                    <Pencil size={15}/> Modifier
-                  </button>
-                  <button
-                    className="danger"
-                    disabled={busy}
-                    onClick={() => removeVisual(visual)}
-                  >
-                    {visual.actif ? <Trash2 size={15}/> : <Archive size={15}/>}
-                    Supprimer
-                  </button>
-                </div>
-              )}
-            </article>
-          ))}
+          <div className="tableWrap"><table className="visuals-compact-table"><thead><tr>
+            {columns.map(([column,label])=><SortableHeader key={column} column={column} label={label} rows={tableRows} sortState={sortState} onSort={setSortState} onReset={()=>setSortState(null)}/>)}
+            <th>Dates des associations</th><th>Actions</th>
+          </tr></thead><tbody>{sortedRows.map(visual=><tr key={visual.id}>
+            <td>{visual.campaign_name}</td><td>{visual.nom_visuel}</td><td>{visual.code_visuel||'—'}</td><td>{visual.phase||'—'}</td>
+            <td>{visual.format_support}{visual.is_out_of_frame?' — Hors-Cadre':''}</td><td>{visual.quantite_prevue||0}</td><td>{visual.edt_numbers||'—'}</td><td>{visual.actif?'Actif':'Archivé / inactif'}</td>
+            <td>{(visual.edt_associations||[]).map(link=><div key={link.phase_id||link.edt_id}>{link.edt?.no_edt} : {link.date_debut||'—'} → {link.date_fin||'—'}</div>)}</td>
+            <td>{canManage&&<div className="visual-managed-actions"><button disabled={busy} onClick={()=>editVisual(visual)}><Pencil size={15}/> Modifier</button><button className="danger" disabled={busy} onClick={()=>removeVisual(visual)}>{visual.actif?<Trash2 size={15}/>:<Archive size={15}/>} Supprimer</button></div>}</td>
+          </tr>)}</tbody></table></div>
+          {!sortedRows.length&&<p>Aucun visuel correspondant.</p>}
         </section>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import React,{createContext,useContext,useEffect,useRef,useState} from 'react';
-import {addVisualReference,listReferenceVisuals,visualReferenceUrl} from '../services/visualReferenceService';
+import {addVisualReference,removeVisualReference,listReferenceVisuals,visualReferenceUrl} from '../services/visualReferenceService';
 
 function ReferencePreview({asset}){
  const [state,setState]=useState({path:'',url:''});
@@ -17,9 +17,15 @@ export default function VisualReferences({visual,canManage=false,onChanged}){
   try{for(const file of files){const next=await addVisualReference(visual,file);setAssets(next)}onChanged?.();setMessage('Références enregistrées.');}
   catch(error){setMessage(error.message)}finally{lock.current=false;setBusy(false)}
  }
+ async function remove(asset){
+  if(!canManage||lock.current||!window.confirm(`Supprimer la référence « ${asset.name} » ? L’original sera conservé dans l’historique.`))return;
+  lock.current=true;setBusy(true);setMessage('');
+  try{setAssets(await removeVisualReference(visual.id,asset.id));await onChanged?.();setMessage('Référence supprimée de la reconnaissance.');}
+  catch(error){setMessage(error.message)}finally{lock.current=false;setBusy(false)}
+ }
  return <section className="visual-references"><h3>Visuels génériques de référence</h3><p>Photos ou PDF utilisés pour reconnaître ce visuel lors des imports.</p>
-  {assets.map(asset=><ReferencePreview key={asset.id} asset={asset}/>)}
-  {!assets.length&&<p>Aucune référence ajoutée.</p>}
+  {assets.filter(asset=>!asset.archived).map(asset=><div key={asset.id}><ReferencePreview asset={asset}/><span>{asset.name} — {asset.mime_type==='application/pdf'?'PDF':asset.mime_type}</span>{canManage&&<button type="button" disabled={busy} onClick={()=>remove(asset)}>Supprimer la référence</button>}</div>)}
+  {!assets.some(asset=>!asset.archived)&&<p>Aucune référence ajoutée.</p>}
   {canManage&&<label>Ajouter des photos ou PDF<input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" multiple disabled={busy} onChange={upload}/></label>}
   {busy&&<p role="status">Analyse et enregistrement des références…</p>}{message&&<p role="status">{message}</p>}
  </section>;
@@ -37,5 +43,5 @@ export function GenericCampaignVisual({support}){
   [support.visuel_campagne,support.visuel_en_expo].filter(Boolean).some(name=>normalized(name)===normalized(v.nom_visuel))&&
   [support.campagne_selon_visuel,support.campagne_actuelle].filter(Boolean).some(name=>normalized(name)===normalized(v.campagne?.nom_campagne))));
  const visual=matches.length===1?matches[0]:null;
- return <div><span>{support.visuel_campagne||visual?.nom_visuel||''}</span>{visual?.reference_assets?.slice(0,1).map(asset=><ReferencePreview key={asset.id} asset={asset}/>)}</div>;
+ return <div><span>{support.visuel_campagne||visual?.nom_visuel||''}</span>{visual?.reference_assets?.filter(asset=>!asset.archived).slice(0,1).map(asset=><ReferencePreview key={asset.id} asset={asset}/>)}</div>;
 }
