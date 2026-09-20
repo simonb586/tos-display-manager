@@ -36,10 +36,10 @@ Les PASS ci-dessous concernent la version locale et les contrôles distants expl
 | DIFF | PASS | `checks.json`, `diff.log` |
 | SQL et stockage privé | PASS local | PostgreSQL embarqué, RLS et archivage |
 | Test transactionnel du nouveau schéma en production | PASS | Neuf profils ; rollback vérifié (`remote-transaction.json`) |
-| COMMIT | NON EFFECTUÉ | Publication en attente |
-| PUSH | NON EFFECTUÉ | Publication en attente |
-| VERCEL | NON EFFECTUÉ | Migration requise avant déploiement |
-| PRODUCTION | NON VALIDÉE pour cette version | Portail déployé inchangé |
+| COMMIT | `4bed7f8` | Fonctionnalités `5a46a99`, correction du doublon `4bed7f8` |
+| PUSH | PASS | Push normal sur `release/v1.3.3` |
+| VERCEL | PASS | `dpl_DbPjHYdsheBkQ53YVMgrV9fPgwpH`, domaine public associé |
+| PRODUCTION | Vérification en cours | HTML et fichiers initiaux identiques au build ; contrôle Admin PASS |
 
 Audit distant en lecture seule : 6 619 infrastructures ; 4 543 installations courantes projetées, dont 2 387 Marketing, 301 opérationnelles et 1 855 à classer. Les 38 lignes d'historique existantes restent conservées. Voir `remote-data.json`. Les neuf profils testés et leur isolation figurent dans `remote-roles.json`.
 
@@ -49,7 +49,7 @@ Les essais de reconnaissance utilisent des images de test, avec perspective et i
 
 Migration additive : `supabase/migrations/20260920085824_visual_reference_assets.sql`. Elle ajoute `reference_assets` aux visuels existants, un bucket privé, les permissions minimales correspondantes et la protection contre la suppression d'un visuel référencé. Aucune variable d'environnement nouvelle n'est requise.
 
-Après confirmation : test transactionnel distant avec attente de verrou limitée à 2 secondes, exécution limitée à 15 secondes et rollback ; application et vérification de la migration ; commit et push normal ; déploiement Vercel ; validation du portail en production. Ne pas déployer le frontal avant le schéma.
+Ordre exécuté : test transactionnel distant avec attente de verrou limitée à 2 secondes, exécution limitée à 15 secondes et rollback vérifié ; application et vérification de la migration ; commit et push normal ; build et déploiement Vercel ; contrôles du portail en production. Le schéma a été appliqué avant le frontal.
 
 Limites des références : 25 Mo par fichier, 20 pages par PDF, 10 fichiers par visuel et 4 Mo de métadonnées de reconnaissance par visuel. Le moteur de reconnaissance est chargé à la demande. Le build signale la taille importante de ce module ; le test réel en navigateur passe.
 

@@ -68,7 +68,12 @@ export function canonicalAssignmentRows(assignments,campaigns,infrastructures,vi
 async function loadRows(context,signal,infrastructureRows,previewTargetId){
   const {loadBusinessRows}=await import('./businessParityService.js');
   const [history,assignments,campaigns,infrastructures,visuals]=await Promise.all([
-    loadBusinessRows('Historique des campagnes',{targetUserId:previewTargetId}),
+    loadBusinessRows('Historique des campagnes',{targetUserId:previewTargetId}).catch(error=>{
+      // Infrastructure remains available when this profile cannot open history.
+      // Do not hide network failures or other server errors.
+      if(error?.code==='42501'&&error.message==='business_view_denied')return {rows:[]};
+      throw error;
+    }),
     fetchAll('campagnes_supports','*',signal,previewTargetId),fetchAll('campagnes_maitres','*',signal,previewTargetId),
     infrastructureRows ?? fetchAll('infrastructures','*',signal,previewTargetId),
     fetchAll('campagne_visuels_formats','*',signal,previewTargetId)

@@ -8,7 +8,7 @@ const access=await targetedAccess(),records=[];
 async function expectedFor(login){
  async function all(table){const rows=[];for(let offset=0;;offset+=500){const {data,error}=await login.client.from(table).select('*').order('id').range(offset,offset+499);if(error)throw error;rows.push(...data);if(data.length<500)return rows;}}
  const [supports,campaigns,visuals]=await Promise.all(['infrastructures','campagnes_maitres','campagne_visuels_formats'].map(all));
- const history=[];let total;do{const {data,error}=await login.client.rpc('portal_business_rows',{p_view:'Historique des campagnes',p_offset:history.length,p_limit:1000});if(error)throw error;history.push(...data.rows);total=data.total;}while(history.length<total);
+ const history=[];let total;do{const {data,error}=await login.client.rpc('portal_business_rows',{p_view:'Historique des campagnes',p_offset:history.length,p_limit:1000});if(error?.code==='42501'&&error.message==='business_view_denied')break;if(error)throw error;history.push(...data.rows);total=data.total;}while(history.length<total);
  if(login.profile.client_id){
   for(const row of [...supports,...campaigns,...visuals])assert.equal(row.client_id,login.profile.client_id,'Client isolation');
   for(const row of history)assert(row.client_id===login.profile.client_id||(row.client_id==null&&supports.some(s=>s.support_id===row.support_id)),'History must belong to the client or an exact scoped support');
@@ -16,7 +16,8 @@ async function expectedFor(login){
  const installed=projectSiteSupportDeployments({supports,campaigns,visuals,history}).filter(r=>r.etat_courant==='Oui');
  return {marketing:installed.filter(r=>r.business_context==='marketing').length,operational:installed.filter(r=>r.business_context==='operational_communication').length,accessibleCampaigns:campaigns.length,accessibleVisuals:visuals.length,supports:supports.length};
 }
-for(const [actor,id] of [['admin',1],['marylene',25],['client',32],['client-b',37]]){
+// Use activated profiles; never complete an invitation or change a password for a test.
+for(const [actor,id] of [['admin',1],['marylene',25],['client',33],['client-b',-92501]]){
  const login=await existingSession(access,id);
  try{
   const expectedScope=await expectedFor(login);
@@ -45,7 +46,7 @@ for(const [actor,id] of [['admin',1],['marylene',25],['client',32],['client-b',3
     assert(await b.evaluate("!!document.querySelector('[role=dialog] input[type=file][accept*=pdf]')"));
    }
    assert.deepEqual(b.errors,[]);
-   assert.deepEqual(b.responses.filter(r=>r.status>=400&&r.url.includes('.supabase.co')),[]);
+   assert.deepEqual(b.responses.filter(r=>r.status>=400&&r.url.includes('.supabase.co')&&!(r.status===403&&r.url.endsWith('/rpc/portal_business_rows'))),[]);
    return {views,expectedScope,result:'PASS'};
   });
   records.push({actor,...result});console.log(actor+': PASS');
