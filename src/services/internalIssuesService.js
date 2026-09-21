@@ -39,7 +39,7 @@ export function normalizeTerrainIssue(row) {
     type_enjeu: first(row.type_enjeu, row.type_enjeux),
     description: first(row.description, row.enjeux, row.type_enjeu),
     statut: text(row.statut),
-    commentaire: first(row.commentaire, row.commentaires),
+    commentaire: first(row.commentaire, row.commentaires, row.description),
     photo: first(row.photo_url, row.photo_id),
     date: first(row.created_at, row.date_inscription),
     client: first(row.client, row.client_id)

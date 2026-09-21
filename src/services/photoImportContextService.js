@@ -6,7 +6,7 @@ async function catalogRows(table,fields) {
 }
 export async function loadPhotoImportCatalog() {
  const [supports,edts,phases,links,campaigns,visuals,associations]=await Promise.all([
-  catalogRows('infrastructures','id,support_id,client_id,format_affichage,site,emplacement_visibilite'),
+  catalogRows('infrastructures','id,support_id,client_id,format_affichage,site,emplacement_visibilite,latitude,longitude,edt_associe,edt_precedent_associe,prochain_edt_cible'),
   catalogRows('suivi_des_edt','id,no_edt,client_id,campagne_id,date_debut,date_fin,archived_at'),
   catalogRows('edt_phases','id,edt_id,phase_type,date_debut_prevue,date_fin_prevue,date_debut_reelle,date_fin_reelle'),
   catalogRows('edt_supports','id,edt_id,phase_id,support_id,date_cible'),
@@ -22,9 +22,9 @@ export function importContextForPhoto(photo,catalog,manual=photo.import_context?
   originalFilename:photo.originalFilename||photo.original_filename||photo.nom_fichier,
   supportId:photo.supportId||photo.proposed_support_id||'',capturedAt:photo.capturedAt||photo.captured_at||photo.prise_le,
   capturedAtSource:photo.capturedAtSource||photo.metadata?.captured_at_source||'IMPORT_DATE',
-  visualReferenceMatches:photo.visualReferenceMatches||[],ocrText:photo.ocrText||photo.ocr_text,ocrConfidence:photo.ocrConfidence||photo.ocr_confidence
+  visualReferenceMatches:photo.visualReferenceMatches||[],gps:photo.gps||photo.metadata?.gps,ocrVerifiedSupport:photo.ocrVerifiedSupport,ocrText:photo.ocrText||photo.ocr_text,ocrConfidence:photo.ocrConfidence||photo.ocr_confidence
  }),...(photo.visualReferenceMatches!==undefined?{visualReferenceMatches:photo.visualReferenceMatches}:{}),
- ...(photo.ocrText!==undefined?{ocrText:photo.ocrText,ocrConfidence:photo.ocrConfidence}:{})};
+ ...(photo.ocrText!==undefined?{ocrText:photo.ocrText,ocrConfidence:photo.ocrConfidence,ocrVerifiedSupport:photo.ocrVerifiedSupport}:{})};
  return {input,manual,recognition:recognizeImportPhoto(input,catalog,manual)};
 }
 export async function savePhotoImportContext(photoId,context) {

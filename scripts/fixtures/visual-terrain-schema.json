@@ -1,0 +1,2126 @@
+[
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "id",
+    "data_type": "bigint",
+    "default_value": "nextval('campagne_visuels_formats_id_seq'::regclass)"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "campagne_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "phase",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "nom_visuel",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "code_visuel",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "format_support",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "quantite_prevue",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "quantite_installee",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "actif",
+    "data_type": "boolean",
+    "default_value": "true"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "instructions_terrain",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "is_out_of_frame",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "client_visible",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "edt_phase_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "client_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "campagne_visuels_formats",
+    "column_name": "reference_assets",
+    "data_type": "jsonb",
+    "default_value": "'[]'::jsonb"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "id",
+    "data_type": "bigint",
+    "default_value": "nextval('campagnes_maitres_id_seq'::regclass)"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "code_campagne",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "nom_campagne",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "client",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "type_campagne",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "visuel_generique",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "no_edt",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "date_debut",
+    "data_type": "date",
+    "default_value": null
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "date_fin",
+    "data_type": "date",
+    "default_value": null
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "priorite",
+    "data_type": "text",
+    "default_value": "'Normale'::text"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "statut",
+    "data_type": "text",
+    "default_value": "'Brouillon'::text"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "publiee_terrain",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "instructions_terrain",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "supports_cibles",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "supports_completes",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "created_by",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "business_context",
+    "data_type": "text",
+    "default_value": "'marketing'::text"
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "client_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "campagnes_maitres",
+    "column_name": "client_published",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "id",
+    "data_type": "bigint",
+    "default_value": "nextval('clients_id_seq'::regclass)"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "nom_client",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "clients",
+    "column_name": "type_client",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "clients",
+    "column_name": "client_admin",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "clients",
+    "column_name": "statut",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "clients",
+    "column_name": "notes",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "clients",
+    "column_name": "raw_data",
+    "data_type": "jsonb",
+    "default_value": "'{}'::jsonb"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "courriels_rapport",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "clients",
+    "column_name": "courriels_cc",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "clients",
+    "column_name": "logo_url",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "clients",
+    "column_name": "couleur_rapport",
+    "data_type": "text",
+    "default_value": "'#4c1d95'::text"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "mention_legale",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "edt_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "nom",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "ordre",
+    "data_type": "integer",
+    "default_value": "1"
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "statut",
+    "data_type": "text",
+    "default_value": "'À faire'::text"
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "date_debut_prevue",
+    "data_type": "date",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "date_fin_prevue",
+    "data_type": "date",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "date_debut_reelle",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "date_fin_reelle",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "progression",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "notes",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "phase_type",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "closed_at",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "closed_by",
+    "data_type": "uuid",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "report_ready_at",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "commentaire",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "anomalies",
+    "data_type": "jsonb",
+    "default_value": "'[]'::jsonb"
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "photo_exception",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "reopened_at",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "reopened_by",
+    "data_type": "uuid",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "reopen_reason",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_phases",
+    "column_name": "client_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_supports",
+    "column_name": "id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_supports",
+    "column_name": "edt_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_supports",
+    "column_name": "phase_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_supports",
+    "column_name": "support_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_supports",
+    "column_name": "statut",
+    "data_type": "text",
+    "default_value": "'Planifié'::text"
+  },
+  {
+    "table_name": "edt_supports",
+    "column_name": "priorite",
+    "data_type": "text",
+    "default_value": "'Normale'::text"
+  },
+  {
+    "table_name": "edt_supports",
+    "column_name": "assigne_a",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_supports",
+    "column_name": "date_cible",
+    "data_type": "date",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_supports",
+    "column_name": "bon_de_travail_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_supports",
+    "column_name": "progression",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "edt_supports",
+    "column_name": "bloque",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "edt_supports",
+    "column_name": "motif_blocage",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_supports",
+    "column_name": "completed_at",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "edt_supports",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "edt_supports",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "id",
+    "data_type": "bigint",
+    "default_value": "nextval('enjeux_terrain_id_seq'::regclass)"
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "reference",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "support_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "type_enjeu",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "description",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "statut",
+    "data_type": "text",
+    "default_value": "'Ouvert'::text"
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "priorite",
+    "data_type": "text",
+    "default_value": "'Normale'::text"
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "photo_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "photo_url",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "storage_path",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "utilisateur",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "resolved_at",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "client_visible",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "edt_phase_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "enjeux_terrain",
+    "column_name": "client_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "column_name": "id",
+    "data_type": "bigint",
+    "default_value": "nextval('historique_des_campagnes_id_seq'::regclass)"
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "column_name": "support_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "column_name": "campagne",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "column_name": "visuel",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "column_name": "no_edt",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "column_name": "date_installation",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "column_name": "date_retrait",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "column_name": "photo_installation",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "column_name": "utilisateur",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "column_name": "raw_data",
+    "data_type": "jsonb",
+    "default_value": "'{}'::jsonb"
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "column_name": "client_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "column_name": "movement_meta",
+    "data_type": "jsonb",
+    "default_value": "'{}'::jsonb"
+  },
+  {
+    "table_name": "historique_des_campagnes",
+    "column_name": "import_movement_key",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "id",
+    "data_type": "bigint",
+    "default_value": "nextval('infrastructures_id_seq'::regclass)"
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "support_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "type_support",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "format_affichage",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "medium_recommande",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "emplacement_visibilite",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "site",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "type_site",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "ligne_distribution",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "type_ligne_distribution",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "enjeux",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "type_enjeux",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "actif",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "campagne_selon_visuel",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "visuel_en_expo",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "commentaires",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "campagne_actuelle",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "visuel_campagne",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "visuel_actuel_cadre",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "date_derniere_manipulation",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "edt_associe",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "prochain_edt_cible",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "edt_precedent_associe",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "coordonnees_gps",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "latitude",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "longitude",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "lien_carte_interactive",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "raw_data",
+    "data_type": "jsonb",
+    "default_value": "'{}'::jsonb"
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "visuel_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "phase_campagne",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "format_visuel",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "photo_principale_url",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "photo_miniature_url",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "campagne_precedente",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "visuel_precedent",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "legacy_campagnes_precedentes_quickbase",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "legacy_edt_precedent_quickbase",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "date_visuel_actuel",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "infrastructures",
+    "column_name": "client_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "id",
+    "data_type": "bigint",
+    "default_value": "nextval('inspections_terrain_id_seq'::regclass)"
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "support_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "no_arret",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "source_type",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "emplacement",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "action",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "affiche_presente",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "affiche_conforme",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "support_endommage",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "nettoyage_effectue",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "remplacement_effectue",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "commentaires",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "latitude",
+    "data_type": "double precision",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "longitude",
+    "data_type": "double precision",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "precision_gps_m",
+    "data_type": "double precision",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "photo_path",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "photo_url",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "utilisateur_courriel",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "statut",
+    "data_type": "text",
+    "default_value": "'Terminée'::text"
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "sync_note",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "campagne_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "campagne",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "visuel",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inspections_terrain",
+    "column_name": "no_edt",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inventory_movements",
+    "column_name": "id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "inventory_movements",
+    "column_name": "visual_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "inventory_movements",
+    "column_name": "item_reference",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inventory_movements",
+    "column_name": "movement_type",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inventory_movements",
+    "column_name": "quantity",
+    "data_type": "numeric",
+    "default_value": "0"
+  },
+  {
+    "table_name": "inventory_movements",
+    "column_name": "edt_number",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inventory_movements",
+    "column_name": "support_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inventory_movements",
+    "column_name": "notes",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "inventory_movements",
+    "column_name": "created_by",
+    "data_type": "uuid",
+    "default_value": "auth.uid()"
+  },
+  {
+    "table_name": "inventory_movements",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "photo_action_log",
+    "column_name": "id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "photo_action_log",
+    "column_name": "action",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "photo_action_log",
+    "column_name": "photo_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "photo_action_log",
+    "column_name": "support_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "photo_action_log",
+    "column_name": "nom_fichier",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "photo_action_log",
+    "column_name": "details",
+    "data_type": "jsonb",
+    "default_value": "'{}'::jsonb"
+  },
+  {
+    "table_name": "photo_action_log",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "default_value": "auth.uid()"
+  },
+  {
+    "table_name": "photo_action_log",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "id",
+    "data_type": "bigint",
+    "default_value": "nextval('repertoire_des_affiches_id_seq'::regclass)"
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "type_campagne",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "nom_campagne",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "medium_affichage",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "format",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "nom_detaille_visuel",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "quantite_entrepot",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "quantite_expo",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "date_debut",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "date_fin",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "statut_campagne",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "visuel",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "statut_apres_periode",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "date_dernier_decompte",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "raw_data",
+    "data_type": "jsonb",
+    "default_value": "'{}'::jsonb"
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "repertoire_des_affiches",
+    "column_name": "client_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "id",
+    "data_type": "bigint",
+    "default_value": "nextval('suivi_des_edt_id_seq'::regclass)"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "no_edt",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "campagne",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "phase",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "client",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "date_debut_prevue",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "date_fin_prevue",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "dates_travaux",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "statut",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "supports_cibles",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "supports_completes",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "photos_recues",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "avancement",
+    "data_type": "numeric",
+    "default_value": "0"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "coordonnateur",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "commentaires",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "raw_data",
+    "data_type": "jsonb",
+    "default_value": "'{}'::jsonb"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "rapport_final_envoye",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "rapport_final_path",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "nom",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "priorite",
+    "data_type": "text",
+    "default_value": "'Normale'::text"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "date_debut",
+    "data_type": "date",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "date_fin",
+    "data_type": "date",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "supports_prevus",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "supports_installes",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "progression",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "description",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "supports_planifies",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "supports_en_cours",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "supports_bloques",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "supports_termines",
+    "data_type": "integer",
+    "default_value": "0"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "derniere_synchro",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "campagne_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "lifecycle_status",
+    "data_type": "text",
+    "default_value": "'brouillon'::text"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "retrait_date_proposee",
+    "data_type": "date",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "lifecycle_closed_at",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "lifecycle_closed_by",
+    "data_type": "uuid",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "lifecycle_exception",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "client_visible",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "requester_contact_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "archived_at",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "archived_by",
+    "data_type": "uuid",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "archive_reason",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "suivi_des_edt",
+    "column_name": "client_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "id",
+    "data_type": "bigint",
+    "default_value": "nextval('support_photos_id_seq'::regclass)"
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "support_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "campagne_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "visuel_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "type_photo",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "nom_fichier",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "storage_path",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "photo_url",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "thumbnail_url",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "prise_le",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "utilisateur",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "statut_validation",
+    "data_type": "text",
+    "default_value": "'À valider'::text"
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "est_principale",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "commentaire_validation",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "validee_le",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "validee_par",
+    "data_type": "uuid",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "deleted_at",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "deleted_by",
+    "data_type": "uuid",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "edt_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "source",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "original_filename",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "normalized_filename",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "storage_bucket",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "captured_at",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "uploaded_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "uploaded_by",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "intervention_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "inspection_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "issue_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "is_current_visual",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "replaced_photo_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "status",
+    "data_type": "text",
+    "default_value": "'active'::text"
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "metadata",
+    "data_type": "jsonb",
+    "default_value": "'{}'::jsonb"
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "client_visible",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "client_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "review_status",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "ocr_text",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "ocr_confidence",
+    "data_type": "numeric(5,2)",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "ocr_suggestions",
+    "data_type": "jsonb",
+    "default_value": "'[]'::jsonb"
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "proposed_support_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "import_batch_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "assignment_pending",
+    "data_type": "boolean",
+    "default_value": "false"
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "target_storage_path",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "target_filename",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "target_support_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "target_client_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "import_context",
+    "data_type": "jsonb",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "import_finalized_at",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "movement_history_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "support_photos",
+    "column_name": "movement_kind",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "terrain_operations",
+    "column_name": "id",
+    "data_type": "uuid",
+    "default_value": "gen_random_uuid()"
+  },
+  {
+    "table_name": "terrain_operations",
+    "column_name": "reference",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "terrain_operations",
+    "column_name": "type_operation",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "terrain_operations",
+    "column_name": "support_id",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "terrain_operations",
+    "column_name": "utilisateur",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "terrain_operations",
+    "column_name": "statut",
+    "data_type": "text",
+    "default_value": "'En cours'::text"
+  },
+  {
+    "table_name": "terrain_operations",
+    "column_name": "etape",
+    "data_type": "text",
+    "default_value": "'Début'::text"
+  },
+  {
+    "table_name": "terrain_operations",
+    "column_name": "details",
+    "data_type": "jsonb",
+    "default_value": "'{}'::jsonb"
+  },
+  {
+    "table_name": "terrain_operations",
+    "column_name": "erreur",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "terrain_operations",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "terrain_operations",
+    "column_name": "completed_at",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "id",
+    "data_type": "bigint",
+    "default_value": "nextval('utilisateurs_id_seq'::regclass)"
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "nom",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "courriel",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "role",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "organisation",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "statut",
+    "data_type": "text",
+    "default_value": null
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "raw_data",
+    "data_type": "jsonb",
+    "default_value": "'{}'::jsonb"
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "auth_user_id",
+    "data_type": "uuid",
+    "default_value": null
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "client_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "invitation_statut",
+    "data_type": "text",
+    "default_value": "'Invitation envoyée'::text"
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "invitation_envoyee_le",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "derniere_activite_le",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "premiere_connexion_le",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "utilisateurs",
+    "column_name": "compte_active_le",
+    "data_type": "timestamp with time zone",
+    "default_value": null
+  },
+  {
+    "table_name": "visual_edt_associations",
+    "column_name": "visual_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "visual_edt_associations",
+    "column_name": "edt_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "visual_edt_associations",
+    "column_name": "phase_id",
+    "data_type": "bigint",
+    "default_value": null
+  },
+  {
+    "table_name": "visual_edt_associations",
+    "column_name": "date_debut",
+    "data_type": "date",
+    "default_value": null
+  },
+  {
+    "table_name": "visual_edt_associations",
+    "column_name": "date_fin",
+    "data_type": "date",
+    "default_value": null
+  },
+  {
+    "table_name": "visual_edt_associations",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "default_value": "now()"
+  }
+]

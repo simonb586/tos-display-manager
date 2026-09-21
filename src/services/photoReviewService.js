@@ -11,7 +11,7 @@ export async function uploadUnmatchedPhoto(item,{batchId}={}) {
   storage_bucket:'support-photos',storage_path:path,photo_url:null,thumbnail_url:null,prise_le:item.capturedAt,captured_at:item.capturedAt,
   source:'mass_import',statut_validation:'À valider',review_status:'unmatched',ocr_text:item.ocrText||null,ocr_confidence:item.ocrConfidence,
   ocr_suggestions:item.suggestions||[],import_batch_id:batchId||null,
-  metadata:{sha256:item.hash||null,captured_at_source:item.capturedAtSource,exif_tag:item.exifTag||null}};
+  metadata:{sha256:item.hash||null,captured_at_source:item.capturedAtSource,exif_tag:item.exifTag||null,gps:item.gps||null}};
  const {data,error}=await supabase.from('support_photos').insert(row).select().single();
  if(error){await supabase.storage.from('support-photos').remove([path]);throw error;}return data;
 }
@@ -34,4 +34,32 @@ export async function validateReviewPhoto(photo,supportId) {
 }
 export async function ignoreReviewPhoto(id) {
  const {data,error}=await supabase.rpc('ignore_photo_review_item',{p_photo_id:id});if(error)throw error;return data;
+}
+
+export async function deleteReviewPhotos(ids){
+ ready();const selection=[...new Set(ids.map(Number))];
+ const {data:photos,error}=await supabase.rpc('delete_review_photos',{p_ids:selection,p_finish:false});if(error)throw error;
+ const buckets=new Map();for(const photo of photos){const paths=buckets.get(photo.storage_bucket)||[];paths.push(photo.storage_path);buckets.set(photo.storage_bucket,paths);}
+ for(const [bucket,paths] of buckets){const {error:storageError}=await supabase.storage.from(bucket).remove(paths);if(storageError)throw Error('Suppression en attente : '+storageError.message+'. Réessayez la sélection.');}
+ const {error:finishError}=await supabase.rpc('delete_review_photos',{p_ids:selection,p_finish:true});if(finishError)throw finishError;
+ window.dispatchEvent(new Event('tos-terrain-data-updated'));return photos;
+}
+
+export async function reanalyzeReviewPhotos(photos,onProgress=()=>{}){
+ const [{analyzePhotoItem},{getSignedDownloadUrl}]=await Promise.all([import('./massPhotoImportService'),import('./photoAccessService')]);
+ const catalog=await loadPhotoImportCatalog(),results=[];
+ try{
+  for(const photo of photos){
+   if(photo.import_finalized_at||photo.source!=='mass_import'||photo.review_delete_requested_at)continue;
+   try{
+    const response=await fetch(await getSignedDownloadUrl(photo));if(!response.ok)throw Error('Original indisponible.');
+    const blob=await response.blob(),file=new File([blob],photo.original_filename||photo.nom_fichier,{type:blob.type});
+    const analyzed=await analyzePhotoItem({file,originalFilename:file.name,mimeType:file.type,capturedAt:photo.captured_at||photo.prise_le,capturedAtSource:photo.metadata?.captured_at_source||photo.import_context?.input?.capturedAtSource||'IMPORT_DATE',gps:photo.metadata?.gps||photo.import_context?.input?.gps,manual:photo.import_context?.manual||{}},{catalog});
+    if(!analyzed.import_context)throw Error(analyzed.error||'Analyse incomplète.');
+    await savePhotoImportContext(photo.id,analyzed.import_context);results.push({id:photo.id,ok:true,recognition:analyzed.recognition,warning:analyzed.ocrWarning||analyzed.referenceWarning});
+   }catch(error){results.push({id:photo.id,ok:false,error:error.message});}
+   onProgress(results.length,photos.length,results.at(-1));
+  }
+ }finally{const {releaseFrameIdentifierOcr}=await import('./frameIdentifierOcrService');await releaseFrameIdentifierOcr();}
+ return results;
 }

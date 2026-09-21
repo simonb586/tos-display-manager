@@ -95,6 +95,11 @@ export async function listCampaignVisuals() {
   for(let offset=0;;offset+=500){const {data,error}=await query.range(offset,offset+499);if(error)throw error;rows.push(...(data||[]));if((data||[]).length<500)return rows.sort(compareVisuals);}
 }
 
+export async function listVisualMaterialItems(){
+ ready();const rows=[];
+ for(let offset=0;;offset+=500){const {data,error}=await supabase.from('repertoire_des_affiches').select('id,client_id,nom_detaille_visuel,nom_campagne,format,quantite_entrepot,quantite_expo').order('id').range(offset,offset+499);if(error)throw error;rows.push(...data);if(data.length<500)return rows;}
+}
+
 export async function assignVisualToEdt(visualId, phaseId, removedEdtId = null) {
   ready();
   const {data,error}=await supabase.rpc('update_visual_edt_association', {
@@ -123,6 +128,7 @@ export async function saveCampaignVisual(visual) {
     code_visuel: visual.code_visuel?.trim() || null,
     format_support: visual.format_support?.trim() || '',
     quantite_prevue: Number(visual.quantite_prevue || 0),
+    ...(visual.inventory_item_id!==undefined?{inventory_item_id:visual.inventory_item_id?Number(visual.inventory_item_id):null}:{}),
     actif: visual.actif !== false,
     instructions_terrain: visual.instructions_terrain?.trim() || null,
     is_out_of_frame: Boolean(visual.is_out_of_frame),

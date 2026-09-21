@@ -1,3 +1,4 @@
+import {readExifGps} from '../lib/exifGps';
 import { clampImportOptions, manifestItem, readExifDate, sha256File } from '../lib/massPhotoImport.js';
 import { uploadUnmatchedPhoto } from './photoReviewService.js';
 import {importContextForPhoto,savePhotoImportContext} from './photoImportContextService';
@@ -13,13 +14,14 @@ export async function analyzePhotoItem(item, context={}) {
   let next={...item,status:'validating',error:''};
   if(!/^image\/(jpeg|png|webp|heic|heif)$/i.test(next.mimeType||'')) return {...next,status:'failed',error:'FORMAT_INVALID'};
   try{const exif=await readExifDate(next.file);if(exif)next={...next,capturedAt:exif.capturedAt,capturedAtSource:'EXIF',exifTag:exif.tag};}catch{next.exifWarning='EXIF illisible : original conservé, date à confirmer.';}
+  next.gps=await readExifGps(next.file)||next.gps;
   try{
    next.hash=await sha256File(next.file);
    if(!next.manual?.support){
     try{
      const ocr=await readFrameIdentifier(next.file,context.catalog?.supports||[]);
-     next={...next,ocrText:ocr.supportId||ocr.observations.map(o=>o.text).join('\n'),
-      ocrConfidence:ocr.supportId?ocr.candidates.find(c=>c.support_id===ocr.supportId).confidence:0,
+     next={...next,ocrVerifiedSupport:ocr.supportId,ocrText:ocr.supportId||ocr.observations.map(o=>o.text).join('\n'),
+      ocrConfidence:ocr.supportId?ocr.candidates.find(c=>c.support_id===ocr.supportId).confidence:Math.max(0,...ocr.candidates.map(c=>c.confidence)),
       suggestions:ocr.candidates,ocrRegion:ocr.supportId?ocr.candidates.find(c=>c.support_id===ocr.supportId).region:null};
     }catch(error){next.ocrWarning='Identifiant non lu : attribuez le support manuellement.';}
    }

@@ -1,5 +1,5 @@
 // Import-only inference. Terrain keeps its explicit capture workflow.
-import {normalizeFrameIdentifier} from './frameIdentifierOcr.js';
+import {rankImportSupports} from './importSupportCandidates.js';
 export const REVIEW_FIELDS = ['support','date','type','edt','phase','campaign','visual'];
 const confirmed = state => ['AUTO_CONFIRMED','MANUAL_CONFIRMED','NOT_APPLICABLE'].includes(state);
 const same = (a,b) => a != null && b != null && String(a) === String(b);
@@ -17,19 +17,15 @@ export function recognizeImportPhoto(item, catalog, manual = {}) {
   const supports = catalog.supports||[];
   const exact = supports.filter(s=>same(s.support_id,manual.support));
   let matches = exact;
+  const supportRanking=rankImportSupports(item,supports);
   if(!manual.support){
-    const text=normalizeFrameIdentifier(item.ocrText||'');const filename=normalize(item.originalFilename||'');
-    matches=supports.filter(s=>{
-      const key=normalize(s.support_id);if(!key)return false;
-      if(same(item.supportId,s.support_id))return true;
-      const pattern=new RegExp('(^|[^A-Z0-9])'+key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'([^A-Z0-9]|$)');
-      return pattern.test(filename) || Number(item.ocrConfidence)>=95 && pattern.test(text);
-    });
+    matches=supportRanking.filter(candidate=>candidate.automatic).map(candidate=>candidate.support);
   }
+  candidates.supportDetails=supportRanking.slice(0,6).map(({support,...candidate})=>candidate);
   candidates.support=matches.map(s=>s.support_id);
   const support=matches.length===1?matches[0]:null;
   if(support)accept('support',support.support_id,Boolean(manual.support));
-  else reasons.support=matches.length>1?'Plusieurs supports possibles':'Support à identifier';
+  else reasons.support=matches.length>1?'SUPPORT À VALIDER — plusieurs numéros exacts':supportRanking.length?'SUPPORT À VALIDER — candidat approchant':'Support à identifier';
   const capture=manual.date||item.capturedAt;
   const source=manual.date?'MANUAL':String(item.capturedAtSource||'IMPORT_DATE').toUpperCase();
   values.date=day(capture)?capture:null;
@@ -43,10 +39,20 @@ export function recognizeImportPhoto(item, catalog, manual = {}) {
   };
   if(!support)return result();
   const links=(catalog.links||[]).filter(l=>same(l.support_id,support.support_id));
-  const edts=(catalog.edts||[]).filter(e=>same(e.client_id,support.client_id)&&links.some(l=>same(l.edt_id,e.id)));
-  candidates.edt=edts;
+  const clientEdts=(catalog.edts||[]).filter(e=>same(e.client_id,support.client_id));
+  const namedEdts=[support.edt_associe,support.edt_precedent_associe,support.prochain_edt_cible].filter(Boolean).map(normalize);
+  const edts=clientEdts.filter(e=>links.some(l=>same(l.edt_id,e.id))||namedEdts.includes(normalize(e.no_edt))||same(e.id,manual.edt));
+  candidates.edt=clientEdts;
   const phases=(catalog.phases||[]).filter(p=>edts.some(e=>same(e.id,p.edt_id))&&['installation','retrait'].includes(p.phase_type));
   const date=day(capture);
+  const activeEdts=edts.filter(e=>{
+    const ps=phases.filter(p=>same(p.edt_id,e.id));
+    const starts=ps.filter(p=>p.phase_type==='installation').map(p=>day(p.date_debut_reelle)||day(p.date_debut_prevue)).filter(Boolean);
+    const ends=ps.filter(p=>p.phase_type==='retrait').map(p=>day(p.date_fin_reelle)||day(p.date_debut_reelle)||day(p.date_debut_prevue)||day(p.date_fin_prevue)).filter(Boolean);
+    const start=starts.sort()[0]||day(e.date_debut),end=ends.sort().at(-1)||day(e.date_fin);
+    return date&&start&&date>=start&&(!end||date<=end);
+  });
+  const activeEdt=confirmed(states.date)&&activeEdts.length===1?activeEdts[0]:null;
   const ranked=phases.map(p=>{
     const associationDates=(catalog.associations||[]).filter(a=>same(a.phase_id,p.id)).map(a=>p.phase_type==='installation'?a.date_debut:a.date_fin);
     const dates=[p.date_debut_reelle,p.date_debut_prevue,...associationDates].map(day).filter(Boolean);
@@ -66,7 +72,7 @@ export function recognizeImportPhoto(item, catalog, manual = {}) {
   const noMovement=['inspection','enjeu','photo'].includes(values.type);
   if(noMovement || explicitWithout){na('edt');na('phase');values.withoutEdt=explicitWithout&&!noMovement;phase=null;}
   else {
-    const edt=edts.find(e=>same(e.id,manual.edt||phase?.edt_id));
+    const edt=edts.find(e=>same(e.id,manual.edt||phase?.edt_id||activeEdt?.id));
     if(edt)accept('edt',edt.id,Boolean(manual.edt));
     else reasons.edt=edts.length?'EDT à valider':'Aucun EDT correspondant : décision requise';
     if(phase&&same(phase.edt_id,values.edt)&&(!values.type||phase.phase_type===values.type))accept('phase',phase.id,Boolean(manual.phase));
@@ -81,7 +87,7 @@ export function recognizeImportPhoto(item, catalog, manual = {}) {
   const campaigns=(catalog.campaigns||[]).filter(c=>same(c.client_id,support.client_id)&&['marketing','operational_communication'].includes(c.business_context)&&
     (edt?.campagne_id||same(c.id,manual.campaign)||(!day(c.date_debut)||date>=day(c.date_debut))&&(!day(c.date_fin)||date<=day(c.date_fin))));
   candidates.campaign=campaigns.filter(c=>!edt?.campagne_id||same(c.id,edt.campagne_id));
-  const campaign=candidates.campaign.find(c=>same(c.id,manual.campaign||(!referenceConflict&&reference?.campaign_id)));
+  const campaign=candidates.campaign.find(c=>same(c.id,manual.campaign||edt?.campagne_id||(!referenceConflict&&reference?.campaign_id)));
   if(campaign)accept('campaign',campaign.id,Boolean(manual.campaign));
   const visuals=(catalog.visuals||[]).filter(v=>same(v.client_id,support.client_id)&&importFormatCompatible(support,v)&&campaigns.some(c=>same(c.id,v.campagne_id))&&(!values.campaign||same(v.campagne_id,values.campaign)));
   // Existing support/visual links are deliberately not an eligibility condition.

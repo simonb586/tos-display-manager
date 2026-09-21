@@ -334,6 +334,6 @@ export function Detail({ name, row, role, config, onSaved, onClose, onOpenMap, r
           : <p>{String(formatBusinessValue(row[c],c) ?? '—')}</p>}
       </div>;
     })}</div>
-    {name === 'Infrastructures' && support && <Support360Panel supportId={support} role={role} scopedData={scopedData} previewTargetId={previewTargetId}/>}
+    {name === 'Infrastructures' && support && <Support360Panel supportId={support} support={row} role={role} scopedData={scopedData} previewTargetId={previewTargetId}/>}
   </div></div>;
 }

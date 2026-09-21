@@ -1,32 +1,37 @@
 import React,{useEffect,useMemo,useRef,useState} from 'react';
-import {listPhotoReviewQueue,ignoreReviewPhoto} from '../services/photoReviewService';
+import {listPhotoReviewQueue,ignoreReviewPhoto,deleteReviewPhotos,reanalyzeReviewPhotos} from '../services/photoReviewService';
 import {loadPhotoImportCatalog,importContextForPhoto,savePhotoImportContext,finalizeImportPhoto} from '../services/photoImportContextService';
 import {getSignedDownloadUrl} from '../services/photoAccessService';
 import {importRecognitionCounts} from '../lib/photoImportRecognition';
 import {photoReviewState,isImportedPhoto} from '../lib/photoReview';
 import {validateSupportPhoto} from '../services/photoInventoryService';
-import {deleteSupportPhoto} from '../services/photoLibraryService';
 import PhotoImportContextEditor,{ImportPhotoPreview,ImportBatchDecision,updateImportManual} from './PhotoImportContextEditor';
 import '../features/v10/photo-review-queue.css';
 import '../features/v10/photo-import-context.css';
 const filters={all:'Toutes',support:'Support à identifier',date:'Date à valider',edt:'EDT à valider',type:'Type à valider',visual:'Visuel à valider',unmatched:'Non identifiées',ready:'Prêtes à confirmer',validated:'Validées',ignored:'Ignorées'};
 export default function PhotoReviewQueue({role,initialPhotoId=null}) {
  const canManage=['Administrateur','Coordonnateur'].includes(role);
+ const canDelete=role==='Administrateur';
  const [rows,setRows]=useState([]),[catalog,setCatalog]=useState(null),[filter,setFilter]=useState('all'),[query,setQuery]=useState(''),[sort,setSort]=useState('recent'),[selected,setSelected]=useState(new Set()),[viewer,setViewer]=useState(null),[rotation,setRotation]=useState(0),[zoom,setZoom]=useState(1),[page,setPage]=useState(0),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
  const active=useRef(false),loadVersion=useRef(0);
  const [loading,setLoading]=useState(true);
- useEffect(()=>{if(initialPhotoId)setViewer(initialPhotoId)},[initialPhotoId]);
- async function remove(photo){
-  if(!canManage||active.current||!window.confirm(`Supprimer définitivement la photo « ${photo.original_filename||photo.nom_fichier||photo.id} » ?`))return;
+ const selectable=photo=>photoReviewState(photo)==='pending'&&!photo.movement_history_id&&!photo.est_principale&&!photo.is_current_visual;
+ async function reanalyze(){
+  if(!canManage||active.current)return;active.current=true;setBusy(true);
+  try{const results=await reanalyzeReviewPhotos(rows.filter(p=>selected.has(p.id)),(done,total)=>setMessage('Réanalyse '+done+' / '+total+' — originaux conservés.'));await load();setMessage(results.filter(r=>r.ok).length+' photo(s) réanalysée(s). '+results.filter(r=>!r.ok).length+' erreur(s). Les associations incertaines restent à valider.');}catch(error){setMessage(error.message)}finally{active.current=false;setBusy(false)}
+ }
+ async function removeSelection(ids=[...selected]){
+  if(!canDelete||active.current||!ids.length||!window.confirm('Supprimer '+ids.length+' photos sélectionnées ?'))return;
   active.current=true;setBusy(true);
-  try{await deleteSupportPhoto(photo);setViewer(null);setSelected(current=>{const next=new Set(current);next.delete(photo.id);return next});await load();setMessage('Photo supprimée.');}
+  try{await deleteReviewPhotos(ids);setSelected(new Set());setViewer(null);await load();setMessage(ids.length+' photos supprimées et Storage vérifié.');}
   catch(error){setMessage(error.message)}finally{active.current=false;setBusy(false)}
  }
+ useEffect(()=>{if(initialPhotoId)setViewer(initialPhotoId)},[initialPhotoId]);
  async function load(){
   const version=++loadVersion.current;setLoading(true);
   let photos;try{photos=await listPhotoReviewQueue();}finally{if(version===loadVersion.current)setLoading(false);}
   if(version!==loadVersion.current)return;
-  setRows(photos);setCatalog(null);setPage(0);
+  setRows(photos);setSelected(current=>new Set([...current].filter(id=>photos.some(p=>p.id===id&&selectable(p)))));setCatalog(null);setPage(0);
   try{const data=await loadPhotoImportCatalog();if(version!==loadVersion.current)return;setCatalog(data);setRows(photos.map(p=>{
    try{return {...p,import_context:importContextForPhoto(p,data)};}
    catch(error){return {...p,context_error:error.message};}
@@ -57,8 +62,9 @@ export default function PhotoReviewQueue({role,initialPhotoId=null}) {
   {message&&<p role="status">{message}</p>}
   <div className="review-counters"><span>Importées <b>{counts.imported}</b></span><span>Auto-reconnues <b>{counts.automatic}</b></span><span>À valider <b>{counts.review}</b></span><span>Non identifiées <b>{counts.unidentified}</b></span><span>Validées <b>{counts.validated}</b></span><span>Erreurs <b>{counts.errors}</b></span></div>
   <div className="review-toolbar"><label>Filtrer<select value={filter} onChange={e=>{setFilter(e.target.value);setPage(0);}}>{Object.entries(filters).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label><label>Rechercher<input value={query} onChange={e=>{setQuery(e.target.value);setPage(0);}}/></label><label>Tri<select value={sort} onChange={e=>setSort(e.target.value)}><option value="recent">Plus récentes</option><option value="oldest">Plus anciennes</option><option value="name">Nom original</option></select></label><button disabled={busy} onClick={()=>load().catch(e=>setMessage(e.message))}>Actualiser</button></div>
-  {catalog&&selected.size>0&&<><ImportBatchDecision catalog={catalog} onApply={bulk} disabled={busy}/><button disabled={busy} onClick={()=>execute([...selected],false)}>Enregistrer la sélection</button><button disabled={busy} onClick={()=>execute([...selected],true)}>Confirmer la sélection</button></>}
-  <div className="review-grid">{shown.map(photo=><article key={photo.id} data-photo-id={photo.id}><label><input type="checkbox" checked={selected.has(photo.id)} disabled={busy||Boolean(photo.import_finalized_at)||!isImportedPhoto(photo)||!photo.import_context?.recognition} onChange={e=>setSelected(current=>{const next=new Set(current);e.target.checked?next.add(photo.id):next.delete(photo.id);return next;})}/> Sélectionner</label>
+  {canManage&&<div className="review-toolbar" role="group" aria-label="Actions sur la sélection"><label><input type="checkbox" aria-label="Tout sélectionner" disabled={busy} checked={visible.some(selectable)&&visible.filter(selectable).every(p=>selected.has(p.id))} onChange={e=>setSelected(e.target.checked?new Set(visible.filter(selectable).map(p=>p.id)):new Set())}/> Tout sélectionner les photos à valider ({visible.filter(selectable).length})</label><span>{selected.size} sélectionnée(s)</span><button disabled={busy||!selected.size} onClick={reanalyze}>Réanalyser la sélection</button>{canDelete&&<button className="danger" disabled={busy||!selected.size} onClick={()=>removeSelection()}>Supprimer les photos sélectionnées</button>}</div>}
+  {canManage&&catalog&&selected.size>0&&<><ImportBatchDecision catalog={catalog} onApply={bulk} disabled={busy}/><button disabled={busy} onClick={()=>execute([...selected],false)}>Enregistrer la sélection</button><button disabled={busy} onClick={()=>execute([...selected],true)}>Confirmer la sélection</button></>}
+  <div className="review-grid">{shown.map(photo=><article key={photo.id} data-photo-id={photo.id}><label><input type="checkbox" checked={selected.has(photo.id)} disabled={busy||!canManage||!selectable(photo)} onChange={e=>setSelected(current=>{const next=new Set(current);e.target.checked?next.add(photo.id):next.delete(photo.id);return next;})}/> Sélectionner</label>
    <ImportPhotoPreview photo={photo} onClick={()=>{setViewer(photo.id);setZoom(1);setRotation(0);}}/>
    <div className="review-card-body"><strong>{photo.original_filename||photo.nom_fichier}</strong><span>{photo.import_context?.recognition?.values?.support||photo.support_id||'Support à identifier'}</span><span>{photo.statut_validation||photo.review_status||'À valider'}</span><small>{photo.import_context?.recognition?.values?.date||photo.captured_at||photo.prise_le||'Date à confirmer'}</small>
     <small>EDT : {catalog?.edts.find(e=>String(e.id)===String(photo.import_context?.recognition?.values?.edt))?.no_edt||'À valider'}</small>
@@ -67,7 +73,7 @@ export default function PhotoReviewQueue({role,initialPhotoId=null}) {
     <small>{photo.context_error||Object.values(photo.import_context?.recognition?.reasons||{}).join(' · ')||(!catalog?'Chargement du catalogue…':'')}</small>
     {!isImportedPhoto(photo)&&photoReviewState(photo)==='pending'&&<button disabled={busy} onClick={()=>execute([photo.id],true)}>Valider la preuve Terrain</button>}
     <button disabled={!catalog||!photo.import_context?.recognition} onClick={()=>{setViewer(photo.id);setZoom(1);setRotation(0);}}>Examiner / Corriger</button><button onClick={()=>original(photo)}>Fichier original</button>
-    {canManage&&photoReviewState(photo)==='pending'&&<div className="review-actions">{isImportedPhoto(photo)&&<button disabled={busy||!catalog||!photo.import_context?.recognition} onClick={()=>{setViewer(photo.id);setZoom(1);setRotation(0);}}>Attribuer un support</button>}<button className="danger" disabled={busy} onClick={()=>remove(photo)}>Supprimer</button></div>}
+    {canManage&&photoReviewState(photo)==='pending'&&<div className="review-actions">{isImportedPhoto(photo)&&<button disabled={busy||!catalog||!photo.import_context?.recognition} onClick={()=>{setViewer(photo.id);setZoom(1);setRotation(0);}}>Attribuer un support</button>}<button className="danger" disabled={busy||!canDelete} onClick={()=>removeSelection([photo.id])}>Supprimer</button></div>}
    </div></article>)}</div>
   {loading&&<p role="status">Chargement des photos…</p>}
   {!loading&&!shown.length&&<p>Aucune photo pour ce filtre.</p>}

@@ -1,7 +1,21 @@
+import {allPhotoProjectionRows} from './photoProjectionService';
 import { supabase, supabaseConfigured } from '../lib/supabaseClient';
 import { prepareAndUploadPhoto, rollbackUploadedPhoto } from './photoWorkflowService';
 
 const QUEUE_KEY = 'tos-terrain-offline-queue-v1';
+
+export async function listTerrainIssueTypes(){
+ const {data,error}=await supabase.from('terrain_issue_types').select('label').order('sort_order');
+ if(error)throw error;return data||[];
+}
+export async function listActiveTerrainIssues(supportId){
+ const rows=await allPhotoProjectionRows('enjeux_terrain',{support_id:supportId});return rows.filter(issue=>!issue.resolved_at).sort((a,b)=>String(a.created_at).localeCompare(String(b.created_at)));
+}
+export async function resolveTerrainIssue({issueId,fileName,storagePath,comments}){
+ const {data,error}=await supabase.rpc('resolve_terrain_issue',{p_issue_id:Number(issueId),p_nom_fichier:fileName,p_storage_path:storagePath,p_comment:comments||null});
+ if(error)throw error;if(!data?.ok)throw Error('Résolution non confirmée.');
+ window.dispatchEvent(new CustomEvent('tos-terrain-data-updated',{detail:data}));return data;
+}
 
 export function getOfflineQueue() {
   try {
@@ -43,7 +57,7 @@ async function uploadTerrainPhotoLegacy(file, supportId, action = 'inspection') 
 
 export async function uploadTerrainPhoto(file, supportId, action = 'inspection', context = {}) {
   const uploaded = await prepareAndUploadPhoto(file, {
-    supportId, storageSupportId:supportId, type:action === 'photo' ? 'autre' : action,
+    supportId, storageSupportId:supportId, type:action === 'photo' ? 'autre' : action === 'resolution_enjeu' ? 'enjeu' : action,
     campaignCode:context.campaignCode || 'NONE', edt:context.edt || 'NONE',
     capturedAt:context.capturedAt, source:context.source || 'terrain'
   }, 'terrain-photos');

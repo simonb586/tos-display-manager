@@ -2,7 +2,7 @@ import {supabase} from '../lib/supabaseClient';
 import {referenceFileFeatures} from './visualReferenceRecognitionService';
 
 const bucket='visual-references';
-export async function addVisualReference(visual,file){
+export async function addVisualReference(visual,file,replacedAssetId=null){
   const extensions={'image/jpeg':'jpg','image/png':'png','image/webp':'webp','application/pdf':'pdf'};
   if(!extensions[file.type]||file.size>25*1024*1024)throw Error('Choisissez une photo JPG, PNG, WebP ou un PDF de 25 Mo maximum.');
   if(!visual.id||!visual.client_id)throw Error('Enregistrez le visuel et son client avant d’ajouter une référence.');
@@ -11,7 +11,7 @@ export async function addVisualReference(visual,file){
   const {error:uploadError}=await supabase.storage.from(bucket).upload(path,file,{upsert:false,contentType:file.type});
   if(uploadError)throw uploadError;
   const asset={id,storage_path:path,name:file.name,mime_type:file.type,pages,created_at:new Date().toISOString()};
-  const {data,error}=await supabase.rpc('add_visual_reference',{p_visual_id:visual.id,p_asset:asset});
+  const {data,error}=await supabase.rpc(replacedAssetId?'replace_visual_reference':'add_visual_reference',{p_visual_id:visual.id,p_asset:asset,...(replacedAssetId?{p_asset_id:replacedAssetId}:{})});
   // Keep an uploaded original if an ambiguous network error occurs. Never delete a
   // potentially committed reference as a client-side rollback.
   if(error)throw Error('Original conservé ; association non confirmée. '+error.message);

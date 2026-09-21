@@ -22,19 +22,24 @@ export function updateImportManual(context,catalog,patch) {
 }
 export default function PhotoImportContextEditor({context,catalog,onChange,disabled=false}) {
  const r=context.recognition,v=r.values,c=r.candidates;
+ const [editConfirmed,setEditConfirmed]=useState(false);
+ const needs=key=>editConfirmed||r.states[key]==='TO_REVIEW';
  const [supportTerm,setSupportTerm]=useState(context.manual?.support||v.support||'');
  useEffect(()=>setSupportTerm(context.manual?.support||v.support||''),[context.manual?.support,v.support]);
+ const confirmedValue=key=>key==='date'&&v.date?new Date(v.date).toLocaleString('fr-CA'):key==='edt'?c.edt?.find(x=>String(x.id)===String(v.edt))?.no_edt:key==='campaign'?c.campaign?.find(x=>String(x.id)===String(v.campaign))?.nom_campagne:key==='visual'?c.visual?.find(x=>String(x.id)===String(v.visual))?.nom_visuel:key==='phase'?c.phase?.find(x=>String(x.id)===String(v.phase))?.phase_type:v[key];
  const change=patch=>onChange(updateImportManual(context,catalog,patch));
- const options=(key,rows,label)=> <label>{labels[key]}<select aria-label={labels[key]} value={v[key]??''} onChange={e=>change({[key]:e.target.value})}><option value="">À valider</option>{(rows||[]).map(row=><option key={row.id} value={row.id}>{label(row)}</option>)}</select></label>;
+ const options=(key,rows,label)=> needs(key)&&<label>{labels[key]}<select aria-label={labels[key]} value={v[key]??''} onChange={e=>change({[key]:e.target.value})}><option value="">À valider</option>{(rows||[]).map(row=><option key={row.id} value={row.id}>{label(row)}</option>)}</select></label>;
  const localDate=v.date?new Date(new Date(v.date).getTime()-new Date(v.date).getTimezoneOffset()*60000).toISOString().slice(0,16):'';
  const supportMatches=supportTerm.length>=2?(catalog.supports||[]).filter(s=>[s.support_id,s.site,s.emplacement_visibilite].join(' ').toLocaleLowerCase('fr').includes(supportTerm.toLocaleLowerCase('fr'))).slice(0,12):[];
  return <fieldset disabled={disabled} className="import-context-fields"><legend>Contexte de la photo</legend>
-  <div className="import-confirmed-fields">{Object.entries(r.states).map(([key,state])=><span key={key} data-validation-field={key} data-validation-state={state}><b>{labels[key]}</b> : {statuses[state]}</span>)}</div>
-  <label>Rechercher un support<input aria-label="Rechercher un support" value={supportTerm} onChange={e=>setSupportTerm(e.target.value)} placeholder="Numéro ou emplacement"/></label>
-  <div className="support-results">{supportMatches.map(s=><button type="button" key={s.support_id} onClick={()=>change({support:s.support_id})}>{s.support_id} — {s.site}</button>)}</div>
-  <label>Date détectée ({r.dateSource})<input aria-label="Date de la photo" type="datetime-local" value={localDate} onChange={e=>{if(e.target.value)change({date:new Date(e.target.value).toISOString()});}}/></label>
+  <div className="import-confirmed-fields">{Object.entries(r.states).map(([key,state])=><span key={key} data-validation-field={key} data-validation-state={state}><b>{labels[key]}</b> : {statuses[state]}{confirmedValue(key)&&<small> — {confirmedValue(key)}</small>}</span>)}</div>
+  <button type="button" onClick={()=>setEditConfirmed(!editConfirmed)}>{editConfirmed?"Afficher seulement les éléments à valider":"Modifier les éléments confirmés"}</button>
+  {needs('support')&&<><label>Rechercher un support<input aria-label="Rechercher un support" value={supportTerm} onChange={e=>setSupportTerm(e.target.value)} placeholder="Numéro ou emplacement"/></label>
+  <div className="support-results">{supportMatches.map(s=><button type="button" key={s.support_id} onClick={()=>change({support:s.support_id})}>{s.support_id} — {s.site}</button>)}</div></>}
+  {r.states.support==='TO_REVIEW'&&c.supportDetails?.length>0&&<section aria-label="Supports proposés"><strong>Support à valider</strong>{c.supportDetails.map(candidate=><div key={candidate.support_id}><button type="button" onClick={()=>change({support:candidate.support_id})}>{candidate.support_id}</button><span> Confiance {candidate.score}/100 — {candidate.evidence.join(' · ')}</span></div>)}</section>}
+  {needs('date')&&<label>Date détectée ({r.dateSource})<input aria-label="Date de la photo" type="datetime-local" value={localDate} onChange={e=>{if(e.target.value)change({date:new Date(e.target.value).toISOString()});}}/></label>}
   {v.date&&r.states.date==='TO_REVIEW'&&<button type="button" onClick={()=>change({date:v.date})}>Confirmer cette date</button>}
-  <label>Type<select aria-label="Type d’intervention" value={v.type||''} onChange={e=>change({type:e.target.value})}><option value="">À valider</option>{['installation','retrait','inspection','enjeu','photo'].map(t=><option key={t} value={t}>{t[0].toUpperCase()+t.slice(1)}</option>)}</select></label>
+  {needs('type')&&<label>Type<select aria-label="Type d’intervention" value={v.type||''} onChange={e=>change({type:e.target.value})}><option value="">À valider</option>{['installation','retrait','inspection','enjeu','photo'].map(t=><option key={t} value={t}>{t[0].toUpperCase()+t.slice(1)}</option>)}</select></label>}
   <label><input type="checkbox" checked={Boolean(context.manual?.withoutEdt)} onChange={e=>change({withoutEdt:e.target.checked})}/> Installation sans EDT</label>
   {!v.withoutEdt&&!['inspection','enjeu','photo'].includes(v.type)&&<>
    {options('edt',c.edt,e=>e.no_edt)}

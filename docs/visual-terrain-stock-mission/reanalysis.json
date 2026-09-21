@@ -1,0 +1,27 @@
+{
+  "at": "2026-09-20T23:57:28.582Z",
+  "result": "PASS",
+  "total": 204,
+  "originalsPreserved": 204,
+  "rowsPreserved": 204,
+  "allAnalyzed": true,
+  "manualChoicesPreserved": true,
+  "newMovements": 0,
+  "newFinalizations": 0,
+  "confirmed": {
+    "support": 69,
+    "date": 204,
+    "type": 0,
+    "edt": 0,
+    "phase": 0,
+    "campaign": 0,
+    "visual": 0
+  },
+  "supportCandidates": 198,
+  "ready": 0,
+  "activeReferenceVisuals": 0,
+  "limitations": [
+    "Automatic visual identification requires generic references.",
+    "Unknown or absent EDT records are never invented."
+  ]
+}

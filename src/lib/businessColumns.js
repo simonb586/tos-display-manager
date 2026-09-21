@@ -33,7 +33,7 @@ const ALWAYS_HIDDEN_COLUMNS = {
   Infrastructures: ['format_visuel', 'photo_miniature_url', 'photo_principale_url']
 };
 
-const BUSINESS_LABELS={nom_campagne:'Campagne / communication',business_context:'Contexte',date_debut:'Début',date_fin:'Fin',statut:'Statut',site:'Site',support_id:'Support',type_support:'Type',type_site:'Type de site',emplacement_visibilite:'Emplacement / visibilité',visual:'Visuel',numero_edt:'EDT',no_edt:'EDT',objet:'Rapport',sent_at:'Publié le',type_enjeu:'Enjeu',description:'Description',occurred_at:'Date',action:'Activité',nom:'Nom',courriel:'Courriel',role:'Rôle'};
+const BUSINESS_LABELS={quantite_entrepot:'Quantité entrepôt',quantite_expo:'Quantité terrain',last_movement_id:'Dernier mouvement',last_movement_at:'Date du dernier mouvement',duration:'Durée de l’enjeu',deactivates_support:'Désactive le support',resolved_at:'Date de résolution',resolution_comment:'Commentaire de résolution',nom_campagne:'Campagne / communication',business_context:'Contexte',date_debut:'Début',date_fin:'Fin',statut:'Statut',site:'Site',support_id:'Support',type_support:'Type',type_site:'Type de site',emplacement_visibilite:'Emplacement / visibilité',visual:'Visuel',numero_edt:'EDT',no_edt:'EDT',objet:'Rapport',sent_at:'Publié le',type_enjeu:'Enjeu',description:'Description',occurred_at:'Date',action:'Activité',nom:'Nom',courriel:'Courriel',role:'Rôle'};
 
 const getCols = (rows, name) => {
   if (!rows?.length) return [];

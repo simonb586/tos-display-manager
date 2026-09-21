@@ -23,7 +23,7 @@ async function input(b,selector,value){await b.evaluate(`(()=>{const e=document.
 async function upload(b,type){await b.evaluate(`(async()=>{let file;
  if(${JSON.stringify(type)}==='pdf'){file=new File([Uint8Array.from(atob(${JSON.stringify(pdfBase64)}),c=>c.charCodeAt(0))],'mission-reference.pdf',{type:'application/pdf'});}
  else{const c=document.createElement('canvas');c.width=600;c.height=800;const x=c.getContext('2d');x.fillStyle='#ffffff';x.fillRect(0,0,600,800);for(let i=0;i<80;i++){x.fillStyle=i%2?'#ee4422':'#1155aa';x.fillRect((i*41)%550,(i*73)%750,20+i%40,30);x.fillStyle='#000000';x.font='18px Arial';x.fillText('TOS '+i,(i*29)%500,(i*83)%780);}file=new File([await new Promise(r=>c.toBlob(r,'image/png'))],'mission-reference.png',{type:'image/png'});}
- const dt=new DataTransfer();dt.items.add(file);const e=document.querySelector('.visual-references input[type=file]');e.files=dt.files;e.dispatchEvent(new Event('change',{bubbles:true}));})()`)}
+ const dt=new DataTransfer();dt.items.add(file);const e=document.querySelector('.visual-references input[type=file]:not([hidden])');e.files=dt.files;e.dispatchEvent(new Event('change',{bubbles:true}));})()`)}
 try{
  if(!clientsOnly){
  const admin=await existingSession(access,1);logins.push(admin);
@@ -44,7 +44,7 @@ try{
   await b.evaluate("setVisualField('Format exact du support','20 x 28')");await b.pause(100);
   await click(b,'Enregistrer');await b.waitFor(`!![...document.querySelectorAll('.visuals-compact-table tbody tr')].find(e=>e.textContent.includes(${JSON.stringify(name)}))`);
   const created=await admin.client.from('campagne_visuels_formats').select('id').eq('nom_visuel',name).single();assert.ifError(created.error);visualId=created.data.id;
-  const edit=async()=>{await b.waitFor(`[...document.querySelectorAll('.visuals-compact-table tbody tr')].find(e=>e.textContent.includes(${JSON.stringify(name)}))?.querySelector('button')?.disabled===false`);await b.evaluate(`[...document.querySelectorAll('.visuals-compact-table tbody tr')].find(e=>e.textContent.includes(${JSON.stringify(name)})).querySelector('button').click()`);await b.waitFor("!!document.querySelector('form .visual-references input[type=file]')")};
+  const edit=async()=>{await b.waitFor(`[...document.querySelectorAll('.visuals-compact-table tbody tr')].find(e=>e.textContent.includes(${JSON.stringify(name)}))?.querySelector('button')?.disabled===false`);await b.evaluate(`[...document.querySelectorAll('.visuals-compact-table tbody tr')].find(e=>e.textContent.includes(${JSON.stringify(name)})).querySelector('button').click()`);await b.waitFor("!!document.querySelector('form .visual-references input[type=file]:not([hidden])')")};
   await edit();
   console.log(label+': visual created; testing failed loader and retry');
   await b.send('Network.setBlockedURLs',{urls:['*/vendor/opencv-*']});await upload(b,'image');
@@ -60,7 +60,7 @@ try{
   await b.waitFor("[...document.querySelectorAll('.visual-references img')].some(e=>e.complete&&e.naturalWidth>0)");
   const refs=await admin.client.from('campagne_visuels_formats').select('reference_assets').eq('id',visualId).single();assert.ifError(refs.error);assert.equal(refs.data.reference_assets.length,2);
   assert(refs.data.reference_assets.every(a=>a.pages[0].features.points.length>0));
-  await b.evaluate("window.confirm=()=>true");await click(b,'Supprimer la référence');await b.waitFor("document.querySelectorAll('.visual-references button').length===1");
+  await b.evaluate("window.confirm=()=>true");await click(b,'Supprimer la référence');await b.waitFor("[...document.querySelectorAll('.visual-references button')].filter(b=>b.textContent==='Supprimer la référence').length===1");
   await click(b,'Enregistrer les modifications');await b.waitFor("!document.querySelector('form.v74-form')");
   for(const ignoreCache of [false,true]){await b.send('Page.reload',{ignoreCache});await b.waitFor("document.querySelectorAll('aside button').length>2",90);await navigate(b,'Campagne — Visuels et formats');await b.waitFor(`!![...document.querySelectorAll('.visuals-compact-table tbody tr')].find(e=>e.textContent.includes(${JSON.stringify(name)}))`);await edit();assert(await b.evaluate("document.querySelector('.visual-references').textContent.includes('mission-reference.pdf')"));await click(b,'Annuler');}
   records.push({view:'Visuels',compact:true,create:true,edit:true,image:true,pdf:true,reopen:true,remove:true,retry:true,cachedReload:true,hardRefresh:true});

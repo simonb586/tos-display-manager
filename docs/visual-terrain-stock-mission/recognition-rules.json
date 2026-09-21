@@ -1,0 +1,71 @@
+{
+  "result": "PASS",
+  "scope": "Deterministic fixtures, separate from real-photo OCR measurements",
+  "cases": [
+    {
+      "name": "VH VAUD 16.jpg",
+      "support": true,
+      "edt": true,
+      "campaign": true,
+      "visual": true
+    },
+    {
+      "name": "vh-vaud-16.jpg",
+      "support": true,
+      "edt": true,
+      "campaign": true,
+      "visual": true
+    },
+    {
+      "name": "VH–VAUD–16.jpg",
+      "support": true,
+      "edt": true,
+      "campaign": true,
+      "visual": true
+    },
+    {
+      "name": "clear OCR",
+      "support": true
+    },
+    {
+      "name": "partial OCR",
+      "manual": true
+    },
+    {
+      "name": "ambiguous support",
+      "manual": true
+    },
+    {
+      "name": "unknown support preserves date",
+      "manual": true
+    },
+    {
+      "name": "inside active EDT interval",
+      "edt": true,
+      "campaign": true,
+      "manual": true
+    },
+    {
+      "name": "operational communication",
+      "edt": true,
+      "campaign": true,
+      "visual": true
+    },
+    {
+      "name": "ambiguous reference preserves EDT campaign",
+      "manual": true
+    },
+    {
+      "name": "GPS candidate without invented association",
+      "manual": true
+    },
+    {
+      "name": "canonical infrastructure EDT reference without planning row",
+      "edt": true
+    },
+    {
+      "name": "manual EDT available without invented automatic link",
+      "manual": true
+    }
+  ]
+}

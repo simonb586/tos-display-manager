@@ -13,6 +13,7 @@ import {
 import {
   finalizeTerrainInstallation,
   finalizeTerrainIntervention,
+  listTerrainIssueTypes,listActiveTerrainIssues,resolveTerrainIssue,
   rollbackUploadedPhoto,
   uploadTerrainPhoto
 } from '../services/terrainService';
@@ -39,6 +40,7 @@ export default function TerrainApp({ dataStore, role, session }) {
   const [installationPhase,setInstallationPhase]=useState('');
   const [comments, setComments] = useState('');
   const [issueType, setIssueType] = useState('');
+  const [issueTypes,setIssueTypes]=useState([]),[activeIssues,setActiveIssues]=useState([]),[issueId,setIssueId]=useState(''),[issuesLoading,setIssuesLoading]=useState(false);
   const [visualError, setVisualError] = useState('');
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState('');
@@ -53,6 +55,9 @@ export default function TerrainApp({ dataStore, role, session }) {
   const idField = source === 'Infrastructure' ? 'support_id' : 'no_arret';
   const visual = visuals.find(item => String(item.id) === String(visualId));
   const requiresVisual = source === 'Infrastructure' && action === 'installation';
+
+  useEffect(()=>{let live=true;if(action==='enjeu')listTerrainIssueTypes().then(rows=>{if(live)setIssueTypes(rows)}).catch(e=>{if(live)setMessage(e.message)});return()=>{live=false}},[action]);
+  useEffect(()=>{let live=true;setActiveIssues([]);setIssueId('');if(action==='resolution_enjeu'&&selected?.support_id){setIssuesLoading(true);listActiveTerrainIssues(selected.support_id).then(rows=>{if(live){setActiveIssues(rows);if(rows.length===1)setIssueId(String(rows[0].id));}}).catch(e=>{if(live)setMessage(e.message)}).finally(()=>{if(live)setIssuesLoading(false)});}return()=>{live=false}},[action,selected?.support_id]);
 
   useEffect(() => () => {
     if (preview) URL.revokeObjectURL(preview);
@@ -167,6 +172,7 @@ export default function TerrainApp({ dataStore, role, session }) {
       setMessage('Prends ou joins une photo avant de terminer.');
       return;
     }
+    if(action==='resolution_enjeu'&&!issueId){setMessageType('error');setMessage('Sélectionne l’enjeu à résoudre.');return;}
 
     submittingRef.current = true;
     setBusy(true);
@@ -201,7 +207,7 @@ export default function TerrainApp({ dataStore, role, session }) {
           throw new Error('La stabilisation v0.12.8 exige une Infrastructure pour cette opération.');
         }
 
-        const result = await finalizeTerrainIntervention({
+        const result = action==='resolution_enjeu'?await resolveTerrainIssue({issueId,fileName:uploaded.normalizedFilename,storagePath:uploaded.path,comments}):await finalizeTerrainIntervention({
           supportId: selected.support_id,
           phaseId: null,
           action,
@@ -226,7 +232,7 @@ export default function TerrainApp({ dataStore, role, session }) {
       }
 
       if (!(source === 'Infrastructure' && action === 'installation')) {
-        const explanation = action === 'retrait'
+        const explanation = action === 'resolution_enjeu'?'Enjeu résolu. L’historique et les photos sont conservés.':action === 'enjeu'?'Enjeu enregistré et état du support mis à jour.':action === 'retrait'
           ? 'Retrait confirmé. Le support est sans affiche ; les photos restent dans la galerie.'
           : action === 'inspection'
           ? 'Photo validée et ajoutée à la galerie.'
@@ -330,6 +336,7 @@ export default function TerrainApp({ dataStore, role, session }) {
               <option value="retrait">Retrait — support sans affiche</option>
               <option value="inspection">Inspection</option>
               <option value="enjeu">Enjeu</option>
+              <option value="resolution_enjeu">Retrait d’un enjeu</option>
               <option value="photo">Autre photo</option>
             </select>
           </label>
@@ -416,13 +423,12 @@ export default function TerrainApp({ dataStore, role, session }) {
           {action === 'enjeu' && (
             <>
               <label>
-                Type d’enjeu
-                <input
+                Type de problème
+                <select
                   required
                   value={issueType}
                   onChange={event => setIssueType(event.target.value)}
-                  placeholder="Ex. vitre brisée, affiche endommagée, structure..."
-                />
+                ><option value="">Sélectionner un problème</option>{issueTypes.map(type=><option key={type.label}>{type.label}</option>)}</select>
               </label>
               {selected && <div className="terrain-issue-context" aria-label="Contexte de l’enjeu">
                 <span>Support : <strong>{selected.support_id}</strong></span>
@@ -430,8 +436,9 @@ export default function TerrainApp({ dataStore, role, session }) {
             </>
           )}
 
+          {action==='resolution_enjeu'&&<section><h3>Enjeu à résoudre</h3>{issuesLoading?<p>Chargement…</p>:activeIssues.length?<label>Choisir l’enjeu<select required value={issueId} onChange={e=>setIssueId(e.target.value)}><option value="">Sélectionner</option>{activeIssues.map(issue=><option key={issue.id} value={issue.id}>{issue.type_enjeu} — {new Date(issue.created_at).toLocaleDateString('fr-CA')}</option>)}</select></label>:<p>Aucun enjeu actif pour ce support.</p>}{activeIssues.find(i=>String(i.id)===issueId)?.description&&<p>{activeIssues.find(i=>String(i.id)===issueId).description}</p>}</section>}
           <label>
-            Commentaires
+            Commentaire (optionnel)
             <textarea
               value={comments}
               onChange={event => setComments(event.target.value)}
@@ -459,7 +466,7 @@ export default function TerrainApp({ dataStore, role, session }) {
           <div className="terrain-form-footer">
             {!file && <small className="terrain-photo-required">Une photo est requise pour terminer.</small>}
             <button type="submit" className="terrain-save" disabled={busy}>
-              <Save/> {busy ? 'Enregistrement…' : 'Terminer'}
+              <Save/> {busy ? 'Enregistrement…' : action==='enjeu'?'Enregistrer':action==='resolution_enjeu'?'Confirmer la résolution':'Terminer'}
             </button>
             {message && <div className={`terrain-message ${messageType}`} role={messageType === 'error' ? 'alert' : 'status'} aria-live="polite">{message}</div>}
           </div>

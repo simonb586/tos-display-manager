@@ -1,6 +1,8 @@
 import SortableHeader from './SortableHeader';
 import useSortableRows from '../hooks/useSortableRows';
 import VisualReferences from './VisualReferences';
+import {addVisualReference} from '../services/visualReferenceService';
+import '../features/v07/visual-workspace.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { Archive, Pencil, Plus, Save, Trash2, X } from 'lucide-react';
 import { listMasterCampaigns } from '../services/campaignService';
@@ -10,6 +12,7 @@ import {
   deleteOrArchiveCampaignVisual,
   listEdtPhasesForCampaign,
   listCampaignVisuals,
+  listVisualMaterialItems,
   saveCampaignVisual
 } from '../services/campaignVisualService';
 
@@ -20,6 +23,7 @@ const empty = {
   code_visuel: '',
   format_support: '',
   quantite_prevue: 0,
+  inventory_item_id: '',
   actif: true,
   is_out_of_frame: false,
   instructions_terrain: '',
@@ -33,11 +37,13 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
   const initialDraft = readFormDraft('visual', draftScope, { form: {...empty,campagne_id:campaignId||''}, formOpen: false });
   const [campaigns, setCampaigns] = useState([]);
   const [visuals, setVisuals] = useState([]);
+  const [materialItems,setMaterialItems]=useState([]);
   const [form, setForm] = useState(initialDraft.form);
   const [formOpen, setFormOpen] = useState(Boolean(initialDraft.formOpen));
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const mutationActive = useRef(false);
+  const [referenceFiles,setReferenceFiles]=useState([]);
   const [edts, setEdts] = useState([]);
   const [edtSearch,setEdtSearch]=useState('');
   const [campaignSearch,setCampaignSearch]=useState(''),[visualSearch,setVisualSearch]=useState('');
@@ -63,6 +69,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
 
   useEffect(() => {
     reload();
+    if(canManage)listVisualMaterialItems().then(setMaterialItems).catch(error=>setMessage(error.message));
   }, [businessContext,campaignId]);
 
   useEffect(() => {
@@ -92,7 +99,13 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
     setBusy(true);
 
     try {
-      await saveCampaignVisual({...form,edt_associations:role==='Administrateur'?form.edt_associations:undefined});
+      const saved=await saveCampaignVisual({...form,edt_associations:role==='Administrateur'?form.edt_associations:undefined});
+      if(referenceFiles.length){
+        const savedVisual=(await listCampaignVisuals()).find(v=>String(v.id)===String(saved.id||saved.visual_id||saved.visual?.id||form.id));
+        if(!savedVisual)throw Error('Visuel enregistré. Rechargez sa fiche pour ajouter les références.');
+        setForm(current=>({...current,id:savedVisual.id}));
+        for(const file of referenceFiles){await addVisualReference(savedVisual,file);setReferenceFiles(current=>current.filter(f=>f!==file));}
+      }
       setMessage(form.id ? 'Visuel modifié.' : 'Visuel enregistré.');
       clearFormDraft('visual', draftScope);
       setForm(emptyForCampaign);
@@ -132,6 +145,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
   }
 
   function editVisual(visual) {
+    setReferenceFiles([]);
     setForm({
       id: visual.id,
       campagne_id: visual.campagne_id || '',
@@ -140,6 +154,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
       code_visuel: visual.code_visuel || '',
       format_support: visual.format_support || '',
       quantite_prevue: visual.quantite_prevue || 0,
+      inventory_item_id: visual.inventory_item_id || '',
       actif: visual.actif !== false,
       is_out_of_frame: visual.is_out_of_frame === true,
       instructions_terrain: visual.instructions_terrain || '',
@@ -151,17 +166,18 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
   }
 
   function discardDraft() {
+    setReferenceFiles([]);
     clearFormDraft('visual', draftScope);
     setForm(emptyForCampaign);
     setFormOpen(false);
   }
 
   return (
-    <div className="v74-page">
+    <div className="v74-page visual-workspace">
       <header className="v74-hero">
         <div><h1>Campagne — Visuels et formats</h1>
         <p>Une campagne peut contenir plusieurs phases, visuels, formats et EDT.</p></div>
-        {canManage && <button type="button" className="business-primary-action" onClick={() => { setForm(emptyForCampaign); setFormOpen(true); }}><Plus/> Créer un visuel</button>}
+        {canManage && <button type="button" className="business-primary-action" onClick={() => { setReferenceFiles([]); setForm(emptyForCampaign); setFormOpen(true); }}><Plus/> Créer un visuel</button>}
       </header>
 
       {message && <div className="v74-msg">{message}</div>}
@@ -242,6 +258,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
                 />
               </label>
 
+              <label>Article du Répertoire des affiches<select value={form.inventory_item_id||''} onChange={e=>setForm({...form,inventory_item_id:e.target.value})}><option value="">Association automatique uniquement si exacte et unique</option>{materialItems.filter(item=>String(item.client_id)===String(campaigns.find(c=>String(c.id)===String(form.campagne_id))?.client_id)).map(item=><option key={item.id} value={item.id}>{item.nom_detaille_visuel} — {item.format||'Format à renseigner'} — Entrepôt {item.quantite_entrepot??'?'} / Terrain {item.quantite_expo??'?'}</option>)}</select></label>
               <label>
                 Instructions
                 <textarea
@@ -265,7 +282,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
                 <span><b>Hors-Cadre</b><small>Permet d’utiliser ce visuel sans limiter les supports selon son format.</small></span>
               </label>
 
-              {form.id ? <VisualReferences key={form.id} visual={visuals.find(v=>String(v.id)===String(form.id))||form} canManage={canManage} onChanged={reload}/> : <p>Enregistrez le visuel, puis ouvrez Modifier pour ajouter ses photos ou PDF de référence.</p>}
+              {form.id ? <VisualReferences key={form.id} visual={visuals.find(v=>String(v.id)===String(form.id))||form} canManage={canManage} onChanged={reload}/> : <section className="visual-references"><h3>Visuel générique de référence</h3><p>Ces fichiers serviront à reconnaître le visuel lors des imports.</p><label>Ajouter des images ou PDF<input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" multiple disabled={busy} onChange={e=>{const files=[...e.target.files];e.target.value='';setReferenceFiles(current=>[...current,...files]);}}/></label>{referenceFiles.map((file,index)=><div key={index}>{file.name}<button type="button" disabled={busy} onClick={()=>setReferenceFiles(current=>current.filter((_,i)=>i!==index))}>Retirer</button></div>)}</section>}
               <div className="visual-form-actions">
                 <button disabled={busy}>
                   <Save/> {form.id ? 'Enregistrer les modifications' : 'Enregistrer'}
@@ -283,7 +300,7 @@ export default function CampaignVisualManager({ role, businessContext = BUSINESS
           <h2>Visuels configurés</h2>
           <label>Rechercher un visuel<input value={visualSearch} onChange={e=>setVisualSearch(e.target.value)} placeholder="Campagne, visuel, format ou EDT"/></label>
 
-          <div className="tableWrap"><table className="visuals-compact-table"><thead><tr>
+          <div className="tableWrap visual-table-scroll" tabIndex={0} role="region" aria-label="Liste des visuels, défilement horizontal et vertical"><table className="visuals-compact-table"><thead><tr>
             {columns.map(([column,label])=><SortableHeader key={column} column={column} label={label} rows={tableRows} sortState={sortState} onSort={setSortState} onReset={()=>setSortState(null)}/>)}
             <th>Dates des associations</th><th>Actions</th>
           </tr></thead><tbody>{sortedRows.map(visual=><tr key={visual.id}>
