@@ -1,0 +1,58 @@
+{
+  "at": "2026-09-21T00:23:52.097Z",
+  "records": [
+    {
+      "view": "Campagnes maîtres",
+      "shortcutAbsent": true
+    },
+    {
+      "view": "Communications opérationnelles",
+      "shortcutAbsent": true
+    },
+    {
+      "view": "Visuels",
+      "compact": true,
+      "create": true,
+      "edit": true,
+      "image": true,
+      "pdf": true,
+      "reopen": true,
+      "remove": true,
+      "retry": true,
+      "cachedReload": true,
+      "hardRefresh": true
+    },
+    {
+      "view": "EDT",
+      "naturalOrder": true,
+      "search22": true,
+      "completed22": true,
+      "all22": true,
+      "archiveExcludes22": true,
+      "search09Alias": true,
+      "completed09": true,
+      "all09": true,
+      "archiveExcludes09": true
+    },
+    {
+      "actor": "marylene",
+      "clientScope": true,
+      "edtCount": 168,
+      "search": "PASS",
+      "permissions": true
+    },
+    {
+      "actor": "client",
+      "clientScope": true,
+      "search": "not exposed by existing permissions",
+      "permissions": true
+    },
+    {
+      "actor": "client-b",
+      "clientScope": true,
+      "edtCount": 1,
+      "search": "PASS",
+      "permissions": true
+    }
+  ]
+}

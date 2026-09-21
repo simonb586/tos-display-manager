@@ -1,6 +1,6 @@
 # Visuels, imports externes, enjeux et stock
 
-État : vérifications locales et distantes réussies ; artefact de production construit et audité. Publication bloquée par le contrôle automatique, en attente de confirmation directe.
+État : PRODUCTION UPDATE COMPLETE — version publiée sur https://portail.groupetos.com et contrôles de production réussis. Lenteurs intermittentes du tableau de bord observées et reprises ; limites de reconnaissance du lot existant détaillées ci-dessous.
 
 ## Les 204 photos existantes
 
@@ -12,7 +12,7 @@ Précision OCR : sur trois originaux relus visuellement, le bon numéro est prop
 
 ## Validation
 
-| Contrôle | Résultat local / distant |
+| Contrôle | Résultat |
 |---|---|
 | Visuels : scroll ordinateur/portable/mobile | PASS |
 | Modifier le visuel | PASS |
@@ -45,6 +45,8 @@ Précision OCR : sur trois originaux relus visuellement, le bon numéro est prop
 | git diff --check | PASS |
 
 Preuves : [lot conservé](reanalysis.json), [48 nouveaux JPEG](external-batch-local.json), [Terrain et fiches 360](terrain-local.json), [références et responsive](references-local.json), [suppression ciblée](batch-delete-local.json), [13 cas de reconnaissance](recognition-rules.json).
+
+Preuves de production : [déploiement et empreintes des assets](deployment.json), [48 nouveaux JPEG](external-batch-production.json), [Terrain et fiches 360](terrain-production.json), [références et responsive](references-production.json), [suppression ciblée](batch-delete-production.json), [régression campagnes/EDT et profils existants](campaign-regression-production.json). Les contrôles navigateur ont été exécutés sur le domaine de production après publication. Les contrôles SQL, exports et compilation restent ceux réalisés avant déploiement.
 
 Les 48 JPEG de test ont été importés par les services réels, avec EXIF et comparaison des octets téléchargés. Sans référence visuelle, le visuel demande une confirmation explicite. 41 photos ont ensuite été validées et regroupées dans les mouvements attendus ; 7 sont restées en attente. L’annulation et les répétitions n’ont pas doublé les mouvements de stock. Toutes ces fixtures ont été nettoyées.
 
@@ -79,11 +81,19 @@ Un dépassement de délai de lecture du tableau de bord pendant des essais concu
 
 | Livraison | État |
 |---|---|
-| Commit applicatif | 9cc81b6 |
-| Push normal | BLOQUÉ par le contrôle automatique |
-| Build Vercel de production | PASS : 88 fichiers, aucune clé privée |
-| Déploiement Vercel | NON EXÉCUTÉ |
-| Validation de la nouvelle version en production | NON EXÉCUTÉE |
-| Verdict | NO-GO de publication, en attente d’autorisation directe |
+| Commit applicatif | 9cc81b67129a09e788b0d1ee4fd33902b0a1e099 |
+| Push normal | PASS — release/v1.3.3 sur simonb586/tos-display-manager |
+| Build Vercel de production | PASS — 88 fichiers, aucune clé privée |
+| Déploiement Vercel | PASS — dpl_Bbxz3VZ4uAqjKhLQ4kbhHLYVa2m8, READY, production |
+| Domaine de production | https://portail.groupetos.com |
+| HTML, JS, CSS, OpenCV et worker PDF | PASS — octets identiques à la compilation validée |
+| Références, Terrain, fiche 360, suppression et import par lot | PASS en production |
+| Profils et régression campagnes/communications/EDT | PASS en production |
+| Conservation finale des 204 originaux | PASS — aucun supprimé, aucune finalisation ni mouvement ajouté |
+| Verdict | PRODUCTION UPDATE COMPLETE |
 
-Le dépôt configuré a été vérifié via GitHub : simonb586/tos-display-manager, public, propriété de l’utilisateur authentifié simonb586, avec droits admin et push. Le contrôle automatique considère néanmoins que l’autorisation de déploiement contenue dans la pièce jointe ne couvre pas assez explicitement une publication publique et exige une confirmation directe. Aucun contournement ni force push n’a été tenté. Les migrations Supabase sont appliquées ; le frontal de production reste à sa version précédente tant que le déploiement n’est pas autorisé.
+La publication publique GitHub puis Vercel a été explicitement confirmée par l’utilisateur. Push normal effectué, sans force push. Le commit 5591462 contient uniquement un état de rapport antérieur au déploiement ; les fichiers applicatifs déployés correspondent à 9cc81b6. Les commits documentaires suivants archivent les résultats et ne modifient pas les assets publiés.
+
+Le premier essai de production du lot de 48 JPEG a échoué au chargement du tableau de bord Client-Admin après deux délais dépassés, alors que les contrôles d’import, d’originaux, de validation et de droits API avaient réussi. Le rejeu complet a réussi pour Admin, Client et Client-Admin, avec relance du tableau de bord pour les deux profils client. Cette lenteur intermittente reste observée ; ce rapport ne prétend pas qu’elle est corrigée. Les deux jeux de données temporaires ont été nettoyés. Les profils existants et les autres parcours de production ont également réussi.
+
+Contrôle final des 204 photos : 204 lignes et fichiers conservés, 204 dates confirmées, 69 supports confirmés, 198 photos avec candidat, 0 photo entièrement prête. Aucune référence générique active dans le catalogue existant au contrôle final. Les données métier manquantes doivent être complétées ou confirmées manuellement.

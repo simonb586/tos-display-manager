@@ -1,0 +1,50 @@
+{
+  "at": "2026-09-21T00:13:41.513Z",
+  "records": [
+    {
+      "view": "Visuels",
+      "compact": true,
+      "create": true,
+      "edit": true,
+      "image": true,
+      "pdf": true,
+      "reopen": true,
+      "remove": true,
+      "retry": true,
+      "cachedReload": true,
+      "hardRefresh": true
+    },
+    {
+      "width": 1440,
+      "viewport": 1440,
+      "body": 1425,
+      "actions": "sticky",
+      "overflow": "auto"
+    },
+    {
+      "width": 1024,
+      "viewport": 1024,
+      "body": 1009,
+      "actions": "sticky",
+      "overflow": "auto"
+    },
+    {
+      "width": 390,
+      "viewport": 390,
+      "body": 390,
+      "actions": "sticky",
+      "overflow": "auto"
+    },
+    {
+      "infrastructure360Reference": true,
+      "mainPhotoPreserved": true,
+      "jpg": true,
+      "png": true,
+      "pdf": true,
+      "replace": true
+    },
+    {
+      "deleteVisualArchivesUsedReferences": true
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "at": "2026-09-21T00:13:02.936Z",
+  "result": "PASS",
+  "commit": "5591462944a53d9e73cfe67bcd4180d89284107c",
+  "origin": "https://portail.groupetos.com",
+  "htmlMatchesBuild": true,
+  "records": [
+    {
+      "asset": "/assets/index-C1fOqWLM.js",
+      "sha256": "b1513c4ae0892754a36f4a1d30b4f9fd9b4a3514b50359b8b34283b29de46cc8",
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "asset": "/assets/index-a513Wu-L.css",
+      "sha256": "371fddbe40b0127d2c7f3d44b58ff2f1867d29da5efcf0dc1e476c229889e81e",
+      "cacheControl": "public, max-age=0, must-revalidate"
+    },
+    {
+      "asset": "/vendor/opencv-5.0.0-release.1.js",
+      "sha256": "b873c8211421da7b9bf41ae157a923f05a46a0b8d3e5904c44c6f3ad6d39a1bd",
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "asset": "/assets/pdf.worker.min-Dswkl-cV.mjs",
+      "sha256": "8ab0e5e30031b4a06ecfddd5ae9562f0227f830ee7ec9ed1a968b134243d2386",
+      "cacheControl": "public, max-age=0, must-revalidate"
+    }
+  ],
+  "applicationCommit": "9cc81b67129a09e788b0d1ee4fd33902b0a1e099",
+  "publishedBranch": "release/v1.3.3",
+  "deploymentId": "dpl_Bbxz3VZ4uAqjKhLQ4kbhHLYVa2m8",
+  "deploymentUrl": "https://tos-display-manager-nnnl7lp7k-tos3.vercel.app",
+  "target": "production",
+  "readyState": "READY",
+  "publicationConfirmedByUser": true,
+  "validationCompletedAt": "2026-09-21T00:28:45.586Z",
+  "externalBatchFirstAttempt": "FAIL: Client-Admin dashboard loading timed out twice; fixtures cleaned.",
+  "externalBatchReplay": "PASS: all import, inventory and role checks; dashboard retry used by Client and Client-Admin; fixtures cleaned."
+}
