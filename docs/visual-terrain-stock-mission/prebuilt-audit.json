@@ -1,0 +1,9 @@
+{
+  "at": "2026-09-21T00:06:07.231Z",
+  "result": "PASS",
+  "files": 88,
+  "publicJwtOccurrences": 1,
+  "privateKeys": 0,
+  "commit": "9cc81b6",
+  "published": false
+}

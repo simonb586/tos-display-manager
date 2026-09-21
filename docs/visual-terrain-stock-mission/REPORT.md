@@ -1,6 +1,6 @@
 # Visuels, imports externes, enjeux et stock
 
-État : vérifications locales et distantes réussies ; déploiement et vérifications de production en cours.
+État : vérifications locales et distantes réussies ; artefact de production construit et audité. Publication bloquée par le contrôle automatique, en attente de confirmation directe.
 
 ## Les 204 photos existantes
 
@@ -77,4 +77,13 @@ Un dépassement de délai de lecture du tableau de bord pendant des essais concu
 
 ## Livraison
 
-Commit, push, Vercel et validation de production : en cours. Le verdict de production sera ajouté après vérification de la version déployée.
+| Livraison | État |
+|---|---|
+| Commit applicatif | 9cc81b6 |
+| Push normal | BLOQUÉ par le contrôle automatique |
+| Build Vercel de production | PASS : 88 fichiers, aucune clé privée |
+| Déploiement Vercel | NON EXÉCUTÉ |
+| Validation de la nouvelle version en production | NON EXÉCUTÉE |
+| Verdict | NO-GO de publication, en attente d’autorisation directe |
+
+Le dépôt configuré a été vérifié via GitHub : simonb586/tos-display-manager, public, propriété de l’utilisateur authentifié simonb586, avec droits admin et push. Le contrôle automatique considère néanmoins que l’autorisation de déploiement contenue dans la pièce jointe ne couvre pas assez explicitement une publication publique et exige une confirmation directe. Aucun contournement ni force push n’a été tenté. Les migrations Supabase sont appliquées ; le frontal de production reste à sa version précédente tant que le déploiement n’est pas autorisé.
