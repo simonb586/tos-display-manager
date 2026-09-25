@@ -32,7 +32,11 @@ Diagnostic du catalogue complet sans contexte EDT : 22 visuels sur 157 trouvent 
 - Migration additive appliquée : `20260925211601_terrain_material_auto_resolution.sql`, avant publication du frontal.
 - Conseiller de sécurité Supabase : mêmes alertes avant/après, aucun nouveau signal ; alertes existantes sur fonctions definer, table privée sans politique, durée OTP et protection des mots de passe.
 
-Publication et contrôle de production : à compléter après déploiement.
+Publication et contrôle de production : PASS. Commit applicatif `76fb4c2`, push normal sur `release/v1.3.3`. Déploiement Vercel `tos-display-manager-9yewpmu51-tos3.vercel.app`, code de sortie 0. Sur `https://portail.groupetos.com`, la connexion est accessible et les fichiers d'entrée ainsi que les modules Terrain résolveur/finaliseur sont identiques octet par octet au build testé. Le contrôle sous rôle PostgreSQL `authenticated` avec un profil Installateur confirme également le nouveau message du cas signalé. Aucun essai d'installation réel n'a été finalisé pour ce support : son article reste à renseigner.
+
+Verdict technique : PRODUCTION UPDATE COMPLETE. Limite métier restante : catalogue incomplet, notamment pour le visuel et le format de l'EDT signalé.
+
+Références des alertes préexistantes : [table privée sans politique](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy), [fonctions definer accessibles](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable), [durée OTP](https://supabase.com/docs/guides/platform/going-into-prod#security), [protection des mots de passe](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
 
 Diagnostic temporaire, à activer dans la console du navigateur : `sessionStorage.setItem('tos-terrain-material-debug','1')`. Pour arrêter : `sessionStorage.removeItem('tos-terrain-material-debug')`. Le journal indique visuel, format, campagne, médium, ID, nombre de correspondances et statut ; aucune photo ni session n'est journalisée. Aucune nouvelle variable d'environnement.
 
