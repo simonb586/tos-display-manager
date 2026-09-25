@@ -17,7 +17,7 @@ match(terrain, /visualRequestRef\.current/, 'Protection Support A vers B absente
 match(terrain, /requestId !== visualRequestRef\.current/, 'Réponse visuel obsolète non rejetée.');
 match(terrain, /action === 'installation'/, 'Contexte installation absent.');
 match(terrain, /option value="enjeu"/, 'Action enjeu absente.');
-match(service, /finaliser_installation_terrain_v1344/, 'RPC installation avec mode EDT explicite absente.');
+match(service, /finaliser_installation_terrain_v1345/, 'RPC installation avec mode EDT explicite et article résolu absente.');
 match(service, /finaliser_intervention_terrain_v1342/, 'RPC intervention sécurisée active absente.');
 match(service, /p_idempotency_key/, 'Idempotence serveur absente.');
 match(photoModel, /capturedAt:date\.toISOString\(\)/, 'Timestamp photo automatique absent.');

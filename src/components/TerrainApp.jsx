@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { terrainErrorMessage } from '../lib/terrainErrors';
+import {resolveRepertoireAffiche,requireRepertoireAffiche} from '../services/repertoireAfficheService';
 import '../features/terrain/terrain-issue-reporting-p0.css';
 import {
   AlertTriangle,
@@ -50,11 +51,34 @@ export default function TerrainApp({ dataStore, role, session }) {
   const fileInputRef = useRef(null);
   const submittingRef = useRef(false);
   const visualRequestRef = useRef(0);
+  const [materialResolution,setMaterialResolution]=useState(null);
+  const [materialError,setMaterialError]=useState('');
+  const materialRequestRef=useRef(0);
+  // Retain the upload after a failed/uncertain installation response. Reusing
+  // its path reuses the canonical idempotency key on retry.
+  const installationUploadRef=useRef(null);
 
   const rows = source === 'Infrastructure' ? infrastructures : stops;
   const idField = source === 'Infrastructure' ? 'support_id' : 'no_arret';
   const visual = visuals.find(item => String(item.id) === String(visualId));
   const requiresVisual = source === 'Infrastructure' && action === 'installation';
+  const materialKey=JSON.stringify([selected?.support_id,visualId,withoutEdt?null:installationPhase]);
+
+  function materialContext(interventionReference) {
+    return {visuel:visual,format:visual?.format_support,campagne:visual?.campagne?.nom_campagne,
+      mediumAffichage:visual?.medium_affichage||selected?.medium_affichage,supportId:selected?.support_id,
+      phaseId:withoutEdt?null:installationPhase,interventionReference};
+  }
+  useEffect(()=>{
+    const request=++materialRequestRef.current;let live=true;
+    setMaterialResolution(null);setMaterialError('');
+    if(requiresVisual&&visual?.id&&(withoutEdt||installationPhase)){
+      resolveRepertoireAffiche(materialContext()).then(result=>{
+        if(live&&request===materialRequestRef.current){setMaterialResolution({key:materialKey,...result});if(result.status!=='resolved')setMaterialError(result.message);}
+      }).catch(error=>{if(live&&request===materialRequestRef.current)setMaterialError(terrainErrorMessage(error,'read'));});
+    }
+    return()=>{live=false};
+  },[materialKey,requiresVisual,visual?.id]);
 
   useEffect(()=>{let live=true;if(action==='enjeu')listTerrainIssueTypes().then(rows=>{if(live)setIssueTypes(rows)}).catch(e=>{if(live)setMessage(e.message)});return()=>{live=false}},[action]);
   useEffect(()=>{let live=true;setActiveIssues([]);setIssueId('');if(action==='resolution_enjeu'&&selected?.support_id){setIssuesLoading(true);listActiveTerrainIssues(selected.support_id).then(rows=>{if(live){setActiveIssues(rows);if(rows.length===1)setIssueId(String(rows[0].id));}}).catch(e=>{if(live)setMessage(e.message)}).finally(()=>{if(live)setIssuesLoading(false)});}return()=>{live=false}},[action,selected?.support_id]);
@@ -181,16 +205,28 @@ export default function TerrainApp({ dataStore, role, session }) {
 
     try {
       const supportId = selected.support_id || selected.no_arret;
-      const uploaded = await uploadTerrainPhoto(file, supportId, action, {
+      const cached=requiresVisual&&installationUploadRef.current?.file===file&&installationUploadRef.current?.key===materialKey?installationUploadRef.current:null;
+      let repertoireAfficheId=null;
+      if(requiresVisual){
+        const reference=cached?`TERRAIN-${supportId}-${cached.uploaded.path}`:null;
+        const resolution=await resolveRepertoireAffiche({...materialContext(reference),
+          repertoireAfficheId:cached?.repertoireAfficheId??(materialResolution?.key===materialKey?materialResolution.record?.id:null)});
+        setMaterialResolution({key:materialKey,...resolution});
+        repertoireAfficheId=requireRepertoireAffiche(resolution);
+        setMaterialError('');
+      }
+      const uploaded = cached?.uploaded||await uploadTerrainPhoto(file, supportId, action, {
         campaignCode:visual?.campagne?.nom_campagne || selected.campagne_actuelle || selected.campagne_selon_visuel,
         edt:action === 'installation' && !withoutEdt ? visuals.flatMap(v=>v.edt_associations||[]).find(a=>String(a.phase_id)===installationPhase)?.edt_number : undefined,
         source:'terrain'
       });
+      if(requiresVisual)installationUploadRef.current={file,key:materialKey,uploaded,repertoireAfficheId};
 
       try { if (source === 'Infrastructure' && action === 'installation') {
         const result = await finalizeTerrainInstallation({
           supportId: selected.support_id,
           visualId,
+          repertoireAfficheId,
           phaseId:withoutEdt?null:installationPhase,
           withoutEdt,
           fileName: uploaded.normalizedFilename,
@@ -224,7 +260,7 @@ export default function TerrainApp({ dataStore, role, session }) {
         }
       }} catch (error) {
         try {
-          await rollbackUploadedPhoto(uploaded);
+          if(!requiresVisual)await rollbackUploadedPhoto(uploaded);
         } catch (rollbackError) {
           console.error('Nettoyage de la photo Terrain impossible', rollbackError);
         }
@@ -244,6 +280,7 @@ export default function TerrainApp({ dataStore, role, session }) {
       setIssueType('');
 
       clearPhoto();
+      installationUploadRef.current=null;
       setSelected(null);
       setQuery('');
       setVisualId('');
@@ -418,6 +455,7 @@ export default function TerrainApp({ dataStore, role, session }) {
               <span>EDT : {withoutEdt?'Installation sans EDT':visual.edt_associations?.find(a=>String(a.phase_id)===installationPhase)?.edt_number}</span>
             </div>
           )}
+          {requiresVisual&&materialError&&<div className="terrain-message error" role="alert">{materialError}</div>}
 
 
           {action === 'enjeu' && (

@@ -197,6 +197,7 @@ export async function finalizeTerrainInstallation({
   phaseId,
   withoutEdt = false,
   visualId,
+  repertoireAfficheId,
   fileName,
   storagePath,
   photoUrl,
@@ -207,7 +208,8 @@ export async function finalizeTerrainInstallation({
     throw new Error('Supabase n’est pas configuré.');
   }
 
-  const { data, error } = await supabase.rpc('finaliser_installation_terrain_v1344', {
+  const { data, error } = await supabase.rpc('finaliser_installation_terrain_v1345', {
+    p_repertoire_affiche_id:repertoireAfficheId==null?null:Number(repertoireAfficheId),
     p_edt_phase_id: withoutEdt ? null : Number(phaseId),
     p_sans_edt: withoutEdt,
     p_support_id: String(supportId),
