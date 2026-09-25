@@ -21,7 +21,7 @@ export async function analyzePhotoItem(item, context={}) {
     try{
      const ocr=await readFrameIdentifier(next.file,context.catalog?.supports||[]);
      next={...next,ocrVerifiedSupport:ocr.supportId,ocrText:ocr.supportId||ocr.observations.map(o=>o.text).join('\n'),
-      ocrConfidence:ocr.supportId?ocr.candidates.find(c=>c.support_id===ocr.supportId).confidence:Math.max(0,...ocr.candidates.map(c=>c.confidence)),
+      ocrConfidence:ocr.supportId?ocr.candidates.find(c=>c.support_id===ocr.supportId).confidence:Math.min(94,Math.max(0,...ocr.candidates.map(c=>c.confidence))),
       suggestions:ocr.candidates,ocrRegion:ocr.supportId?ocr.candidates.find(c=>c.support_id===ocr.supportId).region:null};
     }catch(error){next.ocrWarning='Identifiant non lu : attribuez le support manuellement.';}
    }
