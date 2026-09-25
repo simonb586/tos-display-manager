@@ -47,4 +47,8 @@ Les photos existantes ne sont ni supprimées, ni réimportées, ni finalisées p
 
 Tests navigateur OCR, sécurité des associations, régressions ciblées, `npm run check` (code de sortie 0), compilation Vercel de production et `git diff --check` : PASS. Avertissements existants sur la taille des bundles et les scripts d'installation de dépendances ; compilation réussie.
 
-Publication : en cours. Les preuves détaillées sont conservées localement dans `.cache/visual-terrain-stock/ocr-corner-*`.
+Commit applicatif : `e52ed00`. Push normal sur `release/v1.3.3` : PASS.
+
+Publication Vercel de production : PASS, `tos-display-manager-kin7vzfux-tos3.vercel.app`, code de sortie 0. Contrôle de `https://portail.groupetos.com` : PASS ; page de connexion accessible, HTML, assets d'entrée, module OCR et worker identiques octet par octet au build validé. L'essai OCR des photos a été exécuté localement dans Edge ; ce contrôle de production vérifie la livraison des mêmes fichiers, sans importer de photos ni modifier de données en production.
+
+Verdict du complément OCR : PRODUCTION UPDATE COMPLETE, avec la limite de reconnaissance réelle documentée ci-dessus. Les preuves détaillées sont conservées localement dans `.cache/visual-terrain-stock/ocr-corner-*`.
